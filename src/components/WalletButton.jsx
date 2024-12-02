@@ -6,6 +6,7 @@ import "./WalletButton.css";
 function WalletButton() {
     const [walletAddress, setWalletAddress] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Escucha eventos de conexión y desconexión de Phantom Wallet
     useEffect(() => {
@@ -32,12 +33,10 @@ function WalletButton() {
     async function handleConnect() {
         try {
             if (!walletAddress) {
-                // Intenta conectar la wallet usando el helper
                 const address = await connectWallet();
                 setWalletAddress(address); // Almacena la dirección conectada
             } else {
-                // Si ya está conectada, abre el menú lateral
-                setIsMenuOpen(true);
+                setIsMenuOpen(true); // Abre el menú si ya está conectado
             }
         } catch (error) {
             console.error("Error al conectar wallet:", error);
@@ -47,21 +46,19 @@ function WalletButton() {
 
     function handleLogout() {
         if (window.confirm("¿Seguro que quieres desconectarte?")) {
+            setIsLoading(true);
             if (window.solana?.disconnect) {
                 window.solana.disconnect();
             }
             setWalletAddress(null); // Limpia el estado de la wallet
             setIsMenuOpen(false); // Cierra el menú
-        }
-        // Forzar reinicio del estado en la wallet
-        if (window.solana?.connect) {
-            window.solana.connect({ onlyIfTrusted: false });
+            setIsLoading(false);
         }
     }
 
     return (
         <div>
-            <button className="wallet-button" onClick={handleConnect}>
+            <button className="wallet-button" onClick={handleConnect} disabled={isLoading}>
                 {walletAddress
                     ? `${walletAddress.slice(0, 5)}...`
                     : "Connect Wallet"}
