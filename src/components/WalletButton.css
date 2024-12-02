@@ -1,0 +1,19 @@
+/* Estilos del botón */
+.wallet-button {
+    background-color: #fc554f;
+    color: #ffffff;
+    font-size: 1.2rem;
+    font-family: 'IBM-Plex-Mono', sans-serif;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Efecto al pasar el ratón */
+.wallet-button:hover {
+    background-color: #fc564f;
+    opacity: 0.6;
+}
+

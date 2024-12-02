@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>DeChat</title>
+    <!-- Favicon -->
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <!-- Fuente Roboto desde Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Estilos globales -->
+    <style>
+        /* Estilos globales */
+        body {
+            margin: 0;                /* Elimina márgenes por defecto */
+            background-color: #f0f0f0; /* Fondo claro */
+            font-family: Arial, sans-serif; /* Fuente predeterminada */
+        }
+
+        /* Configuración del contenedor principal */
+        .container {
+            max-width: 1920px;  /* Define el ancho máximo */
+            margin: 0 auto;     /* Centra horizontalmente */
+            padding: 0 20px;    /* Espaciado lateral */
+        }
+
+        /* Ajustes de #root */
+        #root {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Altura completa de la ventana */
+        }
+    </style>
+</head>
+<body>
+    <!-- Contenedor principal -->
+    <div class="container">
+        <div id="root"></div>
+    </div>
+    <!-- Entrada principal de React -->
+    <script type="module" src="./src/App.jsx"></script>
+</body>
+</html>

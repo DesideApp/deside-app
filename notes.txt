@@ -1,0 +1,17 @@
+app
+├── /node_modules
+├── /src                     # Todo el código fuente
+│   ├── /components          # Componentes reutilizables
+│   │   ├── Header.jsx       # Header (barra de navegación)
+│   │   ├── SignatureValidation.jsx 
+│   │   ├── WalletButton.css
+│   │   ├── WalletButton.jsx # Botón de conectar wallet
+│   ├── /pages               # Vistas principales (si tienes más de una página)
+│   │   ├── Home.jsx         # Página de inicio
+│   │   └── Profile.jsx      # Página de perfil (si existe)
+│   ├── /utils               # Funciones auxiliares y lógica compartida
+│   │   └── solanaHelpers.js # Lógica para interactuar con la wallet
+│   ├── App.jsx              # Punto de entrada principal
+├── index.html               # Página HTML principal
+├── package-lock.json
+├── package.json             # Configuración del proyecto
