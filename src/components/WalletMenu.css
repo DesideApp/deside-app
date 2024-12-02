@@ -1,19 +1,19 @@
 .wallet-menu {
     position: fixed;
     top: 0;
-    right: -300px;
+    right: -300px; /* Menú fuera de la pantalla por defecto */
     width: 300px;
     height: 100%;
-    background-color: #1a1a1a;
+    background-color: #1a1a1a; /* Fondo oscuro */
     color: white;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
-    overflow-y: auto;
-    transition: right 0.3s ease;
-    z-index: 1000;
+    overflow-y: auto; /* Permite scroll si el contenido excede */
+    transition: right 0.3s ease; /* Animación suave al abrir/cerrar */
+    z-index: 1000; /* Asegura que esté por encima de otros elementos */
 }
 
 .wallet-menu.open {
-    right: 0;
+    right: 0; /* Mueve el menú dentro de la pantalla al abrir */
 }
 
 .wallet-menu-header {
@@ -21,7 +21,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 15px;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #333; /* Línea divisoria entre encabezado y contenido */
 }
 
 .close-button {
@@ -30,29 +30,36 @@
     color: white;
     font-size: 20px;
     cursor: pointer;
+    transition: color 0.3s ease; /* Transición suave al pasar el ratón */
+}
+
+.close-button:hover {
+    color: #ff4d4d; /* Cambia a rojo al pasar el ratón */
 }
 
 .wallet-menu-content {
-    padding: 15px;
+    padding: 15px; /* Espaciado interno del contenido */
 }
 
 .wallet-address {
-    background: #333;
+    background: #333; /* Fondo oscuro para destacar menos */
     padding: 10px;
     border-radius: 5px;
-    word-wrap: break-word;
+    word-wrap: break-word; /* Maneja direcciones largas */
+    margin-bottom: 15px; /* Espacio debajo de la dirección */
 }
 
 .logout-button {
     margin-top: 20px;
     padding: 10px 20px;
-    background-color: #ff4d4d;
+    background-color: #ff4d4d; /* Rojo para indicar acción de desconexión */
     border: none;
     border-radius: 5px;
     color: white;
     cursor: pointer;
+    transition: background-color 0.3s ease; /* Suaviza el cambio de color al pasar el ratón */
 }
 
 .logout-button:hover {
-    background-color: #e04343;
+    background-color: #e04343; /* Rojo más oscuro al pasar el ratón */
 }

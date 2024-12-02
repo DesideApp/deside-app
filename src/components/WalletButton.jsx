@@ -7,7 +7,6 @@ function WalletButton() {
     const [walletAddress, setWalletAddress] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    // Escucha eventos de conexión y desconexión de Phantom Wallet
     useEffect(() => {
         if (window.solana) {
             window.solana.on("connect", () => {
@@ -17,7 +16,8 @@ function WalletButton() {
 
             window.solana.on("disconnect", () => {
                 console.log("Wallet desconectada.");
-                setWalletAddress(null);
+                setWalletAddress(null); // Limpia el estado
+                setIsMenuOpen(false); // Cierra el menú si está abierto
             });
         }
 
@@ -36,8 +36,7 @@ function WalletButton() {
                 const address = await connectWallet();
                 setWalletAddress(address); // Almacena la dirección conectada
             } else {
-                // Si ya está conectada, abre el menú lateral
-                setIsMenuOpen(true);
+                alert("Wallet already connected!");
             }
         } catch (error) {
             console.error("Error al conectar wallet:", error);
@@ -47,32 +46,56 @@ function WalletButton() {
 
     function handleLogout() {
         if (window.confirm("¿Seguro que quieres desconectarte?")) {
-            if (window.solana?.disconnect) {
-                window.solana.disconnect(); // Desconecta la wallet
+            console.log("Desconectando wallet...");
+            try {
+                if (window.solana?.disconnect) {
+                    window.solana.disconnect();
+                    console.log("Wallet desconectada.");
+                }
+            } catch (error) {
+                console.error("Error al desconectar la wallet:", error);
+            } finally {
+                setWalletAddress(null);
+                setIsMenuOpen(false);
+                console.log("Estado limpio y menú cerrado.");
             }
-            setWalletAddress(null); // Limpia el estado de la wallet
-            setIsMenuOpen(false); // Cierra el menú si está abierto
+        }
+    }
+
+    function handleMenuButtonClick() {
+        if (!walletAddress) {
+            alert("Please connect your wallet first.");
+        } else {
+            setIsMenuOpen(!isMenuOpen);
         }
     }
 
     return (
-        <div>
+        <div className="wallet-container">
+            {/* Botón principal para conectar */}
             <button className="wallet-button" onClick={handleConnect}>
                 {walletAddress
                     ? `${walletAddress.slice(0, 5)}...`
                     : "Connect Wallet"}
             </button>
 
+            {/* Botón para abrir el menú */}
+            <button
+                className="menu-button"
+                onClick={handleMenuButtonClick}
+            >
+                ⋮
+            </button>
+
             {/* Renderizar el menú lateral */}
             <WalletMenu
                 isOpen={isMenuOpen}
-                onClose={() => setIsMenuOpen(false)} // Cierra el menú al hacer clic en "X"
+                onClose={() => setIsMenuOpen(false)}
                 walletAddress={walletAddress}
-                handleLogout={handleLogout} // Manejar el logout
+                handleLogout={handleLogout}
             />
         </div>
     );
 }
 
 export default WalletButton;
-
