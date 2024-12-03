@@ -1,11 +1,19 @@
 export async function connectWallet() {
     try {
-        // Detecta si el proveedor de Phantom está disponible
-        const provider = window.solana;
+        let provider;
 
-        if (!provider || !provider.isPhantom) {
-            alert("Por favor, instala Phantom Wallet para continuar.");
-            return null; // No hay un proveedor válido
+        // Detecta el proveedor según el wallet seleccionado
+        if (wallet === "phantom" && window.solana?.isPhantom) {
+            provider = window.solana;
+        } else if (wallet === "backpack" && window.solana?.isBackpack) {
+            provider = window.solana;
+        } else if (wallet === "magiceden" && window.magicEden?.isMagicEden) {
+            provider = window.magicEden;
+        }
+
+        if (!provider) {
+            alert(`Please install ${wallet} Wallet to continue.`);
+            return null;
         }
 
         // Solicita al usuario que conecte la wallet. Abre Phantom Wallet incluso si ya está conectado.

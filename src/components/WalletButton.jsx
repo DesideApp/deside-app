@@ -34,18 +34,18 @@ function WalletButton() {
 
     async function handleConnect(wallet) {
         try {
-            setIsModalOpen(false); // Cierra el modal al seleccionar una wallet
-            if (wallet === "phantom") {
-                const address = await connectWallet();
-                setWalletAddress(address);
-            } else {
-                alert(`${wallet} is not supported yet.`);
+            const address = await connectWallet(wallet); // Pasa la wallet seleccionada al helper
+            if (address) {
+                setWalletAddress(address); // Actualiza la dirección de la wallet conectada
             }
         } catch (error) {
-            console.error("Error al conectar wallet:", error);
-            alert("Failed to connect wallet. Please try again.");
+            console.error(`Error al conectar ${wallet} Wallet:`, error);
+            alert(`Failed to connect ${wallet} Wallet. Please try again.`);
+        } finally {
+            setIsModalOpen(false); // Cierra el modal después de intentar conectar
         }
     }
+    
 
     function handleLogout() {
         if (window.confirm("¿Seguro que quieres desconectarte?")) {
