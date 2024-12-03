@@ -1,0 +1,43 @@
+name: Rewrite Author Daily
+
+on:
+  schedule:
+    # Ejecuta el workflow todos los días a las 23:59 UTC
+    - cron: "59 23 * * *"
+
+jobs:
+  rewrite-author:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Clona el repositorio
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 2. Configura Git
+    - name: Set up Git
+      run: |
+        git config user.name "DesideApp"
+        git config user.email "deside.w3app@gmail.com"
+
+    # 3. Reescribe el autor de los commits realizados hoy
+    - name: Rewrite commits from today
+      run: |
+        COMMITS=$(git log --pretty=oneline --since="yesterday.midnight" --author="deside.w3app@gmail.com" | wc -l)
+        if [ "$COMMITS" -eq "0" ]; then
+          echo "No commits to rewrite for today."
+          exit 0
+        fi
+        echo "Rewriting $COMMITS commits..."
+        git filter-branch --env-filter '
+          if [ "$GIT_COMMITTER_EMAIL" = "deside.w3app@gmail.com" ]; then
+            export GIT_COMMITTER_NAME="MigueVdeRohe"
+            export GIT_COMMITTER_EMAIL="miguevderohe@gmail.com"
+            export GIT_AUTHOR_NAME="MigueVdeRohe"
+            export GIT_AUTHOR_EMAIL="miguevderohe@gmail.com"
+          fi
+        ' HEAD~$COMMITS..HEAD
+
+    # 4. Fuerza el push al repositorio remoto
+    - name: Force push changes
+      run: git push --force-with-lease
