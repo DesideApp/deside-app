@@ -11,7 +11,8 @@
     width: auto;
     height: 40px;
     font-size: 16px;
-    font-family: 'IBM-Plex-Mono', sans-serif;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: normal; 
     padding: 0px 16px;
     border: none;
     border-radius: 5px;
@@ -27,11 +28,12 @@
 
 /* Botón del menú */
 .menu-button {
-    background-color: #2B232390;
-    color: white;
+    background-color: #fc564f;
+    color: #ffffff;
     width: 40px; /* Ancho cuadrado */
     height: 40px; /* Altura igual al botón "Connect Wallet" */
     border: none;
+    right: 50px;
     border-radius: 5px; /* Mismo redondeo que "Connect Wallet" */
     cursor: pointer;
     display: flex;
@@ -41,15 +43,15 @@
 }
 
 .menu-button:hover {
-    background-color: #1f1b1b;
+    background-color: #fc564f;
 }
 
 /* Icono de tres líneas */
 .menu-icon {
     display: block;
     width: 20px; /* Ancho de las líneas */
-    height: 2px; /* Grosor de las líneas */
-    background-color: white; /* Color de las líneas */
+    height: 3px; /* Grosor de las líneas */
+    background-color: #ffffff; /* Color de las líneas */
     position: relative;
     margin: 0 auto; /* Asegura que esté centrado */
 }
@@ -59,8 +61,8 @@
     content: "";
     position: absolute;
     width: 20px; /* Mismo ancho que la línea principal */
-    height: 2px; /* Mismo grosor que la línea principal */
-    background-color: white; /* Mismo color que la línea principal */
+    height: 3px; /* Mismo grosor que la línea principal */
+    background-color: #ffffff; /* Mismo color que la línea principal */
     left: 0; /* Alinea las líneas con el inicio */
     transition: all 0.3s ease; /* Suaviza los cambios si se anima */
 }

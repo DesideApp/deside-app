@@ -5,7 +5,7 @@ import "./Header.css";
 function Header() {
     return (
         <header className="header">
-            <h1 className="header-title">Log In</h1>
+            <h1 className="header-title">Log in</h1>
             <WalletButton />
         </header>
     );
