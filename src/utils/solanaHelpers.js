@@ -1,4 +1,4 @@
-export async function connectWallet() {
+export async function connectWallet(wallet) {
     try {
         let provider;
 
@@ -16,17 +16,17 @@ export async function connectWallet() {
             return null;
         }
 
-        // Solicita al usuario que conecte la wallet. Abre Phantom Wallet incluso si ya está conectado.
-        const response = await window.solana.connect({ onlyIfTrusted: false });
+        // Solicita al usuario que conecte la wallet usando el proveedor detectado
+        const response = await provider.connect({ onlyIfTrusted: false });
 
         // Verifica que la conexión fue exitosa y retorna la dirección pública
         if (!response.publicKey) {
-            throw new Error("Conexión cancelada por el usuario.");
+            throw new Error(`Connection to ${wallet} cancelled by the user.`);
         }
 
         return response.publicKey.toString();
     } catch (error) {
-        console.error("Error al conectar la wallet:", error);
-        throw new Error("No se pudo conectar con Phantom Wallet.");
+        console.error(`Error al conectar ${wallet} Wallet:`, error);
+        throw new Error(`Failed to connect ${wallet} Wallet.`);
     }
 }
