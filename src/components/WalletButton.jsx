@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { connectWallet } from "../utils/solanaHelpers";
 import WalletMenu from "./WalletMenu";
+import WalletModal from "./WalletModal"; // Nuevo componente para el modal
 import "./WalletButton.css";
 
 function WalletButton() {
     const [walletAddress, setWalletAddress] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
     const menuRef = useRef(null);
 
     useEffect(() => {
@@ -30,10 +32,15 @@ function WalletButton() {
         };
     }, []);
 
-    async function handleConnect() {
+    async function handleConnect(wallet) {
         try {
-            const address = await connectWallet();
-            setWalletAddress(address);
+            setIsModalOpen(false); // Cierra el modal al seleccionar una wallet
+            if (wallet === "phantom") {
+                const address = await connectWallet();
+                setWalletAddress(address);
+            } else {
+                alert(`${wallet} is not supported yet.`);
+            }
         } catch (error) {
             console.error("Error al conectar wallet:", error);
             alert("Failed to connect wallet. Please try again.");
@@ -82,7 +89,10 @@ function WalletButton() {
     return (
         <div className="wallet-container">
             {/* Botón principal para conectar */}
-            <button className="wallet-button" onClick={handleConnect}>
+            <button
+                className="wallet-button"
+                onClick={() => setIsModalOpen(true)} // Abre el modal
+            >
                 {walletAddress
                     ? `${walletAddress.slice(0, 5)}...`
                     : "Connect Wallet"}
@@ -105,6 +115,13 @@ function WalletButton() {
                 handleConnect={handleConnect} // Pasamos la función de conexión
                 handleLogout={handleLogout}
                 menuRef={menuRef} // Pasamos la referencia del menú
+            />
+
+            {/* Renderizar el modal para seleccionar wallet */}
+            <WalletModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSelectWallet={handleConnect} // Maneja la selección de wallet
             />
         </div>
     );
