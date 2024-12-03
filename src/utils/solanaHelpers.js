@@ -7,8 +7,9 @@ export async function connectWallet(wallet) {
         // Detecta el proveedor según el wallet seleccionado
         if (wallet === "phantom" && window.solana?.isPhantom) {
             provider = window.solana;
-        } else if (wallet === "backpack" && window.solana?.isBackpack) {
-            provider = window.solana;
+        } else if (wallet === "backpack" && window.xnft?.solana) {
+            console.log("Backpack Wallet detected");
+            provider = window.xnft.solana;
         } else if (wallet === "magiceden" && window.magicEden?.isMagicEden) {
             provider = window.magicEden;
         } else {
