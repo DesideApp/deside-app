@@ -39,6 +39,7 @@
 
 .wallet-menu-content {
     padding: 15px; /* Espaciado interno del contenido */
+    text-align: center; /* Alineamos todo al centro */
 }
 
 .wallet-address {
@@ -47,6 +48,21 @@
     border-radius: 5px;
     word-wrap: break-word; /* Maneja direcciones largas */
     margin-bottom: 15px; /* Espacio debajo de la dirección */
+}
+
+.connect-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.connect-button:hover {
+    background-color: #0056b3;
 }
 
 .logout-button {

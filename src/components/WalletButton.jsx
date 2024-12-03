@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { connectWallet } from "../utils/solanaHelpers";
 import WalletMenu from "./WalletMenu";
 import "./WalletButton.css";
@@ -6,6 +6,7 @@ import "./WalletButton.css";
 function WalletButton() {
     const [walletAddress, setWalletAddress] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef(null);
 
     useEffect(() => {
         if (window.solana) {
@@ -16,8 +17,8 @@ function WalletButton() {
 
             window.solana.on("disconnect", () => {
                 console.log("Wallet desconectada.");
-                setWalletAddress(null); // Limpia el estado
-                setIsMenuOpen(false); // Cierra el menú si está abierto
+                setWalletAddress(null);
+                setIsMenuOpen(false);
             });
         }
 
@@ -31,13 +32,8 @@ function WalletButton() {
 
     async function handleConnect() {
         try {
-            if (!walletAddress) {
-                // Intenta conectar la wallet usando el helper
-                const address = await connectWallet();
-                setWalletAddress(address); // Almacena la dirección conectada
-            } else {
-                alert("Wallet already connected!");
-            }
+            const address = await connectWallet();
+            setWalletAddress(address);
         } catch (error) {
             console.error("Error al conectar wallet:", error);
             alert("Failed to connect wallet. Please try again.");
@@ -57,18 +53,31 @@ function WalletButton() {
             } finally {
                 setWalletAddress(null);
                 setIsMenuOpen(false);
-                console.log("Estado limpio y menú cerrado.");
             }
         }
     }
 
     function handleMenuButtonClick() {
-        if (!walletAddress) {
-            alert("Please connect your wallet first.");
-        } else {
-            setIsMenuOpen(!isMenuOpen);
-        }
+        setIsMenuOpen(!isMenuOpen);
     }
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setIsMenuOpen(false); // Cierra el menú si se hace clic fuera
+            }
+        }
+
+        if (isMenuOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        } else {
+            document.removeEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isMenuOpen]);
 
     return (
         <div className="wallet-container">
@@ -83,8 +92,9 @@ function WalletButton() {
             <button
                 className="menu-button"
                 onClick={handleMenuButtonClick}
+                aria-label="Menu"
             >
-                ⋮
+                <span className="menu-icon"></span>
             </button>
 
             {/* Renderizar el menú lateral */}
@@ -92,7 +102,9 @@ function WalletButton() {
                 isOpen={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
                 walletAddress={walletAddress}
+                handleConnect={handleConnect} // Pasamos la función de conexión
                 handleLogout={handleLogout}
+                menuRef={menuRef} // Pasamos la referencia del menú
             />
         </div>
     );

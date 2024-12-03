@@ -4,34 +4,71 @@
     gap: 8px; /* Espaciado entre botones */
 }
 
-/* Estilos del botón */
+/* Botón principal para conectar */
 .wallet-button {
     background-color: #fc554f;
-    color: #ffffff;
-    font-size: 1.2rem;
+    color: white;
+    width: auto;
+    height: 40px;
+    font-size: 16px;
     font-family: 'IBM-Plex-Mono', sans-serif;
-    padding: 15px 20px;
+    padding: 0px 16px;
     border: none;
-    border-radius: 10px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease;
 }
 
 /* Efecto al pasar el ratón */
 .wallet-button:hover {
     background-color: #fc564f;
-    opacity: 0.6;
+    opacity: 0.8;
 }
 
+/* Botón del menú */
 .menu-button {
-    background-color: transparent;
+    background-color: #2B232390;
+    color: white;
+    width: 40px; /* Ancho cuadrado */
+    height: 40px; /* Altura igual al botón "Connect Wallet" */
     border: none;
-    font-size: 18px;
+    border-radius: 5px; /* Mismo redondeo que "Connect Wallet" */
     cursor: pointer;
-    color: #007bff;
-    transition: color 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease;
 }
 
 .menu-button:hover {
-    color: #0056b3;
+    background-color: #1f1b1b;
+}
+
+/* Icono de tres líneas */
+.menu-icon {
+    display: block;
+    width: 20px; /* Ancho de las líneas */
+    height: 2px; /* Grosor de las líneas */
+    background-color: white; /* Color de las líneas */
+    position: relative;
+    margin: 0 auto; /* Asegura que esté centrado */
+}
+
+.menu-icon::before,
+.menu-icon::after {
+    content: "";
+    position: absolute;
+    width: 20px; /* Mismo ancho que la línea principal */
+    height: 2px; /* Mismo grosor que la línea principal */
+    background-color: white; /* Mismo color que la línea principal */
+    left: 0; /* Alinea las líneas con el inicio */
+    transition: all 0.3s ease; /* Suaviza los cambios si se anima */
+}
+
+.menu-icon::before {
+    top: -6px; /* Posición vertical de la línea superior */
+}
+
+.menu-icon::after {
+    top: 6px; /* Posición vertical de la línea inferior */
 }
