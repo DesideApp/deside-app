@@ -1,5 +1,7 @@
 export async function connectWallet(wallet) {
     try {
+        console.log("Selected wallet:", wallet); // Log para saber qué wallet se está seleccionando
+        
         let provider;
 
         // Detecta el proveedor según el wallet seleccionado
@@ -9,6 +11,8 @@ export async function connectWallet(wallet) {
             provider = window.solana;
         } else if (wallet === "magiceden" && window.magicEden?.isMagicEden) {
             provider = window.magicEden;
+        } else {
+            console.error(`${wallet} Wallet not detected`);
         }
 
         if (!provider) {
@@ -18,6 +22,7 @@ export async function connectWallet(wallet) {
 
         // Solicita al usuario que conecte la wallet usando el proveedor detectado
         const response = await provider.connect({ onlyIfTrusted: false });
+        console.log("Connection response:", response); // Log para verificar la respuesta de conexión
 
         // Verifica que la conexión fue exitosa y retorna la dirección pública
         if (!response.publicKey) {
