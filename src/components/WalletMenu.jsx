@@ -1,7 +1,7 @@
 import React from "react";
 import "./WalletMenu.css";
 
-function WalletMenu({ isOpen, onClose, walletAddress, handleConnect, handleLogout, menuRef }) {
+function WalletMenu({ isOpen, onClose, walletAddress, handleConnectModal, handleLogout, menuRef }) {
     return (
         <div ref={menuRef} className={`wallet-menu ${isOpen ? "open" : ""}`}>
             <div className="wallet-menu-header">
@@ -20,7 +20,8 @@ function WalletMenu({ isOpen, onClose, walletAddress, handleConnect, handleLogou
                 ) : (
                     <div>
                         <p>Welcome! Please connect your wallet.</p>
-                        <button className="wallet-button" onClick={handleConnect}>
+                        {/* Usa handleConnectModal para abrir el WalletModal */}
+                        <button className="wallet-button" onClick={handleConnectModal}>
                             Connect Wallet
                         </button>
                     </div>
@@ -31,4 +32,3 @@ function WalletMenu({ isOpen, onClose, walletAddress, handleConnect, handleLogou
 }
 
 export default WalletMenu;
-

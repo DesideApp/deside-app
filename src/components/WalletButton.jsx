@@ -112,7 +112,7 @@ function WalletButton() {
                 isOpen={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
                 walletAddress={walletAddress}
-                handleConnect={handleConnect} // Pasamos la función de conexión
+                handleConnectModal={() => setIsModalOpen(true)} // Pasar función para abrir el modal
                 handleLogout={handleLogout}
                 menuRef={menuRef} // Pasamos la referencia del menú
             />
