@@ -10,11 +10,21 @@ export async function connectWallet(wallet) {
         } else if (wallet === "backpack" && window.xnft?.solana) {
             console.log("Backpack Wallet detected");
             provider = window.xnft.solana;
-        } else if (wallet === "magiceden" && window.magicEden?.isMagicEden) {
-            provider = window.magicEden;
+        } else if (wallet === "magiceden") {
+            console.log("Checking Magic Eden Wallet...");
+            console.log("window.magicEden:", window.magicEden);
+            console.log("Magic Eden Solana Provider:", window.magicEden?.solana);
+        
+            if (window.magicEden?.solana) {
+                console.log("Magic Eden Wallet detected");
+                provider = window.magicEden.solana;
+            } else {
+                console.error("Magic Eden Wallet not detected or improperly configured.");
+            }
         } else {
             console.error(`${wallet} Wallet not detected`);
         }
+        
 
         if (!provider) {
             alert(`Please install ${wallet} Wallet to continue.`);
