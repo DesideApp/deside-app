@@ -4,7 +4,8 @@
     flex-direction: column;      /* Organiza en columna */
     justify-content: center;     /* Centra verticalmente */
     align-items: center;         /* Centra horizontalmente */
-    min-height: 100vh;           /* Altura completa de la ventana */
+    min-height: calc(100vh - 50px); /* Resta la altura del header */
+    padding-top: 50px; /* Deja espacio para el header */
     background-color: #ffffff;   /* Fondo opcional */
     text-align: center;          /* Centra el texto */
 }
