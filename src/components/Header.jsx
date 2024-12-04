@@ -5,8 +5,15 @@ import "./Header.css";
 function Header() {
     return (
         <header className="header">
-            <h1 className="header-title">Log in</h1>
-            <WalletButton />
+            {/* Contenedor del título */}
+            <div className="header-title-container">
+                <h1 className="header-title">Log in</h1>
+            </div>
+
+            {/* Contenedor de los botones */}
+            <div className="header-buttons-container">
+                <WalletButton />
+            </div>
         </header>
     );
 }

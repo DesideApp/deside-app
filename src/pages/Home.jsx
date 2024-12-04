@@ -19,8 +19,8 @@ function Home() {
 
     return (
         <div className="home-container">
-            <h1>Bienvenido a Web3 App</h1>
-            <p>Conéctate con tu wallet para comenzar a explorar.</p>
+            <h1>DeChat</h1>
+            <p>Discover a new decentralised social network built in Solana</p>
         </div>
     );
 }

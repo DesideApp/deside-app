@@ -1,5 +1,6 @@
 .wallet-container {
     display: flex;
+    padding: 0 20px;
     align-items: center;
     gap: 8px; /* Espaciado entre botones */
 }
@@ -33,7 +34,6 @@
     width: 40px; /* Ancho cuadrado */
     height: 40px; /* Altura igual al botón "Connect Wallet" */
     border: none;
-    right: 50px;
     border-radius: 5px; /* Mismo redondeo que "Connect Wallet" */
     cursor: pointer;
     display: flex;

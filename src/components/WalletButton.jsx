@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import { connectWallet } from "../utils/solanaHelpers";
+import { connectWallet } from "../utils/solanaHelpers"; // Importamos el helper para conectar wallets
 import WalletMenu from "./WalletMenu";
-import WalletModal from "./WalletModal"; // Nuevo componente para el modal
+import WalletModal from "./WalletModal";
 import "./WalletButton.css";
 
 function WalletButton() {
     const [walletAddress, setWalletAddress] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const menuRef = useRef(null);
 
+    // Maneja eventos de conexión/desconexión
     useEffect(() => {
         if (window.solana) {
             window.solana.on("connect", () => {
@@ -32,11 +33,12 @@ function WalletButton() {
         };
     }, []);
 
+    // Conecta a la wallet seleccionada
     async function handleConnect(wallet) {
         try {
-            const address = await connectWallet(wallet); // Pasa la wallet seleccionada al helper
+            const address = await connectWallet(wallet);
             if (address) {
-                setWalletAddress(address); // Actualiza la dirección de la wallet conectada
+                setWalletAddress(address);
             }
         } catch (error) {
             console.error(`Error al conectar ${wallet} Wallet:`, error);
@@ -45,15 +47,14 @@ function WalletButton() {
             setIsModalOpen(false); // Cierra el modal después de intentar conectar
         }
     }
-    
 
+    // Desconecta la wallet
     function handleLogout() {
         if (window.confirm("¿Seguro que quieres desconectarte?")) {
             console.log("Desconectando wallet...");
             try {
                 if (window.solana?.disconnect) {
                     window.solana.disconnect();
-                    console.log("Wallet desconectada.");
                 }
             } catch (error) {
                 console.error("Error al desconectar la wallet:", error);
@@ -64,14 +65,16 @@ function WalletButton() {
         }
     }
 
+    // Alterna el menú lateral
     function handleMenuButtonClick() {
         setIsMenuOpen(!isMenuOpen);
     }
 
+    // Maneja el cierre del menú al hacer clic fuera
     useEffect(() => {
         function handleClickOutside(event) {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
-                setIsMenuOpen(false); // Cierra el menú si se hace clic fuera
+                setIsMenuOpen(false);
             }
         }
 
@@ -88,40 +91,31 @@ function WalletButton() {
 
     return (
         <div className="wallet-container">
-            {/* Botón principal para conectar */}
-            <button
-                className="wallet-button"
-                onClick={() => setIsModalOpen(true)} // Abre el modal
-            >
-                {walletAddress
-                    ? `${walletAddress.slice(0, 5)}...`
-                    : "Connect Wallet"}
+            {/* Botón principal para conectar wallets */}
+            <button className="wallet-button" onClick={() => setIsModalOpen(true)}>
+                {walletAddress ? `${walletAddress.slice(0, 5)}...` : "Connect Wallet"}
             </button>
 
-            {/* Botón para abrir el menú */}
-            <button
-                className="menu-button"
-                onClick={handleMenuButtonClick}
-                aria-label="Menu"
-            >
+            {/* Botón para abrir el menú lateral */}
+            <button className="menu-button" onClick={handleMenuButtonClick}>
                 <span className="menu-icon"></span>
             </button>
 
-            {/* Renderizar el menú lateral */}
+            {/* Menú lateral */}
             <WalletMenu
                 isOpen={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
                 walletAddress={walletAddress}
-                handleConnectModal={() => setIsModalOpen(true)} // Pasar función para abrir el modal
+                handleConnectModal={() => setIsModalOpen(true)} // Permite abrir el modal desde el menú
                 handleLogout={handleLogout}
-                menuRef={menuRef} // Pasamos la referencia del menú
+                menuRef={menuRef}
             />
 
-            {/* Renderizar el modal para seleccionar wallet */}
+            {/* Modal para seleccionar wallets */}
             <WalletModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSelectWallet={handleConnect} // Maneja la selección de wallet
+                onSelectWallet={handleConnect}
             />
         </div>
     );

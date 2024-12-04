@@ -1,7 +1,7 @@
 /* Estilos del header */
 .header {
     margin: 0;
-    padding: 0;
+    padding: 0 20px; /* Espaciado lateral uniforme */
     width: 100%;
     height: 60px;
     background-color: #ffffff;
@@ -11,16 +11,44 @@
     z-index: 10; /* Coloca el header encima del contenido */
     color: white;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* Título a la izquierda, botones a la derecha */
     align-items: center;
-    padding: 0px;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Contenedor del título */
+.header-title-container {
+    margin-left: 10px; /* Espaciado desde el borde izquierdo */
+}
+
+/* Estilo del título */
 .header-title {
     font-family: 'Montserrat', sans-serif;
     font-size: 24px;
     font-weight: bold;
     margin: 0;
-    color: #fc554f
+    color: #fc554f; /* Color principal */
+}
+
+/* Contenedor de los botones */
+.header-buttons-container {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espaciado entre botones */
+    margin-right: 10px; /* Espaciado desde el borde derecho */
+}
+
+/* Botones */
+.header-buttons-container button {
+    background-color: #fc554f;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.header-buttons-container button:hover {
+    background-color: #e04343; /* Color más oscuro en hover */
 }
