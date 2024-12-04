@@ -1,4 +1,4 @@
-/* Estilos del header */
+/* Ajuste general del header */
 .header {
     margin: 0;
     padding: 0 20px; /* Espaciado lateral uniforme */
@@ -12,7 +12,7 @@
     color: white;
     display: flex;
     justify-content: space-between; /* Título a la izquierda, botones a la derecha */
-    align-items: center;
+    align-items: center; /* Alinea verticalmente el contenido */
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -33,22 +33,8 @@
 /* Contenedor de los botones */
 .header-buttons-container {
     display: flex;
-    align-items: center;
+    align-items: center; /* Centra verticalmente */
     gap: 10px; /* Espaciado entre botones */
-    margin-right: 10px; /* Espaciado desde el borde derecho */
+    margin-right: 40px; /* Espaciado desde el borde derecho */
 }
 
-/* Botones */
-.header-buttons-container button {
-    background-color: #fc554f;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 15px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.header-buttons-container button:hover {
-    background-color: #e04343; /* Color más oscuro en hover */
-}

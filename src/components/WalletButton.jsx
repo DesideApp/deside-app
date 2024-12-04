@@ -95,22 +95,26 @@ function WalletButton() {
             <button className="wallet-button" onClick={() => setIsModalOpen(true)}>
                 {walletAddress ? `${walletAddress.slice(0, 5)}...` : "Connect Wallet"}
             </button>
-
+    
             {/* Botón para abrir el menú lateral */}
-            <button className="menu-button" onClick={handleMenuButtonClick}>
+            <button
+                className="menu-button"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label="Menu"
+            >
                 <span className="menu-icon"></span>
             </button>
-
+    
             {/* Menú lateral */}
             <WalletMenu
                 isOpen={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
                 walletAddress={walletAddress}
-                handleConnectModal={() => setIsModalOpen(true)} // Permite abrir el modal desde el menú
+                handleConnectModal={() => setIsModalOpen(true)}
                 handleLogout={handleLogout}
                 menuRef={menuRef}
             />
-
+    
             {/* Modal para seleccionar wallets */}
             <WalletModal
                 isOpen={isModalOpen}
@@ -118,7 +122,7 @@ function WalletButton() {
                 onSelectWallet={handleConnect}
             />
         </div>
-    );
+    );    
 }
 
 export default WalletButton;

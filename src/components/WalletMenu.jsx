@@ -13,15 +13,14 @@ function WalletMenu({ isOpen, onClose, walletAddress, handleConnectModal, handle
                     <div>
                         <p>Connected Wallet:</p>
                         <p className="wallet-address">{walletAddress}</p>
-                        <button className="wallet-button" onClick={handleLogout}>
+                        <button className="logout-button" onClick={handleLogout}>
                             Logout
                         </button>
                     </div>
                 ) : (
                     <div>
                         <p>Welcome! Please connect your wallet.</p>
-                        {/* Usa handleConnectModal para abrir el WalletModal */}
-                        <button className="wallet-button" onClick={handleConnectModal}>
+                        <button className="connect-button" onClick={handleConnectModal}>
                             Connect Wallet
                         </button>
                     </div>
@@ -32,3 +31,4 @@ function WalletMenu({ isOpen, onClose, walletAddress, handleConnectModal, handle
 }
 
 export default WalletMenu;
+

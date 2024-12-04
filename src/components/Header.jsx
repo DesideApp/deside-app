@@ -7,10 +7,10 @@ function Header() {
         <header className="header">
             {/* Contenedor del título */}
             <div className="header-title-container">
-                <h1 className="header-title">Log in</h1>
+                <h1 className="header-title">Deside</h1>
             </div>
 
-            {/* Contenedor de los botones */}
+            {/* Contenedor de la wallet */}
             <div className="header-buttons-container">
                 <WalletButton />
             </div>

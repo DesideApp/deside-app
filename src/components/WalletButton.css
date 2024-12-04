@@ -1,22 +1,23 @@
 .wallet-container {
     display: flex;
-    padding: 0 20px;
-    align-items: center;
-    gap: 8px; /* Espaciado entre botones */
+    align-items: center; /* Centra verticalmente los botones */
+    gap: 8px; /* Espaciado entre el botón principal y el botón menú */
 }
 
 /* Botón principal para conectar */
 .wallet-button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
     background-color: #fc554f;
     color: white;
-    width: auto;
     height: 40px;
     font-size: 16px;
     font-family: 'Montserrat', sans-serif;
-    font-weight: normal; 
-    padding: 0px 16px;
+    font-weight: normal;
+    padding: 0 16px;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
@@ -29,7 +30,7 @@
 
 /* Botón del menú */
 .menu-button {
-    background-color: #fc564f;
+    background-color: #fc554f;
     color: #ffffff;
     width: 40px; /* Ancho cuadrado */
     height: 40px; /* Altura igual al botón "Connect Wallet" */
@@ -44,16 +45,15 @@
 
 .menu-button:hover {
     background-color: #fc564f;
+    opacity: 0.8;
 }
 
 /* Icono de tres líneas */
 .menu-icon {
-    display: block;
-    width: 20px; /* Ancho de las líneas */
-    height: 3px; /* Grosor de las líneas */
-    background-color: #ffffff; /* Color de las líneas */
     position: relative;
-    margin: 0 auto; /* Asegura que esté centrado */
+    width: 20px; /* Ancho de las líneas */
+    height: 2px; /* Grosor de la línea central */
+    background-color: white; /* Color de la línea central */
 }
 
 .menu-icon::before,
@@ -61,16 +61,15 @@
     content: "";
     position: absolute;
     width: 20px; /* Mismo ancho que la línea principal */
-    height: 3px; /* Mismo grosor que la línea principal */
-    background-color: #ffffff; /* Mismo color que la línea principal */
-    left: 0; /* Alinea las líneas con el inicio */
-    transition: all 0.3s ease; /* Suaviza los cambios si se anima */
+    height: 2px; /* Mismo grosor */
+    background-color: white; /* Mismo color */
+    left: 0; /* Alineación al inicio */
 }
 
 .menu-icon::before {
-    top: -6px; /* Posición vertical de la línea superior */
+    top: -6px; /* Línea superior */
 }
 
 .menu-icon::after {
-    top: 6px; /* Posición vertical de la línea inferior */
+    top: 6px; /* Línea inferior */
 }

@@ -4,9 +4,9 @@
     right: -300px; /* Menú fuera de la pantalla por defecto */
     width: 300px;
     height: 100%;
-    background-color: #1a1a1a; /* Fondo oscuro */
-    color: white;
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+    background-color: #ffffff; /* Fondo oscuro */
+    color: #2b2323 ;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
     overflow-y: auto; /* Permite scroll si el contenido excede */
     transition: right 0.3s ease; /* Animación suave al abrir/cerrar */
     z-index: 1000; /* Asegura que esté por encima de otros elementos */
@@ -21,7 +21,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 15px;
-    border-bottom: 1px solid #333; /* Línea divisoria entre encabezado y contenido */
+    border-bottom: 1px solid #e6dfda; /* Línea divisoria entre encabezado y contenido */
 }
 
 .close-button {
@@ -53,7 +53,10 @@
 .connect-button {
     margin-top: 20px;
     padding: 10px 20px;
-    background-color: #007bff;
+    background-color: #fc554f;
+    font-size: 16px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: normal;
     border: none;
     border-radius: 5px;
     color: white;
@@ -62,7 +65,8 @@
 }
 
 .connect-button:hover {
-    background-color: #0056b3;
+    background-color: #fc564f;
+    opacity: 0.8;
 }
 
 .logout-button {
