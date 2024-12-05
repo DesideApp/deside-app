@@ -35,7 +35,7 @@
     width: 40px; /* Ancho cuadrado */
     height: 40px; /* Altura igual al botón "Connect Wallet" */
     border: none;
-    border-radius: 5px; /* Mismo redondeo que "Connect Wallet" */
+    border-radius: 10px; /* Mismo redondeo que "Connect Wallet" */
     cursor: pointer;
     display: flex;
     justify-content: center;

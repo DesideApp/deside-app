@@ -29,7 +29,7 @@
 
 .wallet-options button {
     padding: 10px 20px;
-    background-color: #007bff;
+    background-color: #fc554f;
     color: white;
     border: none;
     border-radius: 5px;
@@ -40,14 +40,15 @@
 }
 
 .wallet-options button:hover {
-    background-color: #0056b3;
+    background-color: #fc564f;
+    opacity: 0.8;
 }
 
 .close-modal {
     margin-top: 20px;
     background: none;
     border: none;
-    color: #007bff;
+    color: #fc554f;
     cursor: pointer;
     font-size: 14px;
     text-decoration: underline;

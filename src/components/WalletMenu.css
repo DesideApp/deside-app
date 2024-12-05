@@ -43,9 +43,9 @@
 }
 
 .wallet-address {
-    background: #333; /* Fondo oscuro para destacar menos */
+    background: #ffffff; /* Fondo oscuro para destacar menos */
     padding: 10px;
-    border-radius: 5px;
+    border-radius: 10px;
     word-wrap: break-word; /* Maneja direcciones largas */
     margin-bottom: 15px; /* Espacio debajo de la dirección */
 }
@@ -58,7 +58,7 @@
     font-family: 'Montserrat', sans-serif;
     font-weight: normal;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     color: white;
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -74,7 +74,7 @@
     padding: 10px 20px;
     background-color: #ff4d4d; /* Rojo para indicar acción de desconexión */
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     color: white;
     cursor: pointer;
     transition: background-color 0.3s ease; /* Suaviza el cambio de color al pasar el ratón */
