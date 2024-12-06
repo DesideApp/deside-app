@@ -1,3 +1,5 @@
+import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
+
 export async function connectWallet(wallet) {
     try {
         console.log("Selected wallet:", wallet); // Log para saber qué wallet se está seleccionando
@@ -39,10 +41,28 @@ export async function connectWallet(wallet) {
         if (!response.publicKey) {
             throw new Error(`Connection to ${wallet} cancelled by the user.`);
         }
-
+        
         return response.publicKey.toString();
     } catch (error) {
         console.error(`Error al conectar ${wallet} Wallet:`, error);
         throw new Error(`Failed to connect ${wallet} Wallet.`);
+    }
+}
+
+// Nueva función para obtener el balance de una wallet
+export async function getBalance(walletAddress) {
+    try {
+        const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
+        const publicKey = new PublicKey(walletAddress);
+
+        // Obtener el balance en lamports y convertirlo a SOL
+        const balanceLamports = await connection.getBalance(publicKey);
+        const balanceSol = balanceLamports / 1e9; // Convertir de lamports a SOL
+
+        console.log(`Balance for ${walletAddress}: ${balanceSol} SOL`);
+        return balanceSol;
+    } catch (error) {
+        console.error(`Error al obtener el balance de la wallet ${walletAddress}:`, error);
+        throw new Error(`Failed to fetch balance for wallet ${walletAddress}.`);
     }
 }
