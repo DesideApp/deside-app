@@ -1,4 +1,4 @@
-const LOCAL_API_URL = 'http://127.0.0.1:3001/api'; // URL del backend local
+const LOCAL_API_URL = 'https://backend-deside.onrender.com/api'; // URL del backend local
 const PRODUCTION_API_URL = 'https://backend-deside.onrender.com/api'; // URL del backend en producción
 
 const API_BASE_URL =
