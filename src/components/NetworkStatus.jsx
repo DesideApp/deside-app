@@ -1,61 +1,81 @@
 import React, { useEffect, useState } from 'react';
-import { Connection } from '@solana/web3.js';
 import './NetworkStatus.css';
+import API_BASE_URL from '../config/apiConfig';
 
-const connection = new Connection('https://api.mainnet-beta.solana.com');
 
-function NetworkStatus() {
-  const [networkStatus, setNetworkStatus] = useState('');
-  const [tps, setTps] = useState(0);
 
-  useEffect(() => {
-    const checkNetworkStatus = async () => {
-      try {
-        const health = await connection.getHealth();
-        if (health === 'ok') {
-          setNetworkStatus('connected');
-        } else {
-          setNetworkStatus('congested');
-        }
-      } catch (error) {
-        setNetworkStatus('disconnected');
-      }
-    };
+function NetworkStatus({ className }) {
+    const [networkStatus, setNetworkStatus] = useState('');
+    const [tps, setTps] = useState(0);
 
-    const getTPS = async () => {
-      try {
-        const samples = await connection.getRecentPerformanceSamples(1);
-        if (samples.length > 0) {
-          setTps(samples[0].numTransactions / samples[0].samplePeriodSecs);
-        }
-      } catch (error) {
-        console.error('Error fetching TPS:', error);
-      }
-    };
+    useEffect(() => {
+        // Función para verificar el estado de la red desde el backend
+        const checkNetworkStatus = async () => {
+            try {
+                console.log("Fetching network status...");
+                const response = await fetch(`${API_BASE_URL}/solana-status`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log('Network Status Response:', data); // Log para ver la respuesta
+                setNetworkStatus(data.status);
+            } catch (error) {
+                console.error('Error al obtener el estado de la red:', error);
+                setNetworkStatus('disconnected');
+            }
+        };
 
-    checkNetworkStatus();
-    getTPS();
-    const interval = setInterval(() => {
-      checkNetworkStatus();
-      getTPS();
-    }, 10000);
+        // Función para obtener el TPS desde el backend
+        const checkTPS = async () => {
+            try {
+                console.log("Fetching TPS...");
+                const response = await fetch(`${API_BASE_URL}/solana-tps`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log('TPS Response:', data); // Log para ver la respuesta
+                setTps(parseFloat(data.tps));
+            } catch (error) {
+                console.error('Error al obtener el TPS:', error);
+                setTps(0);
+            }
+        };
 
-    return () => clearInterval(interval);
-  }, []);
+        // Llamadas iniciales a las funciones
+        checkNetworkStatus();
+        checkTPS();
 
-  return (
-    <div className="network-status-container">
-      <div className={`network-indicator ${networkStatus}`}></div>
-      <div className="tps-indicator">
-        <div className="tps-label">TPS: {tps.toFixed(2)}</div>
-        <div className="tps-bars">
-          {[...Array(Math.min(10, Math.ceil(tps / 500))).keys()].map((_, index) => (
-            <div key={index} className="tps-bar"></div>
-          ))}
+        // Intervalo para actualizar cada 10 segundos
+        const interval = setInterval(() => {
+            checkNetworkStatus();
+            checkTPS();
+        }, 10000);
+
+        // Limpiar el intervalo al desmontar el componente
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className={`network-status-container ${className}`}>
+            {/* Etiqueta de estado */}
+            <div className="network-status-label">
+                {networkStatus === 'connected' ? 'Red: Conectada' : 'Red: Desconectada'}
+            </div>
+
+            {/* Indicador de barras móviles */}
+            <div className="tps-bars">
+                {[...Array(5)].map((_, index) => (
+                    <div
+                        key={index}
+                        className={`tps-bar ${networkStatus === 'connected' ? 'active' : ''}`}
+                        style={{ animationDelay: `${index * 0.1}s` }}
+                    ></div>
+                ))}
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
 
 export default NetworkStatus;

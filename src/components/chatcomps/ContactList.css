@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Montserrat:wght@400;700&display=swap');
+
+/* Contenedor principal del contact list */
+.contact-list-container {
+    width: 100%;
+    height: calc(100vh - 50vh); /* Ajustar para que ocupe la pantalla restante bajo el header */
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box; /* Asegurar que el padding y borde están incluidos en el tamaño total */
+    overflow: hidden; /* Evitar scroll innecesario */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Título de contactos */
+.contact-list-container h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    color: #333;
+}
+
+/* Contenedor para el botón de agregar contacto */
+.add-contact-button-container {
+    margin-bottom: 15px; /* Espacio entre el botón y el input */
+    text-align: center; /* Centrar el botón */
+}
+
+.add-contact-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.add-contact-button:hover {
+    background-color: #0056b3;
+}
+
+/* Contenedor para el input de wallet y el icono de Solana FM */
+.wallet-input-container {
+    margin-bottom: 20px; /* Añadir espacio entre el input y el resto de la lista */
+}
+
+/* Contenedor del input y el icono */
+.input-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.contact-input {
+    width: 100%;
+    padding: 10px 40px 10px 10px; /* Espacio para el icono dentro del input */
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: none; /* No se permite cambiar el tamaño manualmente */
+    overflow: hidden;
+}
+
+/* Icono de búsqueda de Solana FM */
+.solana-fm-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #007bff;
+    transition: color 0.3s;
+    text-decoration: none;
+}
+
+.solana-fm-icon:hover {
+    color: #0056b3;
+}
+
+/* Contenedor para la lista de contactos */
+.contacts-list-wrapper {
+    flex: 1; /* Ocupar el espacio disponible */
+    overflow-y: auto; /* Solo permitir el scroll cuando sea necesario */
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+
+/* Mensaje cuando no hay contactos */
+.no-contacts-message {
+    color: #777;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    text-align: center;
+    padding-top: 20px;
+}
+
+/* Lista de contactos */
+.contact-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Item de la lista de contactos */
+.contact-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #ffffff;
+    border-radius: 5px;
+    border: 1px solid #e0e0e0;
+    transition: background-color 0.3s;
+}
+
+.contact-item:hover {
+    background-color: #f0f0f0;
+}
+
+/* Botón para eliminar contactos */
+.contact-item button {
+    padding: 5px 10px;
+    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.contact-item button:hover {
+    background-color: #c82333;
+}
+
+/* Mensaje de error */
+.error-message {
+    color: #dc3545;
+    margin-top: 5px;
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+}

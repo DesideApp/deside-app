@@ -1,0 +1,43 @@
+.bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    background-color: #ffffff;
+    border-top: 0px solid #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 -2px 2px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.bottom-bar-button {
+    background: none;
+    border: none;
+    color: #2b2323;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.bottom-bar-button:hover {
+    color: #007bff;
+}
+
+/* Información de la red y precio de Solana */
+.network-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.network-status,
+.solana-price {
+    font-size: 0.9rem;
+    color: #2b2323;
+    font-family: 'Montserrat', sans-serif;
+}

@@ -1,0 +1,45 @@
+/* NetworkStatus.css */
+
+/* Contenedor principal */
+.network-status-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem;
+    color: #333; /* Asegúrate de que haya contraste */
+}
+
+/* Indicador del estado de la red */
+.network-status-label {
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+/* Barras de actividad */
+.tps-bars {
+    display: flex;
+    gap: 3px;
+}
+
+.tps-bar {
+    width: 5px;
+    height: 10px;
+    background-color: #808080; /* Gris para barras inactivas */
+    border-radius: 2px;
+    transition: background-color 0.3s ease, height 0.5s ease;
+}
+
+.tps-bar.active {
+    background-color: #4caf50; /* Verde para barras activas */
+    animation: barPulse 1s infinite alternate ease-in-out;
+}
+
+@keyframes barPulse {
+    0% {
+        height: 8px;
+    }
+    100% {
+        height: 16px;
+    }
+}

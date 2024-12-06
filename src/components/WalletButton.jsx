@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { connectWallet } from "../utils/solanaHelpers"; // Importamos el helper para conectar wallets
+import { connectWallet, getBalance } from "../utils/solanaHelpers"; // Importamos también getBalance
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
 
 function WalletButton() {
     const [walletAddress, setWalletAddress] = useState(null);
+    const [balance, setBalance] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const menuRef = useRef(null);
@@ -13,14 +14,24 @@ function WalletButton() {
     // Maneja eventos de conexión/desconexión
     useEffect(() => {
         if (window.solana) {
-            window.solana.on("connect", () => {
-                console.log("Wallet conectada:", window.solana.publicKey.toString());
-                setWalletAddress(window.solana.publicKey.toString());
+            window.solana.on("connect", async () => {
+                const address = window.solana.publicKey.toString();
+                console.log("Wallet conectada:", address);
+                setWalletAddress(address);
+
+                // Obtener el balance al conectarse
+                try {
+                    const solBalance = await getBalance(address);
+                    setBalance(solBalance);
+                } catch (error) {
+                    console.error("Error al obtener el balance:", error);
+                }
             });
 
             window.solana.on("disconnect", () => {
                 console.log("Wallet desconectada.");
                 setWalletAddress(null);
+                setBalance(null);
                 setIsMenuOpen(false);
             });
         }
@@ -39,6 +50,10 @@ function WalletButton() {
             const address = await connectWallet(wallet);
             if (address) {
                 setWalletAddress(address);
+                
+                // Obtener el balance de la wallet conectada
+                const solBalance = await getBalance(address);
+                setBalance(solBalance);
             }
         } catch (error) {
             console.error(`Error al conectar ${wallet} Wallet:`, error);
@@ -60,6 +75,7 @@ function WalletButton() {
                 console.error("Error al desconectar la wallet:", error);
             } finally {
                 setWalletAddress(null);
+                setBalance(null);
                 setIsMenuOpen(false);
             }
         }
@@ -95,6 +111,13 @@ function WalletButton() {
             <button className="wallet-button" onClick={() => setIsModalOpen(true)}>
                 {walletAddress ? `${walletAddress.slice(0, 5)}...` : "Connect Wallet"}
             </button>
+    
+            {/* Muestra el balance de SOL si está conectado */}
+            {balance !== null && (
+                <div className="wallet-balance">
+                    <p>Balance: {balance.toFixed(2)} SOL</p>
+                </div>
+            )}
     
             {/* Botón para abrir el menú lateral */}
             <button

@@ -1,40 +1,53 @@
 /* Ajuste general del header */
 .header {
     margin: 0;
-    padding: 0 20px; /* Espaciado lateral uniforme */
+    padding: 0 20px;
     width: 100%;
     height: 60px;
     background-color: #ffffff;
-    position: fixed; /* Fija el header en la parte superior */
+    position: fixed;
     top: 0;
     left: 0;
-    z-index: 10; /* Coloca el header encima del contenido */
-    color: white;
+    z-index: 10;
     display: flex;
-    justify-content: space-between; /* Título a la izquierda, botones a la derecha */
-    align-items: center; /* Alinea verticalmente el contenido */
+    justify-content: space-between;
+    align-items: center;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Contenedor del título */
+/* Contenedor del título del header */
 .header-title-container {
-    margin-left: 10px; /* Espaciado desde el borde izquierdo */
+    flex: 1;
 }
 
-/* Estilo del título */
 .header-title {
     font-family: 'Montserrat', sans-serif;
-    font-size: 24px;
-    font-weight: bold;
+    font-size: 1.5rem;
+    color: #333;
     margin: 0;
-    color: #fc554f; /* Color principal */
 }
 
-/* Contenedor de los botones */
+/* Contenedor de los botones del header */
 .header-buttons-container {
     display: flex;
-    align-items: center; /* Centra verticalmente */
-    gap: 10px; /* Espaciado entre botones */
+    align-items: center;
+    gap: 10px;
     margin-right: 40px; /* Espaciado desde el borde derecho */
 }
 
+/* Estilos para los botones Home y Chat */
+.header-nav-container span {
+    font-family: 'Montserrat', sans-serif; /* Fuente Montserrat */
+    font-size: 16px;                       /* Tamaño de fuente */
+    color: #2b2323;                        /* Color de texto */
+    cursor: default;                       /* Mantener el cursor como flecha */
+    text-decoration: none;                 /* Sin subrayado */
+    margin-right: 15px;                    /* Espacio entre los botones */
+    cursor: pointer; /* Cambiar el cursor a manita */
+    font-weight: bold;
+}
+
+/* Sin cambio de color al pasar el ratón */
+.header-nav-container span:hover {
+    color: #2b2323; /* Sin cambio de color */
+}
