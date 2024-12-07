@@ -39,6 +39,8 @@
 
 /* Botón del menú */
 .menu-button {
+    width: 40px; /* Ancho del botón */
+    height: 40px; /* Altura del botón */
     background-color: #fc554f;
     color: #ffffff;
     width: 40px; /* Ancho cuadrado */
@@ -50,6 +52,7 @@
     justify-content: center;
     align-items: center;
     transition: background-color 0.3s ease;
+    padding: 0; /* Sin relleno */
 }
 
 .menu-button:hover {
@@ -63,6 +66,7 @@
     width: 20px; /* Ancho de las líneas */
     height: 2px; /* Grosor de la línea central */
     background-color: white; /* Color de la línea central */
+    display: inline-block;
 }
 
 .menu-icon::before,
