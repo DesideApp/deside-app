@@ -1,26 +1,41 @@
 import React, { useState } from 'react';
 import { PublicKey } from '@solana/web3.js';
+import { getBalance } from '../../utils/solanaHelpers.js';
 import './ContactList.css';
 
 const ContactList = () => {
     const [contacts, setContacts] = useState([]);
     const [newContact, setNewContact] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [contactBalance, setContactBalance] = useState(null);
 
-    const handleAddContact = () => {
+    const handleAddContact = async () => {
         try {
-            new PublicKey(newContact);
+            // Validar si es una clave pública válida
+            const publicKey = new PublicKey(newContact);
 
-            if (!contacts.includes(newContact)) {
-                setContacts([...contacts, newContact]);
+            if (!contacts.includes(publicKey.toString())) {
+                // Obtener balance de la wallet
+                const balance = await getBalance(publicKey.toString());
+                setContactBalance(balance);
+
+                // Agregar el contacto a la lista
+                setContacts([...contacts, publicKey.toString()]);
                 setNewContact('');
                 setErrorMessage('');
             } else {
                 setErrorMessage('El contacto ya existe en la lista.');
             }
         } catch (e) {
-            setErrorMessage('Por favor, introduce una clave pública de Solana válida.');
+            console.error(e);
+            setErrorMessage(
+                'Por favor, introduce una clave pública de Solana válida o verifica el balance.'
+            );
         }
+    };
+
+    const handleRemoveContact = (contact) => {
+        setContacts(contacts.filter((c) => c !== contact));
     };
 
     const getSolanaFmLink = () => {
@@ -34,12 +49,7 @@ const ContactList = () => {
         <div className="contact-list-container">
             <h3>Mis Contactos</h3>
 
-            {/* Contenedor para el botón de agregar contacto */}
-            <div className="add-contact-button-container">
-                <button onClick={handleAddContact} className="add-contact-button">Agregar Contacto</button>
-            </div>
-
-            {/* Contenedor para el input de la wallet y el icono de Solana FM */}
+            {/* Contenedor para el input y botón de agregar contacto */}
             <div className="wallet-input-container">
                 <div className="input-wrapper">
                     <textarea
@@ -60,19 +70,34 @@ const ContactList = () => {
                         </a>
                     )}
                 </div>
+                <button
+                    onClick={handleAddContact}
+                    className="add-contact-button"
+                >
+                    Agregar Contacto
+                </button>
             </div>
 
             {errorMessage && <p className="error-message">{errorMessage}</p>}
+            {contactBalance !== null && (
+                <p className="balance-info">Balance: {contactBalance} SOL</p>
+            )}
 
             <div className="contacts-list-wrapper">
                 {contacts.length === 0 ? (
-                    <p className="no-contacts-message">No tienes contactos agregados.</p>
+                    <p className="no-contacts-message">
+                        No tienes contactos agregados.
+                    </p>
                 ) : (
                     <ul className="contact-list">
                         {contacts.map((contact, index) => (
                             <li key={index} className="contact-item">
                                 {contact}
-                                <button onClick={() => handleRemoveContact(contact)}>Eliminar</button>
+                                <button
+                                    onClick={() => handleRemoveContact(contact)}
+                                >
+                                    Eliminar
+                                </button>
                             </li>
                         ))}
                     </ul>

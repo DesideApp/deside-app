@@ -4,18 +4,14 @@ import "./ChatWindow.css";
 
 function ChatWindow() {
     // Lista de mensajes y estado del modo concentración
-    const [messages, setMessages] = useState([
-        { id: 1, sender: "Alice", text: "Hola, ¿cómo estás?" },
-        { id: 2, sender: "Yo", text: "Todo bien, ¿y tú?" },
-        { id: 3, sender: "Alice", text: "Genial, ¡gracias!" }
-    ]);
+    const [messages, setMessages] = useState([]);
     const [concentrationMode, setConcentrationMode] = useState(false);
 
     // Manejar el envío de nuevos mensajes
     const handleSendMessage = (newMessage) => {
         setMessages([...messages, { id: messages.length + 1, sender: "Yo", text: newMessage }]);
     };
-
+    
     return (
         <div className={`chat-window-container ${concentrationMode ? 'concentration' : ''}`}>
             <div className="chat-header">

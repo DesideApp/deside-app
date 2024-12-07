@@ -15,12 +15,20 @@ function ChatInput({ onSendMessage }) {
         }
     };
 
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault(); // Evita salto de línea
+            handleSend(); // Llama a la función para enviar el mensaje
+        }
+    };
+
     return (
         <div className="chat-input-container">
             <input
                 type="text"
                 value={inputValue}
                 onChange={handleInputChange}
+                onKeyDown={handleKeyDown} // Detectar "Enter"
                 placeholder="Escribe un mensaje..."
                 className="chat-input"
             />
@@ -32,3 +40,4 @@ function ChatInput({ onSendMessage }) {
 }
 
 export default ChatInput;
+

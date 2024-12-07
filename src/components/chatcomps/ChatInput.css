@@ -3,6 +3,7 @@
     align-items: center;
     gap: 10px;
     padding-top: 10px;
+    background-color: #f9f9f9;
     border-top: 1px solid #ccc;
 }
 
@@ -14,6 +15,11 @@
     border-radius: 5px;
 }
 
+.chat-input:focus {
+    outline: none;
+    border-color: #aaa;
+}
+
 .send-button {
     padding: 10px 20px;
     background-color: #fc554f;
@@ -21,6 +27,7 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
     transition: background-color 0.3s;
 }
 
