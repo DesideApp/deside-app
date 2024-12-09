@@ -63,8 +63,8 @@
 /* Icono de tres líneas */
 .menu-icon {
     position: relative;
-    width: 20px; /* Ancho de las líneas */
-    height: 2px; /* Grosor de la línea central */
+    width: 1.25rem; /* Ancho de las líneas */
+    height: 0.125rem; /* Grosor de la línea central */
     background-color: white; /* Color de la línea central */
     display: inline-block;
 }

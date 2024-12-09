@@ -11,12 +11,23 @@ const ContactList = () => {
 
     const handleAddContact = async () => {
         try {
+            if (!newContact) {
+                throw new Error('Por favor, introduce una clave pública.');
+            }
+
             // Validar si es una clave pública válida
             const publicKey = new PublicKey(newContact);
+
+            if (!PublicKey.isOnCurve(publicKey.toBuffer())) {
+                throw new Error('La clave pública no es válida.');
+            }
 
             if (!contacts.includes(publicKey.toString())) {
                 // Obtener balance de la wallet
                 const balance = await getBalance(publicKey.toString());
+                if (balance === null) {
+                    throw new Error('No se pudo obtener el balance. Verifica la clave pública.');
+                }
                 setContactBalance(balance);
 
                 // Agregar el contacto a la lista
@@ -29,7 +40,7 @@ const ContactList = () => {
         } catch (e) {
             console.error(e);
             setErrorMessage(
-                'Por favor, introduce una clave pública de Solana válida o verifica el balance.'
+                e.message || 'Error al agregar el contacto. Por favor, verifica la clave pública.'
             );
         }
     };
