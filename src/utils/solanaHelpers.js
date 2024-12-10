@@ -1,4 +1,5 @@
-import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
+const RPC_URL = 'https://rpc.ankr.com/solhttps://rpc.ankr.com/solana_devnet/84d7f098a02eb4c502839fa2cff526bb9d0ee07aa75c19ecf28f8925a824ba59ana_devnet/YOUR_API_KEY'; // Cambia esto a tu endpoint de Ankr
 
 export async function connectWallet(wallet) {
     try {
@@ -52,7 +53,7 @@ export async function connectWallet(wallet) {
 // Nueva función para obtener el balance de una wallet
 export async function getBalance(walletAddress) {
     try {
-        const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
+        const connection = new Connection(RPC_URL, 'confirmed');
         const publicKey = new PublicKey(walletAddress);
 
         // Obtener el balance en lamports y convertirlo a SOL
