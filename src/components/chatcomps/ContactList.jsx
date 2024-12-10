@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PublicKey } from '@solana/web3.js';
-import { getBalance } from '../../utils/solanaHelpers.js';
 import './ContactList.css';
 
 const ContactList = () => {
@@ -17,18 +16,7 @@ const ContactList = () => {
             // Validar si es una clave pública válida
             const publicKey = new PublicKey(newContact);
 
-            if (!PublicKey.isOnCurve(publicKey.toBuffer())) {
-                throw new Error('La clave pública no es válida.');
-            }
-
             if (!contacts.includes(publicKey.toString())) {
-                // Opcional: obtener balance para verificar que la wallet es válida
-                try {
-                    await getBalance(publicKey.toString()); // Verifica si la wallet es válida
-                } catch (error) {
-                    throw new Error('No se pudo verificar la clave pública. Asegúrate de que es válida.');
-                }
-
                 // Agregar el contacto a la lista
                 setContacts([...contacts, publicKey.toString()]);
                 setNewContact('');
@@ -46,13 +34,6 @@ const ContactList = () => {
         setContacts(contacts.filter((c) => c !== contact));
     };
 
-    const getSolanaFmLink = () => {
-        if (newContact) {
-            return `https://solana.fm/address/${newContact}`;
-        }
-        return '#';
-    };
-
     return (
         <div className="contact-list-container">
             <h3>Mis Contactos</h3>
@@ -67,16 +48,6 @@ const ContactList = () => {
                         rows={1}
                         className="contact-input"
                     />
-                    {newContact && (
-                        <a
-                            href={getSolanaFmLink()}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="solana-fm-icon"
-                        >
-                            🔍
-                        </a>
-                    )}
                 </div>
                 <button
                     onClick={handleAddContact}
