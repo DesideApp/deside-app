@@ -7,7 +7,6 @@ const ContactList = () => {
     const [contacts, setContacts] = useState([]);
     const [newContact, setNewContact] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const [contactBalance, setContactBalance] = useState(null);
 
     const handleAddContact = async () => {
         try {
@@ -23,12 +22,12 @@ const ContactList = () => {
             }
 
             if (!contacts.includes(publicKey.toString())) {
-                // Obtener balance de la wallet
-                const balance = await getBalance(publicKey.toString());
-                if (balance === null) {
-                    throw new Error('No se pudo obtener el balance. Verifica la clave pública.');
+                // Opcional: obtener balance para verificar que la wallet es válida
+                try {
+                    await getBalance(publicKey.toString()); // Verifica si la wallet es válida
+                } catch (error) {
+                    throw new Error('No se pudo verificar la clave pública. Asegúrate de que es válida.');
                 }
-                setContactBalance(balance);
 
                 // Agregar el contacto a la lista
                 setContacts([...contacts, publicKey.toString()]);
@@ -39,9 +38,7 @@ const ContactList = () => {
             }
         } catch (e) {
             console.error(e);
-            setErrorMessage(
-                e.message || 'Error al agregar el contacto. Por favor, verifica la clave pública.'
-            );
+            setErrorMessage(e.message || 'Error al agregar el contacto.');
         }
     };
 
@@ -90,9 +87,6 @@ const ContactList = () => {
             </div>
 
             {errorMessage && <p className="error-message">{errorMessage}</p>}
-            {contactBalance !== null && (
-                <p className="balance-info">Balance: {contactBalance} SOL</p>
-            )}
 
             <div className="contacts-list-wrapper">
                 {contacts.length === 0 ? (
