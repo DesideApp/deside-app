@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { PublicKey } from '@solana/web3.js';
-import axios from 'axios';
 import './ContactList.css';
 
 const ContactList = () => {
@@ -11,19 +10,13 @@ const ContactList = () => {
 
     // Cargar contactos y solicitudes pendientes desde el backend
     useEffect(() => {
-        const fetchContacts = async () => {
-            try {
-                const response = await axios.get(
-                    `${process.env.REACT_APP_BACKEND_URL}/api/contacts`
-                );
-                setContacts(response.data.contacts || []);
-                setPendingRequests(response.data.pendingRequests || []);
-            } catch (error) {
-                console.error('Error fetching contacts:', error);
-                setErrorMessage('Error al cargar contactos.');
-            }
-        };
-        fetchContacts();
+        fetch(`${process.env.REACT_APP_BACKEND_URL}/api/contacts`)
+            .then((response) => response.json())
+            .then((data) => {
+                setContacts(data.contacts || []);
+                setPendingRequests(data.pendingRequests || []);
+            })
+            .catch((error) => console.error('Error fetching contacts:', error));
     }, []);
 
     const handleAddContact = async () => {
@@ -36,17 +29,22 @@ const ContactList = () => {
             const publicKey = new PublicKey(newContact);
 
             // Enviar solicitud al backend
-            const response = await axios.post(
-                `${process.env.REACT_APP_BACKEND_URL}/api/contacts/add`,
-                { pubkey: publicKey.toString() }
-            );
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/contacts/add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ pubkey: publicKey.toString() }),
+            });
 
-            if (response.data.status === 'ok') {
+            const result = await response.json();
+
+            if (result.status === 'ok') {
                 setErrorMessage('');
                 setNewContact('');
                 alert('Solicitud enviada.');
             } else {
-                throw new Error(response.data.error || 'Error al enviar la solicitud.');
+                throw new Error(result.error || 'Error al enviar la solicitud.');
             }
         } catch (e) {
             console.error(e);
@@ -56,16 +54,21 @@ const ContactList = () => {
 
     const handleAcceptContact = async (pubkey) => {
         try {
-            const response = await axios.post(
-                `${process.env.REACT_APP_BACKEND_URL}/api/contacts/accept`,
-                { pubkey }
-            );
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/contacts/accept`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ pubkey }),
+            });
 
-            if (response.data.status === 'ok') {
+            const result = await response.json();
+
+            if (result.status === 'ok') {
                 setContacts((prev) => [...prev, pubkey]);
                 setPendingRequests((prev) => prev.filter((req) => req !== pubkey));
             } else {
-                throw new Error(response.data.error || 'Error al aceptar el contacto.');
+                throw new Error(result.error || 'Error al aceptar el contacto.');
             }
         } catch (e) {
             console.error(e);
@@ -75,15 +78,20 @@ const ContactList = () => {
 
     const handleRejectContact = async (pubkey) => {
         try {
-            const response = await axios.post(
-                `${process.env.REACT_APP_BACKEND_URL}/api/contacts/reject`,
-                { pubkey }
-            );
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/contacts/reject`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ pubkey }),
+            });
 
-            if (response.data.status === 'ok') {
+            const result = await response.json();
+
+            if (result.status === 'ok') {
                 setPendingRequests((prev) => prev.filter((req) => req !== pubkey));
             } else {
-                throw new Error(response.data.error || 'Error al rechazar el contacto.');
+                throw new Error(result.error || 'Error al rechazar el contacto.');
             }
         } catch (e) {
             console.error(e);
@@ -91,22 +99,8 @@ const ContactList = () => {
         }
     };
 
-    const handleRemoveContact = async (contact) => {
-        try {
-            const response = await axios.post(
-                `${process.env.REACT_APP_BACKEND_URL}/api/contacts/remove`,
-                { pubkey: contact }
-            );
-
-            if (response.data.status === 'ok') {
-                setContacts((prev) => prev.filter((c) => c !== contact));
-            } else {
-                throw new Error(response.data.error || 'Error al eliminar el contacto.');
-            }
-        } catch (e) {
-            console.error(e);
-            setErrorMessage(e.message || 'Error al eliminar el contacto.');
-        }
+    const handleRemoveContact = (contact) => {
+        setContacts(contacts.filter((c) => c !== contact));
     };
 
     return (

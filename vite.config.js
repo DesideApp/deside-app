@@ -5,7 +5,12 @@ export default defineConfig({
     plugins: [react()],
     resolve: {
         alias: {
-            axios: require.resolve('axios'),
+            stream: 'stream-browserify',
+            url: 'url',
+            buffer: 'buffer',
         },
+    },
+    define: {
+        'process.env': {},
     },
 });
