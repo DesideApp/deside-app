@@ -5,7 +5,7 @@ import {
     addContact,
     acceptContact,
     rejectContact,
-} from '../services/contactService.js';
+} from '../../services/contactService.js';
 import './ContactList.css';
 
 const ContactList = () => {
