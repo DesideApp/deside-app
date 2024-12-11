@@ -11,13 +11,19 @@ const ContactList = () => {
 
     // Cargar contactos y solicitudes pendientes desde el backend
     useEffect(() => {
-        axios
-            .get(`${process.env.REACT_APP_BACKEND_URL}/api/contacts`)
-            .then((response) => {
+        const fetchContacts = async () => {
+            try {
+                const response = await axios.get(
+                    `${process.env.REACT_APP_BACKEND_URL}/api/contacts`
+                );
                 setContacts(response.data.contacts || []);
                 setPendingRequests(response.data.pendingRequests || []);
-            })
-            .catch((error) => console.error('Error fetching contacts:', error));
+            } catch (error) {
+                console.error('Error fetching contacts:', error);
+                setErrorMessage('Error al cargar contactos.');
+            }
+        };
+        fetchContacts();
     }, []);
 
     const handleAddContact = async () => {
@@ -85,8 +91,22 @@ const ContactList = () => {
         }
     };
 
-    const handleRemoveContact = (contact) => {
-        setContacts(contacts.filter((c) => c !== contact));
+    const handleRemoveContact = async (contact) => {
+        try {
+            const response = await axios.post(
+                `${process.env.REACT_APP_BACKEND_URL}/api/contacts/remove`,
+                { pubkey: contact }
+            );
+
+            if (response.data.status === 'ok') {
+                setContacts((prev) => prev.filter((c) => c !== contact));
+            } else {
+                throw new Error(response.data.error || 'Error al eliminar el contacto.');
+            }
+        } catch (e) {
+            console.error(e);
+            setErrorMessage(e.message || 'Error al eliminar el contacto.');
+        }
     };
 
     return (
