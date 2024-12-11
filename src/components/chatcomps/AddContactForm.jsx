@@ -1,16 +1,31 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 
-const AddContactForm = () => {
+const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
-    const addContact = () => {
-        axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/contacts/add`, { pubkey })
-            .then(() => {
-                alert('Contact request sent!');
-                setPubkey('');
-            })
-            .catch((error) => console.error('Error sending contact request:', error));
+    const addContact = async () => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/contacts/add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ pubkey }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to send contact request.');
+            }
+
+            alert('Contact request sent!');
+            setPubkey('');
+            setErrorMessage('');
+            onContactAdded(); // Notifica al padre que se actualicen los datos
+        } catch (error) {
+            console.error('Error sending contact request:', error);
+            setErrorMessage('Error sending contact request.');
+        }
     };
 
     return (
@@ -23,6 +38,7 @@ const AddContactForm = () => {
                 placeholder="Enter public key"
             />
             <button onClick={addContact}>Send Request</button>
+            {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         </div>
     );
 };
