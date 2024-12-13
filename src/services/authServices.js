@@ -16,6 +16,7 @@ async function initializeToken() {
 
         const data = await response.json();
         token = data.token; // Guarda el token
+        localStorage.setItem('jwtToken', token); // Almacena el token en localStorage
         console.log('Token inicial obtenido:', token);
     }
 }
@@ -34,6 +35,7 @@ async function refreshToken() {
 
     const data = await response.json();
     token = data.token; // Actualiza el token
+    localStorage.setItem('jwtToken', token); // Actualiza el token en localStorage
     console.log('Token refrescado:', token);
     return token;
 }
