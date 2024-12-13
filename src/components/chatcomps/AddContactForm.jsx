@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getCookie } from '../../services/authServices'; // Importar getCookie para obtener el token CSRF
 
 const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState('');
@@ -10,6 +11,7 @@ const AddContactForm = ({ onContactAdded }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-XSRF-TOKEN': getCookie('XSRF-TOKEN') // Enviar el token CSRF
                 },
                 body: JSON.stringify({ pubkey }),
             });
