@@ -9,14 +9,4 @@ export default defineConfig({
   server: {
     port: 3000,
   },
-  resolve: {
-    alias: {
-      stream: 'stream-browserify',
-      url: 'url',
-      buffer: 'buffer',
-    },
-  },
-  define: {
-    'process.env': {},
-  },
 });
