@@ -1,4 +1,4 @@
-import { fetchWithAuth } from './authServices'; // Importar fetchWithAuth para autenticación
+import { apiRequest } from './apiService';
 
 const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -13,11 +13,7 @@ console.log('BASE_URL:', BASE_URL); // Log para verificar la URL base
 export const getContacts = async () => {
     try {
         console.log('Fetching contacts from:', `${BASE_URL}/api/contacts`);
-        const response = await fetchWithAuth(`${BASE_URL}/api/contacts`);
-        if (!response.ok) {
-            throw new Error('Error al obtener contactos.');
-        }
-        const data = await response.json();
+        const data = await apiRequest('/api/contacts');
         console.log('Contacts data:', data); // Log de datos de contactos
         return data;
     } catch (error) {
@@ -30,17 +26,13 @@ export const getContacts = async () => {
 export const addContact = async (pubkey) => {
     try {
         console.log('Adding contact with pubkey:', pubkey);
-        const response = await fetchWithAuth(`${BASE_URL}/api/contacts/add`, {
+        const data = await apiRequest('/api/contacts/add', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ pubkey }),
         });
-        if (!response.ok) {
-            throw new Error('Error al agregar contacto.');
-        }
-        const data = await response.json();
         console.log('Add contact response:', data); // Log de respuesta de agregar contacto
         return data;
     } catch (error) {
@@ -53,17 +45,13 @@ export const addContact = async (pubkey) => {
 export const acceptContact = async (pubkey) => {
     try {
         console.log('Accepting contact with pubkey:', pubkey);
-        const response = await fetchWithAuth(`${BASE_URL}/api/contacts/accept`, {
+        const data = await apiRequest('/api/contacts/accept', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ pubkey }),
         });
-        if (!response.ok) {
-            throw new Error('Error al aceptar contacto.');
-        }
-        const data = await response.json();
         console.log('Accept contact response:', data); // Log de respuesta de aceptar contacto
         return data;
     } catch (error) {
@@ -76,17 +64,13 @@ export const acceptContact = async (pubkey) => {
 export const rejectContact = async (pubkey) => {
     try {
         console.log('Rejecting contact with pubkey:', pubkey);
-        const response = await fetchWithAuth(`${BASE_URL}/api/contacts/reject`, {
+        const data = await apiRequest('/api/contacts/reject', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ pubkey }),
         });
-        if (!response.ok) {
-            throw new Error('Error al rechazar contacto.');
-        }
-        const data = await response.json();
         console.log('Reject contact response:', data); // Log de respuesta de rechazar contacto
         return data;
     } catch (error) {
