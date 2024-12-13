@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import "./BottomBar.css";
 import NetworkStatus from './NetworkStatus';
-import { fetchWithAuth } from '../../services/authService.js'; // Importamos fetchWithAuth
+import { fetchWithAuth } from '../../services/authServices.js'; // Importamos fetchWithAuth
 
 function BottomBar() {
     const [solPrice, setSolPrice] = useState(null);
