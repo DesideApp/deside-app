@@ -14,7 +14,7 @@ function App() {
                 <main>
                     <Routes>
                         <Route path="/" element={<Home />} />
-                        <Route path="/chat" element={<Chat />} />
+                        <Route path="/chat" element={<Chat />} /> // nota
                     </Routes>
                 </main>
                 <BottomBar />
