@@ -1,7 +1,11 @@
 let token = null; // Token inicial
 
-// Endpoint para obtener un nuevo token
+// Función para refrescar el token
 async function refreshToken() {
+    if (!token) {
+        throw new Error('No se puede refrescar el token porque no está definido.');
+    }
+
     const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/refresh`, {
         method: 'POST',
         headers: {
@@ -15,16 +19,21 @@ async function refreshToken() {
 
     const data = await response.json();
     token = data.token; // Actualiza el token
+    localStorage.setItem('authToken', token); // Guarda el nuevo token en localStorage
     console.log('Nuevo token obtenido:', token);
     return token;
 }
 
-// Función para realizar solicitudes con el token
+// Función para realizar solicitudes con autenticación
 async function fetchWithAuth(url, options = {}) {
     if (!token) {
-        // Inicializar token si aún no se ha obtenido
+        // Inicializar token desde localStorage o usar un valor inicial
         const storedToken = localStorage.getItem('authToken');
-        token = storedToken || 'your-initial-token'; // Cambiar a tu token inicial o una lógica adecuada
+        if (storedToken) {
+            token = storedToken;
+        } else {
+            throw new Error('No token available for authenticated requests.');
+        }
     }
 
     // Configurar headers con el token
@@ -35,18 +44,24 @@ async function fetchWithAuth(url, options = {}) {
     };
 
     // Realizar la solicitud
-    const response = await fetch(url, options);
+    let response = await fetch(url, options);
 
     // Si el token está expirado, intenta refrescarlo y reintentar
     if (response.status === 403) {
         console.warn('Token expirado, intentando refrescar...');
-        await refreshToken();
-        options.headers.Authorization = `Bearer ${token}`; // Actualiza el token en el header
-        return fetch(url, options); // Reintenta la solicitud
+        await refreshToken(); // Actualiza el token
+        options.headers.Authorization = `Bearer ${token}`; // Actualiza el token en los headers
+        response = await fetch(url, options); // Reintenta la solicitud
     }
 
-    // Si no hay error, devuelve la respuesta
     return response;
 }
 
-export { fetchWithAuth, refreshToken };
+// Inicializar el token en la aplicación (opcional, para asegurar un flujo claro)
+function initializeToken(initialToken) {
+    token = initialToken;
+    localStorage.setItem('authToken', initialToken); // Guarda el token inicial en localStorage
+    console.log('Token inicial configurado:', initialToken);
+}
+
+export { fetchWithAuth, refreshToken, initializeToken };
