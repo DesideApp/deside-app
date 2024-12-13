@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { connectWallet, getBalance } from "../utils/solanaHelpers";
+import { connectWallet, getBalance } from "../utils/solanaHelpers.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";

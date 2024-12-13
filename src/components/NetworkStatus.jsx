@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './NetworkStatus.css';
-import { fetchWithAuth } from '../services/authServices'; // Importamos fetchWithAuth
+import { fetchWithAuth } from '../services/authServices.js'; // Importamos fetchWithAuth
 
 function NetworkStatus({ className }) {
     const [networkStatus, setNetworkStatus] = useState('');
