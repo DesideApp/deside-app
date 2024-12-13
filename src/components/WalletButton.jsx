@@ -15,10 +15,12 @@ function WalletButton() {
         if (window.solana) {
             window.solana.on("connect", async () => {
                 const address = window.solana.publicKey.toString();
+                console.log("Wallet connected:", address); // Log de conexión
                 setWalletAddress(address);
 
                 try {
                     const solBalance = await getBalance(address);
+                    console.log("Wallet balance:", solBalance); // Log de balance
                     setBalance(solBalance);
                 } catch (error) {
                     console.error("Error al obtener el balance:", error);
@@ -26,6 +28,7 @@ function WalletButton() {
             });
 
             window.solana.on("disconnect", () => {
+                console.log("Wallet disconnected"); // Log de desconexión
                 setWalletAddress(null);
                 setBalance(null);
                 setIsMenuOpen(false);
@@ -44,9 +47,11 @@ function WalletButton() {
         try {
             const address = await connectWallet(wallet);
             if (address) {
+                console.log(`Connected to ${wallet} Wallet:`, address); // Log de conexión específica
                 setWalletAddress(address);
                 try {
                     const solBalance = await getBalance(address);
+                    console.log("Wallet balance:", solBalance); // Log de balance
                     setBalance(solBalance);
                 } catch (error) {
                     console.error("Error al obtener el balance:", error);
@@ -69,6 +74,7 @@ function WalletButton() {
             } catch (error) {
                 console.error("Error al desconectar la wallet:", error);
             } finally {
+                console.log("Wallet logged out"); // Log de desconexión
                 setWalletAddress(null);
                 setBalance(null);
                 setIsMenuOpen(false);

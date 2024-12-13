@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useNavigate } from 'react-router-dom';
 import WalletButton from "./WalletButton";
 import "./Header.css";
 
-
 function Header() {
     const navigate = useNavigate();
+
+    const handleNavigation = (path) => {
+        console.log(`Navigating to ${path}`); // Log de navegación
+        navigate(path);
+    };
 
     return (
         <header className="header">
@@ -16,8 +20,8 @@ function Header() {
 
             {/* Contenedor de navegación */}
             <nav className="header-nav-container">
-                <span onClick={() => navigate('/')} className="nav-link">Home</span>
-                <span onClick={() => navigate('/chat')} className="nav-link">Chat</span>
+                <span onClick={() => handleNavigation('/')} className="nav-link">Home</span>
+                <span onClick={() => handleNavigation('/chat')} className="nav-link">Chat</span>
             </nav>
 
             {/* Contenedor de la wallet */}

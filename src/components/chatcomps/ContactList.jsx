@@ -38,6 +38,7 @@ const ContactList = () => {
 
         try {
             const publicKey = new PublicKey(newContact);
+            console.log('Adding contact:', publicKey.toString()); // Log de agregar contacto
             await addContact(publicKey.toString()); // Ahora utiliza fetchWithAuth
             setErrorMessage('');
             setNewContact('');
@@ -50,6 +51,7 @@ const ContactList = () => {
 
     const handleAcceptContact = async (pubkey) => {
         try {
+            console.log('Accepting contact:', pubkey); // Log de aceptar contacto
             await acceptContact(pubkey); // Ahora utiliza fetchWithAuth
             setContacts((prev) => [...prev, pubkey]);
             setPendingRequests((prev) => prev.filter((req) => req !== pubkey));
@@ -61,6 +63,7 @@ const ContactList = () => {
 
     const handleRejectContact = async (pubkey) => {
         try {
+            console.log('Rejecting contact:', pubkey); // Log de rechazar contacto
             await rejectContact(pubkey); // Ahora utiliza fetchWithAuth
             setPendingRequests((prev) => prev.filter((req) => req !== pubkey));
         } catch (error) {
@@ -70,6 +73,7 @@ const ContactList = () => {
     };
 
     const handleRemoveContact = (contact) => {
+        console.log('Removing contact:', contact); // Log de eliminar contacto
         setContacts(contacts.filter((c) => c !== contact));
     };
 

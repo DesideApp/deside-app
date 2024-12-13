@@ -15,7 +15,9 @@ export const getContacts = async () => {
         if (!response.ok) {
             throw new Error('Error al obtener contactos.');
         }
-        return await response.json();
+        const data = await response.json();
+        console.log('Contacts data:', data); // Log de datos de contactos
+        return data;
     } catch (error) {
         console.error('Error en getContacts:', error);
         throw error;
@@ -36,7 +38,9 @@ export const addContact = async (pubkey) => {
         if (!response.ok) {
             throw new Error('Error al agregar contacto.');
         }
-        return await response.json();
+        const data = await response.json();
+        console.log('Add contact response:', data); // Log de respuesta de agregar contacto
+        return data;
     } catch (error) {
         console.error('Error en addContact:', error);
         throw error;
@@ -57,7 +61,9 @@ export const acceptContact = async (pubkey) => {
         if (!response.ok) {
             throw new Error('Error al aceptar contacto.');
         }
-        return await response.json();
+        const data = await response.json();
+        console.log('Accept contact response:', data); // Log de respuesta de aceptar contacto
+        return data;
     } catch (error) {
         console.error('Error en acceptContact:', error);
         throw error;
@@ -78,7 +84,9 @@ export const rejectContact = async (pubkey) => {
         if (!response.ok) {
             throw new Error('Error al rechazar contacto.');
         }
-        return await response.json();
+        const data = await response.json();
+        console.log('Reject contact response:', data); // Log de respuesta de rechazar contacto
+        return data;
     } catch (error) {
         console.error('Error en rejectContact:', error);
         throw error;

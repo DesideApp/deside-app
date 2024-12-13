@@ -2,6 +2,7 @@ let token = null; // Inicializa como null
 
 async function initializeToken() {
     if (!token) {
+        console.log('Initializing token...'); // Log de inicialización del token
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/token`, {
             method: 'POST',
             headers: {
@@ -22,6 +23,7 @@ async function initializeToken() {
 }
 
 async function refreshToken() {
+    console.log('Refreshing token...'); // Log de refresco del token
     const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/refresh`, {
         method: 'POST',
         headers: {
