@@ -1,4 +1,4 @@
-import { fetchWithAuth } from './authService'; // Importar fetchWithAuth para autenticación
+import { fetchWithAuth } from './authServices'; // Importar fetchWithAuth para autenticación
 
 const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
