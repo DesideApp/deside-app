@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './NetworkStatus.css';
-import API_BASE_URL from '../config/apiConfig';
-
-
+import { fetchWithAuth } from '../services/authService'; // Importamos fetchWithAuth
 
 function NetworkStatus({ className }) {
     const [networkStatus, setNetworkStatus] = useState('');
@@ -13,7 +11,7 @@ function NetworkStatus({ className }) {
         const checkNetworkStatus = async () => {
             try {
                 console.log("Fetching network status...");
-                const response = await fetch(`${API_BASE_URL}/solana-status`);
+                const response = await fetchWithAuth(`${process.env.REACT_APP_BACKEND_URL}/solana-status`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
@@ -30,7 +28,7 @@ function NetworkStatus({ className }) {
         const checkTPS = async () => {
             try {
                 console.log("Fetching TPS...");
-                const response = await fetch(`${API_BASE_URL}/solana-tps`);
+                const response = await fetchWithAuth(`${process.env.REACT_APP_BACKEND_URL}/solana-tps`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }

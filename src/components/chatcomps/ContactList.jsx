@@ -5,7 +5,7 @@ import {
     addContact,
     acceptContact,
     rejectContact,
-} from '../../services/contactService.js';
+} from '../../services/contactService.js'; // Utiliza el fetchWithAuth internamente
 import './ContactList.css';
 
 const ContactList = () => {
@@ -15,9 +15,11 @@ const ContactList = () => {
     const [pendingRequests, setPendingRequests] = useState([]);
 
     useEffect(() => {
+        console.log('Fetching contacts...');
         const fetchContacts = async () => {
             try {
-                const data = await getContacts();
+                const data = await getContacts(); // Ahora utiliza fetchWithAuth
+                console.log('Fetched contacts:', data);
                 setContacts(data.contacts || []);
                 setPendingRequests(data.pendingRequests || []);
             } catch (error) {
@@ -25,7 +27,6 @@ const ContactList = () => {
                 setErrorMessage('Error al obtener contactos.');
             }
         };
-
         fetchContacts();
     }, []);
 
@@ -37,7 +38,7 @@ const ContactList = () => {
 
         try {
             const publicKey = new PublicKey(newContact);
-            await addContact(publicKey.toString());
+            await addContact(publicKey.toString()); // Ahora utiliza fetchWithAuth
             setErrorMessage('');
             setNewContact('');
             alert('Solicitud enviada.');
@@ -49,7 +50,7 @@ const ContactList = () => {
 
     const handleAcceptContact = async (pubkey) => {
         try {
-            await acceptContact(pubkey);
+            await acceptContact(pubkey); // Ahora utiliza fetchWithAuth
             setContacts((prev) => [...prev, pubkey]);
             setPendingRequests((prev) => prev.filter((req) => req !== pubkey));
         } catch (error) {
@@ -60,7 +61,7 @@ const ContactList = () => {
 
     const handleRejectContact = async (pubkey) => {
         try {
-            await rejectContact(pubkey);
+            await rejectContact(pubkey); // Ahora utiliza fetchWithAuth
             setPendingRequests((prev) => prev.filter((req) => req !== pubkey));
         } catch (error) {
             console.error(error);
