@@ -1,4 +1,4 @@
-import { getAccessToken } from './tokenService';
+import { getAccessToken } from './tokenService.js';
 
 async function apiRequest(endpoint, options = {}) {
     const token = await getAccessToken(); // Obtén el access token válido
