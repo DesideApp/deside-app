@@ -7,6 +7,8 @@ if (!BASE_URL) {
     throw new Error('Backend URL not defined.');
 }
 
+console.log('BASE_URL:', BASE_URL); // Log para verificar la URL base
+
 // Obtener contactos
 export const getContacts = async () => {
     try {
