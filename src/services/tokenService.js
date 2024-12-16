@@ -1,26 +1,17 @@
-import jwt from 'jsonwebtoken';
+// Guardar token en localStorage
+export function setToken(token) {
+    localStorage.setItem('jwtToken', token);
+}
 
-const secretKey = 'your-secretKey';
+// Obtener token de localStorage
+export function getToken() {
+    return localStorage.getItem('jwtToken');
+}
 
-const tokenService = {
-    generateToken: (payload, expiresIn = '1h') => {
-        return jwt.sign(payload, secretKey, { expiresIn });
-    },
-
-    verifyToken: (token) => {
-        try {
-            return jwt.verify(token, secretKey);
-        } catch (error) {
-            return null;
-        }
-    },
-
-    decodeToken: (token) => {
-        return jwt.decode(token);
-    }
-};
-
-export default tokenService;
+// Eliminar token de localStorage
+export function removeToken() {
+    localStorage.removeItem('jwtToken');
+}
 
 let accessToken = null; // Almacenar temporalmente el access token en memoria
 
