@@ -19,6 +19,7 @@
     "axios": "^1.7.9",
     "buffer": "^6.0.3",
     "dotenv": "^16.4.7",
+    "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
     "mongoose": "^8.9.0",
     "react": "^18.3.1",
