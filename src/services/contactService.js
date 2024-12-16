@@ -30,6 +30,8 @@ export const addContact = async (pubkey) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'), // Enviar el token CSRF
+                'Authorization': `Bearer ${localStorage.getItem('jwtToken')}` // Enviar el token JWT
             },
             body: JSON.stringify({ pubkey }),
         });
@@ -49,6 +51,8 @@ export const acceptContact = async (pubkey) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'), // Enviar el token CSRF
+                'Authorization': `Bearer ${localStorage.getItem('jwtToken')}` // Enviar el token JWT
             },
             body: JSON.stringify({ pubkey }),
         });
@@ -68,6 +72,8 @@ export const rejectContact = async (pubkey) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'), // Enviar el token CSRF
+                'Authorization': `Bearer ${localStorage.getItem('jwtToken')}` // Enviar el token JWT
             },
             body: JSON.stringify({ pubkey }),
         });
@@ -78,3 +84,9 @@ export const rejectContact = async (pubkey) => {
         throw error;
     }
 };
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}

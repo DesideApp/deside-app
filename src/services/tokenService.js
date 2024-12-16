@@ -32,6 +32,7 @@ async function getAccessToken() {
         });
 
         if (!response.ok) {
+            console.error('Failed to refresh token:', response.statusText);
             throw new Error('Refresh token expired or invalid');
         }
 

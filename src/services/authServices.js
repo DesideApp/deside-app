@@ -31,6 +31,7 @@ async function initializeToken() {
         });
 
         if (!response.ok) {
+            console.error('Error al obtener token inicial:', response.statusText);
             throw new Error('Error al obtener token inicial');
         }
 
@@ -52,6 +53,7 @@ async function refreshToken() {
     });
 
     if (!response.ok) {
+        console.error('Error al refrescar el token:', response.statusText);
         throw new Error('Error al refrescar el token');
     }
 
