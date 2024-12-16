@@ -1,8 +1,9 @@
+import API_BASE_URL from '../config/apiConfig.js';
 import { getAccessToken } from './tokenService.js';
 
 async function apiRequest(endpoint, options = {}) {
     const token = await getAccessToken(); // Obtén el access token válido
-    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
         headers: {
             ...options.headers,
