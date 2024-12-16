@@ -1,3 +1,5 @@
+import { getCookie } from './tokenService.js'; // Import getCookie function
+
 let token = localStorage.getItem('jwtToken'); // Inicializa con el token almacenado en localStorage
 
 async function getCsrfToken() {
@@ -86,12 +88,6 @@ async function fetchWithAuth(url, options = {}) {
     }
 
     return response;
-}
-
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
 export { fetchWithAuth, refreshToken, initializeToken, getCsrfToken };

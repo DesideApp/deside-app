@@ -28,6 +28,7 @@ async function getAccessToken() {
             credentials: 'include', // Enviar cookies httpOnly al backend
             headers: {
                 'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'), // Enviar el token CSRF
             },
         });
 
@@ -51,4 +52,10 @@ function isTokenExpired(token) {
     return payload.exp < currentTime; // Devuelve true si el token ha expirado
 }
 
-export { getAccessToken, isTokenExpired };
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+export { getAccessToken, isTokenExpired, getCookie };

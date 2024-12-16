@@ -1,4 +1,5 @@
 import { apiRequest } from './apiService.js';
+import { getCookie } from './tokenService.js'; // Import getCookie function
 
 const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://backend-deside.onrender.com';
 
@@ -83,10 +84,4 @@ export const rejectContact = async (pubkey) => {
         console.error('Error en rejectContact:', error);
         throw error;
     }
-};
-
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
 }
