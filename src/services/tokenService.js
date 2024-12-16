@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
-const secretKey = 'your-secret-key';
+const secretKey = 'your-secretKey';
 
 const tokenService = {
     generateToken: (payload, expiresIn = '1h') => {
@@ -20,7 +20,7 @@ const tokenService = {
     }
 };
 
-module.exports = tokenService;
+export default tokenService;
 
 let accessToken = null; // Almacenar temporalmente el access token en memoria
 
