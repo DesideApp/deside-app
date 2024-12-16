@@ -1,13 +1,16 @@
-let token = null; // Inicializa como null
+let token = localStorage.getItem('jwtToken'); // Inicializa con el token almacenado en localStorage
 
 async function initializeToken() {
     if (!token) {
+        console.log('Initializing token...'); // Log de inicialización del token
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/token`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': getCookie('XSRF-TOKEN') // Enviar el token CSRF
             },
             body: JSON.stringify({ username: 'deside.w3app@gmail.com' }), // Cambia por un username válido
+            credentials: 'include', // Incluye las cookies en la solicitud
         });
 
         if (!response.ok) {
@@ -22,11 +25,13 @@ async function initializeToken() {
 }
 
 async function refreshToken() {
+    console.log('Refreshing token...'); // Log de refresco del token
     const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/refresh`, {
         method: 'POST',
         headers: {
-            Authorization: `Bearer ${token}`,
+            'X-XSRF-TOKEN': getCookie('XSRF-TOKEN') // Enviar el token CSRF
         },
+        credentials: 'include', // Incluye las cookies en la solicitud
     });
 
     if (!response.ok) {
@@ -48,7 +53,9 @@ async function fetchWithAuth(url, options = {}) {
     options.headers = {
         ...options.headers,
         Authorization: `Bearer ${token}`,
+        'X-XSRF-TOKEN': getCookie('XSRF-TOKEN') // Enviar el token CSRF
     };
+    options.credentials = 'include'; // Incluye las cookies en cada solicitud
 
     const response = await fetch(url, options);
 
@@ -60,6 +67,12 @@ async function fetchWithAuth(url, options = {}) {
     }
 
     return response;
+}
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
 export { fetchWithAuth, refreshToken, initializeToken };
