@@ -1,87 +1,119 @@
 import { apiRequest } from './apiService.js';
-import { getCookie } from './tokenService.js'; // Import getCookie function
+import { getTokens } from './tokenService.js'; // Import getTokens function
+import API_BASE_URL from '../config/apiConfig.js'; // Import API_BASE_URL
 
-const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://backend-deside.onrender.com';
-
-// Verificar que la URL del backend esté definida
-if (!BASE_URL) {
-    throw new Error('Backend URL not defined.');
+// Validar clave pública
+function validatePubkey(pubkey) {
+    if (!pubkey) {
+        throw new Error('Public key is required.');
+    }
 }
-
-console.log('BASE_URL:', BASE_URL); // Log para verificar la URL base
 
 // Obtener contactos
 export const getContacts = async () => {
     try {
-        console.log('Fetching contacts from:', `${BASE_URL}/api/contacts`);
-        const data = await apiRequest('/api/contacts');
+        const { csrfToken, jwtToken } = getTokens();
+
+        console.log('Fetching contacts from:', `${API_BASE_URL}/api/contacts`);
+        const data = await apiRequest(`${API_BASE_URL}/api/contacts`, {
+            method: 'GET',
+            headers: {
+                'X-XSRF-TOKEN': csrfToken,
+                'Authorization': `Bearer ${jwtToken}`
+            },
+        });
+
         console.log('Contacts data:', data); // Log de datos de contactos
         return data;
     } catch (error) {
         console.error('Error en getContacts:', error);
-        throw error;
+        throw new Error('Failed to fetch contacts. Please try again.');
     }
 };
 
 // Agregar contacto
 export const addContact = async (pubkey) => {
     try {
-        console.log('Adding contact with pubkey:', pubkey);
-        const data = await apiRequest('/api/contacts/add', {
+        validatePubkey(pubkey);
+
+        const { csrfToken, jwtToken } = getTokens();
+
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('Adding contact with pubkey:', pubkey);
+        }
+
+        const data = await apiRequest(`${API_BASE_URL}/api/contacts/add`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'), // Enviar el token CSRF
-                'Authorization': `Bearer ${localStorage.getItem('jwtToken')}` // Enviar el token JWT
+                'X-XSRF-TOKEN': csrfToken, // Enviar el token CSRF
+                'Authorization': `Bearer ${jwtToken}` // Enviar el token JWT
             },
             body: JSON.stringify({ pubkey }),
         });
+
         console.log('Add contact response:', data); // Log de respuesta de agregar contacto
         return data;
     } catch (error) {
-        console.error('Error en addContact:', error);
-        throw error;
+        console.error(`Error en addContact con pubkey ${pubkey}:`, error);
+        throw new Error('Failed to add contact. Please try again.');
     }
 };
 
 // Aceptar contacto
 export const acceptContact = async (pubkey) => {
     try {
-        console.log('Accepting contact with pubkey:', pubkey);
-        const data = await apiRequest('/api/contacts/accept', {
+        validatePubkey(pubkey);
+
+        const { csrfToken, jwtToken } = getTokens();
+
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('Accepting contact with pubkey:', pubkey);
+        }
+
+        const data = await apiRequest(`${API_BASE_URL}/api/contacts/accept`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'), // Enviar el token CSRF
-                'Authorization': `Bearer ${localStorage.getItem('jwtToken')}` // Enviar el token JWT
+                'X-XSRF-TOKEN': csrfToken, // Enviar el token CSRF
+                'Authorization': `Bearer ${jwtToken}` // Enviar el token JWT
             },
             body: JSON.stringify({ pubkey }),
         });
+
         console.log('Accept contact response:', data); // Log de respuesta de aceptar contacto
         return data;
     } catch (error) {
-        console.error('Error en acceptContact:', error);
-        throw error;
+        console.error(`Error en acceptContact con pubkey ${pubkey}:`, error);
+        throw new Error('Failed to accept contact. Please try again.');
     }
 };
 
 // Rechazar contacto
 export const rejectContact = async (pubkey) => {
     try {
-        console.log('Rejecting contact with pubkey:', pubkey);
-        const data = await apiRequest('/api/contacts/reject', {
+        validatePubkey(pubkey);
+
+        const { csrfToken, jwtToken } = getTokens();
+
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('Rejecting contact with pubkey:', pubkey);
+        }
+
+        const data = await apiRequest(`${API_BASE_URL}/api/contacts/reject`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'), // Enviar el token CSRF
-                'Authorization': `Bearer ${localStorage.getItem('jwtToken')}` // Enviar el token JWT
+                'X-XSRF-TOKEN': csrfToken, // Enviar el token CSRF
+                'Authorization': `Bearer ${jwtToken}` // Enviar el token JWT
             },
             body: JSON.stringify({ pubkey }),
         });
+
         console.log('Reject contact response:', data); // Log de respuesta de rechazar contacto
         return data;
     } catch (error) {
-        console.error('Error en rejectContact:', error);
-        throw error;
+        console.error(`Error en rejectContact con pubkey ${pubkey}:`, error);
+        throw new Error('Failed to reject contact. Please try again.');
     }
-}
+};

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
+import DOMPurify from 'dompurify'; // Importar DOMPurify para sanitización
 
 const useSignal = (backendUrl, pubkey) => {
     const socket = useRef(null);
@@ -31,7 +32,8 @@ const useSignal = (backendUrl, pubkey) => {
         // Manejo de señales entrantes
         socket.current.on('signal', (data) => {
             console.log('Señal recibida:', data);
-            setSignals((prev) => [...prev, data]);
+            const sanitizedData = DOMPurify.sanitize(data); // Sanitizar datos recibidos
+            setSignals((prev) => [...prev, sanitizedData]);
         });
 
         // Limpieza al desmontar
