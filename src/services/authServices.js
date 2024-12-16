@@ -88,6 +88,7 @@ export async function refreshToken() {
 export async function fetchWithAuth(endpoint, options = {}) {
     const token = getToken();
     if (!token) {
+        console.error('No token available');
         throw new Error('No token available');
     }
 
