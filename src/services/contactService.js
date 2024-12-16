@@ -1,6 +1,6 @@
 import { apiRequest } from './apiService.js';
 
-const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://backend-deside.onrender.com';
 
 // Verificar que la URL del backend esté definida
 if (!BASE_URL) {
@@ -13,7 +13,7 @@ console.log('BASE_URL:', BASE_URL); // Log para verificar la URL base
 export const getContacts = async () => {
     try {
         console.log('Fetching contacts from:', `${BASE_URL}/api/contacts`);
-        const data = await apiRequest(`${BASE_URL}/api/contacts`);
+        const data = await apiRequest('/api/contacts');
         console.log('Contacts data:', data); // Log de datos de contactos
         return data;
     } catch (error) {
@@ -26,7 +26,7 @@ export const getContacts = async () => {
 export const addContact = async (pubkey) => {
     try {
         console.log('Adding contact with pubkey:', pubkey);
-        const data = await apiRequest(`${BASE_URL}/api/contacts/add`, {
+        const data = await apiRequest('/api/contacts/add', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ export const addContact = async (pubkey) => {
 export const acceptContact = async (pubkey) => {
     try {
         console.log('Accepting contact with pubkey:', pubkey);
-        const data = await apiRequest(`${BASE_URL}/api/contacts/accept`, {
+        const data = await apiRequest('/api/contacts/accept', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ export const acceptContact = async (pubkey) => {
 export const rejectContact = async (pubkey) => {
     try {
         console.log('Rejecting contact with pubkey:', pubkey);
-        const data = await apiRequest(`${BASE_URL}/api/contacts/reject`, {
+        const data = await apiRequest('/api/contacts/reject', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
