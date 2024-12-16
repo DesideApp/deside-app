@@ -1,8 +1,25 @@
 let token = localStorage.getItem('jwtToken'); // Inicializa con el token almacenado en localStorage
 
+async function getCsrfToken() {
+    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/csrf-token`, {
+        method: 'GET',
+        credentials: 'include', // Incluye las cookies en la solicitud
+    });
+
+    if (!response.ok) {
+        throw new Error('Error al obtener el token CSRF');
+    }
+
+    const data = await response.json();
+    document.cookie = `XSRF-TOKEN=${data.csrfToken}; SameSite=Strict; Secure`;
+    return data.csrfToken;
+}
+
 async function initializeToken() {
     if (!token) {
         console.log('Initializing token...'); // Log de inicialización del token
+        await getCsrfToken(); // Obtener el token CSRF antes de cualquier otra solicitud
+
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/token`, {
             method: 'POST',
             headers: {
@@ -75,4 +92,4 @@ function getCookie(name) {
     if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-export { fetchWithAuth, refreshToken, initializeToken };
+export { fetchWithAuth, refreshToken, initializeToken, getCsrfToken };

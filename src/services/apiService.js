@@ -12,8 +12,9 @@ async function apiRequest(endpoint, options = {}) {
     });
 
     if (!response.ok) {
-        console.error('API request failed:', response.statusText);
-        throw new Error('Request failed');
+        const errorData = await response.json();
+        console.error('API request failed:', response.statusText, errorData);
+        throw new Error(`Request failed: ${response.statusText}`);
     }
 
     return await response.json();
