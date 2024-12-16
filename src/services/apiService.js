@@ -12,8 +12,8 @@ async function apiRequest(endpoint, options = {}, retry = true) {
         return cache.get(cacheKey);
     }
 
-    const token = await getAccessToken(); // Obtén el access token válido
     const csrfToken = getCsrfToken();
+    const token = await getAccessToken(); // Obtén el access token válido
 
     if (!csrfToken || !token) {
         console.error('CSRF or Access Token is missing');
@@ -24,15 +24,19 @@ async function apiRequest(endpoint, options = {}, retry = true) {
     console.log('CSRF Token:', csrfToken);
     console.log('Access Token:', token);
 
+    const headers = {
+        ...options.headers,
+        'Content-Type': 'application/json', // Ensure Content-Type is set to JSON
+        'Authorization': `Bearer ${token}`, // Incluye el access token en el encabezado
+        'X-XSRF-TOKEN': csrfToken, // Enviar el token CSRF
+    };
+
+    console.log('Headers enviados:', headers);
+
     try {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             ...options,
-            headers: {
-                ...options.headers,
-                'Content-Type': 'application/json', // Ensure Content-Type is set to JSON
-                'Authorization': `Bearer ${token}`, // Incluye el access token en el encabezado
-                'X-XSRF-TOKEN': csrfToken, // Enviar el token CSRF
-            },
+            headers,
         });
 
         if (!response.ok) {

@@ -29,7 +29,15 @@ export async function login(username, password) {
             body: JSON.stringify({ username, password }),
         });
 
-        setToken(response.token); // Guardar el token JWT en localStorage
+        const { csrfToken, token } = response;
+
+        // Guardar tokens
+        setToken(token);
+        document.cookie = `XSRF-TOKEN=${csrfToken}; path=/`;
+
+        console.log('Login exitoso, tokens guardados.');
+        console.log('JWT Token (localStorage):', localStorage.getItem('jwtToken'));
+        console.log('CSRF Token (cookie):', document.cookie);
         return response;
     } catch (error) {
         console.error('Login error:', error);
