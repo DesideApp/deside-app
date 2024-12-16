@@ -68,6 +68,19 @@ export function getCsrfToken() {
     return getCookie('XSRF-TOKEN');
 }
 
+// Función para obtener y validar tokens CSRF y JWT
+export function getTokens() {
+    const csrfToken = getCsrfToken();
+    const jwtToken = getToken();
+
+    if (!csrfToken || !jwtToken) {
+        console.error('CSRF or JWT Token is missing');
+        throw new Error('CSRF or JWT Token is missing');
+    }
+
+    return { csrfToken, jwtToken };
+}
+
 // Renovación del token JWT usando refresh token
 export async function refreshToken() {
     try {
