@@ -83,3 +83,27 @@ export async function refreshToken() {
         throw new Error('Session renewal failed. Please log in again.');
     }
 }
+
+// Función fetchWithAuth para solicitudes autenticadas
+export async function fetchWithAuth(endpoint, options = {}) {
+    const token = getToken();
+    if (!token) {
+        throw new Error('No token available');
+    }
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers: {
+            ...options.headers,
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Fetch with auth failed:', response.statusText, errorData);
+        throw new Error(`Request failed: ${response.statusText}`);
+    }
+
+    return response.json();
+}
