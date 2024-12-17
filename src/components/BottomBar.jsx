@@ -7,6 +7,8 @@ function BottomBar() {
     const [solPrice, setSolPrice] = useState(null);
 
     useEffect(() => {
+        let isMounted = true;
+
         // Función para obtener el precio de Solana desde el backend
         const fetchSolPrice = async () => {
             try {
@@ -15,10 +17,14 @@ function BottomBar() {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 const data = await response.json();
-                setSolPrice(data.solana.usd); // Ajusta esto según la estructura de la respuesta de tu backend
+                if (isMounted) {
+                    setSolPrice(data.solana.usd); // Ajusta esto según la estructura de la respuesta de tu backend
+                }
             } catch (error) {
                 console.error('Error al obtener el precio de Solana:', error);
-                setSolPrice('N/A'); // Si hay un error, mostrar 'N/A'
+                if (isMounted) {
+                    setSolPrice('N/A'); // Si hay un error, mostrar 'N/A'
+                }
             }
         };
 
@@ -29,7 +35,10 @@ function BottomBar() {
         const interval = setInterval(fetchSolPrice, 10000);
 
         // Limpiar el intervalo al desmontar el componente
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+            isMounted = false;
+        };
     }, []);
 
     return (
