@@ -15,6 +15,9 @@ async function apiRequest(endpoint, options = {}, retry = true) {
     const csrfToken = getCsrfToken();
     const token = await getAccessToken(); // Obtén el access token válido
 
+    console.log('JWT Token:', token);
+    console.log('CSRF Token:', csrfToken);
+
     if (!csrfToken || !token) {
         console.error('CSRF or Access Token is missing');
         throw new Error('CSRF or Access Token is missing');

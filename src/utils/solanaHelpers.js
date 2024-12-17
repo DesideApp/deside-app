@@ -1,4 +1,7 @@
 import { Connection, PublicKey } from "@solana/web3.js";
+import { getAccessToken, getCsrfToken } from '../services/tokenService'; // Importar funciones de tokenService
+import { apiRequest } from '../services/apiService'; // Importar apiRequest de apiService
+
 const RPC_URL = 'https://rpc.ankr.com/solana_devnet/84d7f098a02eb4c502839fa2cff526bb9d0ee07aa75c19ecf28f8925a824ba59'; // Cambia esto a tu endpoint de Ankr
 
 export async function connectWallet(wallet) {
@@ -65,5 +68,29 @@ export async function getBalance(walletAddress) {
     } catch (error) {
         console.error(`Error al obtener el balance de la wallet ${walletAddress}:`, error);
         throw new Error(`Failed to fetch balance for wallet ${walletAddress}.`);
+    }
+}
+
+// Función para realizar una solicitud autenticada a la API de Solana
+export async function fetchSolanaData(endpoint) {
+    try {
+        const accessToken = await getAccessToken();
+        const csrfToken = getCsrfToken();
+
+        console.log('JWT Token:', accessToken);
+        console.log('CSRF Token:', csrfToken);
+
+        const response = await apiRequest(endpoint, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'X-XSRF-TOKEN': csrfToken,
+            },
+        });
+
+        return response;
+    } catch (error) {
+        console.error('Error fetching Solana data:', error);
+        throw new Error('Failed to fetch Solana data.');
     }
 }

@@ -36,8 +36,8 @@ export async function login(username, password) {
         document.cookie = `XSRF-TOKEN=${csrfToken}; path=/`;
 
         console.log('Login exitoso, tokens guardados.');
-        console.log('JWT Token (localStorage):', localStorage.getItem('jwtToken'));
-        console.log('CSRF Token (cookie):', document.cookie);
+        console.log('JWT Token in localStorage:', localStorage.getItem('jwtToken'));
+        console.log('CSRF Token in cookie:', document.cookie);
         return response;
     } catch (error) {
         console.error('Login error:', error);
