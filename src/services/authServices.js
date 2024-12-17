@@ -1,5 +1,5 @@
 import { apiRequest } from './apiService.js';
-import { setToken, removeToken, getToken, getCsrfToken } from './tokenService.js';
+import { setToken, removeToken, getToken, getCsrfToken, setCookie } from './tokenService.js';
 import API_BASE_URL from '../config/apiConfig.js';
 
 // Validar credenciales de usuario
@@ -116,3 +116,23 @@ export async function fetchWithAuth(endpoint, options = {}) {
 
     return response.json();
 }
+
+export const fetchToken = async (username) => {
+    try {
+        const response = await apiRequest('/api/auth/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username }),
+        });
+
+        if (response.csrfToken) {
+            setCookie('XSRF-TOKEN', response.csrfToken);
+            console.log('CSRF Token saved:', response.csrfToken);
+        }
+
+        console.log('Token fetched successfully');
+    } catch (error) {
+        console.error('Error fetching token:', error);
+        throw error;
+    }
+};

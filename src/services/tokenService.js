@@ -73,6 +73,9 @@ export function getTokens() {
     const csrfToken = getCsrfToken();
     const jwtToken = getToken();
 
+    console.log('JWT Token from localStorage:', localStorage.getItem('jwtToken'));
+    console.log('CSRF Token from cookies:', getCookie('XSRF-TOKEN'));
+
     if (!csrfToken || !jwtToken) {
         console.error('CSRF or JWT Token is missing');
         throw new Error('CSRF or JWT Token is missing');

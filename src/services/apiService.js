@@ -34,6 +34,8 @@ async function apiRequest(endpoint, options = {}, retry = true) {
         'X-XSRF-TOKEN': csrfToken, // Enviar el token CSRF
     };
 
+    console.log('Authorization Header:', token ? `Bearer ${token}` : 'No token');
+    console.log('CSRF Header:', csrfToken || 'No CSRF Token');
     console.log('Headers enviados:', headers);
 
     try {
