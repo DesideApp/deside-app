@@ -125,6 +125,7 @@ export const fetchToken = async (username) => {
             body: JSON.stringify({ username }),
         });
 
+        // Guardar CSRF en cookie
         if (response.csrfToken) {
             setCookie('XSRF-TOKEN', response.csrfToken);
             console.log('CSRF Token saved:', response.csrfToken);

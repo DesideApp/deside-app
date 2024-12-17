@@ -28,11 +28,12 @@ async function apiRequest(endpoint, options = {}, retry = true) {
     console.log('Access Token:', token);
 
     const headers = {
-        ...options.headers,
         'Content-Type': 'application/json', // Ensure Content-Type is set to JSON
-        'Authorization': `Bearer ${token}`, // Incluye el access token en el encabezado
-        'X-XSRF-TOKEN': csrfToken, // Enviar el token CSRF
+        ...options.headers,
     };
+
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (csrfToken) headers['X-XSRF-TOKEN'] = csrfToken;
 
     console.log('Authorization Header:', token ? `Bearer ${token}` : 'No token');
     console.log('CSRF Header:', csrfToken || 'No CSRF Token');

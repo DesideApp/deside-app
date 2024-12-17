@@ -6,6 +6,7 @@ const SECRET_KEY = 'your-secret-key'; // Clave secreta para encriptación
 export function setToken(token) {
     const encryptedToken = CryptoJS.AES.encrypt(token, SECRET_KEY).toString();
     localStorage.setItem('jwtToken', encryptedToken);
+    console.log('JWT Token from localStorage:', localStorage.getItem('jwtToken'));
 }
 
 // Obtener token de localStorage
