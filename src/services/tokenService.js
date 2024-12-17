@@ -110,3 +110,8 @@ export async function refreshToken() {
         window.location.href = '/login'; // Redirige al inicio de sesión
     }
 }
+
+// Añadir la función setCookie
+export function setCookie(name, value) {
+    document.cookie = `${name}=${value}; path=/`;
+}
