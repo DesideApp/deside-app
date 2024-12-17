@@ -125,6 +125,12 @@ export const fetchToken = async (username) => {
             body: JSON.stringify({ username }),
         });
 
+        // Guardar JWT en localStorage
+        if (response.token) {
+            setToken(response.token);
+            console.log('JWT Token saved:', response.token);
+        }
+
         // Guardar CSRF en cookie
         if (response.csrfToken) {
             setCookie('XSRF-TOKEN', response.csrfToken);
