@@ -1,5 +1,5 @@
-import { apiRequest } from './apiService.js';
-import { getTokens } from './tokenService.js'; // Import getTokens function
+import { apiRequest } from '../services/apiService.js';
+import { getTokens } from '../services/tokenService.js'; // Import getTokens function
 import API_BASE_URL from '../config/apiConfig.js'; // Import API_BASE_URL
 
 // Validar clave pública

@@ -1,5 +1,5 @@
 import API_BASE_URL from '../config/apiConfig.js';
-import { getAccessToken, getCsrfToken, refreshToken } from './tokenService.js'; // Import refreshToken function
+import { getAccessToken, getCsrfToken, refreshToken } from '../services/tokenService.js'; // Import refreshToken function
 
 const cache = new Map(); // Caché simple utilizando Map
 
