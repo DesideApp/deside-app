@@ -26,22 +26,23 @@ async function initializeToken() {
 }
 
 async function refreshToken() {
-    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
+    try {
+        const response = await apiRequest('/api/auth/refresh', {
+            method: 'POST',
+            credentials: 'include', // Enviar cookies HTTP-only al backend
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
 
-    if (!response.ok) {
-        throw new Error('Error al refrescar el token');
+        setToken(response.token); // Actualiza el token JWT en localStorage
+        console.log('Token renovado:', response.token);
+        return response.token;
+    } catch (error) {
+        console.error('Error al refrescar el token:', error);
+        logout(); // Cierra sesión si no se puede renovar el token
+        throw new Error('Session renewal failed. Please log in again.');
     }
-
-    const data = await response.json();
-    token = data.token; // Actualiza el token
-    localStorage.setItem('jwtToken', token); // Actualiza el token en localStorage
-    console.log('Token refrescado:', token);
-    return token;
 }
 
 async function fetchWithAuth(url, options = {}) {
@@ -135,27 +136,6 @@ export async function register(username, password, email) {
     } catch (error) {
         console.error('Registration error:', error);
         throw new Error('Registration failed. Please check your details and try again.');
-    }
-}
-
-// Renovación del token JWT usando refresh token
-export async function refreshToken() {
-    try {
-        const response = await apiRequest('/api/auth/refresh', {
-            method: 'POST',
-            credentials: 'include', // Enviar cookies HTTP-only al backend
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        setToken(response.token); // Actualiza el token JWT en localStorage
-        console.log('Token renovado:', response.token);
-        return response.token;
-    } catch (error) {
-        console.error('Error al refrescar el token:', error);
-        logout(); // Cierra sesión si no se puede renovar el token
-        throw new Error('Session renewal failed. Please log in again.');
     }
 }
 
