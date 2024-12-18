@@ -3,7 +3,7 @@ import { getAccessToken, getCsrfToken, refreshToken } from '../services/tokenSer
 
 const cache = new Map(); // Caché simple utilizando Map
 
-async function apiRequest(endpoint, options = {}, retry = true) {
+export async function apiRequest(endpoint, options = {}, retry = true) {
     const cacheKey = `${endpoint}:${JSON.stringify(options)}`;
     
     // Verificar si la respuesta está en la caché
@@ -64,9 +64,7 @@ async function apiRequest(endpoint, options = {}, retry = true) {
 
         return responseData;
     } catch (error) {
-        console.error(`Error during API request to ${endpoint}:`, error);
-        throw new Error('An error occurred while processing your request. Please try again.');
+        console.error('API request error:', error);
+        throw error;
     }
 }
-
-export { apiRequest };

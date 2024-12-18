@@ -17,6 +17,9 @@ function App() {
                     <Routes>
                         <Route path="/" element={<Home />} />
                         <Route path="/chat" element={<Chat />} /> 
+                        {/* Verifica que todas las rutas sean correctas */}
+                        {/* Ejemplo: */}
+                        <Route path="/some-path" component={SomeComponent} />
                     </Routes>
                 </main>
                 <BottomBar />
