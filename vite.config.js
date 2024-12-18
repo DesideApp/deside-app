@@ -7,6 +7,7 @@ export default defineConfig({
   build: {
     outDir: 'dist', // Asegúrate de que el directorio de salida sea 'dist'
     rollupOptions: {
+      input: '/public/index.html', // Asegúrate de que el archivo de entrada sea 'public/index.html'
       external: ['tweetnacl']
     }
   },
