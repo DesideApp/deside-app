@@ -12,14 +12,13 @@ function validatePubkey(pubkey) {
 // Obtener contactos
 export const getContacts = async () => {
     try {
-        const { csrfToken, jwtToken } = getTokens();
+        const { jwtToken } = getTokens();
 
         console.log('Fetching contacts from:', `${API_BASE_URL}/api/contacts`);
         const data = await apiRequest(`${API_BASE_URL}/api/contacts`, {
             method: 'GET',
             credentials: 'include', // Permite cookies
             headers: {
-                'X-XSRF-TOKEN': csrfToken,
                 'Authorization': `Bearer ${jwtToken}`
             },
         });
@@ -37,7 +36,7 @@ export const addContact = async (pubkey) => {
     try {
         validatePubkey(pubkey);
 
-        const { csrfToken, jwtToken } = getTokens();
+        const { jwtToken } = getTokens();
 
         if (process.env.NODE_ENV !== 'production') {
             console.log('Adding contact with pubkey:', pubkey);
@@ -48,7 +47,6 @@ export const addContact = async (pubkey) => {
             credentials: 'include', // Permite cookies
             headers: {
                 'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': csrfToken, // Enviar el token CSRF
                 'Authorization': `Bearer ${jwtToken}` // Enviar el token JWT
             },
             body: JSON.stringify({ pubkey }),
@@ -67,7 +65,7 @@ export const acceptContact = async (pubkey) => {
     try {
         validatePubkey(pubkey);
 
-        const { csrfToken, jwtToken } = getTokens();
+        const { jwtToken } = getTokens();
 
         if (process.env.NODE_ENV !== 'production') {
             console.log('Accepting contact with pubkey:', pubkey);
@@ -78,7 +76,6 @@ export const acceptContact = async (pubkey) => {
             credentials: 'include', // Permite cookies
             headers: {
                 'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': csrfToken, // Enviar el token CSRF
                 'Authorization': `Bearer ${jwtToken}` // Enviar el token JWT
             },
             body: JSON.stringify({ pubkey }),
@@ -97,7 +94,7 @@ export const rejectContact = async (pubkey) => {
     try {
         validatePubkey(pubkey);
 
-        const { csrfToken, jwtToken } = getTokens();
+        const { jwtToken } = getTokens();
 
         if (process.env.NODE_ENV !== 'production') {
             console.log('Rejecting contact with pubkey:', pubkey);
@@ -108,7 +105,6 @@ export const rejectContact = async (pubkey) => {
             credentials: 'include', // Permite cookies
             headers: {
                 'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': csrfToken, // Enviar el token CSRF
                 'Authorization': `Bearer ${jwtToken}` // Enviar el token JWT
             },
             body: JSON.stringify({ pubkey }),

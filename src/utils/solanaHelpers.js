@@ -1,6 +1,6 @@
 import nacl from "tweetnacl";
 import { Connection, PublicKey } from "@solana/web3.js";
-import { getAccessToken, getCsrfToken } from '../services/tokenService'; // Importar funciones de tokenService
+import { getAccessToken } from '../services/tokenService'; // Importar funciones de tokenService
 import { apiRequest } from '../services/apiService'; // Importar apiRequest de apiService
 
 const RPC_URL = 'https://rpc.ankr.com/solana_devnet/84d7f098a02eb4c502839fa2cff526bb9d0ee07aa75c19ecf28f8925a824ba59'; // Cambia esto a tu endpoint de Ankr
@@ -67,17 +67,14 @@ export async function getBalance(walletAddress) {
 export async function fetchSolanaData(endpoint) {
     try {
         const accessToken = await getAccessToken();
-        const csrfToken = getCsrfToken();
 
         console.log('JWT Token:', accessToken);
-        console.log('CSRF Token:', csrfToken);
 
         console.log('Realizando solicitud autenticada a:', endpoint);
         const response = await apiRequest(endpoint, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
-                'X-XSRF-TOKEN': csrfToken,
             },
         });
 

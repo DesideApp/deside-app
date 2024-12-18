@@ -8,7 +8,7 @@
   ],
   "routes": [
     {
-      "src": "/assets/(.*)", 
+      "src": "/assets/(.*)",
       "dest": "/dist/assets/$1"
     },
     {
