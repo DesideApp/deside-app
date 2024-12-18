@@ -75,9 +75,9 @@ function validateCredentials(username, password) {
     }
 }
 
-function validateRegistrationData(username, password, email) {
-    if (!username || !password || !email) {
-        throw new Error('Username, password, and email are required.');
+function validateRegistrationData(pubkey, signature, message) {
+    if (!pubkey || !signature || !message) {
+        throw new Error('Public key, signature, and message are required.');
     }
 }
 
@@ -109,15 +109,40 @@ export async function login(username, password) {
     }
 }
 
+export async function loginWithSignature(pubkey, signature, message) {
+    try {
+        const response = await apiRequest('/api/auth/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pubkey, signature, message }),
+        });
+
+        const { token, refreshToken } = response;
+
+        setToken(token);
+        setCookie('refreshToken', refreshToken);
+
+        console.log('Login exitoso, tokens guardados.');
+        console.log('JWT Token in localStorage:', localStorage.getItem('jwtToken'));
+        console.log('Refresh Token in cookie:', document.cookie);
+        return response;
+    } catch (error) {
+        console.error('Login error:', error);
+        throw new Error('Login failed. Please check your credentials and try again.');
+    }
+}
+
 export function logout() {
     removeToken();
     document.cookie = 'XSRF-TOKEN=; Max-Age=0';
     window.location.href = '/login';
 }
 
-export async function register(username, password, email) {
+export async function register(pubkey, signature, message) {
     try {
-        validateRegistrationData(username, password, email);
+        validateRegistrationData(pubkey, signature, message);
 
         const response = await apiRequest('/api/auth/register', {
             method: 'POST',
@@ -125,7 +150,7 @@ export async function register(username, password, email) {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': getCsrfToken(),
             },
-            body: JSON.stringify({ username, password, email }),
+            body: JSON.stringify({ pubkey, signature, message }),
         });
 
         return response;
