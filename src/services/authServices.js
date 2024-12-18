@@ -1,6 +1,7 @@
 import { apiRequest } from '../services/apiService.js';
 import { setToken, removeToken, getToken, getCsrfToken, setCookie } from '../services/tokenService.js';
 import API_BASE_URL from '../config/apiConfig.js';
+import nacl from 'tweetnacl'; // Importar nacl para la verificación de firmas
 
 let token = null;
 
@@ -81,6 +82,13 @@ function validateRegistrationData(pubkey, signature, message) {
     }
 }
 
+function verifySignature(message, signature, pubkey) {
+    const encodedMessage = new TextEncoder().encode(message);
+    const signatureUint8 = Uint8Array.from(signature);
+    const pubkeyUint8 = Uint8Array.from(Buffer.from(pubkey, 'base64'));
+    return nacl.sign.detached.verify(encodedMessage, signatureUint8, pubkeyUint8);
+}
+
 export async function login(username, password) {
     try {
         validateCredentials(username, password);
@@ -111,12 +119,14 @@ export async function login(username, password) {
 
 export async function loginWithSignature(pubkey, signature, message) {
     try {
+        const isSignatureValid = verifySignature(message, signature, pubkey);
+
         const response = await apiRequest('/api/auth/token', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ pubkey, signature, message }),
+            body: JSON.stringify({ pubkey, isSignatureValid }),
         });
 
         const { token, refreshToken } = response;
@@ -143,6 +153,7 @@ export function logout() {
 export async function register(pubkey, signature, message) {
     try {
         validateRegistrationData(pubkey, signature, message);
+        const isSignatureValid = verifySignature(message, signature, pubkey);
 
         const response = await apiRequest('/api/auth/register', {
             method: 'POST',
@@ -150,7 +161,7 @@ export async function register(pubkey, signature, message) {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': getCsrfToken(),
             },
-            body: JSON.stringify({ pubkey, signature, message }),
+            body: JSON.stringify({ pubkey, isSignatureValid }),
         });
 
         return response;
