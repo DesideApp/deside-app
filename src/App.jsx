@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import Home from "./pages/Home";
 import Chat from './pages/chat/Chat.jsx';
 import BottomBar from "./components/BottomBar.jsx";
+import './index.css';
 
 function App() {
     console.log("App component loaded"); // Log de carga de la aplicación
