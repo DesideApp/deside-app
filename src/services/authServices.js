@@ -1,6 +1,6 @@
 import { apiRequest } from './apiService.js';
 import { setToken, removeToken, getToken, getCsrfToken, setCookie } from './tokenService.js';
-import API_BASE_URL from '../apiConfig';
+import API_BASE_URL from '../config/apiConfig.js';
 
 let token = null; // Inicializa como null
 
