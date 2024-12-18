@@ -2,13 +2,14 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  base: '/', // Cambia si usas subdirectorios, por ejemplo, '/mi-app/'
   plugins: [react()],
   build: {
-    outDir: 'dist', // Asegúrate de que sea 'dist'
+    outDir: 'dist',
     rollupOptions: {
-      input: 'public/index.html', // Punto de entrada
-    },
+      input: {
+        main: 'src/index.html'
+      }
+    }
   },
   server: {
     port: 3000, // Cambia según tu entorno
