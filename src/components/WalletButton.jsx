@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { connectWallet, getBalance } from "../utils/solanaHelpers.js";
+import { connectWallet, getBalance, signMessage } from "../utils/solanaHelpers.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -82,6 +82,32 @@ function WalletButton() {
         }
     };
 
+    const handleSignMessage = async (wallet) => {
+        try {
+            const message = "Please sign this message to authenticate.";
+            const signedData = await signMessage(wallet, message);
+            console.log("Signed data:", signedData); // Log de datos firmados
+
+            // Aquí puedes enviar los datos firmados al backend para su verificación
+            // const response = await apiRequest('/api/auth/login', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify(signedData),
+            // });
+
+            // if (response.ok) {
+            //     console.log("Authentication successful");
+            // } else {
+            //     console.error("Authentication failed");
+            // }
+        } catch (error) {
+            console.error(`Error signing message with ${wallet} Wallet:`, error);
+            alert(`Failed to sign message with ${wallet} Wallet. Please try again.`);
+        }
+    };
+
     const handleMenuButtonClick = () => {
         setIsMenuOpen(!isMenuOpen);
     };
@@ -123,6 +149,8 @@ function WalletButton() {
             >
                 <span className="menu-icon"></span>
             </button>
+
+            <button onClick={() => handleSignMessage("phantom")}>Sign Message</button>
 
             <WalletMenu
                 isOpen={isMenuOpen}

@@ -1,3 +1,4 @@
+import nacl from "tweetnacl";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { getAccessToken, getCsrfToken } from '../services/tokenService'; // Importar funciones de tokenService
 import { apiRequest } from '../services/apiService'; // Importar apiRequest de apiService
@@ -16,21 +17,12 @@ export async function connectWallet(wallet) {
         } else if (wallet === "backpack" && window.xnft?.solana) {
             console.log("Backpack Wallet detected");
             provider = window.xnft.solana;
-        } else if (wallet === "magiceden") {
-            console.log("Checking Magic Eden Wallet...");
-            console.log("window.magicEden:", window.magicEden);
-            console.log("Magic Eden Solana Provider:", window.magicEden?.solana);
-        
-            if (window.magicEden?.solana) {
-                console.log("Magic Eden Wallet detected");
-                provider = window.magicEden.solana;
-            } else {
-                console.error("Magic Eden Wallet not detected or improperly configured.");
-            }
+        } else if (wallet === "magiceden" && window.magicEden?.solana) {
+            console.log("Magic Eden Wallet detected");
+            provider = window.magicEden.solana;
         } else {
             console.error(`${wallet} Wallet not detected`);
         }
-        
 
         if (!provider) {
             alert(`Please install ${wallet} Wallet to continue.`);
@@ -93,5 +85,47 @@ export async function fetchSolanaData(endpoint) {
     } catch (error) {
         console.error('Error fetching Solana data:', error);
         throw new Error('Failed to fetch Solana data.');
+    }
+}
+
+// Función para firmar un mensaje con la wallet del usuario
+export async function signMessage(wallet, message) {
+    try {
+        let provider;
+
+        // Detecta el proveedor según el wallet seleccionado
+        if (wallet === "phantom" && window.solana?.isPhantom) {
+            provider = window.solana;
+        } else if (wallet === "backpack" && window.xnft?.solana) {
+            provider = window.xnft.solana;
+        } else if (wallet === "magiceden" && window.magicEden?.solana) {
+            provider = window.magicEden.solana;
+        } else {
+            throw new Error(`${wallet} Wallet not detected`);
+        }
+
+        if (!provider) {
+            throw new Error(`Please install ${wallet} Wallet to continue.`);
+        }
+
+        // Solicita al usuario que conecte la wallet usando el proveedor detectado
+        const response = await provider.connect({ onlyIfTrusted: false });
+
+        // Verifica que la conexión fue exitosa
+        if (!response.publicKey) {
+            throw new Error(`Connection to ${wallet} cancelled by the user.`);
+        }
+
+        const encodedMessage = new TextEncoder().encode(message);
+        const signature = await provider.signMessage(encodedMessage);
+
+        return {
+            signature: Array.from(signature),
+            message,
+            pubkey: response.publicKey.toBase58(),
+        };
+    } catch (error) {
+        console.error(`Error signing message with ${wallet} Wallet:`, error);
+        throw new Error(`Failed to sign message with ${wallet} Wallet.`);
     }
 }
