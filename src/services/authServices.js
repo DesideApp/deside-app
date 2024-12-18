@@ -2,7 +2,7 @@ import { apiRequest } from '../services/apiService.js';
 import { setToken, removeToken, getToken, getCsrfToken, setCookie } from '../services/tokenService.js';
 import API_BASE_URL from '../config/apiConfig.js';
 
-let token = null; // Inicializa como null
+let token = null;
 
 async function initializeToken() {
     if (!token) {
@@ -11,7 +11,7 @@ async function initializeToken() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username: 'deside.w3app@gmail.com' }), // Cambia por un username válido
+            body: JSON.stringify({ username: 'deside.w3app@gmail.com' }),
         });
 
         if (!response.ok) {
@@ -19,8 +19,8 @@ async function initializeToken() {
         }
 
         const data = await response.json();
-        token = data.token; // Guarda el token
-        localStorage.setItem('jwtToken', token); // Almacena el token en localStorage
+        token = data.token;
+        localStorage.setItem('jwtToken', token);
         console.log('Token inicial obtenido:', token);
     }
 }
@@ -29,25 +29,25 @@ async function refreshToken() {
     try {
         const response = await apiRequest('/api/auth/refresh', {
             method: 'POST',
-            credentials: 'include', // Enviar cookies HTTP-only al backend
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
         });
 
-        setToken(response.token); // Actualiza el token JWT en localStorage
+        setToken(response.token);
         console.log('Token renovado:', response.token);
         return response.token;
     } catch (error) {
         console.error('Error al refrescar el token:', error);
-        logout(); // Cierra sesión si no se puede renovar el token
+        logout();
         throw new Error('Session renewal failed. Please log in again.');
     }
 }
 
 async function fetchWithAuth(url, options = {}) {
     if (!token) {
-        await initializeToken(); // Obtén el token inicial si no existe
+        await initializeToken();
     }
 
     options.headers = {
@@ -61,7 +61,7 @@ async function fetchWithAuth(url, options = {}) {
         console.warn('Token expirado, intentando refrescar...');
         await refreshToken();
         options.headers.Authorization = `Bearer ${token}`;
-        return fetch(url, options); // Reintenta la solicitud
+        return fetch(url, options);
     }
 
     return response;
@@ -69,21 +69,18 @@ async function fetchWithAuth(url, options = {}) {
 
 export { fetchWithAuth, refreshToken, initializeToken };
 
-// Validar credenciales de usuario
 function validateCredentials(username, password) {
     if (!username || !password) {
         throw new Error('Username and password are required.');
     }
 }
 
-// Validar datos de registro
 function validateRegistrationData(username, password, email) {
     if (!username || !password || !email) {
         throw new Error('Username, password, and email are required.');
     }
 }
 
-// Inicio de sesión del usuario
 export async function login(username, password) {
     try {
         validateCredentials(username, password);
@@ -92,13 +89,13 @@ export async function login(username, password) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken(),
             },
             body: JSON.stringify({ username, password }),
         });
 
         const { csrfToken, token } = response;
 
-        // Guardar tokens
         setToken(token);
         document.cookie = `XSRF-TOKEN=${csrfToken}; path=/`;
 
@@ -112,14 +109,12 @@ export async function login(username, password) {
     }
 }
 
-// Cierre de sesión del usuario
 export function logout() {
-    removeToken(); // Elimina el token JWT del almacenamiento local
-    document.cookie = 'XSRF-TOKEN=; Max-Age=0'; // Elimina el token CSRF
-    window.location.href = '/login'; // Redirige al inicio de sesión
+    removeToken();
+    document.cookie = 'XSRF-TOKEN=; Max-Age=0';
+    window.location.href = '/login';
 }
 
-// Registro de un nuevo usuario
 export async function register(username, password, email) {
     try {
         validateRegistrationData(username, password, email);
@@ -128,6 +123,7 @@ export async function register(username, password, email) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken(),
             },
             body: JSON.stringify({ username, password, email }),
         });
@@ -147,13 +143,11 @@ export const fetchToken = async (username) => {
             body: JSON.stringify({ username }),
         });
 
-        // Guardar JWT en localStorage
         if (response.token) {
             setToken(response.token);
             console.log('JWT Token saved:', response.token);
         }
 
-        // Guardar CSRF en cookie
         if (response.csrfToken) {
             setCookie('XSRF-TOKEN', response.csrfToken);
             console.log('CSRF Token saved:', response.csrfToken);

@@ -1,19 +1,18 @@
 import API_BASE_URL from '../config/apiConfig.js';
-import { getAccessToken, getCsrfToken, refreshToken } from '../services/tokenService.js'; // Import refreshToken function
+import { getAccessToken, getCsrfToken, refreshToken } from '../services/tokenService.js';
 
-const cache = new Map(); // Caché simple utilizando Map
+const cache = new Map();
 
 export async function apiRequest(endpoint, options = {}, retry = true) {
     const cacheKey = `${endpoint}:${JSON.stringify(options)}`;
     
-    // Verificar si la respuesta está en la caché
     if (cache.has(cacheKey)) {
         console.log('Returning cached response for:', endpoint);
         return cache.get(cacheKey);
     }
 
     const csrfToken = getCsrfToken();
-    const token = await getAccessToken(); // Obtén el access token válido
+    const token = await getAccessToken();
 
     console.log('JWT Token:', token);
     console.log('CSRF Token:', csrfToken);
@@ -28,7 +27,7 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
     console.log('Access Token:', token);
 
     const headers = {
-        'Content-Type': 'application/json', // Ensure Content-Type is set to JSON
+        'Content-Type': 'application/json',
         ...options.headers,
     };
 
@@ -46,10 +45,10 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
         });
 
         if (!response.ok) {
-            if (response.status === 401 && retry) { // Token expirado o inválido
+            if (response.status === 401 && retry) {
                 console.warn('Access token expired, attempting to refresh...');
-                await refreshToken(); // Renueva el token
-                return apiRequest(endpoint, options, false); // Reintenta la solicitud
+                await refreshToken();
+                return apiRequest(endpoint, options, false);
             }
             const errorData = await response.json();
             console.error('API request failed:', response.statusText, errorData);
@@ -59,7 +58,6 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
         const responseData = await response.json();
         console.log('API response data:', responseData);
 
-        // Almacenar la respuesta en la caché
         cache.set(cacheKey, responseData);
 
         return responseData;
