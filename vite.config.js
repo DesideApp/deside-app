@@ -20,6 +20,13 @@ export default defineConfig({
   },
   server: {
     port: 3000, // Cambia según tu entorno
+    proxy: {
+      '/api': {
+        target: 'https://backend-deside.onrender.com', // URL de tu backend en Render
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   publicDir: 'public', // Archivos estáticos
 });
