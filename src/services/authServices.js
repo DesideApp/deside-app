@@ -139,32 +139,6 @@ export async function register(username, password, email) {
     }
 }
 
-// Función fetchWithAuth para solicitudes autenticadas
-export async function fetchWithAuth(endpoint, options = {}) {
-    const token = getToken();
-    if (!token) {
-        console.error('No token available');
-        throw new Error('No token available');
-    }
-
-    console.log('Realizando solicitud autenticada a:', endpoint);
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        ...options,
-        headers: {
-            ...options.headers,
-            'Authorization': `Bearer ${token}`,
-        },
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Fetch with auth failed:', response.statusText, errorData);
-        throw new Error(`Request failed: ${response.statusText}`);
-    }
-
-    return response.json();
-}
-
 export const fetchToken = async (username) => {
     try {
         const response = await apiRequest('/api/auth/token', {
