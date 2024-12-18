@@ -80,6 +80,7 @@ export async function fetchSolanaData(endpoint) {
         console.log('JWT Token:', accessToken);
         console.log('CSRF Token:', csrfToken);
 
+        console.log('Realizando solicitud autenticada a:', endpoint);
         const response = await apiRequest(endpoint, {
             method: 'GET',
             headers: {

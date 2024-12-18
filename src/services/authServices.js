@@ -84,6 +84,7 @@ export async function refreshToken() {
         });
 
         setToken(response.token); // Actualiza el token JWT en localStorage
+        console.log('Token renovado:', response.token);
         return response.token;
     } catch (error) {
         console.error('Error al refrescar el token:', error);
@@ -100,6 +101,7 @@ export async function fetchWithAuth(endpoint, options = {}) {
         throw new Error('No token available');
     }
 
+    console.log('Realizando solicitud autenticada a:', endpoint);
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
         headers: {
