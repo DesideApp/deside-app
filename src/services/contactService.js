@@ -17,6 +17,7 @@ export const getContacts = async () => {
         console.log('Fetching contacts from:', `${API_BASE_URL}/api/contacts`);
         const data = await apiRequest(`${API_BASE_URL}/api/contacts`, {
             method: 'GET',
+            credentials: 'include', // Permite cookies
             headers: {
                 'X-XSRF-TOKEN': csrfToken,
                 'Authorization': `Bearer ${jwtToken}`
@@ -44,6 +45,7 @@ export const addContact = async (pubkey) => {
 
         const data = await apiRequest(`${API_BASE_URL}/api/contacts/add`, {
             method: 'POST',
+            credentials: 'include', // Permite cookies
             headers: {
                 'Content-Type': 'application/json',
                 'X-XSRF-TOKEN': csrfToken, // Enviar el token CSRF
@@ -73,6 +75,7 @@ export const acceptContact = async (pubkey) => {
 
         const data = await apiRequest(`${API_BASE_URL}/api/contacts/accept`, {
             method: 'POST',
+            credentials: 'include', // Permite cookies
             headers: {
                 'Content-Type': 'application/json',
                 'X-XSRF-TOKEN': csrfToken, // Enviar el token CSRF
@@ -102,6 +105,7 @@ export const rejectContact = async (pubkey) => {
 
         const data = await apiRequest(`${API_BASE_URL}/api/contacts/reject`, {
             method: 'POST',
+            credentials: 'include', // Permite cookies
             headers: {
                 'Content-Type': 'application/json',
                 'X-XSRF-TOKEN': csrfToken, // Enviar el token CSRF
