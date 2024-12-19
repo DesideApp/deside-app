@@ -5,7 +5,9 @@ import Home from "./pages/Home";
 import Chat from './pages/chat/Chat.jsx';
 import BottomBar from "./components/BottomBar.jsx";
 
-function App() {
+// Asegúrate de que este archivo contenga el código necesario para tu componente principal
+
+function Main() {
     console.log("App component loaded"); // Log de carga de la aplicación
 
     return (
@@ -24,5 +26,5 @@ function App() {
     );
 }
 
-export default App;
+export default Main;
 

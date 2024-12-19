@@ -1,10 +1,10 @@
 {
-    "compilerOptions": {
-      "baseUrl": "src",
-      "paths": {
-        "@components/*": ["components/*"],
-        "@pages/*": ["pages/*"]
-      }
+  "compilerOptions": {
+    "baseUrl": "./", // Asegúrate de que el directorio base esté configurado correctamente
+    "paths": {
+      "@components/*": ["src/components/*"], // Ruta relativa a la baseUrl
+      "@pages/*": ["src/pages/*"]           // Ruta relativa a la baseUrl
     }
-  }
-  
+  },
+  "include": ["src/**/*"] // Asegúrate de que se incluyan todos los archivos en 'src'
+}

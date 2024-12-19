@@ -7,11 +7,8 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     rollupOptions: {
-      input: {
-        main: 'public/index.html'
-      },
-      external: ['@solana/web3.js'], // Añadir @solana/web3.js como externo si es necesario
-    }
+      input: resolve(__dirname, 'index.html'), // Asegúrate de que apunte al archivo correcto
+    },
   },
   resolve: {
     alias: {
@@ -19,14 +16,13 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000, // Cambia según tu entorno
+    port: 3000,
     proxy: {
       '/api': {
-        target: 'https://backend-deside.onrender.com', // URL de tu backend en Render
+        target: 'https://backend-deside.onrender.com',
         changeOrigin: true,
-        secure: false,
+        secure: true,
       },
     },
   },
-  publicDir: 'public', // Archivos estáticos
 });
