@@ -25,5 +25,4 @@ export default defineConfig({
       },
     },
   },
-  publicDir: 'public', // Directorio para archivos estáticos como favicon o imágenes
 });
