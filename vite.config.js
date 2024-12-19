@@ -5,24 +5,25 @@ import { resolve } from 'path';
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: 'dist',
+    outDir: 'dist', // Directorio de salida para la build
     rollupOptions: {
-      input: resolve(__dirname, '/public/index.html'), // Asegúrate de que apunte al archivo correcto
+      input: resolve(__dirname, 'index.html'), // El archivo de entrada es el index.html en la raíz
     },
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
+      '@': resolve(__dirname, 'src'), // Alias para usar `@` en imports
     },
   },
   server: {
     port: 3000,
     proxy: {
       '/api': {
-        target: 'https://backend-deside.onrender.com',
+        target: 'https://backend-deside.onrender.com', // Backend de Render
         changeOrigin: true,
-        secure: true,
+        secure: false, // Cambiar a true en producción si usas HTTPS
       },
     },
   },
+  publicDir: 'public', // Directorio para archivos estáticos como favicon o imágenes
 });

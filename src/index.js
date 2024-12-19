@@ -1,9 +1,14 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client'; // Usa `react-dom/client` si estás en React 18+
-import Main from './Main.jsx'; // Importar el componente principal
+import ReactDOM from 'react-dom/client'; // Para React 18+
+import Main from './Main.jsx'; // Componente principal
 
-// Crea el punto de conexión al DOM
+// Selecciona el elemento raíz desde el DOM
 const rootElement = document.getElementById('root');
-const root = ReactDOM.createRoot(rootElement);
 
-root.render(<Main />);
+// Crea la raíz de React y renderiza el componente principal
+if (rootElement) {
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<Main />);
+} else {
+    console.error("No se encontró el elemento con id 'root' en el DOM.");
+}
