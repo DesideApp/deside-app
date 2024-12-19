@@ -32,7 +32,6 @@ export async function getAccessToken() {
     try {
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/refresh`, {
             method: 'POST',
-            credentials: 'include', // Enviar cookies httpOnly al backend
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -58,4 +57,42 @@ export function isTokenExpired(token) {
     return payload.exp < currentTime;
 }
 
-// Eliminar funciones relacionadas con CSRF
+// Añadir la función refreshToken
+export async function refreshToken() {
+    try {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/refresh`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            console.error('Failed to refresh token');
+            throw new Error('Failed to refresh token');
+        }
+
+        const data = await response.json();
+        setToken(data.token); // Actualiza el token JWT en localStorage
+        accessToken = data.accessToken; // Actualiza el access token en memoria
+        return data.token;
+    } catch (error) {
+        console.error('Error al refrescar el token:', error);
+        removeToken();
+        window.location.href = '/login'; // Redirige al inicio de sesión
+    }
+}
+
+// Añadir la función getTokens
+export function getTokens() {
+    const jwtToken = getToken();
+
+    console.log('JWT Token from localStorage:', localStorage.getItem('jwtToken'));
+
+    if (!jwtToken) {
+        console.error('JWT Token is missing');
+        throw new Error('JWT Token is missing');
+    }
+
+    return { jwtToken };
+}

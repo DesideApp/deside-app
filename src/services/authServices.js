@@ -1,5 +1,5 @@
 import { apiRequest } from '../services/apiService.js';
-import { setToken, removeToken, getToken, getCsrfToken, setCookie } from '../services/tokenService.js';
+import { setToken, removeToken, getToken } from '../services/tokenService.js'; // Eliminar setCookie
 import API_BASE_URL from '../config/apiConfig.js';
 import nacl from 'tweetnacl'; // Importar nacl para la verificación de firmas
 
@@ -97,19 +97,16 @@ export async function login(username, password) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': getCsrfToken(),
             },
             body: JSON.stringify({ username, password }),
         });
 
-        const { csrfToken, token } = response;
+        const { token } = response;
 
         setToken(token);
-        document.cookie = `XSRF-TOKEN=${csrfToken}; path=/`;
 
         console.log('Login exitoso, tokens guardados.');
         console.log('JWT Token in localStorage:', localStorage.getItem('jwtToken'));
-        console.log('CSRF Token in cookie:', document.cookie);
         return response;
     } catch (error) {
         console.error('Login error:', error);
@@ -132,11 +129,9 @@ export async function loginWithSignature(pubkey, signature, message) {
         const { token, refreshToken } = response;
 
         setToken(token);
-        setCookie('refreshToken', refreshToken);
 
         console.log('Login exitoso, tokens guardados.');
         console.log('JWT Token in localStorage:', localStorage.getItem('jwtToken'));
-        console.log('Refresh Token in cookie:', document.cookie);
         return response;
     } catch (error) {
         console.error('Login error:', error);
@@ -146,7 +141,6 @@ export async function loginWithSignature(pubkey, signature, message) {
 
 export function logout() {
     removeToken();
-    document.cookie = 'XSRF-TOKEN=; Max-Age=0';
     window.location.href = '/login';
 }
 
@@ -159,7 +153,6 @@ export async function register(pubkey, signature, message) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': getCsrfToken(),
             },
             body: JSON.stringify({ pubkey, isSignatureValid }),
         });
@@ -182,11 +175,6 @@ export const fetchToken = async (username) => {
         if (response.token) {
             setToken(response.token);
             console.log('JWT Token saved:', response.token);
-        }
-
-        if (response.csrfToken) {
-            setCookie('XSRF-TOKEN', response.csrfToken);
-            console.log('CSRF Token saved:', response.csrfToken);
         }
 
         console.log('Token fetched successfully');
