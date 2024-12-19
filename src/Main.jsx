@@ -4,10 +4,10 @@ import Header from "./components/Header";
 import Home from "./pages/Home";
 import Chat from './pages/chat/Chat.jsx';
 import BottomBar from "./components/BottomBar.jsx";
-import App from './App';
+import Main from './Main.jsx';
 
 
-function App() {
+function Main() {
     console.log("App component loaded"); // Log de carga de la aplicación
 
     return (
@@ -26,5 +26,5 @@ function App() {
     );
 }
 
-export default App;
+export default Main;
 
