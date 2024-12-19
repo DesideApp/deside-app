@@ -35,7 +35,6 @@ export async function getAccessToken() {
             credentials: 'include', // Enviar cookies httpOnly al backend
             headers: {
                 'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'), // Enviar el token CSRF
             },
         });
 
@@ -59,60 +58,4 @@ export function isTokenExpired(token) {
     return payload.exp < currentTime;
 }
 
-export function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-}
-
-export function getCsrfToken() {
-    return getCookie('XSRF-TOKEN');
-}
-
-// Función para obtener y validar tokens CSRF y JWT
-export function getTokens() {
-    const csrfToken = getCsrfToken();
-    const jwtToken = getToken();
-
-    console.log('JWT Token from localStorage:', localStorage.getItem('jwtToken'));
-    console.log('CSRF Token from cookies:', getCookie('XSRF-TOKEN'));
-
-    if (!csrfToken || !jwtToken) {
-        console.error('CSRF or JWT Token is missing');
-        throw new Error('CSRF or JWT Token is missing');
-    }
-
-    return { csrfToken, jwtToken };
-}
-
-// Renovación del token JWT usando refresh token
-export async function refreshToken() {
-    try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/refresh`, {
-            method: 'POST',
-            credentials: 'include', // Enviar cookies HTTP-only al backend
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            console.error('Failed to refresh token');
-            throw new Error('Failed to refresh token');
-        }
-
-        const data = await response.json();
-        setToken(data.token); // Actualiza el token JWT en localStorage
-        accessToken = data.accessToken; // Actualiza el access token en memoria
-        return data.token;
-    } catch (error) {
-        console.error('Error al refrescar el token:', error);
-        removeToken();
-        window.location.href = '/login'; // Redirige al inicio de sesión
-    }
-}
-
-// Añadir la función setCookie
-export function setCookie(name, value) {
-    document.cookie = `${name}=${value}; path=/`;
-}
+// Eliminar funciones relacionadas con CSRF
