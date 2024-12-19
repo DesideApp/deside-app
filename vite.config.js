@@ -7,7 +7,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     rollupOptions: {
-      input: resolve(__dirname, 'public/index.html'), // Asegúrate de que apunte al archivo correcto
+      input: resolve(__dirname, '/public/index.html'), // Asegúrate de que apunte al archivo correcto
     },
   },
   resolve: {
