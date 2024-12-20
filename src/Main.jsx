@@ -14,8 +14,8 @@ function Main() {
                 <Header />
                 <main>
                     <Routes>
-                        <Route path="/pages" element={<Home />} />
-                        <Route path="/pages/chat" element={<Chat />} /> 
+                        <Route path="/" element={<Home />} />
+                        <Route path="/chat" element={<Chat />} /> 
                     </Routes>
                 </main>
                 <BottomBar />
