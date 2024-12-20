@@ -54,28 +54,10 @@ function NetworkStatus({ className }) {
         return 'red';
     };
 
-    const renderTpsBars = () => {
-        const bars = [];
-        const tpsValue = tps || 0;
-        const numBars = Math.min(Math.floor(tpsValue / 10), 10); // Ajusta el divisor según sea necesario
-
-        for (let i = 0; i < numBars; i++) {
-            bars.push(<div key={i} className="tps-bar active"></div>);
-        }
-
-        return bars;
-    };
-
     return (
         <div className={`network-status ${className}`}>
-            <div className="status-container">
-                <span>Status: <span className={`status-light ${getStatusColor()}`}></span></span>
-            </div>
-            <div className="tps-container">
-                <div className="tps-bars">
-                    {renderTpsBars()}
-                </div>
-            </div>
+            <span>Status: <span className={`status-light ${getStatusColor()}`}></span></span>
+            <span>TPS: {tps}</span>
             {error && <span className="error">{error}</span>}
         </div>
     );
