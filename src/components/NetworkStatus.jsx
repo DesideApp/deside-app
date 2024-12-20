@@ -57,7 +57,7 @@ function NetworkStatus({ className }) {
     const renderTpsBars = () => {
         const bars = [];
         const tpsValue = tps || 0;
-        const numBars = Math.min(Math.floor(tpsValue / 10), 10); // Adjust the divisor as needed
+        const numBars = Math.min(Math.floor(tpsValue / 10), 10); // Ajusta el divisor según sea necesario
 
         for (let i = 0; i < numBars; i++) {
             bars.push(<div key={i} className="tps-bar active"></div>);
