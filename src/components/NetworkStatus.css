@@ -39,8 +39,8 @@
 }
 
 .tps-bar {
-    width: 4px; /* Hacer las barras más finas */
-    height: 8px;
+    width: 5px; /* Hacer las barras un poco más gruesas */
+    height: 10px; /* Hacer las barras un poco más altas */
     background-color: #4caf50; /* Verde para barras activas */
     border-radius: 2px;
     transition: height 1s ease; /* Movimiento más suave */
@@ -66,10 +66,10 @@
 
 @keyframes barPulse {
     0%, 100% {
-        height: 8px;
+        height: 10px;
     }
     50% {
-        height: 12px; /* Reducir la altura máxima */
+        height: 14px; /* Aumentar la altura máxima */
     }
 }
 
