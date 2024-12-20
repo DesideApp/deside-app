@@ -43,7 +43,7 @@
     background-color: #4caf50; /* Verde para barras activas */
     border-radius: 2px;
     transition: height 0.5s ease, transform 0.5s ease; /* Movimiento más suave */
-    transform-origin: bottom; /* Fijar la parte inferior */
+    transform-origin: center; /* Alinear a la mitad */
     animation: barPulse 2s infinite ease-in-out;
 }
 
