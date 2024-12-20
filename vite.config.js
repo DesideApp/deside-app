@@ -5,10 +5,15 @@ import { resolve } from 'path';
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: 'dist',
     rollupOptions: {
-      input: resolve(__dirname, 'index.html'),
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'], // Mueve las dependencias principales a un archivo separado
+          solana: ['@solana/web3.js'], // Crea un chunk separado para Solana si usas esta librería
+        },
+      },
     },
+    chunkSizeWarningLimit: 1000, // Aumenta el límite a 1000 kBs
   },
   base: '/', // Esto asegura que las rutas sean absolutas
   resolve: {
