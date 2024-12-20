@@ -78,7 +78,13 @@ export async function fetchSolanaData(endpoint) {
             },
         });
 
-        return response;
+        if (!response.ok) {
+            throw new Error(`Error en la solicitud a ${endpoint}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('Datos recibidos:', data);
+        return data;
     } catch (error) {
         console.error('Error fetching Solana data:', error);
         throw new Error('Failed to fetch Solana data.');
