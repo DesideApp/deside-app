@@ -31,7 +31,7 @@ export default defineConfig({
       '/api': {
         target: backendUrl, // Backend de Render
         changeOrigin: true,
-        secure: false, // Cambiar a true en producción si usas HTTPS
+        secure: true, // Cambiar a true en producción si usas HTTPS
       },
     },
   },
