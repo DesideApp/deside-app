@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import './NetworkStatus.css';
-import { fetchWithAuth } from '../services/authServices'; // Importamos fetchWithAuth
 
 function NetworkStatus({ className }) {
     const [status, setStatus] = useState('offline');
+    const [tps, setTps] = useState(null);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const checkStatus = async () => {
+        const fetchNetworkStatus = async () => {
             try {
-                const response = await fetchWithAuth('/api/status');
-                if (response.status === 401) {
-                    setError('Unauthorized');
-                    setStatus('offline');
-                } else {
-                    setStatus(response.status);
+                const response = await fetch('https://backend-deside.onrender.com/api/solana-status');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
+                const data = await response.json();
+                setStatus(data.status);
             } catch (error) {
                 console.error('Failed to fetch network status:', error);
                 setError('Failed to fetch network status');
@@ -23,12 +22,36 @@ function NetworkStatus({ className }) {
             }
         };
 
-        checkStatus();
+        const fetchTps = async () => {
+            try {
+                const response = await fetch('https://backend-deside.onrender.com/api/solana-tps');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                setTps(data.tps);
+            } catch (error) {
+                console.error('Failed to fetch TPS:', error);
+                setError('Failed to fetch TPS');
+                setTps('N/A');
+            }
+        };
+
+        fetchNetworkStatus();
+        fetchTps();
+
+        const interval = setInterval(() => {
+            fetchNetworkStatus();
+            fetchTps();
+        }, 10000);
+
+        return () => clearInterval(interval);
     }, []);
 
     return (
         <div className={`network-status ${className}`}>
             <span>Status: {status}</span>
+            <span>TPS: {tps}</span>
             {error && <span className="error">{error}</span>}
         </div>
     );
