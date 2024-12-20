@@ -43,13 +43,12 @@
     height: 8px;
     background-color: #808080; /* Gris para barras inactivas */
     border-radius: 2px;
-    transition: background-color 0.3s ease, height 1s ease;
     transform-origin: bottom; /* Fijar la base de las barras */
+    animation: barPulse 2s infinite ease-in-out;
 }
 
 .tps-bar.active {
     background-color: #4caf50; /* Verde para barras activas */
-    animation: barPulse 2s infinite ease-in-out;
 }
 
 .tps-bar:nth-child(1) {
