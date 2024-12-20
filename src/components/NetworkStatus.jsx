@@ -48,10 +48,30 @@ function NetworkStatus({ className }) {
         return () => clearInterval(interval);
     }, []);
 
+    const getStatusColor = () => {
+        if (status === 'connected') return 'green';
+        if (status === 'congested') return 'yellow';
+        return 'red';
+    };
+
+    const renderTpsBars = () => {
+        const bars = [];
+        const tpsValue = tps || 0;
+        const numBars = Math.min(Math.floor(tpsValue / 10), 10); // Adjust the divisor as needed
+
+        for (let i = 0; i < numBars; i++) {
+            bars.push(<div key={i} className="tps-bar active"></div>);
+        }
+
+        return bars;
+    };
+
     return (
         <div className={`network-status ${className}`}>
-            <span>Status: {status}</span>
-            <span>TPS: {tps}</span>
+            <span>Status: <span className={`status-light ${getStatusColor()}`}></span></span>
+            <div className="tps-bars">
+                {renderTpsBars()}
+            </div>
             {error && <span className="error">{error}</span>}
         </div>
     );
