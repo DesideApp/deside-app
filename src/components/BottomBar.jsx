@@ -52,7 +52,7 @@ function BottomBar() {
             <div className="network-info">
                 <NetworkStatus className="network-status" />
                 <div className="solana-price">
-                    <span>Precio SOL: {solPrice ? `$${solPrice}` : 'Cargando...'}</span>
+                    <span>SOL: {solPrice ? `$${solPrice}` : 'Cargando...'}</span>
                 </div>
             </div>
         </footer>
