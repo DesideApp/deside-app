@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client'; // Para React 18+
-import Main from '/src/Main.jsx'; // Componente principal
+import Main from './Main.jsx'; // Componente principal
 
 // Selecciona el elemento raíz desde el DOM
 const rootElement = document.getElementById('root');
