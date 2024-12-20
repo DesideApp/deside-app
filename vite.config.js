@@ -12,8 +12,7 @@ export default defineConfig({
           solana: ['@solana/web3.js'], // Crea un chunk separado para Solana si usas esta librería
         },
       },
-    },
-    chunkSizeWarningLimit: 1000, // Aumenta el límite a 1000 kBs
+    }
   },
   base: '/', // Esto asegura que las rutas sean absolutas
   resolve: {
