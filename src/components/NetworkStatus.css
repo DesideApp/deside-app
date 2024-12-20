@@ -16,6 +16,20 @@
     margin-right: 8px;
 }
 
+/* Contenedor de estado */
+.status-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Contenedor de TPS */
+.tps-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
 /* Barras de actividad */
 .tps-bars {
     display: flex;

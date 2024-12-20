@@ -68,9 +68,13 @@ function NetworkStatus({ className }) {
 
     return (
         <div className={`network-status ${className}`}>
-            <span>Status: <span className={`status-light ${getStatusColor()}`}></span></span>
-            <div className="tps-bars">
-                {renderTpsBars()}
+            <div className="status-container">
+                <span>Status: <span className={`status-light ${getStatusColor()}`}></span></span>
+            </div>
+            <div className="tps-container">
+                <div className="tps-bars">
+                    {renderTpsBars()}
+                </div>
             </div>
             {error && <span className="error">{error}</span>}
         </div>
