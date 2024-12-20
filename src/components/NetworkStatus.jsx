@@ -54,16 +54,6 @@ function NetworkStatus({ className }) {
         return 'red';
     };
 
-    const getBarHeights = () => {
-        if (tps === null || tps === 'N/A') return [8, 8, 8, 8];
-        const baseHeight = 8;
-        const maxHeight = 16;
-        const tpsFactor = tps / 1000; // Ajusta este valor según el rango de TPS esperado
-        return [1, 2, 3, 4].map(factor => baseHeight + (maxHeight - baseHeight) * tpsFactor * factor / 4);
-    };
-
-    const barHeights = getBarHeights();
-
     return (
         <div className={`network-status-container ${className}`}>
             <div className="status-container">
@@ -73,12 +63,8 @@ function NetworkStatus({ className }) {
             <div className="tps-container">
                 <span className="network-status-label">TPS:</span>
                 <div className="tps-bars">
-                    {barHeights.map((height, index) => (
-                        <div
-                            key={index}
-                            className="tps-bar"
-                            style={{ height: `${height}px` }}
-                        ></div>
+                    {[...Array(4)].map((_, index) => (
+                        <div key={index} className="tps-bar"></div>
                     ))}
                 </div>
             </div>
