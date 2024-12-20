@@ -11,6 +11,13 @@
   ],
   "routes": [
     {
+      "src": "/(.*).js",
+      "headers": {
+        "Content-Type": "application/javascript"
+      },
+      "dest": "/$1.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
