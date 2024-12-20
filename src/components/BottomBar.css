@@ -33,14 +33,9 @@
     display: flex;
     align-items: center;
     gap: 20px;
-    flex-grow: 1; /* Permitir que el contenedor crezca */
-    justify-content: flex-end; /* Alinear a la derecha */
 }
 
-.network-status {
-    margin-right: auto; /* Alinear a la izquierda */
-}
-
+.network-status,
 .solana-price {
     font-size: 0.9rem;
     color: #2b2323;
