@@ -43,7 +43,7 @@
     background-color: #4caf50; /* Verde para barras activas */
     border-radius: 2px;
     transition: height 0.5s ease, transform 0.5s ease; /* Movimiento más suave */
-    transform-origin: bottom; /* Fijar la parte inferior de las barras */
+    transform-origin: center; /* Alinear a la mitad */
     animation: barPulse 2s infinite ease-in-out;
 }
 
@@ -69,8 +69,8 @@
         transform: scaleY(1);
     }
     50% {
-        height: 16px;
-        transform: scaleY(1.2);
+        height: 12px; /* Reducir la altura máxima */
+        transform: scaleY(1.1);
     }
 }
 
