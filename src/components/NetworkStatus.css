@@ -39,10 +39,11 @@
 }
 
 .tps-bar {
-    width: 10px;
+    width: 8px; /* Reducir el ancho de las barras */
     background-color: #4caf50; /* Verde para barras activas */
     border-radius: 2px;
     transition: height 0.5s ease;
+    transform-origin: bottom; /* Fijar la parte superior de las barras */
 }
 
 .status-light {
