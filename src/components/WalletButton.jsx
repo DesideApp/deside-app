@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { connectWallet, getBalance } from "../utils/solanaHelpers.js";
+import { connectWallet, getBalance, signMessage } from "../utils/solanaHelpers.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
-import SignatureValidation from "./SignatureValidation";
 import "./WalletButton.css";
 
 function WalletButton() {
@@ -25,6 +24,16 @@ function WalletButton() {
                     setBalance(solBalance);
                 } catch (error) {
                     console.error("Error al obtener el balance:", error);
+                }
+
+                // Firma automática al conectar la wallet
+                try {
+                    const message = "Please sign this message to authenticate.";
+                    const signedData = await signMessage("phantom", message);
+                    console.log("Signed data:", signedData); // Log de datos firmados
+                    // Aquí puedes manejar la lógica después de una firma exitosa
+                } catch (error) {
+                    console.error("Error signing message:", error);
                 }
             });
 
@@ -57,6 +66,16 @@ function WalletButton() {
                 } catch (error) {
                     console.error("Error al obtener el balance:", error);
                 }
+
+                // Firma automática al conectar la wallet
+                try {
+                    const message = "Please sign this message to authenticate.";
+                    const signedData = await signMessage(wallet, message);
+                    console.log("Signed data:", signedData); // Log de datos firmados
+                    // Aquí puedes manejar la lógica después de una firma exitosa
+                } catch (error) {
+                    console.error("Error signing message:", error);
+                }
             }
         } catch (error) {
             console.error(`Error al conectar ${wallet} Wallet:`, error);
@@ -81,11 +100,6 @@ function WalletButton() {
                 setIsMenuOpen(false);
             }
         }
-    };
-
-    const handleSuccess = (signedData) => {
-        console.log("Authentication successful with signed data:", signedData);
-        // Aquí puedes manejar la lógica después de una firma exitosa
     };
 
     const handleMenuButtonClick = () => {
@@ -129,8 +143,6 @@ function WalletButton() {
             >
                 <span className="menu-icon"></span>
             </button>
-
-            <SignatureValidation wallet="phantom" onSuccess={handleSuccess} />
 
             <WalletMenu
                 isOpen={isMenuOpen}

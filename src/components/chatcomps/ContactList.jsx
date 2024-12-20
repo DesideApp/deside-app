@@ -6,7 +6,7 @@ import {
     acceptContact,
     rejectContact,
 } from '../../services/contactService.js'; // Utiliza el fetchWithAuth internamente
-import SignatureValidation from '../SignatureValidation'; // Importar SignatureValidation
+import { signMessage } from '../../utils/solanaHelpers'; // Importar signMessage
 import './ContactList.css';
 
 const ContactList = () => {
@@ -31,7 +31,7 @@ const ContactList = () => {
         fetchContacts();
     }, []);
 
-    const handleAddContact = async (signedData) => {
+    const handleAddContact = async () => {
         if (!newContact) {
             setErrorMessage('Por favor, introduce una clave pública.');
             return;
@@ -40,6 +40,12 @@ const ContactList = () => {
         try {
             const publicKey = new PublicKey(newContact);
             console.log('Adding contact:', publicKey.toString()); // Log de agregar contacto
+
+            // Firma automática antes de agregar el contacto
+            const message = "Please sign this message to add a contact.";
+            const signedData = await signMessage("phantom", message);
+            console.log("Signed data:", signedData); // Log de datos firmados
+
             await addContact(publicKey.toString(), signedData); // Ahora utiliza fetchWithAuth
             setErrorMessage('');
             setNewContact('');
@@ -90,7 +96,9 @@ const ContactList = () => {
                     rows={1}
                     className="contact-input"
                 />
-                <SignatureValidation wallet="phantom" onSuccess={handleAddContact} />
+                <button onClick={handleAddContact} className="add-contact-button">
+                    Agregar Contacto
+                </button>
             </div>
 
             {errorMessage && <p className="error-message">{errorMessage}</p>}
