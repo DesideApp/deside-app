@@ -21,6 +21,7 @@
     display: flex;
     align-items: center;
     gap: 5px;
+    flex-direction: row-reverse; /* Invertir el orden de los elementos */
 }
 
 /* Contenedor de TPS */
