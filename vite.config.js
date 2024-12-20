@@ -11,12 +11,14 @@ export default defineConfig({
     rollupOptions: {
       input: resolve(__dirname, 'public/index.html'), // El archivo de entrada es el index.html en public
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom']
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         }
       }
     },
-    chunkSizeWarningLimit: 500, // Ajustar el límite de tamaño de los chunks
+    chunkSizeWarningLimit: 1000, // Aumentar el límite de tamaño de los chunks a 1000 KiB
   },
   resolve: {
     alias: {
