@@ -10,7 +10,13 @@ export default defineConfig({
     outDir: 'dist', // Directorio de salida para la build
     rollupOptions: {
       input: resolve(__dirname, 'public/index.html'), // El archivo de entrada es el index.html en public
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom']
+        }
+      }
     },
+    chunkSizeWarningLimit: 500, // Ajustar el límite de tamaño de los chunks
   },
   resolve: {
     alias: {
