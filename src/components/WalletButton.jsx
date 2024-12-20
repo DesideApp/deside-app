@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { connectWallet, getBalance, signMessage } from "../utils/solanaHelpers.js";
+import { connectWallet, getBalance } from "../utils/solanaHelpers.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
+import SignatureValidation from "./SignatureValidation";
 import "./WalletButton.css";
 
 function WalletButton() {
@@ -82,7 +83,11 @@ function WalletButton() {
         }
     };
 
-   
+    const handleSuccess = (signedData) => {
+        console.log("Authentication successful with signed data:", signedData);
+        // Aquí puedes manejar la lógica después de una firma exitosa
+    };
+
     const handleMenuButtonClick = () => {
         setIsMenuOpen(!isMenuOpen);
     };
@@ -125,7 +130,7 @@ function WalletButton() {
                 <span className="menu-icon"></span>
             </button>
 
-            <button onClick={() => handleSignMessage("phantom")}>Sign Message</button>
+            <SignatureValidation wallet="phantom" onSuccess={handleSuccess} />
 
             <WalletMenu
                 isOpen={isMenuOpen}

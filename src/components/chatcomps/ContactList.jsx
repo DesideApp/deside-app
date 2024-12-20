@@ -6,6 +6,7 @@ import {
     acceptContact,
     rejectContact,
 } from '../../services/contactService.js'; // Utiliza el fetchWithAuth internamente
+import SignatureValidation from '../SignatureValidation'; // Importar SignatureValidation
 import './ContactList.css';
 
 const ContactList = () => {
@@ -30,7 +31,7 @@ const ContactList = () => {
         fetchContacts();
     }, []);
 
-    const handleAddContact = async () => {
+    const handleAddContact = async (signedData) => {
         if (!newContact) {
             setErrorMessage('Por favor, introduce una clave pública.');
             return;
@@ -39,7 +40,7 @@ const ContactList = () => {
         try {
             const publicKey = new PublicKey(newContact);
             console.log('Adding contact:', publicKey.toString()); // Log de agregar contacto
-            await addContact(publicKey.toString()); // Ahora utiliza fetchWithAuth
+            await addContact(publicKey.toString(), signedData); // Ahora utiliza fetchWithAuth
             setErrorMessage('');
             setNewContact('');
             alert('Solicitud enviada.');
@@ -89,9 +90,7 @@ const ContactList = () => {
                     rows={1}
                     className="contact-input"
                 />
-                <button onClick={handleAddContact} className="add-contact-button">
-                    Agregar Contacto
-                </button>
+                <SignatureValidation wallet="phantom" onSuccess={handleAddContact} />
             </div>
 
             {errorMessage && <p className="error-message">{errorMessage}</p>}
