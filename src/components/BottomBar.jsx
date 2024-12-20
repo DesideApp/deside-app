@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import "./BottomBar.css";
 import NetworkStatus from './NetworkStatus';
-import { fetchWithAuth } from '../services/authServices'; // Importamos fetchWithAuth
 
 function BottomBar() {
     const [solPrice, setSolPrice] = useState(null);
@@ -12,7 +11,7 @@ function BottomBar() {
         // Función para obtener el precio de Solana desde el backend
         const fetchSolPrice = async () => {
             try {
-                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/solana-price`);
+                const response = await fetch('https://backend-deside.onrender.com/api/solana-price');
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
