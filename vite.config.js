@@ -9,7 +9,7 @@ export default defineConfig({
   build: {
     outDir: 'dist', // Directorio de salida para la build
     rollupOptions: {
-      input: resolve(__dirname, 'public/index.html'), // El archivo de entrada es el index.html en public
+      input: resolve(__dirname, 'index.html'), // El archivo de entrada es el index.html en public
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
