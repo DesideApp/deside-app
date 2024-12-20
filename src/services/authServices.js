@@ -1,13 +1,13 @@
 import { apiRequest } from '../services/apiService.js';
-import { setToken, removeToken, getToken } from '../services/tokenService.js'; // Eliminar setCookie
+import { setToken, removeToken, getToken } from '../services/tokenService.js';
 import API_BASE_URL from '../config/apiConfig.js';
 import nacl from 'tweetnacl'; // Importar nacl para la verificación de firmas
 
 let token = null;
 
 async function initializeToken() {
-    if (!token) {
-        const response = await fetch(`${API_BASE_URL}/auth/token`, {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/token`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -21,8 +21,11 @@ async function initializeToken() {
 
         const data = await response.json();
         token = data.token;
-        localStorage.setItem('jwtToken', token);
+        setToken(token);
         console.log('Token inicial obtenido:', token);
+    } catch (error) {
+        console.error('Error al obtener token inicial:', error);
+        throw error;
     }
 }
 
