@@ -12,13 +12,13 @@ function BottomBar() {
         // Función para obtener el precio de Solana desde el backend
         const fetchSolPrice = async () => {
             try {
-                const response = await fetchWithAuth(`${process.env.REACT_APP_BACKEND_URL}/solana-price`);
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/solana-price`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 const data = await response.json();
                 if (isMounted) {
-                    setSolPrice(data.solana.usd); // Ajusta esto según la estructura de la respuesta de tu backend
+                    setSolPrice(data.price); // Ajusta esto según la estructura de la respuesta de tu backend
                 }
             } catch (error) {
                 console.error('Error al obtener el precio de Solana:', error);
