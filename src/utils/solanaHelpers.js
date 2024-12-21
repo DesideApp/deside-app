@@ -122,8 +122,11 @@ export async function signMessage(wallet, message) {
         const encodedMessage = new TextEncoder().encode(message);
         const { signature } = await provider.signMessage(encodedMessage);
 
+        // Convertir la firma a base64 utilizando btoa
+        const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
+
         return {
-            signature: Buffer.from(signature).toString('base64'), // Convertir la firma a base64
+            signature: signatureBase64,
             message,
             pubkey: response.publicKey.toBase58(),
         };
