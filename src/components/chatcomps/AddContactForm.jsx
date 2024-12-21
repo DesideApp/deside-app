@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { signMessage } from '../../utils/solanaHelpers'; // Importar signMessage
 import { getCookie } from '../../services/authServices'; // Importar getCookie para obtener el token CSRF
 
 const AddContactForm = ({ onContactAdded }) => {
@@ -6,7 +7,17 @@ const AddContactForm = ({ onContactAdded }) => {
     const [errorMessage, setErrorMessage] = useState('');
 
     const addContact = async () => {
+        if (!pubkey) {
+            setErrorMessage('Por favor, introduce una clave pública.');
+            return;
+        }
+
         try {
+            // Firma automática antes de agregar el contacto
+            const message = "Please sign this message to add a contact.";
+            const signedData = await signMessage("phantom", message);
+            console.log("Signed data:", signedData); // Log de datos firmados
+
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/contacts/add`, {
                 method: 'POST',
                 headers: {
@@ -14,7 +25,11 @@ const AddContactForm = ({ onContactAdded }) => {
                     'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`, // Enviar el token JWT
                     'X-XSRF-TOKEN': getCookie('XSRF-TOKEN') // Enviar el token CSRF
                 },
-                body: JSON.stringify({ pubkey }),
+                body: JSON.stringify({
+                    pubkey,
+                    signature: signedData.signature,
+                    message: signedData.message,
+                }),
             });
 
             if (!response.ok) {
