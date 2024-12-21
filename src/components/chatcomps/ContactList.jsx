@@ -46,13 +46,29 @@ const ContactList = () => {
             const signedData = await signMessage("phantom", message);
             console.log("Signed data:", signedData); // Log de datos firmados
 
-            await addContact(publicKey.toString(), signedData); // Ahora utiliza fetchWithAuth
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/contacts/add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`, // Enviar el token JWT
+                },
+                body: JSON.stringify({
+                    pubkey: publicKey.toString(),
+                    signature: signedData.signature,
+                    message: signedData.message,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to send contact request.');
+            }
+
+            alert('Solicitud enviada.');
             setErrorMessage('');
             setNewContact('');
-            alert('Solicitud enviada.');
         } catch (error) {
-            console.error(error);
-            setErrorMessage(error.message);
+            console.error('Error sending contact request:', error);
+            setErrorMessage('Error sending contact request.');
         }
     };
 
