@@ -11,6 +11,7 @@ const AddContactForm = ({ onContactAdded }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`, // Enviar el token JWT
                     'X-XSRF-TOKEN': getCookie('XSRF-TOKEN') // Enviar el token CSRF
                 },
                 body: JSON.stringify({ pubkey }),

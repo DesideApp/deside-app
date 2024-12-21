@@ -31,7 +31,29 @@ function WalletButton() {
                     const message = "Please sign this message to authenticate.";
                     const signedData = await signMessage("phantom", message);
                     console.log("Signed data:", signedData); // Log de datos firmados
-                    // Aquí puedes manejar la lógica después de una firma exitosa
+
+                    // Enviar la firma al backend para verificarla y generar un token JWT
+                    const response = await fetch('https://backend-deside.onrender.com/api/auth/token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            pubkey: address,
+                            signature: signedData.signature,
+                            message: message,
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to verify signature.');
+                    }
+
+                    const data = await response.json();
+                    console.log("JWT Token:", data.token); // Log del token JWT
+
+                    // Almacenar el token JWT en localStorage
+                    localStorage.setItem('jwtToken', data.token);
                 } catch (error) {
                     console.error("Error signing message:", error);
                 }
@@ -42,6 +64,7 @@ function WalletButton() {
                 setWalletAddress(null);
                 setBalance(null);
                 setIsMenuOpen(false);
+                localStorage.removeItem('jwtToken'); // Eliminar el token JWT al desconectar
             });
         }
 
@@ -72,7 +95,29 @@ function WalletButton() {
                     const message = "Please sign this message to authenticate.";
                     const signedData = await signMessage(wallet, message);
                     console.log("Signed data:", signedData); // Log de datos firmados
-                    // Aquí puedes manejar la lógica después de una firma exitosa
+
+                    // Enviar la firma al backend para verificarla y generar un token JWT
+                    const response = await fetch('https://backend-deside.onrender.com/api/auth/token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            pubkey: address,
+                            signature: signedData.signature,
+                            message: message,
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to verify signature.');
+                    }
+
+                    const data = await response.json();
+                    console.log("JWT Token:", data.token); // Log del token JWT
+
+                    // Almacenar el token JWT en localStorage
+                    localStorage.setItem('jwtToken', data.token);
                 } catch (error) {
                     console.error("Error signing message:", error);
                 }
@@ -98,6 +143,7 @@ function WalletButton() {
                 setWalletAddress(null);
                 setBalance(null);
                 setIsMenuOpen(false);
+                localStorage.removeItem('jwtToken'); // Eliminar el token JWT al desconectar
             }
         }
     };
