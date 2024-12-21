@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { signMessage } from '../utils/solanaHelpers';
 
 const SignatureValidation = ({ wallet, onSuccess }) => {
+    const isSigning = useRef(false); // Añadir un ref para controlar la firma
+
     const handleSignMessage = async () => {
+        if (isSigning.current) return; // Evitar múltiples firmas
+        isSigning.current = true;
+
         try {
             const message = "Please sign this message to authenticate.";
             const signedData = await signMessage(wallet, message);
@@ -33,6 +38,8 @@ const SignatureValidation = ({ wallet, onSuccess }) => {
         } catch (error) {
             console.error(`Error signing message with ${wallet} Wallet:`, error);
             alert(`Failed to sign message with ${wallet} Wallet. Please try again.`);
+        } finally {
+            isSigning.current = false;
         }
     };
 

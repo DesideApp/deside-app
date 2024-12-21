@@ -10,6 +10,7 @@ function WalletButton() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const menuRef = useRef(null);
+    const isSigning = useRef(false); // Añadir un ref para controlar la firma
 
     useEffect(() => {
         if (window.solana) {
@@ -27,35 +28,40 @@ function WalletButton() {
                 }
 
                 // Firma automática al conectar la wallet
-                try {
-                    const message = "Please sign this message to authenticate.";
-                    const signedData = await signMessage("phantom", message);
-                    console.log("Signed data:", signedData); // Log de datos firmados
+                if (!isSigning.current) {
+                    isSigning.current = true;
+                    try {
+                        const message = "Please sign this message to authenticate.";
+                        const signedData = await signMessage("phantom", message);
+                        console.log("Signed data:", signedData); // Log de datos firmados
 
-                    // Enviar la firma al backend para verificarla y generar un token JWT
-                    const response = await fetch('https://backend-deside.onrender.com/api/auth/token', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            pubkey: address,
-                            signature: signedData.signature,
-                            message: message,
-                        }),
-                    });
+                        // Enviar la firma al backend para verificarla y generar un token JWT
+                        const response = await fetch('https://backend-deside.onrender.com/api/auth/token', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                pubkey: address,
+                                signature: signedData.signature,
+                                message: message,
+                            }),
+                        });
 
-                    if (!response.ok) {
-                        throw new Error('Failed to verify signature.');
+                        if (!response.ok) {
+                            throw new Error('Failed to verify signature.');
+                        }
+
+                        const data = await response.json();
+                        console.log("JWT Token:", data.token); // Log del token JWT
+
+                        // Almacenar el token JWT en localStorage
+                        localStorage.setItem('jwtToken', data.token);
+                    } catch (error) {
+                        console.error("Error signing message:", error);
+                    } finally {
+                        isSigning.current = false;
                     }
-
-                    const data = await response.json();
-                    console.log("JWT Token:", data.token); // Log del token JWT
-
-                    // Almacenar el token JWT en localStorage
-                    localStorage.setItem('jwtToken', data.token);
-                } catch (error) {
-                    console.error("Error signing message:", error);
                 }
             });
 
@@ -91,35 +97,40 @@ function WalletButton() {
                 }
 
                 // Firma automática al conectar la wallet
-                try {
-                    const message = "Please sign this message to authenticate.";
-                    const signedData = await signMessage(wallet, message);
-                    console.log("Signed data:", signedData); // Log de datos firmados
+                if (!isSigning.current) {
+                    isSigning.current = true;
+                    try {
+                        const message = "Please sign this message to authenticate.";
+                        const signedData = await signMessage(wallet, message);
+                        console.log("Signed data:", signedData); // Log de datos firmados
 
-                    // Enviar la firma al backend para verificarla y generar un token JWT
-                    const response = await fetch('https://backend-deside.onrender.com/api/auth/token', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            pubkey: address,
-                            signature: signedData.signature,
-                            message: message,
-                        }),
-                    });
+                        // Enviar la firma al backend para verificarla y generar un token JWT
+                        const response = await fetch('https://backend-deside.onrender.com/api/auth/token', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                pubkey: address,
+                                signature: signedData.signature,
+                                message: message,
+                            }),
+                        });
 
-                    if (!response.ok) {
-                        throw new Error('Failed to verify signature.');
+                        if (!response.ok) {
+                            throw new Error('Failed to verify signature.');
+                        }
+
+                        const data = await response.json();
+                        console.log("JWT Token:", data.token); // Log del token JWT
+
+                        // Almacenar el token JWT en localStorage
+                        localStorage.setItem('jwtToken', data.token);
+                    } catch (error) {
+                        console.error("Error signing message:", error);
+                    } finally {
+                        isSigning.current = false;
                     }
-
-                    const data = await response.json();
-                    console.log("JWT Token:", data.token); // Log del token JWT
-
-                    // Almacenar el token JWT en localStorage
-                    localStorage.setItem('jwtToken', data.token);
-                } catch (error) {
-                    console.error("Error signing message:", error);
                 }
             }
         } catch (error) {
