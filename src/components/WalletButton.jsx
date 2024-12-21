@@ -42,7 +42,7 @@ function WalletButton() {
                                 'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
-                                pubkey: address,
+                                pubkey: address, // Asegurarse de que la clave pública esté en formato base58
                                 signature: signedData.signature,
                                 message: message,
                             }),
@@ -111,7 +111,7 @@ function WalletButton() {
                                 'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
-                                pubkey: address,
+                                pubkey: address, // Asegurarse de que la clave pública esté en formato base58
                                 signature: signedData.signature,
                                 message: message,
                             }),

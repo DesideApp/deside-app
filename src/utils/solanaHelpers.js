@@ -128,7 +128,7 @@ export async function signMessage(wallet, message) {
         return {
             signature: signatureBase64,
             message,
-            pubkey: response.publicKey.toBase58(),
+            pubkey: response.publicKey.toBase58(), // Asegurarse de que la clave pública esté en formato base58
         };
     } catch (error) {
         console.error(`Error signing message with ${wallet} Wallet:`, error);
