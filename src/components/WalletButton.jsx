@@ -86,6 +86,11 @@ function WalletButton() {
 
     const handleConnect = async (wallet) => {
         try {
+            // Desconectar cualquier wallet previamente conectada
+            if (selectedWallet) {
+                await disconnectWallet(selectedWallet);
+            }
+
             const address = await connectWallet(wallet);
             if (address) {
                 console.log(`Connected to ${wallet} Wallet:`, address); // Log de conexión específica
@@ -145,11 +150,12 @@ function WalletButton() {
         }
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         if (window.confirm("¿Seguro que quieres desconectarte?")) {
             try {
-                if (window.solana?.disconnect) {
-                    window.solana.disconnect();
+                // Desconectar todas las wallets
+                if (selectedWallet) {
+                    await disconnectWallet(selectedWallet);
                 }
             } catch (error) {
                 console.error("Error al desconectar la wallet:", error);

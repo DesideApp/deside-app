@@ -135,3 +135,29 @@ export async function signMessage(wallet, message) {
         throw new Error(`Failed to sign message with ${wallet} Wallet.`);
     }
 }
+
+// Función para desconectar una wallet
+export async function disconnectWallet(wallet) {
+    try {
+        let provider;
+
+        // Detecta el proveedor según el wallet seleccionado
+        if (wallet === "phantom" && window.solana?.isPhantom) {
+            provider = window.solana;
+        } else if (wallet === "backpack" && window.xnft?.solana) {
+            provider = window.xnft.solana;
+        } else if (wallet === "magiceden" && window.magicEden?.solana) {
+            provider = window.magicEden.solana;
+        } else {
+            throw new Error(`${wallet} Wallet not detected`);
+        }
+
+        if (provider && provider.disconnect) {
+            await provider.disconnect();
+            console.log(`${wallet} Wallet disconnected`);
+        }
+    } catch (error) {
+        console.error(`Error disconnecting ${wallet} Wallet:`, error);
+        throw new Error(`Failed to disconnect ${wallet} Wallet.`);
+    }
+}
