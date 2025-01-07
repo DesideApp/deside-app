@@ -9,6 +9,7 @@ function WalletButton() {
     const [balance, setBalance] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedWallet, setSelectedWallet] = useState(localStorage.getItem('selectedWallet') || null);
     const menuRef = useRef(null);
     const isSigning = useRef(false); // Añadir un ref para controlar la firma
 
@@ -32,7 +33,7 @@ function WalletButton() {
                     isSigning.current = true;
                     try {
                         const message = "Please sign this message to authenticate.";
-                        const signedData = await signMessage("phantom", message);
+                        const signedData = await signMessage(selectedWallet, message);
                         console.log("Signed data:", signedData); // Log de datos firmados
 
                         // Enviar la firma al backend para verificarla y generar un token JWT
@@ -71,6 +72,7 @@ function WalletButton() {
                 setBalance(null);
                 setIsMenuOpen(false);
                 localStorage.removeItem('jwtToken'); // Eliminar el token JWT al desconectar
+                localStorage.removeItem('selectedWallet'); // Eliminar la wallet seleccionada al desconectar
             });
         }
 
@@ -80,7 +82,7 @@ function WalletButton() {
                 window.solana.removeAllListeners("disconnect");
             }
         };
-    }, []);
+    }, [selectedWallet]);
 
     const handleConnect = async (wallet) => {
         try {
@@ -88,6 +90,8 @@ function WalletButton() {
             if (address) {
                 console.log(`Connected to ${wallet} Wallet:`, address); // Log de conexión específica
                 setWalletAddress(address);
+                setSelectedWallet(wallet);
+                localStorage.setItem('selectedWallet', wallet); // Almacenar la wallet seleccionada en localStorage
                 try {
                     const solBalance = await getBalance(address);
                     console.log("Wallet balance:", solBalance); // Log de balance
@@ -155,6 +159,7 @@ function WalletButton() {
                 setBalance(null);
                 setIsMenuOpen(false);
                 localStorage.removeItem('jwtToken'); // Eliminar el token JWT al desconectar
+                localStorage.removeItem('selectedWallet'); // Eliminar la wallet seleccionada al desconectar
             }
         }
     };

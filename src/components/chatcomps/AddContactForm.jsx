@@ -13,9 +13,14 @@ const AddContactForm = ({ onContactAdded }) => {
         }
 
         try {
+            const selectedWallet = localStorage.getItem('selectedWallet'); // Obtener la wallet seleccionada
+            if (!selectedWallet) {
+                throw new Error('No wallet selected.');
+            }
+
             // Firma automática antes de agregar el contacto
             const message = "Please sign this message to add a contact.";
-            const signedData = await signMessage("phantom", message);
+            const signedData = await signMessage(selectedWallet, message);
             console.log("Signed data:", signedData); // Log de datos firmados
 
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/contacts/add`, {
