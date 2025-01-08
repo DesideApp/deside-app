@@ -17,9 +17,9 @@ export async function connectWallet(wallet) {
         } else if (wallet === "backpack" && window.xnft?.solana) {
             console.log("Backpack Wallet detected");
             provider = window.xnft.solana;
-        } else if (wallet === "magiceden" && window.magicEden?.isMagicEden) {
+        } else if (wallet === "magiceden" && window.magicEden?.solana) {
             console.log("Magic Eden Wallet detected");
-            provider = window.magicEden;
+            provider = window.magicEden.solana;
         } else {
             console.error(`${wallet} Wallet not detected`);
         }
@@ -101,8 +101,8 @@ export async function signMessage(wallet, message) {
             provider = window.solana;
         } else if (wallet === "backpack" && window.xnft?.solana) {
             provider = window.xnft.solana;
-        } else if (wallet === "magiceden" && window.magicEden?.isMagicEden) {
-            provider = window.magicEden;
+        } else if (wallet === "magiceden" && window.magicEden?.solana) {
+            provider = window.magicEden.solana;
         } else {
             throw new Error(`${wallet} Wallet not detected`);
         }
@@ -146,8 +146,8 @@ export async function disconnectWallet(wallet) {
             provider = window.solana;
         } else if (wallet === "backpack" && window.xnft?.solana) {
             provider = window.xnft.solana;
-        } else if (wallet === "magiceden" && window.magicEden?.isMagicEden) {
-            provider = window.magicEden;
+        } else if (wallet === "magiceden" && window.magicEden?.solana) {
+            provider = window.magicEden.solana;
         } else {
             throw new Error(`${wallet} Wallet not detected`);
         }
