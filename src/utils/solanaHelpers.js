@@ -92,24 +92,47 @@ export async function fetchSolanaData(endpoint) {
 }
 
 // Función para firmar un mensaje con la wallet del usuario
-export async function signMessage(message) {
-    const selectedWallet = localStorage.getItem("selectedWallet");
-    if (!selectedWallet) {
-        throw new Error("No hay wallet seleccionada.");
-    }
-
-    const walletProvider = window[selectedWallet.toLowerCase()];
-    if (!walletProvider) {
-        throw new Error(`El proveedor ${selectedWallet} no está disponible.`);
-    }
-
+export async function signMessage(wallet, message) {
     try {
+        let provider;
+
+        // Detecta el proveedor según el wallet seleccionado
+        if (wallet === "phantom" && window.solana?.isPhantom) {
+            provider = window.solana;
+        } else if (wallet === "backpack" && window.xnft?.solana) {
+            provider = window.xnft.solana;
+        } else if (wallet === "magiceden" && window.magicEden?.solana) {
+            provider = window.magicEden.solana;
+        } else {
+            throw new Error(`${wallet} Wallet not detected`);
+        }
+
+        if (!provider) {
+            throw new Error(`Please install ${wallet} Wallet to continue.`);
+        }
+
+        // Solicita al usuario que conecte la wallet usando el proveedor detectado
+        const response = await provider.connect({ onlyIfTrusted: false });
+
+        // Verifica que la conexión fue exitosa
+        if (!response.publicKey) {
+            throw new Error(`Connection to ${wallet} cancelled by the user.`);
+        }
+
         const encodedMessage = new TextEncoder().encode(message);
-        const signature = await walletProvider.signMessage(encodedMessage, "utf8");
-        return signature;
+        const { signature } = await provider.signMessage(encodedMessage);
+
+        // Convertir la firma a base64 utilizando btoa
+        const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
+
+        return {
+            signature: signatureBase64,
+            message,
+            pubkey: response.publicKey.toBase58(), // Asegurarse de que la clave pública esté en formato base58
+        };
     } catch (error) {
-        console.error("Error al firmar el mensaje:", error);
-        throw error;
+        console.error(`Error signing message with ${wallet} Wallet:`, error);
+        throw new Error(`Failed to sign message with ${wallet} Wallet.`);
     }
 }
 
