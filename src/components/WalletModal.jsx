@@ -10,6 +10,7 @@ const WalletModal = ({ isOpen, onClose, onSelectWallet }) => {
   const handleSelectWallet = (wallet) => {
     if (wallet.provider) {
       onSelectWallet(wallet.provider);
+      localStorage.setItem("selectedWallet", wallet.name);
     } else {
       console.error("Proveedor no disponible para", wallet.name);
     }
