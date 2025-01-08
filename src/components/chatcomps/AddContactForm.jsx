@@ -41,9 +41,9 @@ const AddContactForm = ({ onContactAdded }) => {
                 throw new Error('Failed to send contact request.');
             }
 
-            alert('Solicitud enviada.');
-            setErrorMessage('');
+            alert('Contact request sent!');
             setPubkey('');
+            setErrorMessage('');
             onContactAdded(); // Notifica al padre que se actualicen los datos
         } catch (error) {
             console.error('Error sending contact request:', error);

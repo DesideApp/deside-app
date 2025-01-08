@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { connectWallet, getBalance, signMessage, disconnectWallet } from "../utils/solanaHelpers.js";
+import { connectWallet, getBalance, signMessage } from "../utils/solanaHelpers.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -86,11 +86,6 @@ function WalletButton() {
 
     const handleConnect = async (wallet) => {
         try {
-            // Desconectar cualquier wallet previamente conectada
-            if (selectedWallet) {
-                await disconnectWallet(selectedWallet);
-            }
-
             const address = await connectWallet(wallet);
             if (address) {
                 console.log(`Connected to ${wallet} Wallet:`, address); // Log de conexión específica
@@ -150,12 +145,11 @@ function WalletButton() {
         }
     };
 
-    const handleLogout = async () => {
+    const handleLogout = () => {
         if (window.confirm("¿Seguro que quieres desconectarte?")) {
             try {
-                // Desconectar todas las wallets
-                if (selectedWallet) {
-                    await disconnectWallet(selectedWallet);
+                if (window.solana?.disconnect) {
+                    window.solana.disconnect();
                 }
             } catch (error) {
                 console.error("Error al desconectar la wallet:", error);
