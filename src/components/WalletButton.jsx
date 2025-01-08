@@ -33,7 +33,7 @@ function WalletButton() {
                     isSigning.current = true;
                     try {
                         const message = "Please sign this message to authenticate.";
-                        const signedData = await signMessage(selectedWallet, message);
+                        const signedData = await signMessage(message);
                         console.log("Signed data:", signedData); // Log de datos firmados
 
                         // Enviar la firma al backend para verificarla y generar un token JWT
@@ -110,7 +110,7 @@ function WalletButton() {
                     isSigning.current = true;
                     try {
                         const message = "Please sign this message to authenticate.";
-                        const signedData = await signMessage(wallet, message);
+                        const signedData = await signMessage(message);
                         console.log("Signed data:", signedData); // Log de datos firmados
 
                         // Enviar la firma al backend para verificarla y generar un token JWT
