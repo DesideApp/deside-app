@@ -3,7 +3,7 @@ import { disconnectWallet } from "../utils/solanaHelpers.js";
 import "./WalletMenu.css";
 
 function WalletMenu({ isOpen, onClose, walletAddress, handleConnectModal, handleLogout, menuRef }) {
-    if (!isOpen) return null;
+    if (!walletAddress) return null; // No mostrar nada si no hay wallet conectada
 
     const handleLogoutClick = async () => {
         if (window.confirm("¿Seguro que quieres desconectarte?")) {
