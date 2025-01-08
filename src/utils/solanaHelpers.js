@@ -136,7 +136,7 @@ export async function signMessage(wallet, message) {
     }
 }
 
-// Función para desconectar la wallet del usuario
+// Función para desconectar una wallet
 export async function disconnectWallet(wallet) {
     try {
         let provider;
@@ -152,13 +152,10 @@ export async function disconnectWallet(wallet) {
             throw new Error(`${wallet} Wallet not detected`);
         }
 
-        if (!provider) {
-            throw new Error(`Please install ${wallet} Wallet to continue.`);
+        if (provider && provider.disconnect) {
+            await provider.disconnect();
+            console.log(`${wallet} Wallet disconnected`);
         }
-
-        // Desconectar la wallet usando el proveedor detectado
-        await provider.disconnect();
-        console.log(`${wallet} Wallet disconnected`);
     } catch (error) {
         console.error(`Error disconnecting ${wallet} Wallet:`, error);
         throw new Error(`Failed to disconnect ${wallet} Wallet.`);
