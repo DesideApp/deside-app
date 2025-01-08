@@ -2,24 +2,33 @@ import React from "react";
 import { disconnectWallet } from "../utils/solanaHelpers.js";
 import "./WalletMenu.css";
 
-function WalletMenu({ isOpen, onClose, walletAddress, handleConnectModal, handleLogout, menuRef }) {
+function WalletMenu({ 
+    isOpen, 
+    onClose, 
+    walletAddress, 
+    handleConnectModal, 
+    handleLogout, 
+    menuRef 
+}) {
     if (!isOpen) return null;
 
     const handleLogoutClick = async () => {
-        if (window.confirm("¿Seguro que quieres desconectarte?")) {
+        if (window.confirm("Are you sure you want to log out?")) {
             try {
-                // Desconectar todas las wallets
-                const selectedWallet = localStorage.getItem('selectedWallet');
+                const selectedWallet = localStorage.getItem("selectedWallet");
+                
                 if (selectedWallet) {
-                    await disconnectWallet(selectedWallet);
+                    await disconnectWallet(selectedWallet); // Desconectar la wallet activa
                 }
+
+                // Limpieza de datos locales
+                localStorage.removeItem("jwtToken"); 
+                localStorage.removeItem("selectedWallet");
             } catch (error) {
-                console.error("Error al desconectar la wallet:", error);
+                console.error("Error disconnecting wallet:", error);
             } finally {
-                console.log("Wallet logged out"); // Log de desconexión
-                localStorage.removeItem('jwtToken'); // Eliminar el token JWT al desconectar
-                localStorage.removeItem('selectedWallet'); // Eliminar la wallet seleccionada al desconectar
-                handleLogout();
+                console.log("Wallet disconnected");
+                handleLogout(); // Llamada a la función de logout proporcionada
             }
         }
     };
@@ -38,4 +47,3 @@ function WalletMenu({ isOpen, onClose, walletAddress, handleConnectModal, handle
 }
 
 export default WalletMenu;
-

@@ -19,7 +19,6 @@ function WalletModal({ isOpen, onClose, onSelectWallet }) {
                     <button onClick={() => onSelectWallet("magiceden")}>
                         Magic Eden Wallet
                     </button>
-                    {/* Agrega más opciones de wallets aquí */}
                 </div>
                 <button className="close-modal" onClick={onClose}>
                     Close
