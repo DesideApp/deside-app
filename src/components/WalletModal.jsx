@@ -5,6 +5,7 @@ const WalletModal = ({ isOpen, onClose, onSelectWallet }) => {
   const wallets = [
     { name: "Backpack", provider: window.backpack },
     { name: "Phantom", provider: window.phantom },
+    { name: "Magic Eden", provider: window.magicEden },
   ];
 
   const handleSelectWallet = (wallet) => {
