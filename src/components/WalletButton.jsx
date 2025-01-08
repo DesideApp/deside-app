@@ -150,26 +150,6 @@ function WalletButton() {
         }
     };
 
-    const handleLogout = async () => {
-        if (window.confirm("¿Seguro que quieres desconectarte?")) {
-            try {
-                // Desconectar todas las wallets
-                if (selectedWallet) {
-                    await disconnectWallet(selectedWallet);
-                }
-            } catch (error) {
-                console.error("Error al desconectar la wallet:", error);
-            } finally {
-                console.log("Wallet logged out"); // Log de desconexión
-                setWalletAddress(null);
-                setBalance(null);
-                setIsMenuOpen(false);
-                localStorage.removeItem('jwtToken'); // Eliminar el token JWT al desconectar
-                localStorage.removeItem('selectedWallet'); // Eliminar la wallet seleccionada al desconectar
-            }
-        }
-    };
-
     const handleMenuButtonClick = () => {
         setIsMenuOpen(!isMenuOpen);
     };
