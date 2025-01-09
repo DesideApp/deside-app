@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PublicKey } from '@solana/web3.js';
-import { getContacts, addContact } from '../../services/apiService'; // Usar funciones del apiService
+import { apiRequest } from '../../services/apiService.js'; // Centralizar todas las llamadas a la API
 import { signMessage } from '../../utils/solanaHelpers'; // Importar signMessage
 import './ContactList.css';
 
@@ -14,11 +14,7 @@ const ContactList = () => {
         console.log('Fetching contacts...');
         const fetchContacts = async () => {
             try {
-                const jwtToken = localStorage.getItem('jwtToken');
-                if (!jwtToken) {
-                    throw new Error('JWT Token is missing');
-                }
-                const data = await getContacts(jwtToken); // Usar función del apiService
+                const data = await apiRequest('/api/contacts'); // Usar apiService para obtener contactos
                 console.log('Fetched contacts:', data);
                 setContacts(data.contacts || []);
                 setPendingRequests(data.pendingRequests || []);
@@ -27,7 +23,6 @@ const ContactList = () => {
                 setErrorMessage('Error al obtener contactos.');
             }
         };
-
         fetchContacts();
     }, []);
 
@@ -42,30 +37,61 @@ const ContactList = () => {
             console.log('Adding contact:', publicKey.toString()); // Log de agregar contacto
 
             // Firma automática antes de agregar el contacto
-            const message = 'Please sign this message to add a contact.';
-            const signedData = await signMessage('phantom', message);
-            console.log('Signed data:', signedData); // Log de datos firmados
+            const message = "Please sign this message to add a contact.";
+            const signedData = await signMessage(localStorage.getItem('selectedWallet'), message);
+            console.log("Signed data:", signedData); // Log de datos firmados
 
-            const jwtToken = localStorage.getItem('jwtToken');
-            if (!jwtToken) {
-                throw new Error('JWT Token is missing');
-            }
+            // Usar apiService para agregar el contacto
+            await apiRequest('/api/contacts/add', {
+                method: 'POST',
+                body: JSON.stringify({
+                    pubkey: publicKey.toString(),
+                    signature: signedData.signature,
+                    message: signedData.message,
+                }),
+            });
 
-            await addContact(jwtToken, publicKey.toString());
             alert('Solicitud enviada.');
             setErrorMessage('');
             setNewContact('');
         } catch (error) {
             console.error('Error sending contact request:', error);
-            setErrorMessage('Error sending contact request.');
+            setErrorMessage('Error al enviar la solicitud de contacto.');
+        }
+    };
+
+    const handleAcceptContact = async (pubkey) => {
+        try {
+            console.log('Accepting contact:', pubkey); // Log de aceptar contacto
+            await apiRequest(`/api/contacts/accept`, {
+                method: 'POST',
+                body: JSON.stringify({ pubkey }),
+            });
+            setContacts((prev) => [...prev, pubkey]);
+            setPendingRequests((prev) => prev.filter((req) => req !== pubkey));
+        } catch (error) {
+            console.error(error);
+            setErrorMessage('Error al aceptar el contacto.');
+        }
+    };
+
+    const handleRejectContact = async (pubkey) => {
+        try {
+            console.log('Rejecting contact:', pubkey); // Log de rechazar contacto
+            await apiRequest(`/api/contacts/reject`, {
+                method: 'POST',
+                body: JSON.stringify({ pubkey }),
+            });
+            setPendingRequests((prev) => prev.filter((req) => req !== pubkey));
+        } catch (error) {
+            console.error(error);
+            setErrorMessage('Error al rechazar el contacto.');
         }
     };
 
     const handleRemoveContact = (contact) => {
         console.log('Removing contact:', contact); // Log de eliminar contacto
-        setContacts((prevContacts) =>
-            prevContacts.filter((c) => c !== contact)
-        );
+        setContacts(contacts.filter((c) => c !== contact));
     };
 
     return (
@@ -113,10 +139,10 @@ const ContactList = () => {
                         {pendingRequests.map((request, index) => (
                             <li key={index} className="pending-request-item">
                                 {request}
-                                <button onClick={() => alert('Aceptar contacto aún no implementado')}>
+                                <button onClick={() => handleAcceptContact(request)}>
                                     Aceptar
                                 </button>
-                                <button onClick={() => alert('Rechazar contacto aún no implementado')}>
+                                <button onClick={() => handleRejectContact(request)}>
                                     Rechazar
                                 </button>
                             </li>

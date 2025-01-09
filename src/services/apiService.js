@@ -3,16 +3,15 @@ import { getAccessToken, refreshToken } from '../services/tokenService.js';
 
 const cache = new Map();
 
+// Función genérica para realizar solicitudes a la API
 export async function apiRequest(endpoint, options = {}, retry = true) {
     const cacheKey = `${endpoint}:${JSON.stringify(options)}`;
-
-    // Revisa si la respuesta ya está en el caché
+    
     if (cache.has(cacheKey)) {
         console.log('Returning cached response for:', endpoint);
         return cache.get(cacheKey);
     }
 
-    // Obtén el token de acceso
     const token = await getAccessToken();
 
     console.log('JWT Token:', token);
@@ -23,6 +22,8 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
     }
 
     console.log('Making API request to:', `${API_BASE_URL}${endpoint}`);
+    console.log('Access Token:', token);
+
     const headers = {
         'Content-Type': 'application/json',
         ...options.headers,
@@ -30,27 +31,21 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
 
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
+    console.log('Authorization Header:', token ? `Bearer ${token}` : 'No token');
+    console.log('Headers enviados:', headers);
+
     try {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             ...options,
             headers,
-            mode: 'cors', // Asegura que la solicitud utiliza CORS
         });
 
         if (!response.ok) {
-            // Maneja el caso de token expirado
             if (response.status === 401 && retry) {
                 console.warn('Access token expired, attempting to refresh...');
-                await refreshToken(); // Refresca el token
-                return apiRequest(endpoint, options, false); // Reintenta la solicitud
+                await refreshToken();
+                return apiRequest(endpoint, options, false);
             }
-
-            // Maneja errores del servidor
-            if (response.status >= 500) {
-                console.error('Server error:', response.status);
-                throw new Error(`Server error: ${response.status}`);
-            }
-
             const errorData = await response.json();
             console.error('API request failed:', response.statusText, errorData);
             throw new Error(`Request failed: ${response.statusText}`);
@@ -59,19 +54,38 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
         const responseData = await response.json();
         console.log('API response data:', responseData);
 
-        // Guarda la respuesta en caché
         cache.set(cacheKey, responseData);
 
         return responseData;
     } catch (error) {
-        // Manejo general de errores
         console.error('API request error:', error);
-
-        // Devuelve un mensaje más amigable si es un problema de red
-        if (error.name === 'TypeError') {
-            throw new Error('Network error occurred. Please check your connection.');
-        }
-
         throw error;
     }
+}
+
+// Función para obtener contactos desde la API
+export async function getContacts() {
+    return apiRequest('/api/contacts');
+}
+
+// Función para agregar un contacto
+export async function addContact(contact) {
+    return apiRequest('/api/contacts/add', {
+        method: 'POST',
+        body: JSON.stringify(contact),
+    });
+}
+
+// Función para aceptar una solicitud de contacto
+export async function acceptContact(pubkey) {
+    return apiRequest(`/api/contacts/accept/${pubkey}`, {
+        method: 'POST',
+    });
+}
+
+// Función para rechazar una solicitud de contacto
+export async function rejectContact(pubkey) {
+    return apiRequest(`/api/contacts/reject/${pubkey}`, {
+        method: 'POST',
+    });
 }
