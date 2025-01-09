@@ -13,9 +13,23 @@ const useSignal = (backendUrl, pubkey) => {
             return;
         }
 
+        // Inicializar el socket con autoConnect: false
         socket.current = io(backendUrl, {
             query: { pubkey },
+            autoConnect: false, // No conectar automáticamente
         });
+
+        // Conectar el socket solo cuando sea necesario
+        const connectSocket = () => {
+            if (!socket.current.connected) {
+                socket.current.connect();
+            }
+        };
+
+        // Conectar el socket solo si el usuario está autenticado
+        if (pubkey) {
+            connectSocket();
+        }
 
         socket.current.on('connect', () => {
             setConnected(true);
