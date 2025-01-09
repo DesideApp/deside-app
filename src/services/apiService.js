@@ -3,7 +3,6 @@ import { getAccessToken, refreshToken } from '../services/tokenService.js';
 
 const cache = new Map();
 
-// Función genérica para realizar solicitudes a la API
 export async function apiRequest(endpoint, options = {}, retry = true) {
     const cacheKey = `${endpoint}:${JSON.stringify(options)}`;
     
@@ -61,31 +60,4 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
         console.error('API request error:', error);
         throw error;
     }
-}
-
-// Función para obtener contactos desde la API
-export async function getContacts() {
-    return apiRequest('/api/contacts');
-}
-
-// Función para agregar un contacto
-export async function addContact(contact) {
-    return apiRequest('/api/contacts/add', {
-        method: 'POST',
-        body: JSON.stringify(contact),
-    });
-}
-
-// Función para aceptar una solicitud de contacto
-export async function acceptContact(pubkey) {
-    return apiRequest(`/api/contacts/accept/${pubkey}`, {
-        method: 'POST',
-    });
-}
-
-// Función para rechazar una solicitud de contacto
-export async function rejectContact(pubkey) {
-    return apiRequest(`/api/contacts/reject/${pubkey}`, {
-        method: 'POST',
-    });
 }

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { signMessage } from '../../utils/solanaHelpers'; // Importar signMessage
-import { addContact } from '../../services/apiService'; // Importar función addContact desde apiService
+import { getCookie } from '../../services/authServices'; // Importar getCookie para obtener el token CSRF
 
 const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
-    const handleAddContact = async () => {
+    const addContact = async () => {
         if (!pubkey) {
             setErrorMessage('Por favor, introduce una clave pública.');
             return;
@@ -23,20 +23,31 @@ const AddContactForm = ({ onContactAdded }) => {
             const signedData = await signMessage(selectedWallet, message);
             console.log("Signed data:", signedData); // Log de datos firmados
 
-            // Llamada a la función addContact de apiService
-            await addContact({
-                pubkey,
-                signature: signedData.signature,
-                message: signedData.message,
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/contacts/add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`, // Enviar el token JWT
+                    'X-XSRF-TOKEN': getCookie('XSRF-TOKEN') // Enviar el token CSRF
+                },
+                body: JSON.stringify({
+                    pubkey,
+                    signature: signedData.signature,
+                    message: signedData.message,
+                }),
             });
+
+            if (!response.ok) {
+                throw new Error('Failed to send contact request.');
+            }
 
             alert('Contact request sent!');
             setPubkey('');
             setErrorMessage('');
-            onContactAdded(); // Notifica al componente padre que se actualicen los datos
+            onContactAdded(); // Notifica al padre que se actualicen los datos
         } catch (error) {
             console.error('Error sending contact request:', error);
-            setErrorMessage('Error al enviar la solicitud de contacto.');
+            setErrorMessage('Error sending contact request.');
         }
     };
 
@@ -49,7 +60,7 @@ const AddContactForm = ({ onContactAdded }) => {
                 onChange={(e) => setPubkey(e.target.value)}
                 placeholder="Enter public key"
             />
-            <button onClick={handleAddContact}>Send Request</button>
+            <button onClick={addContact}>Send Request</button>
             {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         </div>
     );

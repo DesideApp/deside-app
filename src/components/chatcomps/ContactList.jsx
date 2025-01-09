@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { PublicKey } from '@solana/web3.js';
-import { apiRequest, addContact } from '../../services/apiService.js'; // Centralizar todas las llamadas a la API
+import {
+    getContacts,
+    addContact,
+    acceptContact,
+    rejectContact,
+} from '../../services/contactService.js'; // Utiliza el fetchWithAuth internamente
 import { signMessage } from '../../utils/solanaHelpers'; // Importar signMessage
 import './ContactList.css';
 
@@ -14,7 +19,7 @@ const ContactList = () => {
         console.log('Fetching contacts...');
         const fetchContacts = async () => {
             try {
-                const data = await apiRequest('/api/contacts'); // Usar apiService para obtener contactos
+                const data = await getContacts(); // Ahora utiliza fetchWithAuth
                 console.log('Fetched contacts:', data);
                 setContacts(data.contacts || []);
                 setPendingRequests(data.pendingRequests || []);
@@ -33,58 +38,60 @@ const ContactList = () => {
         }
 
         try {
-            const selectedWallet = localStorage.getItem('selectedWallet'); // Obtener la wallet seleccionada
-            if (!selectedWallet) {
-                throw new Error('No wallet selected.');
-            }
+            const publicKey = new PublicKey(newContact);
+            console.log('Adding contact:', publicKey.toString()); // Log de agregar contacto
 
             // Firma automática antes de agregar el contacto
             const message = "Please sign this message to add a contact.";
-            const signedData = await signMessage(selectedWallet, message);
+            const signedData = await signMessage("phantom", message);
             console.log("Signed data:", signedData); // Log de datos firmados
 
-            // Llamada a la función addContact de apiService
-            await addContact({
-                pubkey: newContact,
-                signature: signedData.signature,
-                message: signedData.message,
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/contacts/add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`, // Enviar el token JWT
+                },
+                body: JSON.stringify({
+                    pubkey: publicKey.toString(),
+                    signature: signedData.signature,
+                    message: signedData.message,
+                }),
             });
 
-            alert('Contact request sent!');
-            setNewContact('');
+            if (!response.ok) {
+                throw new Error('Failed to send contact request.');
+            }
+
+            alert('Solicitud enviada.');
             setErrorMessage('');
+            setNewContact('');
         } catch (error) {
             console.error('Error sending contact request:', error);
-            setErrorMessage('Error al enviar la solicitud de contacto.');
+            setErrorMessage('Error sending contact request.');
         }
     };
 
     const handleAcceptContact = async (pubkey) => {
         try {
             console.log('Accepting contact:', pubkey); // Log de aceptar contacto
-            await apiRequest(`/api/contacts/accept`, {
-                method: 'POST',
-                body: JSON.stringify({ pubkey }),
-            });
+            await acceptContact(pubkey); // Ahora utiliza fetchWithAuth
             setContacts((prev) => [...prev, pubkey]);
             setPendingRequests((prev) => prev.filter((req) => req !== pubkey));
         } catch (error) {
             console.error(error);
-            setErrorMessage('Error al aceptar el contacto.');
+            setErrorMessage(error.message);
         }
     };
 
     const handleRejectContact = async (pubkey) => {
         try {
             console.log('Rejecting contact:', pubkey); // Log de rechazar contacto
-            await apiRequest(`/api/contacts/reject`, {
-                method: 'POST',
-                body: JSON.stringify({ pubkey }),
-            });
+            await rejectContact(pubkey); // Ahora utiliza fetchWithAuth
             setPendingRequests((prev) => prev.filter((req) => req !== pubkey));
         } catch (error) {
             console.error(error);
-            setErrorMessage('Error al rechazar el contacto.');
+            setErrorMessage(error.message);
         }
     };
 
