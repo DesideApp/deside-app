@@ -13,10 +13,15 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
 
     const token = await getAccessToken();
 
+    console.log('JWT Token:', token);
+
     if (!token) {
         console.error('Access Token is missing');
         throw new Error('Access Token is missing');
     }
+
+    console.log('Making API request to:', `${API_BASE_URL}${endpoint}`);
+    console.log('Access Token:', token);
 
     const headers = {
         'Content-Type': 'application/json',
@@ -24,6 +29,9 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
     };
 
     if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    console.log('Authorization Header:', token ? `Bearer ${token}` : 'No token');
+    console.log('Headers enviados:', headers);
 
     try {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -38,11 +46,15 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
                 return apiRequest(endpoint, options, false);
             }
             const errorData = await response.json();
-            throw new Error(errorData.message || 'Request failed');
+            console.error('API request failed:', response.statusText, errorData);
+            throw new Error(`Request failed: ${response.statusText}`);
         }
 
         const responseData = await response.json();
+        console.log('API response data:', responseData);
+
         cache.set(cacheKey, responseData);
+
         return responseData;
     } catch (error) {
         console.error('API request error:', error);
