@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PublicKey } from '@solana/web3.js';
-import { apiRequest } from '../../services/apiService.js'; // Centralizar todas las llamadas a la API
+import { apiRequest, addContact } from '../../services/apiService.js'; // Centralizar todas las llamadas a la API
 import { signMessage } from '../../utils/solanaHelpers'; // Importar signMessage
 import './ContactList.css';
 
@@ -33,27 +33,26 @@ const ContactList = () => {
         }
 
         try {
-            const publicKey = new PublicKey(newContact);
-            console.log('Adding contact:', publicKey.toString()); // Log de agregar contacto
+            const selectedWallet = localStorage.getItem('selectedWallet'); // Obtener la wallet seleccionada
+            if (!selectedWallet) {
+                throw new Error('No wallet selected.');
+            }
 
             // Firma automática antes de agregar el contacto
             const message = "Please sign this message to add a contact.";
-            const signedData = await signMessage(localStorage.getItem('selectedWallet'), message);
+            const signedData = await signMessage(selectedWallet, message);
             console.log("Signed data:", signedData); // Log de datos firmados
 
-            // Usar apiService para agregar el contacto
-            await apiRequest('/api/contacts/add', {
-                method: 'POST',
-                body: JSON.stringify({
-                    pubkey: publicKey.toString(),
-                    signature: signedData.signature,
-                    message: signedData.message,
-                }),
+            // Llamada a la función addContact de apiService
+            await addContact({
+                pubkey: newContact,
+                signature: signedData.signature,
+                message: signedData.message,
             });
 
-            alert('Solicitud enviada.');
-            setErrorMessage('');
+            alert('Contact request sent!');
             setNewContact('');
+            setErrorMessage('');
         } catch (error) {
             console.error('Error sending contact request:', error);
             setErrorMessage('Error al enviar la solicitud de contacto.');
