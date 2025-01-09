@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { signMessage } from '../../utils/solanaHelpers'; // Importar signMessage
-import { getCookie } from '../../services/authServices'; // Importar getCookie para obtener el token CSRF
-import { apiRequest } from '../../services/apiService'; // Importar apiRequest
+import { addContact } from '../../services/contactService'; // Importar addContact
 
 const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
-    const addContact = async () => {
+    const handleAddContact = async () => {
         if (!pubkey) {
             setErrorMessage('Por favor, introduce una clave pública.');
             return;
@@ -24,18 +23,10 @@ const AddContactForm = ({ onContactAdded }) => {
             const signedData = await signMessage(selectedWallet, message);
             console.log("Signed data:", signedData); // Log de datos firmados
 
-            await apiRequest('/api/contacts/add', {
-                method: 'POST',
-                body: JSON.stringify({
-                    pubkey,
-                    signature: signedData.signature,
-                    message: signedData.message,
-                }),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`, // Enviar el token JWT
-                    'X-XSRF-TOKEN': getCookie('XSRF-TOKEN') // Enviar el token CSRF
-                },
+            await addContact({
+                pubkey,
+                signature: signedData.signature,
+                message: signedData.message,
             });
 
             alert('Contact request sent!');
@@ -57,7 +48,7 @@ const AddContactForm = ({ onContactAdded }) => {
                 onChange={(e) => setPubkey(e.target.value)}
                 placeholder="Enter public key"
             />
-            <button onClick={addContact}>Send Request</button>
+            <button onClick={handleAddContact}>Send Request</button>
             {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         </div>
     );

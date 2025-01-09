@@ -1,15 +1,12 @@
-import CryptoJS from 'crypto-js'; // Importar CryptoJS para encriptación
+import CryptoJS from 'crypto-js';
 
-const SECRET_KEY = 'your-secret-key'; // Clave secreta para encriptación
+const SECRET_KEY = 'your-secret-key';
 
-// Guardar token en localStorage
 export function setToken(token) {
     const encryptedToken = CryptoJS.AES.encrypt(token, SECRET_KEY).toString();
     localStorage.setItem('jwtToken', encryptedToken);
-    console.log('JWT Token from localStorage:', localStorage.getItem('jwtToken'));
 }
 
-// Obtener token de localStorage
 export function getToken() {
     const encryptedToken = localStorage.getItem('jwtToken');
     if (!encryptedToken) return null;
@@ -17,12 +14,11 @@ export function getToken() {
     return bytes.toString(CryptoJS.enc.Utf8);
 }
 
-// Eliminar token de localStorage
 export function removeToken() {
     localStorage.removeItem('jwtToken');
 }
 
-let accessToken = null; // Almacenar temporalmente el access token en memoria
+let accessToken = null;
 
 export async function getAccessToken() {
     if (accessToken && !isTokenExpired(accessToken)) {
@@ -42,22 +38,21 @@ export async function getAccessToken() {
         }
 
         const data = await response.json();
-        accessToken = data.accessToken; // Actualiza el access token en memoria
+        accessToken = data.accessToken;
         return accessToken;
     } catch (error) {
         console.error('Failed to refresh token:', error);
         removeToken();
-        window.location.href = '/login'; // Redirige al inicio de sesión
+        window.location.href = '/login';
     }
 }
 
 export function isTokenExpired(token) {
-    const payload = JSON.parse(atob(token.split('.')[1])); // Decodifica el JWT
-    const currentTime = Math.floor(Date.now() / 1000); // Tiempo actual en segundos
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
     return payload.exp < currentTime;
 }
 
-// Añadir la función refreshToken
 export async function refreshToken() {
     try {
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/refresh`, {
@@ -68,31 +63,24 @@ export async function refreshToken() {
         });
 
         if (!response.ok) {
-            console.error('Failed to refresh token');
             throw new Error('Failed to refresh token');
         }
 
         const data = await response.json();
-        setToken(data.token); // Actualiza el token JWT en localStorage
-        accessToken = data.accessToken; // Actualiza el access token en memoria
+        setToken(data.token);
+        accessToken = data.accessToken;
         return data.token;
     } catch (error) {
         console.error('Error al refrescar el token:', error);
         removeToken();
-        window.location.href = '/login'; // Redirige al inicio de sesión
+        window.location.href = '/login';
     }
 }
 
-// Añadir la función getTokens
 export function getTokens() {
     const jwtToken = getToken();
-
-    console.log('JWT Token from localStorage:', localStorage.getItem('jwtToken'));
-
     if (!jwtToken) {
-        console.error('JWT Token is missing');
         throw new Error('JWT Token is missing');
     }
-
     return { jwtToken };
 }

@@ -22,9 +22,7 @@ async function initializeToken() {
         const data = await response.json();
         token = data.token;
         setToken(token);
-        console.log('Token inicial obtenido:', token);
     } catch (error) {
-        console.error('Error al obtener token inicial:', error);
         throw error;
     }
 }
@@ -40,10 +38,8 @@ async function refreshToken() {
         });
 
         setToken(response.token);
-        console.log('Token renovado:', response.token);
         return response.token;
     } catch (error) {
-        console.error('Error al refrescar el token:', error);
         logout();
         throw new Error('Session renewal failed. Please log in again.');
     }
@@ -62,7 +58,6 @@ async function fetchWithAuth(url, options = {}) {
     const response = await fetch(url, options);
 
     if (response.status === 403) {
-        console.warn('Token expirado, intentando refrescar...');
         await refreshToken();
         options.headers.Authorization = `Bearer ${token}`;
         return fetch(url, options);
@@ -105,46 +100,33 @@ export async function login(username, password) {
         });
 
         const { token } = response;
-
         setToken(token);
-
-        console.log('Login exitoso, tokens guardados.');
-        console.log('JWT Token in localStorage:', localStorage.getItem('jwtToken'));
         return response;
     } catch (error) {
-        console.error('Login error:', error);
         throw new Error('Login failed. Please check your credentials and try again.');
     }
 }
 
 export async function loginWithSignature(pubkey, signature, message) {
-    try {
-        const isSignatureValid = verifySignature(message, signature, pubkey);
+    const response = await apiRequest('/api/auth/token', {
+        method: 'POST',
+        body: JSON.stringify({ pubkey, signature, message }),
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
 
-        const response = await apiRequest('/api/auth/token', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ pubkey, isSignatureValid }),
-        });
-
-        const { token, refreshToken } = response;
-
-        setToken(token);
-
-        console.log('Login exitoso, tokens guardados.');
-        console.log('JWT Token in localStorage:', localStorage.getItem('jwtToken'));
-        return response;
-    } catch (error) {
-        console.error('Login error:', error);
-        throw new Error('Login failed. Please check your credentials and try again.');
+    if (!response.ok) {
+        throw new Error('Failed to verify signature.');
     }
+
+    const data = await response.json();
+    setToken(data.token);
+    return data.token;
 }
 
 export function logout() {
     removeToken();
-    window.location.href = '/login';
 }
 
 export async function register(pubkey, signature, message) {
@@ -162,7 +144,6 @@ export async function register(pubkey, signature, message) {
 
         return response;
     } catch (error) {
-        console.error('Registration error:', error);
         throw new Error('Registration failed. Please check your details and try again.');
     }
 }
@@ -177,12 +158,8 @@ export const fetchToken = async (username) => {
 
         if (response.token) {
             setToken(response.token);
-            console.log('JWT Token saved:', response.token);
         }
-
-        console.log('Token fetched successfully');
     } catch (error) {
-        console.error('Error fetching token:', error);
         throw error;
     }
 };

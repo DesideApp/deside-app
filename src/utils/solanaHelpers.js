@@ -8,9 +8,6 @@ const RPC_URL = 'https://rpc.ankr.com/solana_devnet/84d7f098a02eb4c502839fa2cff5
 let activeWalletProvider = null; // Proveedor activo
 let activeWalletType = null; // Tipo de wallet activa
 
-/**
- * Detecta y configura el proveedor de wallet según el tipo seleccionado.
- */
 function getProvider(wallet) {
     if (wallet === "phantom" && window.solana?.isPhantom) {
         return window.solana;
@@ -23,9 +20,6 @@ function getProvider(wallet) {
     }
 }
 
-/**
- * Conecta la wallet seleccionada y guarda su proveedor.
- */
 export async function connectWallet(wallet) {
     try {
         const provider = getProvider(wallet);
@@ -35,7 +29,6 @@ export async function connectWallet(wallet) {
             throw new Error(`Connection to ${wallet} cancelled by the user.`);
         }
 
-        // Configura la wallet activa
         activeWalletProvider = provider;
         activeWalletType = wallet;
 
@@ -47,9 +40,6 @@ export async function connectWallet(wallet) {
     }
 }
 
-/**
- * Desconecta la wallet activa.
- */
 export async function disconnectWallet() {
     try {
         if (activeWalletProvider?.disconnect) {
@@ -57,7 +47,6 @@ export async function disconnectWallet() {
             console.log(`${activeWalletType} Wallet disconnected`);
         }
 
-        // Limpia el estado de la wallet activa
         activeWalletProvider = null;
         activeWalletType = null;
     } catch (error) {
@@ -66,9 +55,6 @@ export async function disconnectWallet() {
     }
 }
 
-/**
- * Firma un mensaje utilizando la wallet activa.
- */
 export async function signMessage(message) {
     try {
         if (!activeWalletProvider) {
@@ -92,9 +78,6 @@ export async function signMessage(message) {
     }
 }
 
-/**
- * Verifica la firma de un mensaje.
- */
 export function verifySignature(message, signature, publicKey) {
     try {
         const encodedMessage = new TextEncoder().encode(message);
@@ -110,9 +93,6 @@ export function verifySignature(message, signature, publicKey) {
     }
 }
 
-/**
- * Obtiene el balance de una wallet en SOL.
- */
 export async function getBalance(walletAddress) {
     try {
         const connection = new Connection(RPC_URL, 'confirmed');
@@ -129,9 +109,6 @@ export async function getBalance(walletAddress) {
     }
 }
 
-/**
- * Realiza una solicitud autenticada a la API.
- */
 export async function fetchSolanaData(endpoint) {
     try {
         const accessToken = await getAccessToken();
@@ -156,9 +133,6 @@ export async function fetchSolanaData(endpoint) {
     }
 }
 
-/**
- * Crea una conexión a la red Solana.
- */
 export function createSolanaConnection(cluster = RPC_URL) {
     try {
         const connection = new Connection(cluster, 'confirmed');

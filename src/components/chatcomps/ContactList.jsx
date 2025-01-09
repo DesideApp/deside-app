@@ -14,8 +14,18 @@ const ContactList = () => {
     const [newContact, setNewContact] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [pendingRequests, setPendingRequests] = useState([]);
+    const [authenticated, setAuthenticated] = useState(false); // Estado de autenticación
 
     useEffect(() => {
+        const token = localStorage.getItem('jwtToken');
+        if (token) {
+            setAuthenticated(true); // Actualizar el estado de autenticación si hay un token
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!authenticated) return;
+
         console.log('Fetching contacts...');
         const fetchContacts = async () => {
             try {
@@ -29,7 +39,7 @@ const ContactList = () => {
             }
         };
         fetchContacts();
-    }, []);
+    }, [authenticated]);
 
     const handleAddContact = async () => {
         if (!newContact) {
