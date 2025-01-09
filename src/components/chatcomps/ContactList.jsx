@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { PublicKey } from '@solana/web3.js';
 import {
-    getContacts,
-    addContact,
-    acceptContact,
-    rejectContact,
-} from '../../services/contactService.js'; // Utiliza el fetchWithAuth internamente
+    fetchContacts,
+    createContact,
+    approveContact,
+    declineContact,
+} from '../../services/contactService.js'; // Importar funciones desde contactService.js
 import { signMessage } from '../../utils/solanaHelpers'; // Importar signMessage
 import './ContactList.css';
 
@@ -27,9 +27,9 @@ const ContactList = () => {
         if (!authenticated) return;
 
         console.log('Fetching contacts...');
-        const fetchContacts = async () => {
+        const fetchContactsData = async () => {
             try {
-                const data = await getContacts(); // Ahora utiliza fetchWithAuth
+                const data = await fetchContacts(); // Ahora utiliza fetchWithAuth
                 console.log('Fetched contacts:', data);
                 setContacts(data.contacts || []);
                 setPendingRequests(data.pendingRequests || []);
@@ -38,7 +38,7 @@ const ContactList = () => {
                 setErrorMessage('Error al obtener contactos.');
             }
         };
-        fetchContacts();
+        fetchContactsData();
     }, [authenticated]);
 
     const handleAddContact = async () => {
@@ -56,17 +56,10 @@ const ContactList = () => {
             const signedData = await signMessage("phantom", message);
             console.log("Signed data:", signedData); // Log de datos firmados
 
-            await apiRequest('/api/contacts/add', {
-                method: 'POST',
-                body: JSON.stringify({
-                    pubkey: publicKey.toString(),
-                    signature: signedData.signature,
-                    message: signedData.message,
-                }),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`, // Enviar el token JWT
-                },
+            await createContact({
+                pubkey: publicKey.toString(),
+                signature: signedData.signature,
+                message: signedData.message,
             });
 
             alert('Solicitud enviada.');
@@ -81,7 +74,7 @@ const ContactList = () => {
     const handleAcceptContact = async (pubkey) => {
         try {
             console.log('Accepting contact:', pubkey); // Log de aceptar contacto
-            await acceptContact(pubkey); // Ahora utiliza fetchWithAuth
+            await approveContact(pubkey); // Ahora utiliza fetchWithAuth
             setContacts((prev) => [...prev, pubkey]);
             setPendingRequests((prev) => prev.filter((req) => req !== pubkey));
         } catch (error) {
@@ -93,7 +86,7 @@ const ContactList = () => {
     const handleRejectContact = async (pubkey) => {
         try {
             console.log('Rejecting contact:', pubkey); // Log de rechazar contacto
-            await rejectContact(pubkey); // Ahora utiliza fetchWithAuth
+            await declineContact(pubkey); // Ahora utiliza fetchWithAuth
             setPendingRequests((prev) => prev.filter((req) => req !== pubkey));
         } catch (error) {
             console.error(error);

@@ -7,14 +7,12 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
     const cacheKey = `${endpoint}:${JSON.stringify(options)}`;
     
     if (cache.has(cacheKey)) {
-        console.log('Returning cached response for:', endpoint);
         return cache.get(cacheKey);
     }
 
     const token = await getAccessToken();
 
     if (!token) {
-        console.error('Access Token is missing');
         throw new Error('Access Token is missing');
     }
 
@@ -44,7 +42,6 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
         cache.set(cacheKey, responseData);
         return responseData;
     } catch (error) {
-        console.error('API request error:', error);
         throw error;
     }
 }

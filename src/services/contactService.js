@@ -1,6 +1,5 @@
-import { apiRequest, getContacts, addContact, acceptContact, rejectContact } from '../services/apiService.js';
-import { getTokens } from '../services/tokenService.js'; // Import getTokens function
-import API_BASE_URL from '../config/apiConfig.js'; // Import API_BASE_URL
+import { getContacts, addContact, acceptContact, rejectContact } from './apiService.js';
+import { getTokens } from './tokenService.js'; // Import getTokens function
 
 // Validar clave pública
 function validatePubkey(pubkey) {
