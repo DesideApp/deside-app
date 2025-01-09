@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { signMessage } from '../../utils/solanaHelpers'; // Importar signMessage
-import { getCookie } from '../../services/authServices'; // Importar getCookie para obtener el token CSRF
+import { signMessage } from '../../utils/solanaHelpers';
+import { apiRequest } from '../../services/apiService';
 
 const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState('');
@@ -13,38 +13,29 @@ const AddContactForm = ({ onContactAdded }) => {
         }
 
         try {
-            const selectedWallet = localStorage.getItem('selectedWallet'); // Obtener la wallet seleccionada
+            const selectedWallet = localStorage.getItem('selectedWallet');
             if (!selectedWallet) {
                 throw new Error('No wallet selected.');
             }
 
-            // Firma automática antes de agregar el contacto
             const message = "Please sign this message to add a contact.";
             const signedData = await signMessage(selectedWallet, message);
-            console.log("Signed data:", signedData); // Log de datos firmados
 
-            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/contacts/add`, {
+            const body = {
+                pubkey,
+                signature: signedData.signature,
+                message: signedData.message,
+            };
+
+            await apiRequest('/api/contacts/add', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`, // Enviar el token JWT
-                    'X-XSRF-TOKEN': getCookie('XSRF-TOKEN') // Enviar el token CSRF
-                },
-                body: JSON.stringify({
-                    pubkey,
-                    signature: signedData.signature,
-                    message: signedData.message,
-                }),
+                body: JSON.stringify(body),
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to send contact request.');
-            }
 
             alert('Contact request sent!');
             setPubkey('');
             setErrorMessage('');
-            onContactAdded(); // Notifica al padre que se actualicen los datos
+            onContactAdded(); // Notifica al componente padre
         } catch (error) {
             console.error('Error sending contact request:', error);
             setErrorMessage('Error sending contact request.');

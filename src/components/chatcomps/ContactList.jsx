@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PublicKey } from '@solana/web3.js';
-import {
-    getContacts,
-    addContact,
-    acceptContact,
-    rejectContact,
-} from '../../services/contactService.js'; // Utiliza el fetchWithAuth internamente
-import { signMessage } from '../../utils/solanaHelpers'; // Importar signMessage
+import { apiRequest } from '../../services/apiService';
+import { signMessage } from '../../utils/solanaHelpers';
 import './ContactList.css';
 
 const ContactList = () => {
@@ -16,11 +11,9 @@ const ContactList = () => {
     const [pendingRequests, setPendingRequests] = useState([]);
 
     useEffect(() => {
-        console.log('Fetching contacts...');
         const fetchContacts = async () => {
             try {
-                const data = await getContacts(); // Ahora utiliza fetchWithAuth
-                console.log('Fetched contacts:', data);
+                const data = await apiRequest('/api/contacts');
                 setContacts(data.contacts || []);
                 setPendingRequests(data.pendingRequests || []);
             } catch (error) {
@@ -39,29 +32,19 @@ const ContactList = () => {
 
         try {
             const publicKey = new PublicKey(newContact);
-            console.log('Adding contact:', publicKey.toString()); // Log de agregar contacto
-
-            // Firma automática antes de agregar el contacto
             const message = "Please sign this message to add a contact.";
-            const signedData = await signMessage("phantom", message);
-            console.log("Signed data:", signedData); // Log de datos firmados
+            const signedData = await signMessage('phantom', message);
 
-            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/contacts/add`, {
+            const body = {
+                pubkey: publicKey.toString(),
+                signature: signedData.signature,
+                message: signedData.message,
+            };
+
+            await apiRequest('/api/contacts/add', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`, // Enviar el token JWT
-                },
-                body: JSON.stringify({
-                    pubkey: publicKey.toString(),
-                    signature: signedData.signature,
-                    message: signedData.message,
-                }),
+                body: JSON.stringify(body),
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to send contact request.');
-            }
 
             alert('Solicitud enviada.');
             setErrorMessage('');
@@ -74,36 +57,38 @@ const ContactList = () => {
 
     const handleAcceptContact = async (pubkey) => {
         try {
-            console.log('Accepting contact:', pubkey); // Log de aceptar contacto
-            await acceptContact(pubkey); // Ahora utiliza fetchWithAuth
+            await apiRequest(`/api/contacts/accept`, {
+                method: 'POST',
+                body: JSON.stringify({ pubkey }),
+            });
             setContacts((prev) => [...prev, pubkey]);
             setPendingRequests((prev) => prev.filter((req) => req !== pubkey));
         } catch (error) {
-            console.error(error);
-            setErrorMessage(error.message);
+            console.error('Error accepting contact:', error);
+            setErrorMessage('Error accepting contact.');
         }
     };
 
     const handleRejectContact = async (pubkey) => {
         try {
-            console.log('Rejecting contact:', pubkey); // Log de rechazar contacto
-            await rejectContact(pubkey); // Ahora utiliza fetchWithAuth
+            await apiRequest(`/api/contacts/reject`, {
+                method: 'POST',
+                body: JSON.stringify({ pubkey }),
+            });
             setPendingRequests((prev) => prev.filter((req) => req !== pubkey));
         } catch (error) {
-            console.error(error);
-            setErrorMessage(error.message);
+            console.error('Error rejecting contact:', error);
+            setErrorMessage('Error rejecting contact.');
         }
     };
 
     const handleRemoveContact = (contact) => {
-        console.log('Removing contact:', contact); // Log de eliminar contacto
-        setContacts(contacts.filter((c) => c !== contact));
+        setContacts((prev) => prev.filter((c) => c !== contact));
     };
 
     return (
         <div className="contact-list-container">
             <h3>Mis Contactos</h3>
-
             <div className="wallet-input-container">
                 <textarea
                     value={newContact}
@@ -116,9 +101,7 @@ const ContactList = () => {
                     Agregar Contacto
                 </button>
             </div>
-
             {errorMessage && <p className="error-message">{errorMessage}</p>}
-
             <div className="contacts-list-wrapper">
                 {contacts.length === 0 ? (
                     <p className="no-contacts-message">No tienes contactos agregados.</p>
@@ -135,7 +118,6 @@ const ContactList = () => {
                     </ul>
                 )}
             </div>
-
             <div className="pending-requests-wrapper">
                 <h3>Solicitudes Pendientes</h3>
                 {pendingRequests.length === 0 ? (
