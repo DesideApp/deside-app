@@ -26,6 +26,8 @@ function ChatInput({ onSendMessage }) {
         <div className="chat-input-container">
             <input
                 type="text"
+                id="chatMessage"
+                name="chatMessage"
                 value={inputValue}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown} // Detectar "Enter"
