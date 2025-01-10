@@ -46,6 +46,7 @@ const AddContactForm = ({ onContactAdded }) => {
                 type="text"
                 id="pubkey"
                 name="pubkey"
+                autocomplete="on"
                 value={pubkey}
                 onChange={(e) => setPubkey(e.target.value)}
                 placeholder="Enter public key"
