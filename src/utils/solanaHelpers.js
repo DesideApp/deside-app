@@ -78,18 +78,36 @@ export async function signMessage(message) {
     }
 }
 
-export function verifySignature(message, signature, publicKey) {
+export async function fetchSolanaPrice() {
     try {
-        const encodedMessage = new TextEncoder().encode(message);
-        const pubKey = new PublicKey(publicKey);
-        const signatureUint8Array = Uint8Array.from(atob(signature), c => c.charCodeAt(0));
-
-        const isValid = pubKey.verify(encodedMessage, signatureUint8Array);
-        console.log(`Signature valid: ${isValid}`);
-        return isValid;
+        const price = await apiRequest("/api/solana-price", { method: "GET" });
+        console.log("Solana price fetched:", price);
+        return price;
     } catch (error) {
-        console.error('Error verifying signature:', error);
-        return false;
+        console.error("Error fetching Solana price:", error);
+        throw error;
+    }
+}
+
+export async function fetchSolanaTPS() {
+    try {
+        const tps = await apiRequest("/api/solana-tps", { method: "GET" });
+        console.log("Solana TPS fetched:", tps);
+        return tps;
+    } catch (error) {
+        console.error("Error fetching Solana TPS:", error);
+        throw error;
+    }
+}
+
+export async function fetchSolanaStatus() {
+    try {
+        const status = await apiRequest("/api/solana-status", { method: "GET" });
+        console.log("Solana network status fetched:", status);
+        return status;
+    } catch (error) {
+        console.error("Error fetching Solana network status:", error);
+        throw error;
     }
 }
 
