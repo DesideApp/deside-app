@@ -48,18 +48,22 @@ export async function getAccessToken() {
 }
 
 export function isTokenExpired(token) {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const currentTime = Math.floor(Date.now() / 1000);
-    return payload.exp < currentTime;
+    try {
+        if (!token) return true;
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const currentTime = Math.floor(Date.now() / 1000);
+        return payload.exp < currentTime;
+    } catch (error) {
+        console.error('Error parsing token:', error);
+        return true;
+    }
 }
 
 export async function refreshToken() {
     try {
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/refresh`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
         });
 
         if (!response.ok) {
@@ -71,9 +75,9 @@ export async function refreshToken() {
         accessToken = data.accessToken;
         return data.token;
     } catch (error) {
-        console.error('Error al refrescar el token:', error);
+        console.error('Error refreshing token:', error);
         removeToken();
-        window.location.href = '/login';
+        throw new Error('Unable to refresh session. Please log in again.');
     }
 }
 

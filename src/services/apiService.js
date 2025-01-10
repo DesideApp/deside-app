@@ -5,25 +5,19 @@ const cache = new Map();
 
 export async function apiRequest(endpoint, options = {}, retry = true) {
     const cacheKey = `${endpoint}:${JSON.stringify(options)}`;
-    
+
     if (cache.has(cacheKey)) {
         return cache.get(cacheKey);
     }
 
-    const token = await getAccessToken();
-
-    if (!token) {
-        throw new Error('Access Token is missing');
-    }
-
-    const headers = {
-        'Content-Type': 'application/json',
-        ...options.headers,
-    };
-
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-
     try {
+        const token = await getAccessToken();
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...options.headers,
+        };
+
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             ...options,
             headers,
@@ -35,13 +29,14 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
                 return apiRequest(endpoint, options, false);
             }
             const errorData = await response.json();
-            throw new Error(`Request failed: ${response.statusText}`);
+            throw new Error(`Request failed: ${response.status} - ${errorData.message || response.statusText}`);
         }
 
         const responseData = await response.json();
         cache.set(cacheKey, responseData);
         return responseData;
     } catch (error) {
+        console.error(`Error in API request to ${endpoint}:`, error);
         throw error;
     }
 }

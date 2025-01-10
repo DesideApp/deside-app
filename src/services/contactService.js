@@ -1,56 +1,37 @@
 import { getContacts, addContact, acceptContact, rejectContact } from './apiService.js';
-import { getTokens } from './tokenService.js'; // Import getTokens function
 
-// Validar clave pública
-function validatePubkey(pubkey) {
-    if (!pubkey) {
-        throw new Error('Public key is required.');
-    }
-}
-
-// Obtener contactos
 export async function fetchContacts() {
     try {
-        const { jwtToken } = getTokens();
-        const data = await getContacts();
-        return data;
+        return await getContacts();
     } catch (error) {
-        throw new Error('Failed to fetch contacts. Please try again.');
+        console.error('Failed to fetch contacts:', error);
+        throw new Error('Unable to fetch contacts. Please try again.');
     }
 }
 
-// Agregar contacto
 export async function createContact(pubkey) {
     try {
-        validatePubkey(pubkey);
-        const { jwtToken } = getTokens();
-        const data = await addContact({ pubkey });
-        return data;
+        return await addContact({ pubkey });
     } catch (error) {
-        throw new Error('Failed to add contact. Please try again.');
+        console.error('Failed to add contact:', error);
+        throw new Error('Unable to add contact. Please try again.');
     }
 }
 
-// Aceptar contacto
 export async function approveContact(pubkey) {
     try {
-        validatePubkey(pubkey);
-        const { jwtToken } = getTokens();
-        const data = await acceptContact(pubkey);
-        return data;
+        return await acceptContact(pubkey);
     } catch (error) {
-        throw new Error('Failed to accept contact. Please try again.');
+        console.error('Failed to accept contact:', error);
+        throw new Error('Unable to accept contact. Please try again.');
     }
 }
 
-// Rechazar contacto
 export async function declineContact(pubkey) {
     try {
-        validatePubkey(pubkey);
-        const { jwtToken } = getTokens();
-        const data = await rejectContact(pubkey);
-        return data;
+        return await rejectContact(pubkey);
     } catch (error) {
-        throw new Error('Failed to reject contact. Please try again.');
+        console.error('Failed to reject contact:', error);
+        throw new Error('Unable to reject contact. Please try again.');
     }
 }
