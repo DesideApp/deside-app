@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import DOMPurify from 'dompurify';
 
-const useSignal = (backendUrl, pubkey) => {
+const useSignal = (backendUrl, pubkey, isAuthenticated) => {
     const socket = useRef(null);
     const [connected, setConnected] = useState(false);
     const [signals, setSignals] = useState([]);
 
     useEffect(() => {
-        if (!pubkey) {
-            console.error('Pubkey is required to initialize signaling.');
+        if (!pubkey || !isAuthenticated) {
+            console.error('Pubkey and authentication are required to initialize signaling.');
             return;
         }
 
@@ -27,7 +27,7 @@ const useSignal = (backendUrl, pubkey) => {
         };
 
         // Conectar el socket solo si el usuario está autenticado
-        if (pubkey) {
+        if (isAuthenticated) {
             connectSocket();
         }
 
@@ -49,7 +49,7 @@ const useSignal = (backendUrl, pubkey) => {
                 socket.current.disconnect();
             }
         };
-    }, [backendUrl, pubkey]);
+    }, [backendUrl, pubkey, isAuthenticated]);
 
     const sendSignal = (targetPubkey, signalData) => {
         if (socket.current) {
