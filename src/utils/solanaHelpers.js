@@ -45,6 +45,31 @@ export async function connectWallet(wallet) {
     }
 }
 
+export async function disconnectWallet(wallet) {
+    try {
+        let provider;
+
+        // Detecta el proveedor según el wallet seleccionado
+        if (wallet === "phantom" && window.solana?.isPhantom) {
+            provider = window.solana;
+        } else if (wallet === "backpack" && window.xnft?.solana) {
+            provider = window.xnft.solana;
+        } else if (wallet === "magiceden" && window.magicEden?.solana) {
+            provider = window.magicEden.solana;
+        } else {
+            console.error(`${wallet} Wallet not detected`);
+        }
+
+        if (provider && provider.disconnect) {
+            await provider.disconnect();
+            console.log(`${wallet} Wallet disconnected`);
+        }
+    } catch (error) {
+        console.error(`Error al desconectar ${wallet} Wallet:`, error);
+        throw new Error(`Failed to disconnect ${wallet} Wallet.`);
+    }
+}
+
 // Nueva función para obtener el balance de una wallet
 export async function getBalance(walletAddress) {
     try {
@@ -138,10 +163,12 @@ export async function signMessage(wallet, message) {
 
 // Función para sobrescribir window.ethereum cuando sea necesario
 export function overwriteEthereumProvider(wallet) {
-    if (wallet === "metamask" && window.ethereum?.isMetaMask) {
-        window.ethereum = window.ethereum;
+    if (wallet === "phantom" && window.solana?.isPhantom) {
+        window.ethereum = window.solana;
     } else if (wallet === "backpack" && window.xnft?.ethereum) {
         window.ethereum = window.xnft.ethereum;
+    } else if (wallet === "magiceden" && window.magicEden?.ethereum) {
+        window.ethereum = window.magicEden.ethereum;
     } else {
         console.error(`${wallet} Ethereum provider not detected`);
     }
