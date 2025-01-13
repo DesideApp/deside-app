@@ -18,7 +18,7 @@ function WalletMenu({
                 const selectedWallet = localStorage.getItem("selectedWallet");
                 
                 if (selectedWallet) {
-                    await disconnectWallet(selectedWallet); // Desconectar la wallet activa
+                    await disconnectWallet(); // Desconectar la wallet activa
                 }
 
                 // Limpieza de datos locales
