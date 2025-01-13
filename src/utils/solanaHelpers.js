@@ -161,3 +161,16 @@ export function createSolanaConnection(cluster = RPC_URL) {
         throw error;
     }
 }
+
+// Función para sobrescribir window.ethereum cuando sea necesario
+export function overwriteEthereumProvider(wallet) {
+    if (wallet === "phantom" && window.solana?.isPhantom) {
+        window.ethereum = window.solana;
+    } else if (wallet === "backpack" && window.xnft?.ethereum) {
+        window.ethereum = window.xnft.ethereum;
+    } else if (wallet === "magiceden" && window.magicEden?.ethereum) {
+        window.ethereum = window.magicEden.ethereum;
+    } else {
+        console.error(`${wallet} Ethereum provider not detected`);
+    }
+}
