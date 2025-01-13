@@ -37,9 +37,14 @@ function WalletMenu({
         <div className="wallet-menu-overlay" onClick={onClose}>
             <div className="wallet-menu" onClick={(e) => e.stopPropagation()} ref={menuRef}>
                 <h2>Wallet Menu</h2>
-                <p>Connected Wallet: {walletAddress}</p>
-                <button onClick={handleConnectModal}>Connect Another Wallet</button>
-                <button onClick={handleLogoutClick}>Logout</button>
+                {walletAddress ? (
+                    <>
+                        <p>Connected Wallet: {walletAddress}</p>
+                        <button onClick={handleLogoutClick}>Logout</button>
+                    </>
+                ) : (
+                    <button onClick={handleConnectModal}>Connect Wallet</button>
+                )}
                 <button onClick={onClose}>Close</button>
             </div>
         </div>

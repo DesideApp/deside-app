@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { connectWallet, getBalance, signMessage, disconnectWallet } from "../utils/solanaHelpers.js";
+import { connectWallet, getBalance, signMessage } from "../utils/solanaHelpers.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -9,113 +9,70 @@ function WalletButton() {
     const [balance, setBalance] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedWallet, setSelectedWallet] = useState(localStorage.getItem("selectedWallet") || null);
+    const [selectedWallet, setSelectedWallet] = useState(localStorage.getItem('selectedWallet') || null);
     const menuRef = useRef(null);
-    const isSigning = useRef(false);
+    const isSigning = useRef(false); // Añadir un ref para controlar la firma
 
-    // Actualiza el balance y JWT token al conectar la wallet
-    const updateWalletData = async (address, wallet) => {
-        try {
-            const solBalance = await getBalance(address);
-            console.log("Wallet balance:", solBalance);
-            setBalance(solBalance);
-
-            // Firma automática al conectar la wallet
-            if (!isSigning.current) {
-                isSigning.current = true;
-                const message = "Please sign this message to authenticate.";
-                const signedData = await signMessage(wallet, message);
-                console.log("Signed data:", signedData);
-
-                // Enviar la firma al backend para obtener el token JWT
-                const response = await fetch("https://backend-deside.onrender.com/api/auth/token", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        pubkey: address,
-                        signature: signedData.signature,
-                        message: message,
-                    }),
-                });
-
-                if (!response.ok) {
-                    throw new Error("Failed to verify signature.");
-                }
-
-                const data = await response.json();
-                console.log("JWT Token:", data.token);
-
-                // Guardar el token JWT en localStorage
-                localStorage.setItem("jwtToken", data.token);
-            }
-        } catch (error) {
-            console.error("Error updating wallet data:", error);
-        } finally {
-            isSigning.current = false;
-        }
-    };
-
-    // Manejo de conexión a wallet
-    const handleConnect = async (wallet) => {
-        try {
-            // Desconectar cualquier wallet previamente conectada
-            if (selectedWallet) {
-                await disconnectWallet(selectedWallet);
-            }
-
-            const address = await connectWallet(wallet);
-            if (address) {
-                console.log(`Connected to ${wallet} Wallet:`, address);
-                setWalletAddress(address);
-                setSelectedWallet(wallet);
-                localStorage.setItem("selectedWallet", wallet);
-
-                // Actualizar balance y autenticar wallet
-                await updateWalletData(address, wallet);
-            }
-        } catch (error) {
-            console.error(`Error connecting ${wallet} Wallet:`, error);
-            alert(`Failed to connect ${wallet} Wallet. Please try again.`);
-        } finally {
-            setIsModalOpen(false);
-        }
-    };
-
-    // Manejo de logout
-    const handleLogout = async () => {
-        if (window.confirm("Are you sure you want to log out?")) {
-            try {
-                if (selectedWallet) {
-                    await disconnectWallet(selectedWallet);
-                }
-            } catch (error) {
-                console.error("Error disconnecting wallet:", error);
-            } finally {
-                console.log("Wallet logged out");
-                setWalletAddress(null);
-                setBalance(null);
-                setIsMenuOpen(false);
-                localStorage.removeItem("jwtToken");
-                localStorage.removeItem("selectedWallet");
-            }
-        }
-    };
-
-    // Manejo de eventos de conexión/desconexión de la wallet
     useEffect(() => {
         if (window.solana) {
             window.solana.on("connect", async () => {
                 const address = window.solana.publicKey.toString();
-                console.log("Wallet connected:", address);
+                console.log("Wallet connected:", address); // Log de conexión
                 setWalletAddress(address);
-                await updateWalletData(address, selectedWallet);
+
+                try {
+                    const solBalance = await getBalance(address);
+                    console.log("Wallet balance:", solBalance); // Log de balance
+                    setBalance(solBalance);
+                } catch (error) {
+                    console.error("Error al obtener el balance:", error);
+                }
+
+                // Firma automática al conectar la wallet
+                if (!isSigning.current) {
+                    isSigning.current = true;
+                    try {
+                        const message = "Please sign this message to authenticate.";
+                        const signedData = await signMessage(selectedWallet, message);
+                        console.log("Signed data:", signedData); // Log de datos firmados
+
+                        // Enviar la firma al backend para verificarla y generar un token JWT
+                        const response = await fetch('https://backend-deside.onrender.com/api/auth/token', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                pubkey: address, // Asegurarse de que la clave pública esté en formato base58
+                                signature: signedData.signature,
+                                message: message,
+                            }),
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to verify signature.');
+                        }
+
+                        const data = await response.json();
+                        console.log("JWT Token:", data.token); // Log del token JWT
+
+                        // Almacenar el token JWT en localStorage
+                        localStorage.setItem('jwtToken', data.token);
+                    } catch (error) {
+                        console.error("Error signing message:", error);
+                    } finally {
+                        isSigning.current = false;
+                    }
+                }
             });
 
             window.solana.on("disconnect", () => {
-                console.log("Wallet disconnected");
-                handleLogout();
+                console.log("Wallet disconnected"); // Log de desconexión
+                setWalletAddress(null);
+                setBalance(null);
+                setIsMenuOpen(false);
+                localStorage.removeItem('jwtToken'); // Eliminar el token JWT al desconectar
+                localStorage.removeItem('selectedWallet'); // Eliminar la wallet seleccionada al desconectar
             });
         }
 
@@ -127,7 +84,90 @@ function WalletButton() {
         };
     }, [selectedWallet]);
 
-    // Cerrar el menú si se hace clic fuera de él
+    const handleConnect = async (wallet) => {
+        try {
+            const address = await connectWallet(wallet);
+            if (address) {
+                console.log(`Connected to ${wallet} Wallet:`, address); // Log de conexión específica
+                setWalletAddress(address);
+                setSelectedWallet(wallet);
+                localStorage.setItem('selectedWallet', wallet); // Almacenar la wallet seleccionada en localStorage
+                try {
+                    const solBalance = await getBalance(address);
+                    console.log("Wallet balance:", solBalance); // Log de balance
+                    setBalance(solBalance);
+                } catch (error) {
+                    console.error("Error al obtener el balance:", error);
+                }
+
+                // Firma automática al conectar la wallet
+                if (!isSigning.current) {
+                    isSigning.current = true;
+                    try {
+                        const message = "Please sign this message to authenticate.";
+                        const signedData = await signMessage(wallet, message);
+                        console.log("Signed data:", signedData); // Log de datos firmados
+
+                        // Enviar la firma al backend para verificarla y generar un token JWT
+                        const response = await fetch('https://backend-deside.onrender.com/api/auth/token', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                pubkey: address, // Asegurarse de que la clave pública esté en formato base58
+                                signature: signedData.signature,
+                                message: message,
+                            }),
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to verify signature.');
+                        }
+
+                        const data = await response.json();
+                        console.log("JWT Token:", data.token); // Log del token JWT
+
+                        // Almacenar el token JWT en localStorage
+                        localStorage.setItem('jwtToken', data.token);
+                    } catch (error) {
+                        console.error("Error signing message:", error);
+                    } finally {
+                        isSigning.current = false;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error(`Error al conectar ${wallet} Wallet:`, error);
+            alert(`Failed to connect ${wallet} Wallet. Please try again.`);
+        } finally {
+            setIsModalOpen(false);
+        }
+    };
+
+    const handleLogout = () => {
+        if (window.confirm("¿Seguro que quieres desconectarte?")) {
+            try {
+                if (window.solana?.disconnect) {
+                    window.solana.disconnect();
+                }
+            } catch (error) {
+                console.error("Error al desconectar la wallet:", error);
+            } finally {
+                console.log("Wallet logged out"); // Log de desconexión
+                setWalletAddress(null);
+                setBalance(null);
+                setIsMenuOpen(false);
+                localStorage.removeItem('jwtToken'); // Eliminar el token JWT al desconectar
+                localStorage.removeItem('selectedWallet'); // Eliminar la wallet seleccionada al desconectar
+            }
+        }
+    };
+
+    const handleMenuButtonClick = () => {
+        setIsMenuOpen(!isMenuOpen);
+    };
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -160,7 +200,7 @@ function WalletButton() {
 
             <button
                 className="menu-button"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={handleMenuButtonClick}
                 aria-label="Menu"
             >
                 <span className="menu-icon"></span>
