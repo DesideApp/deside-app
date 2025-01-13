@@ -1,15 +1,32 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Header from "./components/Header.jsx";
 import Home from "./pages/Home.jsx";
 import Chat from './pages/chat/Chat.jsx';
 import BottomBar from "./components/BottomBar.jsx";
 
+const routes = [
+    {
+        path: "/",
+        element: <Home />,
+    },
+    {
+        path: "/chat",
+        element: <Chat />,
+    },
+];
+
+const router = createBrowserRouter(routes, {
+    future: {
+        v7_relativeSplatPath: true,
+    },
+});
+
 function Main() {
     console.log("App component loaded"); // Log de carga de la aplicación
 
     return (
-        <Router>
+        <RouterProvider router={router}>
             <div>
                 <Header />
                 <main>
@@ -20,7 +37,7 @@ function Main() {
                 </main>
                 <BottomBar />
             </div>
-        </Router>
+        </RouterProvider>
     );
 }
 
