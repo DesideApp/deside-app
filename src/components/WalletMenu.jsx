@@ -1,54 +1,52 @@
-import React from "react";
-import { disconnectWallet } from "../utils/solanaHelpers.js";
-import "./WalletMenu.css";
+import React, { useState, useEffect } from 'react';
+import { getConnectedWallet, connectWallet, disconnectWallet } from '../utils/solanaHelpers';
+import './WalletMenu.css';
 
-function WalletMenu({ 
-    isOpen, 
-    onClose, 
-    walletAddress, 
-    handleConnectModal, 
-    handleLogout, 
-    menuRef 
-}) {
-    if (!isOpen) return null;
+const WalletMenu = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [walletConnected, setWalletConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState(null);
 
-    const handleLogoutClick = async () => {
-        if (window.confirm("Are you sure you want to log out?")) {
-            try {
-                const selectedWallet = localStorage.getItem("selectedWallet");
-                
-                if (selectedWallet) {
-                    await disconnectWallet(); // Desconectar la wallet activa
-                }
-
-                // Limpieza de datos locales
-                localStorage.removeItem("jwtToken"); 
-                localStorage.removeItem("selectedWallet");
-            } catch (error) {
-                console.error("Error disconnecting wallet:", error);
-            } finally {
-                console.log("Wallet disconnected");
-                handleLogout(); // Llamada a la función de logout proporcionada
-            }
-        }
+  useEffect(() => {
+    // Escucha los eventos de conexión y desconexión
+    const updateConnectionStatus = async () => {
+      const connectedWallet = getConnectedWallet();
+      if (connectedWallet) {
+        setWalletConnected(true);
+        setWalletAddress(connectedWallet.walletAddress);
+      } else {
+        setWalletConnected(false);
+        setWalletAddress(null);
+      }
     };
+    updateConnectionStatus();
+  }, []);
 
-    return (
-        <div className="wallet-menu-overlay" onClick={onClose}>
-            <div className="wallet-menu" onClick={(e) => e.stopPropagation()} ref={menuRef}>
-                <h2>Wallet Menu</h2>
-                {walletAddress ? (
-                    <>
-                        <p>Connected Wallet: {walletAddress}</p>
-                        <button onClick={handleLogoutClick}>Logout</button>
-                    </>
-                ) : (
-                    <button onClick={handleConnectModal}>Connect Wallet</button>
-                )}
-                <button onClick={onClose}>Close</button>
-            </div>
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+
+  return (
+    <div>
+      <button onClick={toggleMenu}>
+        {walletConnected ? `Wallet: ${walletAddress}` : 'Connect Wallet'}
+      </button>
+      {isMenuOpen && (
+        <div className="wallet-menu">
+          {walletConnected ? (
+            <>
+              <p>{walletAddress}</p>
+              <button onClick={disconnectWallet}>Logout</button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => connectWallet('phantom')}>Phantom</button>
+              <button onClick={() => connectWallet('backpack')}>Backpack</button>
+              <button onClick={() => connectWallet('magiceden')}>Magic Eden</button>
+            </>
+          )}
         </div>
-    );
-}
+      )}
+    </div>
+  );
+};
 
 export default WalletMenu;

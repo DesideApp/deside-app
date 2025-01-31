@@ -32,6 +32,9 @@ export async function connectWallet(wallet) {
         activeWalletProvider = provider;
         activeWalletType = wallet;
 
+        localStorage.setItem('walletType', wallet);
+        localStorage.setItem('walletAddress', response.publicKey.toBase58());
+
         console.log(`${wallet} Wallet connected: ${response.publicKey.toString()}`);
         return response.publicKey.toString();
     } catch (error) {
@@ -49,10 +52,25 @@ export async function disconnectWallet() {
 
         activeWalletProvider = null;
         activeWalletType = null;
+
+        localStorage.removeItem('walletType');
+        localStorage.removeItem('walletAddress');
     } catch (error) {
         console.error(`Error desconectando la wallet:`, error);
         throw error;
     }
+}
+
+export function getConnectedWallet() {
+    const walletType = localStorage.getItem('walletType');
+    const walletAddress = localStorage.getItem('walletAddress');
+    return walletAddress ? { walletType, walletAddress } : null;
+}
+
+export async function signMessage(wallet, message) {
+    const encodedMessage = new TextEncoder().encode(message);
+    const signedMessage = await wallet.signMessage(encodedMessage, 'utf8');
+    return signedMessage;
 }
 
 export async function signMessage(message) {
@@ -147,6 +165,18 @@ export async function fetchSolanaData(endpoint) {
         return data;
     } catch (error) {
         console.error(`Error fetching data from ${endpoint}:`, error);
+        throw error;
+    }
+}
+
+
+export function createSolanaConnection(cluster = RPC_URL) {
+    try {
+        const connection = new Connection(cluster, 'confirmed');
+        console.log(`Conexión establecida con el cluster: ${cluster}`);
+        return connection;
+    } catch (error) {
+        console.error('Error creando conexión a Solana:', error);
         throw error;
     }
 }

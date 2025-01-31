@@ -108,21 +108,25 @@ export async function login(username, password) {
 }
 
 export async function loginWithSignature(pubkey, signature, message) {
-    const response = await apiRequest('/api/auth/token', {
-        method: 'POST',
-        body: JSON.stringify({ pubkey, signature, message }),
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
+    try {
+        const response = await apiRequest('/api/auth/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pubkey, signature, message }),
+        });
 
-    if (!response.ok) {
-        throw new Error('Failed to verify signature.');
+        if (!response.ok) {
+            throw new Error('Failed to verify signature.');
+        }
+
+        const data = await response.json();
+        setToken(data.token);
+        return data.token;
+    } catch (error) {
+        throw new Error('Error during login with signature: ' + error.message);
     }
-
-    const data = await response.json();
-    setToken(data.token);
-    return data.token;
 }
 
 export function logout() {
