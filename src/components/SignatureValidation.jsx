@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { signMessage } from '../utils/solanaHelpers';
+import { signMessage } from '../services/walletService'; // Actualizar la ruta de importación
 import { loginWithSignature } from '../services/authServices';
 
 const SignatureValidation = ({ wallet, onSuccess }) => {
@@ -11,7 +11,7 @@ const SignatureValidation = ({ wallet, onSuccess }) => {
 
         try {
             const message = "Please sign this message to authenticate.";
-            const signedData = await signMessage(wallet, message);
+            const signedData = await signMessage(message); // No se necesita pasar wallet aquí
             console.log("Signed data:", signedData); // Log de datos firmados
 
             const token = await loginWithSignature(wallet.publicKey.toString(), signedData.signature, message);

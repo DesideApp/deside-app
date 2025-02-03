@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getConnectedWallet, connectWallet, disconnectWallet } from '../utils/solanaHelpers';
+import { getConnectedWallet, connectWallet, disconnectWallet } from '../services/walletService';
 import './WalletMenu.css';
 
 const WalletMenu = () => {
