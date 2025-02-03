@@ -50,6 +50,12 @@ export async function disconnectWallet() {
     }
 }
 
+export function getConnectedWallet() {
+    const walletType = localStorage.getItem('walletType');
+    const walletAddress = localStorage.getItem('walletAddress');
+    return walletAddress ? { walletType, walletAddress } : null;
+}
+
 export async function signMessage(message) {
     try {
         if (!activeWalletProvider) {
