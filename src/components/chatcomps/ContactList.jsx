@@ -6,7 +6,7 @@ import {
     approveContact,
     declineContact,
 } from '../../services/contactService.js'; // Importar funciones desde contactService.js
-import { signMessage } from '../../utils/solanaHelpers'; // Importar signMessage
+import { signMessage } from '../../services/walletService'; // Importar signMessage desde walletService.js
 import './ContactList.css';
 
 const ContactList = () => {
