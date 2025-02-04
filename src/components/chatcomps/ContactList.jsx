@@ -53,7 +53,7 @@ const ContactList = () => {
 
             // Firma automática antes de agregar el contacto
             const message = "Please sign this message to add a contact.";
-            const signedData = await signMessage("phantom", message);
+            const signedData = await signMessage(message);
             console.log("Signed data:", signedData); // Log de datos firmados
 
             await createContact({
