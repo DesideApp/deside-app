@@ -190,7 +190,7 @@ function WalletButton({ buttonText }) {
     return (
         <div className="wallet-container">
             <button className="wallet-button" onClick={() => setIsModalOpen(true)}>
-                {walletAddress ? `${walletAddress.slice(0, 5)}...` : buttonText || "Connect"} {/* Línea relacionada */}
+                {walletAddress ? `${walletAddress.slice(0, 5)}...` : buttonText || "Connect Wallet"} {/* Línea relacionada */}
             </button>
 
             {balance !== null && !isNaN(balance) && (

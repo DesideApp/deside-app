@@ -26,7 +26,7 @@ function Header() {
 
             {/* Contenedor de la wallet */}
             <div className="header-buttons-container">
-                <WalletButton buttonText="Connect" /> {/* Instancia de WalletButton con texto "Connect" */}
+                <WalletButton buttonText="Connect Wallet" /> {/* Instancia de WalletButton con texto "Connect Wallet" */}
             </div>
         </header>
     );
