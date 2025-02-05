@@ -26,8 +26,8 @@ const WalletMenu = () => {
 
   return (
     <div>
-      <button onClick={toggleMenu}>
-        {walletConnected ? `Wallet: ${walletAddress}` : 'Connect Wallet'}
+      <button onClick={toggleMenu} className="menu-button">
+        <span className="menu-icon"></span>
       </button>
       {isMenuOpen && (
         <div className="wallet-menu">
