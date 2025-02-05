@@ -199,14 +199,6 @@ function WalletButton({ buttonText }) {
                 </div>
             )}
 
-            <button
-                className="menu-button"
-                onClick={handleMenuButtonClick}
-                aria-label="Menu"
-            >
-                <span className="menu-icon"></span>
-            </button>
-
             <WalletMenu
                 isOpen={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
