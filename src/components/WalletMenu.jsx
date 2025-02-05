@@ -1,52 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getConnectedWallet, connectWallet, disconnectWallet } from '../services/walletService';
 import './WalletMenu.css';
 
-const WalletMenu = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [walletConnected, setWalletConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState(null);
+function WalletMenu({ isOpen, onClose, handleConnectModal, handleLogout }) {
+    const [walletAddress, setWalletAddress] = useState(null);
+    const menuRef = useRef(null);
 
-  useEffect(() => {
-    // Escucha los eventos de conexión y desconexión
-    const updateConnectionStatus = async () => {
-      const connectedWallet = getConnectedWallet();
-      if (connectedWallet) {
-        setWalletConnected(true);
-        setWalletAddress(connectedWallet.walletAddress);
-      } else {
-        setWalletConnected(false);
-        setWalletAddress(null);
-      }
-    };
-    updateConnectionStatus();
-  }, []);
+    useEffect(() => {
+        const updateConnectionStatus = async () => {
+            const connectedWallet = await getConnectedWallet();
+            if (connectedWallet) {
+                setWalletAddress(connectedWallet.walletAddress);
+            } else {
+                setWalletAddress(null);
+            }
+        };
 
-  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+        updateConnectionStatus();
 
-  return (
-    <div>
-      <button onClick={toggleMenu} className="menu-button">
-        <span className="menu-icon"></span>
-      </button>
-      {isMenuOpen && (
-        <div className="wallet-menu">
-          {walletConnected ? (
-            <>
-              <p>{walletAddress}</p>
-              <button onClick={disconnectWallet}>Logout</button>
-            </>
-          ) : (
-            <>
-              <button onClick={() => connectWallet('phantom')}>Phantom</button>
-              <button onClick={() => connectWallet('backpack')}>Backpack</button>
-              <button onClick={() => connectWallet('magiceden')}>Magic Eden</button>
-            </>
-          )}
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                onClose();
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        } else {
+            document.removeEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isOpen]);
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="wallet-menu" ref={menuRef}>
+            <ul>
+                <li onClick={handleConnectModal}>View Wallet</li>
+                <li>Transactions</li>
+                <li onClick={handleLogout}>Disconnect</li>
+            </ul>
         </div>
-      )}
-    </div>
-  );
-};
+    );
+}
 
 export default WalletMenu;

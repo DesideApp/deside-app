@@ -1,15 +1,30 @@
 .wallet-menu {
-    position: fixed;
-    top: 0;
-    right: -300px; /* Menú fuera de la pantalla por defecto */
-    width: 300px;
-    height: 100%;
-    background-color: #ffffff; /* Fondo oscuro */
-    color: #2b2323 ;
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-    overflow-y: auto; /* Permite scroll si el contenido excede */
-    transition: right 0.3s ease; /* Animación suave al abrir/cerrar */
-    z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    width: 150px;
+    z-index: 1000;
+}
+
+.wallet-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.wallet-menu li {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.wallet-menu li:hover {
+    background-color: #f2f2f2;
 }
 
 .wallet-menu.open {
