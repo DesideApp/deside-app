@@ -35,10 +35,8 @@ function WalletMenu({ isOpen, onClose, handleConnectModal, handleLogout }) {
         };
     }, [isOpen]);
 
-    if (!isOpen) return null;
-
     return (
-        <div className="wallet-menu" ref={menuRef}>
+        <div className={`wallet-menu ${isOpen ? 'open' : ''}`} ref={menuRef}>
             <ul>
                 <li onClick={handleConnectModal}>View Wallet</li>
                 <li>Transactions</li>
