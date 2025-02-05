@@ -35,12 +35,18 @@ function WalletMenu({ isOpen, onClose, handleConnectModal, handleLogout }) {
         };
     }, [isOpen]);
 
+    const handleLogoutClick = () => {
+        handleLogout();
+        localStorage.removeItem('jwtToken');
+        localStorage.removeItem('selectedWallet');
+    };
+
     return (
         <div className={`wallet-menu ${isOpen ? 'open' : ''}`} ref={menuRef}>
             <ul>
                 <li onClick={handleConnectModal}>View Wallet</li>
                 <li>Transactions</li>
-                <li onClick={handleLogout}>Disconnect</li>
+                <li onClick={handleLogoutClick}>Disconnect</li>
             </ul>
         </div>
     );
