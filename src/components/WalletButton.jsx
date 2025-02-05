@@ -5,7 +5,7 @@ import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
 
-function WalletButton({ buttonText }) { // Cambiar prop id a buttonText
+function WalletButton({ buttonText }) {
     const [walletAddress, setWalletAddress] = useState(null);
     const [balance, setBalance] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -190,7 +190,7 @@ function WalletButton({ buttonText }) { // Cambiar prop id a buttonText
     return (
         <div className="wallet-container">
             <button className="wallet-button" onClick={() => setIsModalOpen(true)}>
-                {walletAddress ? `${walletAddress.slice(0, 5)}...` : buttonText || "Connect Wallet"}
+                {walletAddress ? `${walletAddress.slice(0, 5)}...` : buttonText || "Connect"} {/* Línea relacionada */}
             </button>
 
             {balance !== null && !isNaN(balance) && (
