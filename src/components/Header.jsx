@@ -15,7 +15,7 @@ function Header() {
         <header className="header">
             {/* Contenedor del título */}
             <div className="header-title-container">
-                <h1 className="header-title">My App</h1>
+                <h1 className="header-title">Deside</h1>
             </div>
 
             {/* Contenedor de navegación */}
@@ -26,7 +26,7 @@ function Header() {
 
             {/* Contenedor de la wallet */}
             <div className="header-buttons-container">
-                <WalletButton /> {/* Instancia de WalletButton */}
+                <WalletButton id="header-wallet-button" /> {/* Instancia de WalletButton con identificador único */}
             </div>
         </header>
     );
