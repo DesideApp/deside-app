@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getConnectedWallet, connectWallet, disconnectWallet } from '../services/walletService';
 import './WalletMenu.css';
+// Importaciones correctas de walletService
 
 function WalletMenu({ isOpen, onClose, handleConnectModal, handleLogout }) {
     const [walletAddress, setWalletAddress] = useState(null);

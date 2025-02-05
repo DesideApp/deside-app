@@ -1,4 +1,7 @@
-import { PublicKey } from "@solana/web3.js";
+import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
+
+const connection = new Connection(clusterApiUrl('mainnet-beta'));
 
 let activeWalletProvider = null; 
 let activeWalletType = null;
@@ -14,6 +17,41 @@ function getProvider(wallet) {
         throw new Error(`${wallet} Wallet not detected`);
     }
 }
+
+export const connectWallet = async () => {
+    const provider = window.solana;
+    if (!provider) throw new Error('No wallet found');
+    await provider.connect();
+    return provider.publicKey.toString();
+};
+
+export const getBalance = async (publicKey) => {
+    const balance = await connection.getBalance(new PublicKey(publicKey));
+    return balance / 1e9; // Convertir lamports a SOL
+};
+
+export const signMessage = async (message) => {
+    const provider = window.solana;
+    if (!provider) throw new Error('No wallet found');
+    const encodedMessage = new TextEncoder().encode(message);
+    const signedMessage = await provider.signMessage(encodedMessage, 'utf8');
+    return signedMessage;
+};
+
+export const getConnectedWallet = async () => {
+    const provider = window.solana;
+    if (provider && provider.isConnected) {
+        return { walletAddress: provider.publicKey.toString() };
+    }
+    return null;
+};
+
+export const disconnectWallet = async () => {
+    const provider = window.solana;
+    if (provider) {
+        await provider.disconnect();
+    }
+};
 
 export async function connectWallet(wallet) {
     try {
