@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { connectWallet, getBalance, signMessage, getConnectedWallet, disconnectWallet } from "../services/walletService"; // Actualizar importaciones
+import { connectWallet, signMessage, getConnectedWallet, disconnectWallet } from "../services/walletService"; // Actualizar importaciones
+import { getBalance } from "../utils/solanaHelpers"; // Importar getBalance desde solanaHelpers
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
