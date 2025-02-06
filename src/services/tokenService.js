@@ -25,20 +25,9 @@ export function removeToken() {
     localStorage.removeItem('jwtToken');
 }
 
-export async function getAccessToken() {
-    const token = getToken();
-    if (token && !isTokenExpired(token)) {
-        return token;
-    }
-
-    try {
-        const response = await refreshToken();
-        return response.accessToken;
-    } catch (error) {
-        console.error('Failed to refresh token:', error);
-        throw error;
-    }
-}
+export const getAccessToken = () => {
+    return localStorage.getItem('jwtToken');
+};
 
 export function isTokenExpired(token) {
     try {
@@ -52,29 +41,29 @@ export function isTokenExpired(token) {
     }
 }
 
-export async function refreshToken() {
+export const refreshToken = async () => {
     try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/refresh`, {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) throw new Error('No refresh token found');
+
+        const response = await fetch('https://backend-deside.onrender.com/api/auth/refresh', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ refreshToken: localStorage.getItem('refreshToken') }),
+            body: JSON.stringify({ refreshToken }),
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to refresh token');
-        }
+        if (!response.ok) throw new Error('Failed to refresh token');
 
         const data = await response.json();
-        setToken(data.accessToken);
-        return data;
+        localStorage.setItem('jwtToken', data.accessToken);
+        return data.accessToken;
     } catch (error) {
         console.error('Error refreshing token:', error);
-        removeToken();
-        throw new Error('Unable to refresh session. Please log in again.');
+        throw error;
     }
-}
+};
 
 export function getTokens() {
     const jwtToken = getToken();

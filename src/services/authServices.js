@@ -1,18 +1,19 @@
 import { apiRequest } from '../services/apiService.js';
 import { setToken, removeToken, getToken } from '../services/tokenService.js';
 import API_BASE_URL from '../config/apiConfig.js';
-import nacl from 'tweetnacl'; // Importar nacl para la verificación de firmas
+import nacl from 'tweetnacl';
 
 let token = null;
 
 async function initializeToken() {
     try {
+        const existingToken = getToken();
+        if (existingToken) return existingToken; // No inicializar si ya hay un token válido
+
         const response = await fetch(`${API_BASE_URL}/api/auth/token`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username: 'deside.w3app@gmail.com' }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pubkey: 'default_pubkey' }),
         });
 
         if (!response.ok) {
@@ -22,6 +23,7 @@ async function initializeToken() {
         const data = await response.json();
         token = data.token;
         setToken(token);
+        return token;
     } catch (error) {
         throw error;
     }
@@ -32,13 +34,14 @@ async function refreshToken() {
         const response = await apiRequest('/api/auth/refresh', {
             method: 'POST',
             credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
         });
 
-        setToken(response.token);
-        return response.token;
+        if (!response.ok) throw new Error('Failed to refresh token');
+
+        const data = await response.json();
+        setToken(data.token);
+        return data.token;
     } catch (error) {
         logout();
         throw new Error('Session renewal failed. Please log in again.');
@@ -46,10 +49,8 @@ async function refreshToken() {
 }
 
 async function fetchWithAuth(url, options = {}) {
-    if (!token) {
-        await initializeToken();
-    }
-
+    token = getToken() || await initializeToken();
+    
     options.headers = {
         ...options.headers,
         Authorization: `Bearer ${token}`,
@@ -58,7 +59,7 @@ async function fetchWithAuth(url, options = {}) {
     const response = await fetch(url, options);
 
     if (response.status === 403) {
-        await refreshToken();
+        token = await refreshToken();
         options.headers.Authorization = `Bearer ${token}`;
         return fetch(url, options);
     }
@@ -68,52 +69,11 @@ async function fetchWithAuth(url, options = {}) {
 
 export { fetchWithAuth, refreshToken, initializeToken };
 
-function validateCredentials(username, password) {
-    if (!username || !password) {
-        throw new Error('Username and password are required.');
-    }
-}
-
-function validateRegistrationData(pubkey, signature, message) {
-    if (!pubkey || !signature || !message) {
-        throw new Error('Public key, signature, and message are required.');
-    }
-}
-
-function verifySignature(message, signature, pubkey) {
-    const encodedMessage = new TextEncoder().encode(message);
-    const signatureUint8 = Uint8Array.from(signature);
-    const pubkeyUint8 = Uint8Array.from(Buffer.from(pubkey, 'base64'));
-    return nacl.sign.detached.verify(encodedMessage, signatureUint8, pubkeyUint8);
-}
-
-export async function login(username, password) {
-    try {
-        validateCredentials(username, password);
-
-        const response = await apiRequest('/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password }),
-        });
-
-        const { token } = response;
-        setToken(token);
-        return response;
-    } catch (error) {
-        throw new Error('Login failed. Please check your credentials and try again.');
-    }
-}
-
 export async function loginWithSignature(pubkey, signature, message) {
     try {
         const response = await apiRequest('/api/auth/token', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ pubkey, signature, message }),
         });
 
@@ -135,14 +95,15 @@ export function logout() {
 
 export async function register(pubkey, signature, message) {
     try {
-        validateRegistrationData(pubkey, signature, message);
-        const isSignatureValid = verifySignature(message, signature, pubkey);
+        const isSignatureValid = nacl.sign.detached.verify(
+            new TextEncoder().encode(message),
+            Uint8Array.from(signature),
+            Uint8Array.from(Buffer.from(pubkey, 'base64'))
+        );
 
         const response = await apiRequest('/api/auth/register', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ pubkey, isSignatureValid }),
         });
 
@@ -151,19 +112,3 @@ export async function register(pubkey, signature, message) {
         throw new Error('Registration failed. Please check your details and try again.');
     }
 }
-
-export const fetchToken = async (username) => {
-    try {
-        const response = await apiRequest('/api/auth/token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username }),
-        });
-
-        if (response.token) {
-            setToken(response.token);
-        }
-    } catch (error) {
-        throw error;
-    }
-};

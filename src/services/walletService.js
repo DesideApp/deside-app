@@ -1,21 +1,22 @@
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 
 const connection = new Connection(clusterApiUrl('mainnet-beta'));
 
-let activeWalletProvider = null; 
+let activeWalletProvider = null;
 let activeWalletType = null;
 
+const WALLET_PROVIDERS = {
+    phantom: () => window.solana?.isPhantom && window.solana,
+    backpack: () => window.xnft?.solana,
+    magiceden: () => window.magicEden?.solana,
+};
+
 function getProvider(wallet) {
-    if (wallet === "phantom" && window.solana?.isPhantom) {
-        return window.solana;
-    } else if (wallet === "backpack" && window.xnft?.solana) {
-        return window.xnft.solana;
-    } else if (wallet === "magiceden" && window.magicEden?.solana) {
-        return window.magicEden.solana;
-    } else {
+    const provider = WALLET_PROVIDERS[wallet]?.();
+    if (!provider) {
         throw new Error(`${wallet} Wallet not detected`);
     }
+    return provider;
 }
 
 export async function connectWallet(wallet) {
@@ -94,5 +95,17 @@ export function verifySignature(message, signature, publicKey) {
     } catch (error) {
         console.error('Error verifying signature:', error);
         return false;
+    }
+}
+
+export async function getWalletBalance(walletAddress) {
+    try {
+        if (!walletAddress) throw new Error("Wallet address is required");
+
+        const balance = await connection.getBalance(new PublicKey(walletAddress));
+        return balance / 1e9; // Convertir lamports a SOL
+    } catch (error) {
+        console.error("Error fetching wallet balance:", error);
+        throw error;
     }
 }
