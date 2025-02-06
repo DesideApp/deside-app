@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { connectWallet, signMessage, getConnectedWallet, disconnectWallet, getWalletBalance } from "../services/walletService";
+import { authenticateWithServer } from "../services/authservices";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -32,16 +33,7 @@ function WalletButton({ buttonText }) {
 
             const message = "Please sign this message to authenticate.";
             const signedData = await signMessage(wallet, message);
-            const response = await fetch('https://backend-deside.onrender.com/api/auth/token', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pubkey: address, signature: signedData.signature, message }),
-            });
-
-            if (!response.ok) throw new Error('Failed to verify signature.');
-
-            const data = await response.json();
-            localStorage.setItem('jwtToken', data.token);
+            await authenticateWithServer(address, signedData.signature, message);
         } catch (error) {
             console.error("Error connecting wallet:", error);
         } finally {

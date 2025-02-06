@@ -60,41 +60,24 @@ export function getConnectedWallet() {
     return walletAddress ? { walletType, walletAddress } : null;
 }
 
-export async function signMessage(message) {
+export async function signMessage(wallet, message) {
     try {
-        if (!activeWalletProvider) {
+        const provider = getProvider(wallet);
+        if (!provider) {
             throw new Error("No wallet connected. Connect a wallet first.");
         }
 
         const encodedMessage = new TextEncoder().encode(message);
-        const { signature } = await activeWalletProvider.signMessage(encodedMessage);
+        const { signature } = await provider.signMessage(encodedMessage);
 
-        const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
-
-        console.log("Message signed:", { message, signatureBase64 });
         return {
-            signature: signatureBase64,
+            signature: btoa(String.fromCharCode(...new Uint8Array(signature))),
             message,
-            pubkey: activeWalletProvider.publicKey.toBase58(),
+            pubkey: provider.publicKey.toBase58(),
         };
     } catch (error) {
-        console.error(`Error signing message with ${activeWalletType} Wallet:`, error);
+        console.error(`Error signing message with ${wallet} Wallet:`, error);
         throw error;
-    }
-}
-
-export function verifySignature(message, signature, publicKey) {
-    try {
-        const encodedMessage = new TextEncoder().encode(message);
-        const pubKey = new PublicKey(publicKey);
-        const signatureUint8Array = Uint8Array.from(atob(signature), c => c.charCodeAt(0));
-
-        const isValid = pubKey.verify(encodedMessage, signatureUint8Array);
-        console.log(`Signature valid: ${isValid}`);
-        return isValid;
-    } catch (error) {
-        console.error('Error verifying signature:', error);
-        return false;
     }
 }
 

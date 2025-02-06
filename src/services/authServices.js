@@ -8,7 +8,9 @@ let token = null;
 async function initializeToken() {
     try {
         const existingToken = getToken();
-        if (existingToken) return existingToken; // No inicializar si ya hay un token válido
+        if (existingToken) return existingToken; // No solicitar uno nuevo si ya tenemos un token válido
+
+        console.warn("🔴 No token found, requesting a new one...");
 
         const response = await fetch(`${API_BASE_URL}/api/auth/token`, {
             method: 'POST',
@@ -25,6 +27,7 @@ async function initializeToken() {
         setToken(token);
         return token;
     } catch (error) {
+        console.error("🔴 Error en `initializeToken()`:", error);
         throw error;
     }
 }
@@ -43,6 +46,7 @@ async function refreshToken() {
         setToken(data.token);
         return data.token;
     } catch (error) {
+        console.warn("🔴 Token expirado. Se requiere nuevo inicio de sesión.");
         logout();
         throw new Error('Session renewal failed. Please log in again.');
     }
@@ -50,7 +54,7 @@ async function refreshToken() {
 
 async function fetchWithAuth(url, options = {}) {
     token = getToken() || await initializeToken();
-    
+
     options.headers = {
         ...options.headers,
         Authorization: `Bearer ${token}`,
@@ -59,6 +63,7 @@ async function fetchWithAuth(url, options = {}) {
     const response = await fetch(url, options);
 
     if (response.status === 403) {
+        console.warn("🔴 Token rechazado. Intentando renovar...");
         token = await refreshToken();
         options.headers.Authorization = `Bearer ${token}`;
         return fetch(url, options);
@@ -69,7 +74,7 @@ async function fetchWithAuth(url, options = {}) {
 
 export { fetchWithAuth, refreshToken, initializeToken };
 
-export async function loginWithSignature(pubkey, signature, message) {
+export async function authenticateWithServer(pubkey, signature, message) {
     try {
         const response = await apiRequest('/api/auth/token', {
             method: 'POST',
@@ -85,21 +90,29 @@ export async function loginWithSignature(pubkey, signature, message) {
         setToken(data.token);
         return data.token;
     } catch (error) {
-        throw new Error('Error during login with signature: ' + error.message);
+        console.error("🔴 Error en `authenticateWithServer()`:", error);
+        throw new Error('Error during authentication: ' + error.message);
     }
 }
 
 export function logout() {
     removeToken();
+    console.info("🔵 Usuario deslogueado correctamente.");
 }
 
 export async function register(pubkey, signature, message) {
     try {
+        if (!pubkey || !signature || !message) {
+            throw new Error("🔴 Faltan parámetros en el registro.");
+        }
+
         const isSignatureValid = nacl.sign.detached.verify(
             new TextEncoder().encode(message),
             Uint8Array.from(signature),
             Uint8Array.from(Buffer.from(pubkey, 'base64'))
         );
+
+        if (!isSignatureValid) throw new Error("🔴 Firma inválida.");
 
         const response = await apiRequest('/api/auth/register', {
             method: 'POST',
@@ -109,6 +122,7 @@ export async function register(pubkey, signature, message) {
 
         return response;
     } catch (error) {
+        console.error("🔴 Error en `register()`:", error);
         throw new Error('Registration failed. Please check your details and try again.');
     }
 }
