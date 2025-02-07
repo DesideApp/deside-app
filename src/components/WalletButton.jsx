@@ -42,7 +42,7 @@ function WalletButton({ buttonText }) {
     };
 
     const handleLogout = () => {
-        if (!window.confirm("¿Seguro que quieres desconectarte?")) return;
+        if (!window.confirm("Are you sure you want to disconnect?")) return;
 
         disconnectWallet();
         setWalletAddress(null);
@@ -70,8 +70,7 @@ function WalletButton({ buttonText }) {
                 <span className="menu-icon"></span>
             </button>
 
-            <WalletMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} handleLogout={handleLogout} />
-
+            <WalletMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
             <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelectWallet={handleConnect} />
         </div>
     );
