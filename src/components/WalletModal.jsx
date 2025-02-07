@@ -10,19 +10,11 @@ function WalletModal({ isOpen, onClose, onSelectWallet }) {
                 <h2>Connect Wallet</h2>
                 <p>Select a wallet to connect:</p>
                 <div className="wallet-options">
-                    <button onClick={() => onSelectWallet("phantom")}>
-                        Phantom Wallet
-                    </button>
-                    <button onClick={() => onSelectWallet("backpack")}>
-                        Backpack Wallet
-                    </button>
-                    <button onClick={() => onSelectWallet("magiceden")}>
-                        Magic Eden Wallet
-                    </button>
+                    <button onClick={() => onSelectWallet("phantom")}>Phantom Wallet</button>
+                    <button onClick={() => onSelectWallet("backpack")}>Backpack Wallet</button>
+                    <button onClick={() => onSelectWallet("magiceden")}>Magic Eden Wallet</button>
                 </div>
-                <button className="close-modal" onClick={onClose}>
-                    Close
-                </button>
+                <button className="close-modal" onClick={onClose}>Close</button>
             </div>
         </div>
     );

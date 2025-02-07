@@ -1,62 +1,79 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { getConnectedWallet, disconnectWallet } from '../services/walletService';
-import './WalletMenu.css';
+import React, { useState, useEffect, useRef } from "react";
+import { connectWallet, signMessage, getConnectedWallet, disconnectWallet, getWalletBalance } from "../services/walletService.js";
+import { authenticateWithServer } from "../services/authservices.js";
+import WalletMenu from "./WalletMenu";
+import WalletModal from "./WalletModal";
+import "./WalletButton.css";
 
-function WalletMenu({ isOpen, onClose, handleConnectModal }) {
+function WalletButton({ buttonText }) {
     const [walletAddress, setWalletAddress] = useState(null);
+    const [balance, setBalance] = useState(null);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const menuRef = useRef(null);
 
     useEffect(() => {
-        const updateConnectionStatus = async () => {
+        const updateWalletStatus = async () => {
             const connectedWallet = await getConnectedWallet();
-            setWalletAddress(connectedWallet ? connectedWallet.walletAddress : null);
-        };
-
-        updateConnectionStatus();
-
-        const handleClickOutside = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
-                onClose();
+            if (connectedWallet) {
+                setWalletAddress(connectedWallet.walletAddress);
+                setBalance(await getWalletBalance(connectedWallet.walletAddress));
             }
         };
+        updateWalletStatus();
+    }, []);
 
-        if (isOpen) {
-            document.addEventListener("mousedown", handleClickOutside);
-        } else {
-            document.removeEventListener("mousedown", handleClickOutside);
+    const handleConnect = async (wallet) => {
+        try {
+            const address = await connectWallet(wallet);
+            setWalletAddress(address);
+            localStorage.setItem('selectedWallet', wallet);
+
+            setBalance(await getWalletBalance(address));
+
+            const message = "Please sign this message to authenticate.";
+            const signedData = await signMessage(wallet, message);
+            await authenticateWithServer(address, signedData.signature, message);
+        } catch (error) {
+            console.error("Error connecting wallet:", error);
+        } finally {
+            setIsModalOpen(false);
         }
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [isOpen]);
-
-    const handleLogoutClick = () => {
-        disconnectWallet();
-        setWalletAddress(null);
-        localStorage.removeItem('jwtToken');
-        localStorage.removeItem('selectedWallet');
-        onClose();
     };
 
+    const handleLogout = () => {
+        if (!window.confirm("Are you sure you want to disconnect?")) return;
+
+        disconnectWallet();
+        setWalletAddress(null);
+        setBalance(null);
+        setIsMenuOpen(false);
+        localStorage.removeItem('jwtToken');
+        localStorage.removeItem('selectedWallet');
+    };
+
+    const handleToggleMenu = () => setIsMenuOpen(prevState => !prevState);
+
     return (
-        <div className={`wallet-menu ${isOpen ? 'open' : ''}`} ref={menuRef}>
-            <div className="wallet-menu-header">
-                <h3>Wallet Menu</h3>
-                <button className="close-button" onClick={onClose}>×</button>
-            </div>
-            <div className="wallet-menu-content">
-                {walletAddress ? (
-                    <>
-                        <p className="wallet-address">{walletAddress}</p>
-                        <button className="logout-button" onClick={handleLogoutClick}>Disconnect</button>
-                    </>
-                ) : (
-                    <button className="connect-button" onClick={handleConnectModal}>Connect Wallet</button>
-                )}
-            </div>
+        <div className="wallet-container">
+            <button className="wallet-button" onClick={() => setIsModalOpen(true)}>
+                {walletAddress ? `${walletAddress.slice(0, 5)}...` : buttonText || "Connect Wallet"}
+            </button>
+
+            {balance !== null && !isNaN(balance) && (
+                <div className="wallet-balance">
+                    <p>Balance: {parseFloat(balance).toFixed(2)} SOL</p>
+                </div>
+            )}
+
+            <button className="menu-button" onClick={handleToggleMenu} aria-label="Menu">
+                <span className="menu-icon"></span>
+            </button>
+
+            <WalletMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelectWallet={handleConnect} />
         </div>
     );
 }
 
-export default WalletMenu;
+export default WalletButton;
