@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getConnectedWallet, disconnectWallet } from '../services/walletService';
+import { getConnectedWallet, disconnectWallet, connectWallet } from '../services/walletService';
 import WalletModal from './WalletModal';
 import './WalletMenu.css';
 
@@ -35,6 +35,18 @@ function WalletMenu({ isOpen, onClose }) {
         };
     }, [isOpen]);
 
+    const handleConnect = async (wallet) => {
+        try {
+            const address = await connectWallet(wallet);
+            setWalletAddress(address);
+            localStorage.setItem('selectedWallet', wallet);
+        } catch (error) {
+            console.error("Error connecting wallet:", error);
+        } finally {
+            setIsModalOpen(false);
+        }
+    };
+
     const handleLogoutClick = () => {
         disconnectWallet();
         setWalletAddress(null);
@@ -58,7 +70,7 @@ function WalletMenu({ isOpen, onClose }) {
                 </div>
             </div>
 
-            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelectWallet={() => {}} />
+            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelectWallet={handleConnect} />
         </>
     );
 }

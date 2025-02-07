@@ -28,12 +28,6 @@ function WalletButton({ buttonText }) {
             const address = await connectWallet(wallet);
             setWalletAddress(address);
             localStorage.setItem('selectedWallet', wallet);
-
-            setBalance(await getWalletBalance(address));
-
-            const message = "Please sign this message to authenticate.";
-            const signedData = await signMessage(wallet, message);
-            await authenticateWithServer(address, signedData.signature, message);
         } catch (error) {
             console.error("Error connecting wallet:", error);
         } finally {
