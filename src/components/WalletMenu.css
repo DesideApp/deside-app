@@ -2,7 +2,7 @@
     position: fixed;
     top: 0;
     right: -100%;
-    width: 33.33%; /* Ocupa 1/3 de la pantalla */
+    width: 300px; /* Ajuste para hacerlo más compacto */
     height: 100%;
     background: white;
     border-left: 1px solid #ccc;
@@ -13,23 +13,7 @@
 }
 
 .wallet-menu.open {
-    right: 0; /* Mueve el menú dentro de la pantalla al abrir */
-}
-
-.wallet-menu ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.wallet-menu li {
-    padding: 10px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.wallet-menu li:hover {
-    background-color: #f2f2f2;
+    right: 0;
 }
 
 .wallet-menu-header {
@@ -37,37 +21,37 @@
     justify-content: space-between;
     align-items: center;
     padding: 15px;
-    border-bottom: 1px solid #e6dfda; /* Línea divisoria entre encabezado y contenido */
+    border-bottom: 1px solid #e6dfda;
 }
 
 .close-button {
     background: none;
     border: none;
-    color: white;
+    color: #333;
     font-size: 20px;
     cursor: pointer;
-    transition: color 0.3s ease; /* Transición suave al pasar el ratón */
+    transition: color 0.3s ease;
 }
 
 .close-button:hover {
-    color: #ff4d4d; /* Cambia a rojo al pasar el ratón */
+    color: #fc554f;
 }
 
 .wallet-menu-content {
-    padding: 15px; /* Espaciado interno del contenido */
-    text-align: center; /* Alineamos todo al centro */
+    padding: 15px;
+    text-align: center;
 }
 
 .wallet-address {
-    background: #ffffff; /* Fondo oscuro para destacar menos */
+    background: #f2f2f2;
     padding: 10px;
     border-radius: 10px;
-    word-wrap: break-word; /* Maneja direcciones largas */
-    margin-bottom: 15px; /* Espacio debajo de la dirección */
+    word-wrap: break-word;
+    margin-bottom: 15px;
 }
 
-.connect-button {
-    margin-top: 20px;
+.connect-button, .logout-button {
+    width: 100%;
     padding: 10px 20px;
     background-color: #fc554f;
     font-size: 16px;
@@ -80,22 +64,15 @@
     transition: background-color 0.3s ease;
 }
 
-.connect-button:hover {
+.connect-button:hover, .logout-button:hover {
     background-color: #fc564f;
     opacity: 0.8;
 }
 
 .logout-button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #ff4d4d; /* Rojo para indicar acción de desconexión */
-    border: none;
-    border-radius: 10px;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.3s ease; /* Suaviza el cambio de color al pasar el ratón */
+    background-color: #ff4d4d;
 }
 
 .logout-button:hover {
-    background-color: #e04343; /* Rojo más oscuro al pasar el ratón */
+    background-color: #e04343;
 }
