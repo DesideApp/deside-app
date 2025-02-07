@@ -15,7 +15,9 @@ function WalletMenu({ isOpen, onClose }) {
         };
 
         updateConnectionStatus();
+    }, []);
 
+    useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
                 onClose();
@@ -44,9 +46,6 @@ function WalletMenu({ isOpen, onClose }) {
     return (
         <>
             <div className={`wallet-menu ${isOpen ? 'open' : ''}`} ref={menuRef}>
-                <div className="wallet-menu-header">
-                    <button className="close-button" onClick={onClose}>×</button>
-                </div>
                 <div className="wallet-menu-content">
                     {walletAddress ? (
                         <>
