@@ -1,37 +1,23 @@
-import React, { useState } from 'react';
-import ChatInput from './ChatInput';
+import React, { useEffect, useRef } from "react";
 import "./ChatWindow.css";
 
-function ChatWindow() {
-    // Lista de mensajes y estado del modo concentración
-    const [messages, setMessages] = useState([]);
-    const [concentrationMode, setConcentrationMode] = useState(false);
+function ChatWindow({ messages }) {
+    const chatContainerRef = useRef(null);
 
-    // Manejar el envío de nuevos mensajes
-    const handleSendMessage = (newMessage) => {
-        setMessages([...messages, { id: messages.length + 1, sender: "Yo", text: newMessage }]);
-    };
-    
+    // Mantiene el scroll abajo cuando llegan mensajes nuevos
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [messages]);
+
     return (
-        <div className={`chat-window-container ${concentrationMode ? 'concentration' : ''}`}>
-            <div className="chat-header">
-                <h3>Chat en Vivo</h3>
-                <button 
-                    onClick={() => setConcentrationMode(!concentrationMode)} 
-                    className="concentration-toggle"
-                >
-                    {concentrationMode ? 'Desactivar Modo Concentración' : 'Activar Modo Concentración'}
-                </button>
-            </div>
-            <div className="chat-messages">
-                {messages.map((message) => (
-                    <div key={message.id} className={`chat-message ${message.sender === "Yo" ? 'sent' : 'received'}`}>
-                        <span className="message-sender">{message.sender}:</span>
-                        <span className="message-text">{message.text}</span>
-                    </div>
-                ))}
-            </div>
-            <ChatInput onSendMessage={handleSendMessage} />
+        <div className="chat-window" ref={chatContainerRef}>
+            {messages.map((msg, index) => (
+                <div key={index} className={`chat-message ${msg.sender === "me" ? "sent" : "received"}`}>
+                    {msg.text}
+                </div>
+            ))}
         </div>
     );
 }

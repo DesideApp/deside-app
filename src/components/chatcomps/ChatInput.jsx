@@ -1,45 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import "./ChatInput.css";
 
 function ChatInput({ onSendMessage }) {
-    const [inputValue, setInputValue] = useState("");
+    const [message, setMessage] = useState("");
 
-    const handleInputChange = (e) => {
-        setInputValue(e.target.value);
+    const handleSendMessage = () => {
+        if (message.trim() === "") return;
+        onSendMessage(message);
+        setMessage(""); // Limpiar input después de enviar
     };
 
-    const handleSend = () => {
-        if (inputValue.trim() !== "") {
-            onSendMessage(inputValue);
-            setInputValue("");
-        }
-    };
-
-    const handleKeyDown = (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault(); // Evita salto de línea
-            handleSend(); // Llama a la función para enviar el mensaje
+    const handleKeyPress = (event) => {
+        if (event.key === "Enter") {
+            handleSendMessage();
         }
     };
 
     return (
-        <div className="chat-input-container">
+        <div className="chat-input">
             <input
                 type="text"
-                id="chatMessage"
-                name="chatMessage"
-                value={inputValue}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDown} // Detectar "Enter"
-                placeholder="Escribe un mensaje..."
-                className="chat-input"
+                placeholder="Type a message..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
             />
-            <button onClick={handleSend} className="send-button">
-                Enviar
-            </button>
+            <button onClick={handleSendMessage}>Send</button>
         </div>
     );
 }
 
 export default ChatInput;
-
