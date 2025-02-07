@@ -1,13 +1,5 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import routes from './routes';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import Main from "./Main.jsx";
 
-const router = createBrowserRouter(routes, {
-    future: {
-        v7_relativeSplatPath: true,
-    },
-});
-
-ReactDOM.render(
-    <RouterProvider router={router} />,
-    document.getElementById('root')
-);
+ReactDOM.createRoot(document.getElementById("root")).render(<Main />);
