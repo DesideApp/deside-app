@@ -1,6 +1,4 @@
-import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
-
-const connection = new Connection(clusterApiUrl('mainnet-beta'));
+import { authenticateWithServer } from './authServices'; // Importa la función para autenticar
 
 let activeWalletProvider = null;
 let activeWalletType = null;
@@ -11,6 +9,7 @@ const WALLET_PROVIDERS = {
     magiceden: () => window.magicEden?.solana,
 };
 
+// Función para obtener el proveedor de la billetera
 function getProvider(wallet) {
     const provider = WALLET_PROVIDERS[wallet]?.();
     if (!provider) {
@@ -19,6 +18,7 @@ function getProvider(wallet) {
     return provider;
 }
 
+// Conectar la billetera y generar JWT
 export async function connectWallet(wallet) {
     try {
         const provider = getProvider(wallet);
@@ -32,6 +32,14 @@ export async function connectWallet(wallet) {
         activeWalletType = wallet;
 
         console.log(`${wallet} Wallet connected: ${response.publicKey.toString()}`);
+
+        // Firmar el mensaje y obtener el JWT
+        const message = "Please sign this message to authenticate.";
+        const signedData = await signMessage(wallet, message);
+
+        // Enviar la firma al servidor para obtener el JWT
+        await authenticateWithServer(response.publicKey.toString(), signedData.signature, message);
+
         return response.publicKey.toString();
     } catch (error) {
         console.error(`Error connecting ${wallet} Wallet:`, error);
@@ -39,6 +47,7 @@ export async function connectWallet(wallet) {
     }
 }
 
+// Desconectar la billetera
 export async function disconnectWallet() {
     try {
         if (activeWalletProvider?.disconnect) {
@@ -54,12 +63,14 @@ export async function disconnectWallet() {
     }
 }
 
+// Obtener la billetera conectada
 export function getConnectedWallet() {
     const walletType = localStorage.getItem('walletType');
     const walletAddress = localStorage.getItem('walletAddress');
     return walletAddress ? { walletType, walletAddress } : null;
 }
 
+// Firmar el mensaje
 export async function signMessage(wallet, message) {
     try {
         const provider = getProvider(wallet);
@@ -81,6 +92,7 @@ export async function signMessage(wallet, message) {
     }
 }
 
+// Obtener el balance de la billetera
 export async function getWalletBalance(walletAddress) {
     try {
         if (!walletAddress) throw new Error("Wallet address is required");

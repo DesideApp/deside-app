@@ -5,17 +5,18 @@ import nacl from 'tweetnacl';
 
 let token = null;
 
+// Inicializa el token si no hay uno activo
 async function initializeToken() {
     try {
         const existingToken = getToken();
-        if (existingToken) return existingToken; // No solicitar uno nuevo si ya tenemos un token válido
+        if (existingToken) return existingToken; // Si ya hay un token válido, lo usamos
 
         console.warn("🔴 No token found, requesting a new one...");
 
         const response = await fetch(`${API_BASE_URL}/api/auth/token`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pubkey: 'default_pubkey' }),
+            body: JSON.stringify({ pubkey: 'default_pubkey' }), // Aquí puedes cambiar el pubkey si es necesario
         });
 
         if (!response.ok) {
@@ -24,7 +25,7 @@ async function initializeToken() {
 
         const data = await response.json();
         token = data.token;
-        setToken(token);
+        setToken(token); // Guardamos el token
         return token;
     } catch (error) {
         console.error("🔴 Error en `initializeToken()`:", error);
@@ -32,6 +33,7 @@ async function initializeToken() {
     }
 }
 
+// Renovar el token cuando expira
 async function refreshToken() {
     try {
         const response = await apiRequest('/api/auth/refresh', {
@@ -43,7 +45,7 @@ async function refreshToken() {
         if (!response.ok) throw new Error('Failed to refresh token');
 
         const data = await response.json();
-        setToken(data.token);
+        setToken(data.token); // Guardamos el nuevo token
         return data.token;
     } catch (error) {
         console.warn("🔴 Token expirado. Se requiere nuevo inicio de sesión.");
@@ -52,18 +54,19 @@ async function refreshToken() {
     }
 }
 
+// Realizar peticiones a la API con el token JWT
 async function fetchWithAuth(url, options = {}) {
-    token = getToken() || await initializeToken();
+    token = getToken() || await initializeToken(); // Obtener token o inicializarlo
 
     options.headers = {
         ...options.headers,
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`, // Agregar el token al header de la solicitud
     };
 
     const response = await fetch(url, options);
 
+    // Si el token no es válido, renovamos y reintentamos la solicitud
     if (response.status === 403) {
-        console.warn("🔴 Token rechazado. Intentando renovar...");
         token = await refreshToken();
         options.headers.Authorization = `Bearer ${token}`;
         return fetch(url, options);
@@ -72,8 +75,7 @@ async function fetchWithAuth(url, options = {}) {
     return response;
 }
 
-export { fetchWithAuth, refreshToken, initializeToken };
-
+// Verificar la firma del usuario al loguearse
 export async function authenticateWithServer(pubkey, signature, message) {
     try {
         const response = await apiRequest('/api/auth/token', {
@@ -87,7 +89,7 @@ export async function authenticateWithServer(pubkey, signature, message) {
         }
 
         const data = await response.json();
-        setToken(data.token);
+        setToken(data.token); // Guardamos el token recibido
         return data.token;
     } catch (error) {
         console.error("🔴 Error en `authenticateWithServer()`:", error);
@@ -95,17 +97,20 @@ export async function authenticateWithServer(pubkey, signature, message) {
     }
 }
 
+// Función para cerrar la sesión del usuario
 export function logout() {
-    removeToken();
+    removeToken(); // Eliminar el token de localStorage
     console.info("🔵 Usuario deslogueado correctamente.");
 }
 
+// Registro de un nuevo usuario con la firma y mensaje
 export async function register(pubkey, signature, message) {
     try {
         if (!pubkey || !signature || !message) {
             throw new Error("🔴 Faltan parámetros en el registro.");
         }
 
+        // Verificar la firma utilizando la librería tweetnacl
         const isSignatureValid = nacl.sign.detached.verify(
             new TextEncoder().encode(message),
             Uint8Array.from(signature),
@@ -126,3 +131,5 @@ export async function register(pubkey, signature, message) {
         throw new Error('Registration failed. Please check your details and try again.');
     }
 }
+
+export { fetchWithAuth, refreshToken, initializeToken };

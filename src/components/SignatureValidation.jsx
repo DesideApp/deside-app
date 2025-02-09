@@ -1,34 +1,37 @@
 import React, { useRef } from 'react';
-import { signMessage } from '../services/walletService'; // Actualizar la ruta de importación
+import { signMessage } from '../services/walletService'; 
 import { loginWithSignature } from '../services/authServices';
 
-const SignatureValidation = ({ wallet, onSuccess }) => {
-    const isSigning = useRef(false); // Añadir un ref para controlar la firma
+const SignatureValidation = ({ wallet, onSuccess, onError }) => {
+    const isSigning = useRef(false); // Evitar múltiples firmas
 
+    // Manejo de la firma de mensajes
     const handleSignMessage = async () => {
-        if (isSigning.current) return; // Evitar múltiples firmas
+        if (isSigning.current) return; // Prevenir firma simultánea
         isSigning.current = true;
 
         try {
             const message = "Please sign this message to authenticate.";
-            const signedData = await signMessage(message); // No se necesita pasar wallet aquí
-            console.log("Signed data:", signedData); // Log de datos firmados
+            const signedData = await signMessage(wallet, message); // Asegúrate de pasar wallet correctamente
+            console.log("Signed data:", signedData);
 
             const token = await loginWithSignature(wallet.publicKey.toString(), signedData.signature, message);
-            console.log("JWT Token:", token); // Log del token JWT
+            console.log("JWT Token:", token);
 
+            // Invocar el callback onSuccess con el token
             onSuccess(token);
         } catch (error) {
-            console.error(`Error signing message with ${wallet} Wallet:`, error);
-            alert(`Failed to sign message with ${wallet} Wallet. Please try again.`);
+            console.error("Error signing message:", error);
+            if (onError) onError(error); // Llamada a onError si se proporciona
+            alert(`Failed to sign message with ${wallet}. Please try again.`);
         } finally {
             isSigning.current = false;
         }
     };
 
     return (
-        <button onClick={handleSignMessage}>
-            Sign Message
+        <button onClick={handleSignMessage} disabled={isSigning.current}>
+            {isSigning.current ? 'Signing...' : 'Sign Message'}
         </button>
     );
 };
