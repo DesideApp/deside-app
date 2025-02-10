@@ -78,7 +78,7 @@ export function getConnectedWallet() {
 // Firmar el mensaje
 export async function signMessage(wallet, message) {
     try {
-        console.log(`🔵 Solicitando firma a ${wallet}`);
+        console.log(`🟡 Solicitando firma a ${wallet}...`);
 
         const provider = getProvider(wallet);
         if (!provider) {
@@ -100,6 +100,7 @@ export async function signMessage(wallet, message) {
         throw error;
     }
 }
+
 
 
 // Obtener el balance de la billetera

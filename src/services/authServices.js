@@ -105,6 +105,7 @@ export async function authenticateWithServer(pubkey, signature, message) {
 }
 
 
+
 // Función para cerrar la sesión del usuario
 export function logout() {
     removeToken(); // Eliminar el token de localStorage
