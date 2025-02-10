@@ -7,16 +7,16 @@ import BottomBar from "./components/BottomBar.jsx";
 
 function Main() {
     return (
-        <div>
+        <>
             <Header />
             <main>
                 <Routes>
                     <Route path="/" element={<Home />} />
-                    <Route path="/chat/:walletAddress" element={<Chat />} /> 
+                    <Route path="/chat/:walletAddress" element={<Chat />} />
                 </Routes>
             </main>
             <BottomBar />
-        </div>
+        </>
     );
 }
 
