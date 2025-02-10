@@ -72,8 +72,13 @@ export async function disconnectWallet() {
 export function getConnectedWallet() {
     const walletType = localStorage.getItem('walletType');
     const walletAddress = localStorage.getItem('walletAddress');
+
+    console.log("🔍 Buscando wallet conectada...");
+    console.log("🟡 Wallet en localStorage:", walletAddress);
+
     return walletAddress ? { walletType, walletAddress } : null;
 }
+
 
 // Firmar el mensaje
 export async function signMessage(wallet, message) {

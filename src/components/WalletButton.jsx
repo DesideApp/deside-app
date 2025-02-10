@@ -20,38 +20,47 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
 
     // Cargar estado de la wallet al iniciar
     useEffect(() => {
+        console.log("🟡 Comprobando estado de la wallet en el inicio...");
+        
         const updateWalletStatus = async () => {
             const connectedWallet = await getConnectedWallet();
             if (connectedWallet) {
+                console.log("✅ Wallet encontrada en localStorage:", connectedWallet.walletAddress);
                 setWalletAddress(connectedWallet.walletAddress);
-                const solBalance = await getWalletBalance(connectedWallet.walletAddress);
-                setBalance(solBalance);
+                setBalance(await getWalletBalance(connectedWallet.walletAddress));
+            } else {
+                console.log("❌ No hay wallet conectada.");
             }
         };
+    
         updateWalletStatus();
     }, []);
+    
 
     // Conectar wallet y firmar mensaje para obtener JWT
     const handleConnect = async (wallet) => {
         try {
+            console.log("🔵 Intentando conectar desde WalletButton...");
+    
             const address = await connectWallet(wallet);
+            console.log("✅ Wallet conectada en WalletButton:", address);
+    
             setWalletAddress(address);
             localStorage.setItem('selectedWallet', wallet);
-
-            // Obtener balance
-            const solBalance = await getWalletBalance(address);
-            setBalance(solBalance);
-
-            // Autenticación con firma
-            const message = "Please sign this message to authenticate.";
-            const signedData = await signMessage(wallet, message);
-            await authenticateWithServer(address, signedData.signature, message);
+    
+            // 🔴 FUERZA EL ESTADO PARA ASEGURAR QUE SE ACTUALIZA
+            setTimeout(() => {
+                setWalletAddress(localStorage.getItem('selectedWallet'));
+                console.log("🔄 Estado de wallet forzado:", localStorage.getItem('selectedWallet'));
+            }, 500);
+    
         } catch (error) {
-            console.error("Error connecting wallet:", error);
+            console.error("❌ Error connecting wallet:", error);
         } finally {
             setIsModalOpen(false);
         }
     };
+    
 
     // Logout completo (desconectar wallet y borrar sesión)
     const handleLogout = () => {
