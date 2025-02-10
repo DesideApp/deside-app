@@ -2,21 +2,23 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
-const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://backend-deside.onrender.com';
-
 export default defineConfig({
   plugins: [react()],
+  root: '.',  // 📌 Usa la raíz del proyecto
   build: {
+    outDir: 'dist',
+    emptyOutDir: true,  // 📌 Elimina archivos antiguos antes de construir
     rollupOptions: {
+      input: resolve(__dirname, 'index.html'), // 📌 Usa `index.html` en la raíz
       output: {
-        manualChunks: {
-          solana: ['@solana/web3.js'], // Crea un chunk separado para Solana
-        },
+        dir: 'dist',
+        entryFileNames: 'assets/index-[hash].js', // 📌 Asegura nombres únicos
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash][extname]',
       },
     },
-    chunkSizeWarningLimit: 1000, // Aumentar el límite de tamaño de los chunks a 1000 KiB
   },
-  base: './', // Esto asegura que las rutas sean absolutas
+  base: './',  // 📌 Usa rutas relativas
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
@@ -26,9 +28,9 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: backendUrl, // URL del backend
+        target: process.env.REACT_APP_BACKEND_URL || 'https://backend-deside.onrender.com',
         changeOrigin: true,
-        secure: false, // Cambiar a true en producción si usas HTTPS
+        secure: false,
       },
     },
   },
