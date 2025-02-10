@@ -78,24 +78,32 @@ async function fetchWithAuth(url, options = {}) {
 // Verificar la firma del usuario al loguearse
 export async function authenticateWithServer(pubkey, signature, message) {
     try {
-        const response = await apiRequest('/api/auth/token', {
+        console.log("🔵 Enviando autenticación con:");
+        console.log("   👉 PubKey:", pubkey);
+        console.log("   👉 Signature:", signature);
+        console.log("   👉 Message:", message);
+
+        const response = await fetch('https://backend-deside.onrender.com/api/auth/token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ pubkey, signature, message }),
         });
 
         if (!response.ok) {
-            throw new Error('Failed to verify signature.');
+            const errorData = await response.json();
+            throw new Error(`❌ Fallo en autenticación: ${errorData.message}`);
         }
 
         const data = await response.json();
-        setToken(data.token); // Guardamos el token recibido
+        console.log("✅ Token recibido:", data.token);
+        setToken(data.token);
         return data.token;
     } catch (error) {
-        console.error("🔴 Error en `authenticateWithServer()`:", error);
-        throw new Error('Error during authentication: ' + error.message);
+        console.error("❌ Error en authenticateWithServer():", error);
+        throw error;
     }
 }
+
 
 // Función para cerrar la sesión del usuario
 export function logout() {

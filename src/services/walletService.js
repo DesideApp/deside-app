@@ -21,31 +21,36 @@ function getProvider(wallet) {
 // Conectar la billetera y generar JWT
 export async function connectWallet(wallet) {
     try {
+        console.log(`🔵 Intentando conectar con ${wallet}`);
+
         const provider = getProvider(wallet);
         const response = await provider.connect({ onlyIfTrusted: false });
 
         if (!response.publicKey) {
-            throw new Error(`Connection to ${wallet} cancelled by the user.`);
+            throw new Error(`❌ Conexión cancelada por el usuario.`);
         }
 
-        activeWalletProvider = provider;
-        activeWalletType = wallet;
-
-        console.log(`${wallet} Wallet connected: ${response.publicKey.toString()}`);
+        console.log(`✅ ${wallet} conectado: ${response.publicKey.toString()}`);
 
         // Firmar el mensaje y obtener el JWT
         const message = "Please sign this message to authenticate.";
         const signedData = await signMessage(wallet, message);
 
-        // Enviar la firma al servidor para obtener el JWT
-        await authenticateWithServer(response.publicKey.toString(), signedData.signature, message);
+        console.log("🔵 Firma generada:", signedData);
+
+        // Intentar autenticar con el servidor
+        console.log("🔵 Enviando autenticación al servidor...");
+        const token = await authenticateWithServer(response.publicKey.toString(), signedData.signature, message);
+
+        console.log("✅ Token JWT recibido:", token);
 
         return response.publicKey.toString();
     } catch (error) {
-        console.error(`Error connecting ${wallet} Wallet:`, error);
+        console.error(`❌ Error en connectWallet():`, error);
         throw error;
     }
 }
+
 
 // Desconectar la billetera
 export async function disconnectWallet() {
@@ -73,13 +78,17 @@ export function getConnectedWallet() {
 // Firmar el mensaje
 export async function signMessage(wallet, message) {
     try {
+        console.log(`🔵 Solicitando firma a ${wallet}`);
+
         const provider = getProvider(wallet);
         if (!provider) {
-            throw new Error("No wallet connected. Connect a wallet first.");
+            throw new Error("❌ No hay una billetera conectada.");
         }
 
         const encodedMessage = new TextEncoder().encode(message);
         const { signature } = await provider.signMessage(encodedMessage);
+
+        console.log("✅ Firma generada:", signature);
 
         return {
             signature: btoa(String.fromCharCode(...new Uint8Array(signature))),
@@ -87,10 +96,11 @@ export async function signMessage(wallet, message) {
             pubkey: provider.publicKey.toBase58(),
         };
     } catch (error) {
-        console.error(`Error signing message with ${wallet} Wallet:`, error);
+        console.error(`❌ Error en signMessage():`, error);
         throw error;
     }
 }
+
 
 // Obtener el balance de la billetera
 export async function getWalletBalance(walletAddress) {
