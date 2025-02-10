@@ -16,7 +16,7 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 1000, // Aumentar el límite de tamaño de los chunks a 1000 KiB
   },
-  base: '/', // Esto asegura que las rutas sean absolutas
+  base: './', // Esto asegura que las rutas sean absolutas
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
