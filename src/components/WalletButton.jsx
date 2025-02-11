@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
     connectWallet,
-    signMessage,
     getConnectedWallet,
     disconnectWallet,
     getWalletBalance
 } from "../services/walletService.js";
-import { authenticateWithServer, logout } from "../services/authServices.js";
+import { logout } from "../services/authServices.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -18,51 +17,37 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const menuRef = useRef(null);
 
-    // Verificar si hay una wallet conectada al iniciar
     useEffect(() => {
-        console.log("🟡 Comprobando estado de la wallet en el inicio...");
-
+        console.log("🟡 Comprobando estado de la wallet...");
+        
         const updateWalletStatus = async () => {
             const connectedWallet = await getConnectedWallet();
             if (connectedWallet) {
-                console.log("✅ Wallet encontrada en localStorage:", connectedWallet.walletAddress);
+                console.log("✅ Wallet detectada:", connectedWallet.walletAddress);
                 setWalletAddress(connectedWallet.walletAddress);
                 setBalance(await getWalletBalance(connectedWallet.walletAddress));
-            } else {
-                console.log("❌ No hay wallet conectada.");
             }
         };
 
         updateWalletStatus();
     }, []);
 
-    // Conectar wallet y firmar mensaje para obtener JWT
     const handleConnect = async (wallet) => {
         try {
-            console.log("🔵 Intentando conectar desde WalletButton...");
-
+            console.log("🔵 Intentando conectar...");
             const address = await connectWallet(wallet);
-            console.log("✅ Wallet conectada en WalletButton:", address);
-
+            console.log("✅ Wallet conectada:", address);
             setWalletAddress(address);
             localStorage.setItem('selectedWallet', wallet);
-
-            setTimeout(() => {
-                setWalletAddress(localStorage.getItem('selectedWallet'));
-                console.log("🔄 Estado de wallet actualizado:", localStorage.getItem('selectedWallet'));
-            }, 500);
-
         } catch (error) {
-            console.error("❌ Error conectando wallet:", error);
+            console.error("❌ Error al conectar:", error);
         } finally {
             setIsModalOpen(false);
         }
     };
 
-    // Logout completo (desconectar wallet y borrar sesión)
     const handleLogout = () => {
         if (!window.confirm("Are you sure you want to disconnect?")) return;
-
         disconnectWallet();
         logout();
         setWalletAddress(null);
@@ -86,7 +71,13 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
                 <span className="menu-icon"></span>
             </button>
 
-            <WalletMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} walletAddress={walletAddress} handleLogout={handleLogout} />
+            <WalletMenu
+                isOpen={isMenuOpen}
+                onClose={() => setIsMenuOpen(false)}
+                walletAddress={walletAddress}
+                handleLogout={handleLogout}
+            />
+
             <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelectWallet={handleConnect} />
         </div>
     );

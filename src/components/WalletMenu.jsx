@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getConnectedWallet, disconnectWallet, connectWallet } from '../services/walletService';
+import { getConnectedWallet, disconnectWallet } from '../services/walletService';
 import WalletModal from './WalletModal';
+import { Copy } from 'lucide-react'; // Usamos icono de copiar
 import './WalletMenu.css';
 
 function WalletMenu({ isOpen, onClose, walletAddress, handleLogout }) {
@@ -25,13 +26,23 @@ function WalletMenu({ isOpen, onClose, walletAddress, handleLogout }) {
         };
     }, [isOpen]);
 
+    const handleCopy = () => {
+        navigator.clipboard.writeText(walletAddress);
+        alert("Wallet address copied!");
+    };
+
     return (
         <>
             <div className={`wallet-menu ${isOpen ? 'open' : ''}`} ref={menuRef}>
                 <div className="wallet-menu-content">
                     {walletAddress ? (
                         <>
-                            <p className="wallet-address">{walletAddress}</p>
+                            <div className="wallet-address-container">
+                                <p className="wallet-address">{walletAddress}</p>
+                                <button className="copy-button" onClick={handleCopy} aria-label="Copy Address">
+                                    <Copy size={18} />
+                                </button>
+                            </div>
                             <button className="logout-button" onClick={handleLogout}>Disconnect</button>
                         </>
                     ) : (
@@ -40,7 +51,7 @@ function WalletMenu({ isOpen, onClose, walletAddress, handleLogout }) {
                 </div>
             </div>
 
-            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelectWallet={connectWallet} />
+            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelectWallet={() => {}} />
         </>
     );
 }
