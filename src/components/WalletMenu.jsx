@@ -3,19 +3,9 @@ import { getConnectedWallet, disconnectWallet, connectWallet } from '../services
 import WalletModal from './WalletModal';
 import './WalletMenu.css';
 
-function WalletMenu({ isOpen, onClose }) {
-    const [walletAddress, setWalletAddress] = useState(null);
+function WalletMenu({ isOpen, onClose, walletAddress, handleLogout }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const menuRef = useRef(null);
-
-    useEffect(() => {
-        const updateConnectionStatus = async () => {
-            const connectedWallet = await getConnectedWallet();
-            setWalletAddress(connectedWallet ? connectedWallet.walletAddress : null);
-        };
-
-        updateConnectionStatus();
-    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -35,26 +25,6 @@ function WalletMenu({ isOpen, onClose }) {
         };
     }, [isOpen]);
 
-    const handleConnect = async (wallet) => {
-        try {
-            const address = await connectWallet(wallet);
-            setWalletAddress(address);
-            localStorage.setItem('selectedWallet', wallet);
-        } catch (error) {
-            console.error("Error connecting wallet:", error);
-        } finally {
-            setIsModalOpen(false);
-        }
-    };
-
-    const handleLogoutClick = () => {
-        disconnectWallet();
-        setWalletAddress(null);
-        localStorage.removeItem('jwtToken');
-        localStorage.removeItem('selectedWallet');
-        onClose();
-    };
-
     return (
         <>
             <div className={`wallet-menu ${isOpen ? 'open' : ''}`} ref={menuRef}>
@@ -62,7 +32,7 @@ function WalletMenu({ isOpen, onClose }) {
                     {walletAddress ? (
                         <>
                             <p className="wallet-address">{walletAddress}</p>
-                            <button className="logout-button" onClick={handleLogoutClick}>Disconnect</button>
+                            <button className="logout-button" onClick={handleLogout}>Disconnect</button>
                         </>
                     ) : (
                         <button className="connect-button" onClick={() => setIsModalOpen(true)}>Connect Wallet</button>
@@ -70,7 +40,7 @@ function WalletMenu({ isOpen, onClose }) {
                 </div>
             </div>
 
-            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelectWallet={handleConnect} />
+            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelectWallet={connectWallet} />
         </>
     );
 }

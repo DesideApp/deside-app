@@ -18,10 +18,10 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const menuRef = useRef(null);
 
-    // Cargar estado de la wallet al iniciar
+    // Verificar si hay una wallet conectada al iniciar
     useEffect(() => {
         console.log("🟡 Comprobando estado de la wallet en el inicio...");
-        
+
         const updateWalletStatus = async () => {
             const connectedWallet = await getConnectedWallet();
             if (connectedWallet) {
@@ -32,35 +32,32 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
                 console.log("❌ No hay wallet conectada.");
             }
         };
-    
+
         updateWalletStatus();
     }, []);
-    
 
     // Conectar wallet y firmar mensaje para obtener JWT
     const handleConnect = async (wallet) => {
         try {
             console.log("🔵 Intentando conectar desde WalletButton...");
-    
+
             const address = await connectWallet(wallet);
             console.log("✅ Wallet conectada en WalletButton:", address);
-    
+
             setWalletAddress(address);
             localStorage.setItem('selectedWallet', wallet);
-    
-            // 🔴 FUERZA EL ESTADO PARA ASEGURAR QUE SE ACTUALIZA
+
             setTimeout(() => {
                 setWalletAddress(localStorage.getItem('selectedWallet'));
-                console.log("🔄 Estado de wallet forzado:", localStorage.getItem('selectedWallet'));
+                console.log("🔄 Estado de wallet actualizado:", localStorage.getItem('selectedWallet'));
             }, 500);
-    
+
         } catch (error) {
-            console.error("❌ Error connecting wallet:", error);
+            console.error("❌ Error conectando wallet:", error);
         } finally {
             setIsModalOpen(false);
         }
     };
-    
 
     // Logout completo (desconectar wallet y borrar sesión)
     const handleLogout = () => {
@@ -89,7 +86,7 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
                 <span className="menu-icon"></span>
             </button>
 
-            <WalletMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} handleLogout={handleLogout} />
+            <WalletMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} walletAddress={walletAddress} handleLogout={handleLogout} />
             <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelectWallet={handleConnect} />
         </div>
     );
