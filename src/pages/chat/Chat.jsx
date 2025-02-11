@@ -1,13 +1,54 @@
-import React from 'react';
+import React, { useState, useEffect } from "react";
+import ContactList from "../../components/chatcomps/ContactList.jsx";
+import ChatWindow from "../../components/chatcomps/ChatWindow.jsx";
+import RightPanel from "../../components/chatcomps/RightPanel.jsx";
+import { getConnectedWallet, connectWallet } from "../../services/walletService";
+import "./Chat.css";
 
 function Chat() {
-    console.log("✅ Chat.jsx está montado y se está ejecutando");
+    const [walletAddress, setWalletAddress] = useState(null);
+
+    useEffect(() => {
+        const checkWallet = async () => {
+            const connectedWallet = await getConnectedWallet();
+            if (connectedWallet) {
+                setWalletAddress(connectedWallet.walletAddress);
+            }
+        };
+        checkWallet();
+    }, []);
+
+    const handleConnectWallet = async () => {
+        try {
+            const address = await connectWallet("phantom");
+            setWalletAddress(address);
+        } catch (error) {
+            console.error("❌ Error connecting wallet:", error);
+        }
+    };
 
     return (
-        <div style={{ backgroundColor: 'red', height: '100vh' }}>
-            <h1 style={{ color: 'white', textAlign: 'center' }}>
-                🚀 La página de Chat ha cargado correctamente
-            </h1>
+        <div className="chat-page-container">
+            {/* 🟢 Capa de suavizado si no hay wallet */}
+            {!walletAddress && (
+                <div className="overlay">
+                    <div className="overlay-content">
+                        <p>🔑 Connect your wallet to start chatting</p>
+                        <button onClick={handleConnectWallet}>Connect Wallet</button>
+                    </div>
+                </div>
+            )}
+
+            {/* 🟢 Paneles del chat */}
+            <div className="left-panel">
+                <ContactList />
+            </div>
+            <div className="chat-window-panel">
+                <ChatWindow />
+            </div>
+            <div className="right-panel">
+                <RightPanel />
+            </div>
         </div>
     );
 }

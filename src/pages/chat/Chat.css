@@ -37,3 +37,52 @@
     background-color: #f5f5f5;
     box-sizing: border-box;
 }
+
+/* 🟢 Capa de bloqueo elegante y limpia */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9); /* Blanco con 90% de opacidad */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px); /* Ligero blur para suavidad */
+    z-index: 100;
+}
+
+/* 🟢 Cuadro de mensaje y botón */
+.overlay-content {
+    background: rgba(255, 255, 255, 0.95); /* Un poco más sólido */
+    padding: 18px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* 🟢 Mensaje */
+.overlay-content p {
+    font-size: 16px;
+    color: #444;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+/* 🟢 Botón de conexión */
+.overlay-content button {
+    background: #fc554f;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+    font-weight: 500;
+}
+
+.overlay-content button:hover {
+    background: #e0443f;
+}
