@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import ContactList from "../../components/chatcomps/ContactList.jsx";
-import ChatComponent from "../../components/chatcomps/ChatComponent.jsx";
+import ChatWindow from "../../components/chatcomps/ChatWindow.jsx";
 import RightPanel from "../../components/chatcomps/RightPanel.jsx";
 import { getConnectedWallet, connectWallet } from "../../services/walletService.js";
 import "./Chat.css";
 
 function Chat() {
     const [walletAddress, setWalletAddress] = useState(null);
-    const [selectedContact, setSelectedContact] = useState(null);
+    const [selectedContact, setSelectedContact] = useState(null); // Contacto seleccionado
 
     useEffect(() => {
         const checkWallet = async () => {
@@ -30,7 +30,7 @@ function Chat() {
 
     return (
         <div className="chat-page-container">
-            {/* 🔵 Capa de transparencia si no hay wallet conectada */}
+            {/* 🔵 Capa de bloqueo si no hay wallet conectada */}
             {!walletAddress && (
                 <div className="overlay">
                     <div className="overlay-content">
@@ -40,15 +40,19 @@ function Chat() {
                 </div>
             )}
 
-            {/* 🔵 Paneles del chat */}
+            {/* 🔵 Panel Izquierdo: Lista de contactos */}
             <div className="left-panel">
                 <ContactList onSelectContact={setSelectedContact} />
             </div>
+
+            {/* 🔵 Centro: Ventana de chat */}
             <div className="chat-window-panel">
-                <ChatComponent selectedContact={selectedContact} />
+                <ChatWindow selectedContact={selectedContact} />
             </div>
+
+            {/* 🔵 Panel Derecho: Gadgets adicionales */}
             <div className="right-panel">
-                <RightPanel />
+                <RightPanel selectedContact={selectedContact} />
             </div>
         </div>
     );
