@@ -11,6 +11,8 @@ function Chat() {
 
   const { connected, signals, sendSignal } = useSignal(backendUrl, pubkey);
 
+  console.log("✅ Renderizando Chat.jsx...");
+
   return (
     <div className="chat-page-container">
       <div className="left-panel">
