@@ -1,4 +1,6 @@
-import { authenticateWithServer } from './authServices'; // Importa la función para autenticar
+import bs58 from 'bs58'; // ✅ Base58 para la firma
+import { authenticateWithServer } from './authServices'; // Autenticación en backend
+import { PublicKey } from '@solana/web3.js';
 
 let activeWalletProvider = null;
 let activeWalletType = null;
@@ -9,19 +11,19 @@ const WALLET_PROVIDERS = {
     magiceden: () => window.magicEden?.solana,
 };
 
-// Función para obtener el proveedor de la billetera
+// 📌 Obtiene el proveedor de la billetera
 function getProvider(wallet) {
     const provider = WALLET_PROVIDERS[wallet]?.();
     if (!provider) {
-        throw new Error(`${wallet} Wallet not detected`);
+        throw new Error(`❌ ${wallet} Wallet no detectada.`);
     }
     return provider;
 }
 
-// Conectar la billetera y generar JWT
+// 📌 Conectar la billetera y obtener JWT
 export async function connectWallet(wallet) {
     try {
-        console.log(`🔵 Intentando conectar con ${wallet}`);
+        console.log(`🔵 Intentando conectar con ${wallet}...`);
 
         const provider = getProvider(wallet);
         const response = await provider.connect({ onlyIfTrusted: false });
@@ -30,45 +32,45 @@ export async function connectWallet(wallet) {
             throw new Error(`❌ Conexión cancelada por el usuario.`);
         }
 
-        console.log(`✅ ${wallet} conectado: ${response.publicKey.toString()}`);
+        const pubkey = response.publicKey.toBase58();
+        console.log(`✅ ${wallet} conectado: ${pubkey}`);
 
-        // Firmar el mensaje y obtener el JWT
+        // ✍️ Firmar el mensaje
         const message = "Please sign this message to authenticate.";
         const signedData = await signMessage(wallet, message);
 
         console.log("🔵 Firma generada:", signedData);
 
-        // Intentar autenticar con el servidor
+        // 📌 Enviar autenticación al backend
         console.log("🔵 Enviando autenticación al servidor...");
-        const token = await authenticateWithServer(response.publicKey.toString(), signedData.signature, message);
+        const token = await authenticateWithServer(pubkey, signedData.signature, message);
 
         console.log("✅ Token JWT recibido:", token);
 
-        return response.publicKey.toString();
+        return pubkey;
     } catch (error) {
         console.error(`❌ Error en connectWallet():`, error);
         throw error;
     }
 }
 
-
-// Desconectar la billetera
+// 📌 Desconectar la billetera
 export async function disconnectWallet() {
     try {
         if (activeWalletProvider?.disconnect) {
             await activeWalletProvider.disconnect();
-            console.log(`${activeWalletType} Wallet disconnected`);
+            console.log(`✅ ${activeWalletType} Wallet desconectada.`);
         }
 
         activeWalletProvider = null;
         activeWalletType = null;
     } catch (error) {
-        console.error(`Error disconnecting wallet:`, error);
+        console.error(`❌ Error al desconectar la wallet:`, error);
         throw error;
     }
 }
 
-// Obtener la billetera conectada
+// 📌 Obtener la billetera conectada
 export function getConnectedWallet() {
     const walletType = localStorage.getItem('walletType');
     const walletAddress = localStorage.getItem('walletAddress');
@@ -79,8 +81,7 @@ export function getConnectedWallet() {
     return walletAddress ? { walletType, walletAddress } : null;
 }
 
-
-// Firmar el mensaje
+// 📌 Firmar el mensaje correctamente (enviar en Base58)
 export async function signMessage(wallet, message) {
     try {
         console.log(`🟡 Solicitando firma a ${wallet}...`);
@@ -93,10 +94,13 @@ export async function signMessage(wallet, message) {
         const encodedMessage = new TextEncoder().encode(message);
         const { signature } = await provider.signMessage(encodedMessage);
 
-        console.log("✅ Firma generada:", signature);
+        // 📌 Convertimos la firma a Base58
+        const signatureBase58 = bs58.encode(new Uint8Array(signature));
+
+        console.log("✅ Firma generada (Base58):", signatureBase58);
 
         return {
-            signature: btoa(String.fromCharCode(...new Uint8Array(signature))),
+            signature: signatureBase58,
             message,
             pubkey: provider.publicKey.toBase58(),
         };
@@ -106,17 +110,16 @@ export async function signMessage(wallet, message) {
     }
 }
 
-
-
-// Obtener el balance de la billetera
+// 📌 Obtener el balance de la billetera en SOL
 export async function getWalletBalance(walletAddress) {
     try {
-        if (!walletAddress) throw new Error("Wallet address is required");
+        if (!walletAddress) throw new Error("❌ Se requiere una dirección de wallet.");
 
+        const connection = new web3.Connection(web3.clusterApiUrl('mainnet-beta'));
         const balance = await connection.getBalance(new PublicKey(walletAddress));
-        return balance / 1e9; // Convertir lamports a SOL
+        return balance / 1e9; // Convertimos lamports a SOL
     } catch (error) {
-        console.error("Error fetching wallet balance:", error);
+        console.error("❌ Error obteniendo balance:", error);
         throw error;
     }
 }
