@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import ContactList from "../../components/chatcomps/ContactList.jsx";
 import ChatWindow from "../../components/chatcomps/ChatWindow.jsx";
 import RightPanel from "../../components/chatcomps/RightPanel.jsx";
-import { getConnectedWallet, connectWallet } from "../../services/walletService";
+import { getConnectedWallet, connectWallet } from "../../services/walletService.js";
 import "./Chat.css";
 
 function Chat() {
