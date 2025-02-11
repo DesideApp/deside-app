@@ -1,31 +1,15 @@
 import React from 'react';
-import ContactList from '../../components/chatcomps/ContactList.jsx';
-import ChatWindow from '../../components/chatcomps/ChatWindow.jsx';
-import RightPanel from '../../components/chatcomps/RightPanel.jsx';
-import useSignal from '../../hooks/useSignal';
-import "./Chat.css";
 
 function Chat() {
-  const backendUrl = 'https://your-backend-url.com';
-  const pubkey = 'your-public-key';
+    console.log("✅ Chat.jsx está montado y se está ejecutando");
 
-  const { connected, signals, sendSignal } = useSignal(backendUrl, pubkey);
-
-  console.log("✅ Renderizando Chat.jsx...");
-
-  return (
-    <div className="chat-page-container">
-      <div className="left-panel">
-        <ContactList />
-      </div>
-      <div className="chat-window-panel">
-        <ChatWindow />
-      </div>
-      <div className="right-panel">
-        <RightPanel />
-      </div>
-    </div>
-  );
+    return (
+        <div style={{ backgroundColor: 'red', height: '100vh' }}>
+            <h1 style={{ color: 'white', textAlign: 'center' }}>
+                🚀 La página de Chat ha cargado correctamente
+            </h1>
+        </div>
+    );
 }
 
 export default Chat;
