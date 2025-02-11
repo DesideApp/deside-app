@@ -38,7 +38,7 @@
     box-sizing: border-box;
 }
 
-/* 🟢 Capa de bloqueo elegante y limpia */
+/* 🔵 Capa de bloqueo elegante y limpia */
 .overlay {
     position: absolute;
     top: 0;
@@ -49,20 +49,20 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    backdrop-filter: blur(4px); /* Ligero blur para suavidad */
+    backdrop-filter: blur(4px); /* Suavidad en el fondo */
     z-index: 100;
 }
 
-/* 🟢 Cuadro de mensaje y botón */
+/* 🔵 Cuadro de mensaje y botón */
 .overlay-content {
-    background: rgba(255, 255, 255, 0.95); /* Un poco más sólido */
+    background: rgba(255, 255, 255, 0.95);
     padding: 18px;
     border-radius: 12px;
     text-align: center;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* 🟢 Mensaje */
+/* 🔵 Mensaje */
 .overlay-content p {
     font-size: 16px;
     color: #444;
@@ -70,7 +70,7 @@
     margin-bottom: 12px;
 }
 
-/* 🟢 Botón de conexión */
+/* 🔵 Botón de conexión */
 .overlay-content button {
     background: #fc554f;
     color: white;

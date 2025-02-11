@@ -11,7 +11,7 @@ function Chat() {
     useEffect(() => {
         const checkWallet = async () => {
             const connectedWallet = await getConnectedWallet();
-            if (connectedWallet) {
+            if (connectedWallet?.walletAddress) {
                 setWalletAddress(connectedWallet.walletAddress);
             }
         };
@@ -29,7 +29,7 @@ function Chat() {
 
     return (
         <div className="chat-page-container">
-            {/* 🟢 Capa de suavizado si no hay wallet */}
+            {/* 🔵 Capa de transparencia si no hay wallet conectada */}
             {!walletAddress && (
                 <div className="overlay">
                     <div className="overlay-content">
@@ -39,7 +39,7 @@ function Chat() {
                 </div>
             )}
 
-            {/* 🟢 Paneles del chat */}
+            {/* 🔵 Paneles del chat */}
             <div className="left-panel">
                 <ContactList />
             </div>
