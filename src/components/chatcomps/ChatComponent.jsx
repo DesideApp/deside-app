@@ -3,6 +3,8 @@ import { getConnectedWallet } from "../../services/walletService";
 import useSignal from "../../hooks/useSignal";
 import ChatWindow from "./ChatWindow";
 import ChatInput from "./ChatInput";
+import "./ChatComponent.css";
+
 
 function ChatComponent({ selectedContact }) {
     const [walletAddress, setWalletAddress] = useState(null);

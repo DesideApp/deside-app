@@ -3,7 +3,7 @@
     border-radius: 10px;
     background-color: #f9f9f9;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    font-family: 'Inter', sans-serif; /* Usando Inter como fuente principal */
+    font-family: 'Inter', sans-serif;
     max-width: 400px;
     margin: auto;
 }
