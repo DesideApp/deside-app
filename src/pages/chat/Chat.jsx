@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import ContactList from "../../components/chatcomps/ContactList.jsx";
-import ChatWindow from "../../components/chatcomps/ChatWindow.jsx";
+import ChatComponent from "../../components/chatcomps/ChatComponent.jsx";
 import RightPanel from "../../components/chatcomps/RightPanel.jsx";
 import { getConnectedWallet, connectWallet } from "../../services/walletService.js";
 import "./Chat.css";
 
 function Chat() {
     const [walletAddress, setWalletAddress] = useState(null);
+    const [selectedContact, setSelectedContact] = useState(null);
 
     useEffect(() => {
         const checkWallet = async () => {
@@ -41,10 +42,10 @@ function Chat() {
 
             {/* 🔵 Paneles del chat */}
             <div className="left-panel">
-                <ContactList />
+                <ContactList onSelectContact={setSelectedContact} />
             </div>
             <div className="chat-window-panel">
-                <ChatWindow />
+                <ChatComponent selectedContact={selectedContact} />
             </div>
             <div className="right-panel">
                 <RightPanel />

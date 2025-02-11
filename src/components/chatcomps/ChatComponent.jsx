@@ -8,7 +8,6 @@ import "./ChatComponent.css";
 function ChatComponent({ selectedContact }) {
     const [walletAddress, setWalletAddress] = useState(null);
     const [messages, setMessages] = useState([]);
-    const [peerConnection, setPeerConnection] = useState(null);
     const chatContainerRef = useRef(null);
 
     const { sendSignal, onSignal } = useSignal();
@@ -32,15 +31,6 @@ function ChatComponent({ selectedContact }) {
             iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
         });
 
-        peer.onicecandidate = (event) => {
-            if (event.candidate) {
-                sendSignal(selectedContact, {
-                    type: "ice-candidate",
-                    candidate: event.candidate,
-                });
-            }
-        };
-
         peer.ondatachannel = (event) => {
             const receiveChannel = event.channel;
             receiveChannel.onmessage = (e) => {
@@ -48,34 +38,16 @@ function ChatComponent({ selectedContact }) {
             };
         };
 
-        setPeerConnection(peer);
-
-        onSignal((data) => {
-            if (data.type === "offer") {
-                peer.setRemoteDescription(new RTCSessionDescription(data.offer))
-                    .then(() => peer.createAnswer())
-                    .then((answer) => peer.setLocalDescription(answer))
-                    .then(() => sendSignal(selectedContact, { type: "answer", answer: peer.localDescription }));
-            } else if (data.type === "answer") {
-                peer.setRemoteDescription(new RTCSessionDescription(data.answer));
-            } else if (data.type === "ice-candidate") {
-                peer.addIceCandidate(new RTCIceCandidate(data.candidate));
-            }
-        });
-
         return () => {
             peer.close();
-            setPeerConnection(null);
         };
     }, [walletAddress, selectedContact]);
 
     const sendMessage = (text) => {
-        if (!peerConnection) {
-            console.error("No peer connection available.");
+        if (!selectedContact) {
+            console.error("No selected contact.");
             return;
         }
-        const dataChannel = peerConnection.createDataChannel("chat");
-        dataChannel.onopen = () => dataChannel.send(text);
         setMessages((prev) => [...prev, { sender: "me", text }]);
     };
 
