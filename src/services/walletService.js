@@ -23,36 +23,29 @@ function getProvider(wallet) {
 // 📌 Conectar la billetera y obtener JWT
 export async function connectWallet(wallet) {
     try {
-        console.log(`🔵 Intentando conectar con ${wallet}...`);
+        console.log(`🔵 Intentando conectar con ${wallet}`);
 
         const provider = getProvider(wallet);
         const response = await provider.connect({ onlyIfTrusted: false });
 
-        if (!response.publicKey) {
-            throw new Error(`❌ Conexión cancelada por el usuario.`);
-        }
+        if (!response.publicKey) throw new Error("❌ Conexión cancelada por el usuario.");
 
-        const pubkey = response.publicKey.toBase58();
-        console.log(`✅ ${wallet} conectado: ${pubkey}`);
+        console.log(`✅ ${wallet} conectado: ${response.publicKey.toString()}`);
 
-        // ✍️ Firmar el mensaje
         const message = "Please sign this message to authenticate.";
         const signedData = await signMessage(wallet, message);
-
         console.log("🔵 Firma generada:", signedData);
 
-        // 📌 Enviar autenticación al backend
-        console.log("🔵 Enviando autenticación al servidor...");
-        const token = await authenticateWithServer(pubkey, signedData.signature, message);
-
+        const token = await authenticateWithServer(response.publicKey.toString(), signedData.signature, message);
         console.log("✅ Token JWT recibido:", token);
 
-        return pubkey;
+        return response.publicKey.toString();
     } catch (error) {
-        console.error(`❌ Error en connectWallet():`, error);
+        console.error("❌ Error en connectWallet():", error);
         throw error;
     }
 }
+
 
 // 📌 Desconectar la billetera
 export async function disconnectWallet() {
