@@ -1,6 +1,5 @@
 import bs58 from "bs58";
-import { authenticateWithServer } from "./authServices";
-import { fetchWithAuth } from "./authServices"; // 🟢 Para registrar wallets
+import { authenticateWithServer, fetchWithAuth } from "./authServices";
 import { PublicKey, Connection, clusterApiUrl } from "@solana/web3.js";
 
 const WALLET_PROVIDERS = {
@@ -21,39 +20,29 @@ async function connectWallet(wallet) {
     try {
         console.log(`🔵 Intentando conectar con ${wallet}`);
         const provider = getProvider(wallet);
-
-        if (!provider.isConnected) {
-            await provider.connect();
-        }
+        if (!provider.isConnected) await provider.connect();
 
         if (!provider.publicKey) throw new Error("❌ Conexión cancelada por el usuario.");
         const pubkey = provider.publicKey.toBase58();
         console.log(`✅ ${wallet} conectado: ${pubkey}`);
 
+        // 📌 Firmar el mensaje y autenticar
         const message = "Please sign this message to authenticate.";
         const signedData = await signMessage(wallet, message);
-
-        if (!signedData.signature) {
-            throw new Error("❌ No se pudo obtener la firma.");
-        }
+        if (!signedData.signature) throw new Error("❌ No se pudo obtener la firma.");
 
         console.log("🔵 Firma generada:", signedData);
-
         const token = await authenticateWithServer(pubkey, signedData.signature, message);
-
-        if (!token) {
-            throw new Error("❌ No se recibió un token válido.");
-        }
+        if (!token) throw new Error("❌ No se recibió un token válido.");
 
         console.log("✅ Token JWT recibido:", token);
 
-        // 📌 Guardar datos en localStorage y registrar wallet en el backend
+        // 📌 Guardar en localStorage y registrar wallet en backend
         localStorage.setItem("walletAddress", pubkey);
         localStorage.setItem("walletType", wallet);
         localStorage.setItem("jwtToken", token);
         window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet: pubkey } }));
 
-        // 📌 Registrar la wallet en el backend (IMPORTANTE)
         await fetchWithAuth("/api/auth/register-wallet", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -91,8 +80,7 @@ async function disconnectWallet() {
 
 // 📌 Obtener la billetera conectada
 function getConnectedWallet() {
-    const walletAddress = localStorage.getItem("walletAddress");
-    return walletAddress ? { walletAddress } : null;
+    return { walletAddress: localStorage.getItem("walletAddress") } || null;
 }
 
 // 📌 Obtener el balance de la billetera en SOL
@@ -100,10 +88,10 @@ async function getWalletBalance(walletAddress) {
     try {
         if (!walletAddress) throw new Error("❌ Se requiere una dirección de wallet.");
 
-        const connection = new Connection(clusterApiUrl("mainnet-beta"));
+        const connection = new Connection("https://rpc.ankr.com/solana"); // 🔹 Usamos un RPC más estable
         const balance = await connection.getBalance(new PublicKey(walletAddress));
 
-        return balance / 1e9; // Convertimos lamports a SOL
+        return balance / 1e9;
     } catch (error) {
         console.error("❌ Error obteniendo balance:", error);
         throw error;

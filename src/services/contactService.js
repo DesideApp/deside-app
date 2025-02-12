@@ -10,6 +10,7 @@ export async function fetchContacts() {
         return {
             confirmed: data.confirmed || [],
             pending: data.pending || [],
+            requests: data.requests || [],
         };
     } catch (error) {
         console.error("❌ Error al obtener contactos:", error);
@@ -48,7 +49,6 @@ export async function approveContact(pubkey) {
         });
 
         if (!response.ok) throw new Error("Failed to accept contact request.");
-
         return await response.json();
     } catch (error) {
         console.error("❌ Error al aceptar contacto:", error);
@@ -66,7 +66,6 @@ export async function declineContact(pubkey) {
         });
 
         if (!response.ok) throw new Error("Failed to reject contact request.");
-
         return await response.json();
     } catch (error) {
         console.error("❌ Error al rechazar contacto:", error);

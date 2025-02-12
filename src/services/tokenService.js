@@ -1,10 +1,10 @@
 import CryptoJS from 'crypto-js';
 
-const SECRET_KEY = process.env.REACT_APP_SECRET_KEY || 'fallback-secret-key';  // 🔹 Usa .env para más seguridad 🔒
+const SECRET_KEY = process.env.REACT_APP_SECRET_KEY || 'fallback-secret-key';  
 
 // Guardar token en localStorage de forma encriptada
 export function setToken(token) {
-    if (!token) return;
+    if (!token || typeof token !== "string") return;
     const encryptedToken = CryptoJS.AES.encrypt(token, SECRET_KEY).toString();
     localStorage.setItem('jwtToken', encryptedToken);
 }
@@ -15,7 +15,8 @@ export function getToken() {
     if (!encryptedToken) return null;
     try {
         const bytes = CryptoJS.AES.decrypt(encryptedToken, SECRET_KEY);
-        return bytes.toString(CryptoJS.enc.Utf8) || null;
+        const decryptedToken = bytes.toString(CryptoJS.enc.Utf8);
+        return decryptedToken || null;
     } catch (error) {
         console.error("🔴 Error al desencriptar token:", error);
         return null;
@@ -25,33 +26,31 @@ export function getToken() {
 // Eliminar token de localStorage
 export function removeToken() {
     localStorage.removeItem('jwtToken');
-    localStorage.removeItem('refreshToken');  // 🔹 También eliminamos el refreshToken
+    localStorage.removeItem('refreshToken');  
 }
 
 // Verificar si el token ha expirado
 export function isTokenExpired() {
     const token = getToken();
-    if (!token) return true; // 🔹 Si no hay token, asumimos que ha expirado
+    if (!token) return true;
 
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        return payload.exp < Math.floor(Date.now() / 1000); // Comparar con el tiempo actual
+        return payload.exp < Math.floor(Date.now() / 1000);
     } catch (error) {
         console.error("🔴 Error parsing JWT token:", error);
         return true;
     }
 }
 
-// Obtener el token sin procesarlo (puede ser útil en algunos casos)
-export function getAccessToken() {
-    return localStorage.getItem('jwtToken');
-}
-
 // 🔄 **Renovar token usando el refreshToken**
 export async function refreshToken() {
     try {
         const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) throw new Error('No refresh token found');
+        if (!refreshToken) {
+            removeToken();
+            throw new Error('No refresh token found');
+        }
 
         const response = await fetch('https://backend-deside.onrender.com/api/auth/refresh', {
             method: 'POST',
@@ -59,14 +58,17 @@ export async function refreshToken() {
             body: JSON.stringify({ refreshToken }),
         });
 
-        if (!response.ok) throw new Error('Failed to refresh token');
+        if (!response.ok) {
+            removeToken();
+            throw new Error('Failed to refresh token');
+        }
 
         const data = await response.json();
         setToken(data.accessToken);
         return data.accessToken;
     } catch (error) {
         console.error("🔴 Error al renovar token:", error);
-        removeToken(); // 🔹 Si falla, limpiamos tokens para evitar problemas
+        removeToken(); 
         throw error;
     }
 }
