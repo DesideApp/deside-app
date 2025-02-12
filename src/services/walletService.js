@@ -21,7 +21,6 @@ export async function connectWallet(wallet) {
         console.log(`🔵 Intentando conectar con ${wallet}`);
         const provider = getProvider(wallet);
 
-        // Verifica si ya está conectada
         if (!provider.isConnected) {
             await provider.connect();
         }
@@ -37,10 +36,10 @@ export async function connectWallet(wallet) {
         const token = await authenticateWithServer(pubkey, signedData.signature, message);
         console.log("✅ Token JWT recibido:", token);
 
-        // 📌 Guardar la wallet en localStorage y emitir un evento global
+        // 📌 Guardar datos en localStorage y emitir un evento global
         localStorage.setItem("walletAddress", pubkey);
         localStorage.setItem("walletType", wallet);
-        window.dispatchEvent(new Event("walletConnected"));
+        window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet: pubkey } }));
 
         return pubkey;
     } catch (error) {
@@ -61,7 +60,6 @@ export async function disconnectWallet() {
             console.log(`✅ ${walletType} Wallet desconectada.`);
         }
 
-        // 📌 Eliminar datos de localStorage y emitir evento
         localStorage.removeItem("walletAddress");
         localStorage.removeItem("walletType");
         window.dispatchEvent(new Event("walletDisconnected"));
@@ -77,7 +75,7 @@ export function getConnectedWallet() {
     return walletAddress ? { walletAddress } : null;
 }
 
-// 📌 Firmar el mensaje correctamente (enviar en Base58)
+// 📌 Firmar mensaje (enviar en Base58)
 export async function signMessage(wallet, message) {
     try {
         console.log(`🟡 Solicitando firma a ${wallet}...`);
@@ -108,9 +106,12 @@ export async function getWalletBalance(walletAddress) {
 
         const connection = new Connection(clusterApiUrl("mainnet-beta"));
         const balance = await connection.getBalance(new PublicKey(walletAddress));
-        return balance / 1e9; // Convertimos lamports a SOL
+
+        if (!balance) throw new Error("❌ No se pudo obtener el balance de la cuenta.");
+        return balance / 1e9;
     } catch (error) {
         console.error("❌ Error obteniendo balance:", error);
         throw error;
     }
 }
+

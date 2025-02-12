@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import ContactList from "../../components/chatcomps/ContactList.jsx";
 import ChatWindow from "../../components/chatcomps/ChatWindow.jsx";
 import RightPanel from "../../components/chatcomps/RightPanel.jsx";
-import WalletModal from "../../components/WalletModal.jsx";
-import { getConnectedWallet, connectWallet } from "../../services/walletService.js";
+import WalletModal from "../../components/WalletModal.jsx"; 
+import { getConnectedWallet } from "../../services/walletService.js";
 import "./Chat.css";
 
 function Chat() {
@@ -12,31 +12,21 @@ function Chat() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        const updateWalletStatus = async () => {
+        const checkWallet = async () => {
             const connectedWallet = await getConnectedWallet();
-            setWalletAddress(connectedWallet?.walletAddress || null);
+            if (connectedWallet?.walletAddress) {
+                setWalletAddress(connectedWallet.walletAddress);
+            }
         };
+        checkWallet();
 
-        updateWalletStatus();
+        window.addEventListener("walletConnected", (e) => {
+            setWalletAddress(e.detail.wallet);
+            setIsModalOpen(false); // Cierra el modal automáticamente
+        });
 
-        window.addEventListener("walletConnected", updateWalletStatus);
-        window.addEventListener("walletDisconnected", updateWalletStatus);
-
-        return () => {
-            window.removeEventListener("walletConnected", updateWalletStatus);
-            window.removeEventListener("walletDisconnected", updateWalletStatus);
-        };
+        return () => window.removeEventListener("walletConnected", checkWallet);
     }, []);
-
-    const handleWalletSelect = async (wallet) => {
-        try {
-            const address = await connectWallet(wallet);
-            setWalletAddress(address);
-            setIsModalOpen(false); // 🔵 Cierra el modal después de conectar
-        } catch (error) {
-            console.error("❌ Error connecting wallet:", error);
-        }
-    };
 
     return (
         <div className="chat-page-container">
@@ -59,8 +49,7 @@ function Chat() {
                 <RightPanel selectedContact={selectedContact} />
             </div>
 
-            {/* ✅ Ahora el modal de conexión pasa `handleWalletSelect` correctamente */}
-            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelectWallet={handleWalletSelect} />
+            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </div>
     );
 }
