@@ -86,3 +86,21 @@ export function getConnectedWallet() {
     const walletAddress = localStorage.getItem("walletAddress");
     return walletAddress ? { walletAddress } : null;
 }
+
+// 📌 Obtener el balance de la billetera en SOL
+export async function getWalletBalance(walletAddress) {
+    try {
+        if (!walletAddress) throw new Error("❌ Se requiere una dirección de wallet.");
+
+        const connection = new Connection(clusterApiUrl("mainnet-beta"));
+        const balance = await connection.getBalance(new PublicKey(walletAddress));
+
+        if (balance === null) throw new Error("❌ No se pudo obtener el balance de la cuenta.");
+        return balance / 1e9; // Convertimos lamports a SOL
+    } catch (error) {
+        console.error("❌ Error obteniendo balance:", error);
+        throw error;
+    }
+}
+
+export { getConnectedWallet, connectWallet, disconnectWallet, getWalletBalance };
