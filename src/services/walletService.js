@@ -1,4 +1,5 @@
 import bs58 from "bs58";
+import { setToken } from "./tokenService"
 import { authenticateWithServer, fetchWithAuth } from "./authServices";
 import { PublicKey, Connection, clusterApiUrl } from "@solana/web3.js";
 
@@ -37,17 +38,26 @@ async function connectWallet(wallet) {
 
         console.log("✅ Token JWT recibido:", token);
 
-        // 📌 Guardar en localStorage y registrar wallet en backend
+        // 📌 Guardar en localStorage usando `setToken()`
+        setToken(token);
         localStorage.setItem("walletAddress", pubkey);
         localStorage.setItem("walletType", wallet);
-        localStorage.setItem("jwtToken", token);
         window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet: pubkey } }));
 
-        await fetchWithAuth("/api/auth/register-wallet", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ pubkey }),
-        });
+        // 📌 Registrar wallet en el backend y manejar posibles errores
+        try {
+            const response = await fetchWithAuth("/api/auth/register-wallet", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pubkey }),
+            });
+
+            if (!response.ok) {
+                console.warn("⚠️ La wallet ya estaba registrada o hubo un problema en el backend.");
+            }
+        } catch (error) {
+            console.error("❌ Error registrando wallet en el backend:", error);
+        }
 
         return pubkey;
     } catch (error) {

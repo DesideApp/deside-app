@@ -28,16 +28,24 @@ export async function initializeToken() {
 
 // 🚀 2️⃣ **Peticiones con autenticación**
 export async function fetchWithAuth(url, options = {}) {
-    let token = getToken() || await initializeToken();
+    let token = getToken();
+    if (!token) {
+        console.warn("🔴 No se encontró un token válido, intentando renovar...");
+        token = await refreshToken();
+        if (!token) throw new Error("❌ No se pudo renovar el token.");
+    }
 
-    options.headers = { ...options.headers, Authorization: `Bearer ${token}` };
+    options.headers = {
+        ...options.headers,
+        Authorization: `Bearer ${token}`,
+    };
 
     const response = await fetch(url, options);
 
     if (response.status === 403) {
         console.warn("⚠️ Token inválido, intentando renovar...");
         token = await refreshToken();
-        if (!token) return response; 
+        if (!token) return response;
 
         options.headers.Authorization = `Bearer ${token}`;
         return fetch(url, options);
@@ -45,6 +53,7 @@ export async function fetchWithAuth(url, options = {}) {
 
     return response;
 }
+
 
 // 🚀 3️⃣ **Autenticación con Wallet**
 export async function authenticateWithServer(pubkey, signature, message) {

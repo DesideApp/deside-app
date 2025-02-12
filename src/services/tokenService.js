@@ -4,21 +4,39 @@ const SECRET_KEY = process.env.REACT_APP_SECRET_KEY || 'fallback-secret-key';
 
 // Guardar token en localStorage de forma encriptada
 export function setToken(token) {
-    if (!token || typeof token !== "string") return;
-    const encryptedToken = CryptoJS.AES.encrypt(token, SECRET_KEY).toString();
-    localStorage.setItem('jwtToken', encryptedToken);
+    if (!token || typeof token !== "string") {
+        console.error("🔴 Intento de almacenar un token inválido:", token);
+        return;
+    }
+
+    try {
+        const encryptedToken = CryptoJS.AES.encrypt(token, SECRET_KEY).toString();
+        localStorage.setItem("jwtToken", encryptedToken);
+        console.log("✅ Token guardado correctamente.");
+    } catch (error) {
+        console.error("❌ Error al guardar el token:", error);
+    }
 }
 
 // Obtener y desencriptar el token desde localStorage
 export function getToken() {
-    const encryptedToken = localStorage.getItem('jwtToken');
+    const encryptedToken = localStorage.getItem("jwtToken");
     if (!encryptedToken) return null;
+
     try {
         const bytes = CryptoJS.AES.decrypt(encryptedToken, SECRET_KEY);
         const decryptedToken = bytes.toString(CryptoJS.enc.Utf8);
-        return decryptedToken || null;
+
+        if (!decryptedToken || decryptedToken === "undefined") {
+            console.warn("🔴 Token inválido o corrupto, eliminando...");
+            localStorage.removeItem("jwtToken");
+            return null;
+        }
+
+        return decryptedToken;
     } catch (error) {
         console.error("🔴 Error al desencriptar token:", error);
+        localStorage.removeItem("jwtToken");
         return null;
     }
 }
