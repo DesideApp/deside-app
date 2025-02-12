@@ -22,7 +22,7 @@ function Chat() {
 
         window.addEventListener("walletConnected", (e) => {
             setWalletAddress(e.detail.wallet);
-            setIsModalOpen(false); // Cierra el modal automáticamente
+            setIsModalOpen(false); 
         });
 
         return () => window.removeEventListener("walletConnected", checkWallet);

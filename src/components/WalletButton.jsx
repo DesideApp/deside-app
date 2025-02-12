@@ -5,7 +5,7 @@ import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
 
-function WalletButton({ buttonText = "Connect Wallet", openModal }) {
+function WalletButton({ buttonText = "Connect Wallet" }) {
     const [walletAddress, setWalletAddress] = useState(null);
     const [balance, setBalance] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,13 +17,20 @@ function WalletButton({ buttonText = "Connect Wallet", openModal }) {
             if (connectedWallet) {
                 setWalletAddress(connectedWallet.walletAddress);
                 setBalance(await getWalletBalance(connectedWallet.walletAddress));
+            } else {
+                setWalletAddress(null);
             }
         };
 
         updateWalletStatus();
-        window.addEventListener("walletConnected", updateWalletStatus);
 
-        return () => window.removeEventListener("walletConnected", updateWalletStatus);
+        window.addEventListener("walletConnected", updateWalletStatus);
+        window.addEventListener("walletDisconnected", updateWalletStatus);
+
+        return () => {
+            window.removeEventListener("walletConnected", updateWalletStatus);
+            window.removeEventListener("walletDisconnected", updateWalletStatus);
+        };
     }, []);
 
     return (
@@ -46,10 +53,13 @@ function WalletButton({ buttonText = "Connect Wallet", openModal }) {
                 isOpen={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
                 walletAddress={walletAddress}
-                handleLogout={logout}
+                handleLogout={() => {
+                    disconnectWallet();
+                    logout();
+                }}
             />
 
-            <WalletModal isOpen={isModalOpen || openModal} onClose={() => setIsModalOpen(false)} />
+            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </div>
     );
 }

@@ -20,11 +20,9 @@ export async function connectWallet(wallet) {
     try {
         console.log(`🔵 Intentando conectar con ${wallet}`);
         const provider = getProvider(wallet);
-
-        if (!provider.isConnected) {
-            await provider.connect();
-        }
-
+        
+        await provider.connect(); // No necesitamos verificar `isConnected`, la conexión se maneja sola
+        
         if (!provider.publicKey) throw new Error("❌ Conexión cancelada por el usuario.");
         const pubkey = provider.publicKey.toBase58();
         console.log(`✅ ${wallet} conectado: ${pubkey}`);
@@ -38,7 +36,6 @@ export async function connectWallet(wallet) {
 
         // 📌 Guardar datos en localStorage y emitir un evento global
         localStorage.setItem("walletAddress", pubkey);
-        localStorage.setItem("walletType", wallet);
         window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet: pubkey } }));
 
         return pubkey;
@@ -51,17 +48,11 @@ export async function connectWallet(wallet) {
 // 📌 Desconectar la billetera
 export async function disconnectWallet() {
     try {
-        const walletType = localStorage.getItem("walletType");
-        if (!walletType) throw new Error("❌ No hay wallet conectada.");
+        const provider = getProvider(localStorage.getItem("walletType"));
+        if (provider?.disconnect) await provider.disconnect();
 
-        const provider = getProvider(walletType);
-        if (provider?.disconnect) {
-            await provider.disconnect();
-            console.log(`✅ ${walletType} Wallet desconectada.`);
-        }
-
+        console.log("✅ Wallet desconectada.");
         localStorage.removeItem("walletAddress");
-        localStorage.removeItem("walletType");
         window.dispatchEvent(new Event("walletDisconnected"));
     } catch (error) {
         console.error("❌ Error al desconectar la wallet:", error);
@@ -84,15 +75,10 @@ export async function signMessage(wallet, message) {
 
         const encodedMessage = new TextEncoder().encode(message);
         const { signature } = await provider.signMessage(encodedMessage);
+        const signatureBase58 = bs58.encode(signature);
 
-        const signatureBase58 = bs58.encode(new Uint8Array(signature));
         console.log("✅ Firma generada (Base58):", signatureBase58);
-
-        return {
-            signature: signatureBase58,
-            message,
-            pubkey: provider.publicKey.toBase58(),
-        };
+        return { signature: signatureBase58, message, pubkey: provider.publicKey.toBase58() };
     } catch (error) {
         console.error("❌ Error en signMessage():", error);
         throw error;
@@ -107,11 +93,9 @@ export async function getWalletBalance(walletAddress) {
         const connection = new Connection(clusterApiUrl("mainnet-beta"));
         const balance = await connection.getBalance(new PublicKey(walletAddress));
 
-        if (!balance) throw new Error("❌ No se pudo obtener el balance de la cuenta.");
         return balance / 1e9;
     } catch (error) {
         console.error("❌ Error obteniendo balance:", error);
         throw error;
     }
 }
-
