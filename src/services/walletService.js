@@ -1,5 +1,6 @@
 import bs58 from "bs58";
 import { authenticateWithServer } from "./authServices";
+import { fetchWithAuth } from "./authServices"; // 🟢 Para registrar wallets
 import { PublicKey, Connection, clusterApiUrl } from "@solana/web3.js";
 
 const WALLET_PROVIDERS = {
@@ -46,11 +47,18 @@ async function connectWallet(wallet) {
 
         console.log("✅ Token JWT recibido:", token);
 
-        // 📌 Guardar datos en localStorage y emitir un evento global
+        // 📌 Guardar datos en localStorage y registrar wallet en el backend
         localStorage.setItem("walletAddress", pubkey);
         localStorage.setItem("walletType", wallet);
         localStorage.setItem("jwtToken", token);
         window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet: pubkey } }));
+
+        // 📌 Registrar la wallet en el backend (IMPORTANTE)
+        await fetchWithAuth("/api/auth/register-wallet", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pubkey }),
+        });
 
         return pubkey;
     } catch (error) {
@@ -95,8 +103,7 @@ async function getWalletBalance(walletAddress) {
         const connection = new Connection(clusterApiUrl("mainnet-beta"));
         const balance = await connection.getBalance(new PublicKey(walletAddress));
 
-        if (!balance) throw new Error("❌ No se pudo obtener el balance de la cuenta.");
-        return balance / 1e9;
+        return balance / 1e9; // Convertimos lamports a SOL
     } catch (error) {
         console.error("❌ Error obteniendo balance:", error);
         throw error;

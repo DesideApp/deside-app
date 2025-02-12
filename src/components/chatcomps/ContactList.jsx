@@ -1,17 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { fetchWithAuth } from "../../services/authServices"; // ✅ Autenticación correcta
+import { getConnectedWallet } from "../../services/walletService.js";
+import { fetchWithAuth } from "../../services/authServices.js";
 import "./ContactList.css";
 
 function ContactList({ onSelectContact }) {
     const [confirmedContacts, setConfirmedContacts] = useState([]);
-    const [pendingContacts, setPendingContacts] = useState([]);
+    const [pendingRequests, setPendingRequests] = useState([]);
     const [receivedRequests, setReceivedRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [newContact, setNewContact] = useState("");
     const [error, setError] = useState("");
 
     useEffect(() => {
-        fetchContacts();
+        const checkWalletAndFetchContacts = async () => {
+            const connectedWallet = await getConnectedWallet();
+            if (connectedWallet?.walletAddress) {
+                await fetchContacts();
+            }
+        };
+
+        checkWalletAndFetchContacts();
+        window.addEventListener("walletConnected", checkWalletAndFetchContacts);
+
+        return () => window.removeEventListener("walletConnected", checkWalletAndFetchContacts);
     }, []);
 
     // 📌 Obtiene todos los contactos del backend
@@ -21,7 +32,7 @@ function ContactList({ onSelectContact }) {
             const data = await response.json();
 
             setConfirmedContacts(data.confirmed || []);
-            setPendingContacts(data.pending || []);
+            setPendingRequests(data.pending || []);
             setReceivedRequests(data.requests || []);
         } catch (error) {
             console.error("Error fetching contacts:", error);
@@ -147,8 +158,8 @@ function ContactList({ onSelectContact }) {
             {/* 🔵 Lista de solicitudes enviadas (Pendientes) */}
             <h3>Pending Requests</h3>
             <ul className="contact-list">
-                {pendingContacts.length > 0 ? (
-                    pendingContacts.map((contact) => <li key={contact.wallet}>{contact.wallet} (Pending)</li>)
+                {pendingRequests.length > 0 ? (
+                    pendingRequests.map((contact) => <li key={contact.wallet}>{contact.wallet} (Pending)</li>)
                 ) : (
                     <p className="no-contacts-message">No pending requests.</p>
                 )}

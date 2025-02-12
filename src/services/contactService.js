@@ -1,41 +1,75 @@
-import { getContacts, addContact, acceptContact, rejectContact } from './apiService.js';
+import { fetchWithAuth } from './authServices';
 
+// 📌 Obtener contactos y solicitudes pendientes
 export async function fetchContacts() {
     try {
-        const response = await getContacts();
-        return response.contacts || []; // Asegurándonos de que retorne contactos, o un arreglo vacío si no hay.
+        const response = await fetchWithAuth("/api/contacts");
+        if (!response.ok) throw new Error("Failed to fetch contacts.");
+
+        const data = await response.json();
+        return {
+            confirmed: data.confirmed || [],
+            pending: data.pending || [],
+        };
     } catch (error) {
-        console.error('Failed to fetch contacts:', error);
-        throw new Error('Unable to fetch contacts. Please try again.');
+        console.error("❌ Error al obtener contactos:", error);
+        throw new Error("Unable to fetch contacts. Please try again.");
     }
 }
 
-export async function createContact(pubkey) {
+// 📌 Enviar solicitud de amistad
+export async function sendContactRequest(pubkey) {
     try {
-        const response = await addContact({ pubkey });
-        return response; // Podrías retornar la respuesta de la API si es necesario
+        const response = await fetchWithAuth("/api/contacts/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pubkey }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`❌ Error del servidor: ${errorData.message}`);
+        }
+
+        return await response.json();
     } catch (error) {
-        console.error('Failed to add contact:', error);
-        throw new Error('Unable to add contact. Please try again.');
+        console.error("❌ Error al enviar solicitud de contacto:", error);
+        throw error;
     }
 }
 
+// 📌 Aceptar solicitud
 export async function approveContact(pubkey) {
     try {
-        const response = await acceptContact(pubkey);
-        return response; // Retornar la respuesta de la API, por si es necesario realizar más acciones con ella
+        const response = await fetchWithAuth("/api/contacts/accept", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pubkey }),
+        });
+
+        if (!response.ok) throw new Error("Failed to accept contact request.");
+
+        return await response.json();
     } catch (error) {
-        console.error('Failed to accept contact:', error);
-        throw new Error('Unable to accept contact. Please try again.');
+        console.error("❌ Error al aceptar contacto:", error);
+        throw error;
     }
 }
 
+// 📌 Rechazar solicitud
 export async function declineContact(pubkey) {
     try {
-        const response = await rejectContact(pubkey);
-        return response; // Retornar la respuesta de la API, por si es necesario hacer algo con la respuesta
+        const response = await fetchWithAuth("/api/contacts/reject", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pubkey }),
+        });
+
+        if (!response.ok) throw new Error("Failed to reject contact request.");
+
+        return await response.json();
     } catch (error) {
-        console.error('Failed to reject contact:', error);
-        throw new Error('Unable to reject contact. Please try again.');
+        console.error("❌ Error al rechazar contacto:", error);
+        throw error;
     }
 }
