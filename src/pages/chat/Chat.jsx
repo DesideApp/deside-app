@@ -3,7 +3,7 @@ import ContactList from "../../components/chatcomps/ContactList.jsx";
 import ChatWindow from "../../components/chatcomps/ChatWindow.jsx";
 import RightPanel from "../../components/chatcomps/RightPanel.jsx";
 import WalletModal from "../../components/WalletModal.jsx";
-import { getConnectedWallet } from "../../services/walletService.js";
+import { getConnectedWallet, connectWallet } from "../../services/walletService.js";
 import "./Chat.css";
 
 function Chat() {
@@ -19,7 +19,6 @@ function Chat() {
 
         updateWalletStatus();
 
-        // ✅ Escuchar eventos de conexión y desconexión de wallet
         window.addEventListener("walletConnected", updateWalletStatus);
         window.addEventListener("walletDisconnected", updateWalletStatus);
 
@@ -29,9 +28,18 @@ function Chat() {
         };
     }, []);
 
+    const handleWalletSelect = async (wallet) => {
+        try {
+            const address = await connectWallet(wallet);
+            setWalletAddress(address);
+            setIsModalOpen(false); // 🔵 Cierra el modal después de conectar
+        } catch (error) {
+            console.error("❌ Error connecting wallet:", error);
+        }
+    };
+
     return (
         <div className="chat-page-container">
-            {/* 🔵 Overlay que abre el WalletModal si la wallet no está conectada */}
             {!walletAddress && (
                 <div className="overlay">
                     <div className="overlay-content">
@@ -41,7 +49,6 @@ function Chat() {
                 </div>
             )}
 
-            {/* 🔵 Paneles del chat */}
             <div className="left-panel">
                 <ContactList onSelectContact={setSelectedContact} />
             </div>
@@ -52,8 +59,8 @@ function Chat() {
                 <RightPanel selectedContact={selectedContact} />
             </div>
 
-            {/* 🔵 Modal de conexión de wallet sincronizado */}
-            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+            {/* ✅ Ahora el modal de conexión pasa `handleWalletSelect` correctamente */}
+            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelectWallet={handleWalletSelect} />
         </div>
     );
 }
