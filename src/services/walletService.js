@@ -16,7 +16,7 @@ function getProvider(wallet) {
 }
 
 // 📌 Conectar la billetera y obtener JWT
-export async function connectWallet(wallet) {
+async function connectWallet(wallet) {
     try {
         console.log(`🔵 Intentando conectar con ${wallet}`);
         const provider = getProvider(wallet);
@@ -60,7 +60,7 @@ export async function connectWallet(wallet) {
 }
 
 // 📌 Desconectar la billetera
-export async function disconnectWallet() {
+async function disconnectWallet() {
     try {
         const walletType = localStorage.getItem("walletType");
         if (!walletType) throw new Error("❌ No hay wallet conectada.");
@@ -82,13 +82,13 @@ export async function disconnectWallet() {
 }
 
 // 📌 Obtener la billetera conectada
-export function getConnectedWallet() {
+function getConnectedWallet() {
     const walletAddress = localStorage.getItem("walletAddress");
     return walletAddress ? { walletAddress } : null;
 }
 
 // 📌 Obtener el balance de la billetera en SOL
-export async function getWalletBalance(walletAddress) {
+async function getWalletBalance(walletAddress) {
     try {
         if (!walletAddress) throw new Error("❌ Se requiere una dirección de wallet.");
 
@@ -104,7 +104,7 @@ export async function getWalletBalance(walletAddress) {
 }
 
 // 📌 Firmar mensaje (enviar en Base58)
-export async function signMessage(wallet, message) {
+async function signMessage(wallet, message) {
     try {
         console.log(`🟡 Solicitando firma a ${wallet}...`);
         const provider = getProvider(wallet);
@@ -122,4 +122,11 @@ export async function signMessage(wallet, message) {
     }
 }
 
-export { getProvider, connectWallet, disconnectWallet, getConnectedWallet, getWalletBalance, signMessage };
+export { 
+    getProvider, 
+    connectWallet, 
+    disconnectWallet, 
+    getConnectedWallet, 
+    getWalletBalance, 
+    signMessage 
+};
