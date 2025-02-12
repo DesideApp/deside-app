@@ -35,6 +35,7 @@ export async function connectWallet(wallet) {
 
         // 📌 Guardar la wallet en localStorage y emitir un evento global
         localStorage.setItem("walletAddress", pubkey);
+        localStorage.setItem("walletType", wallet);
         window.dispatchEvent(new Event("walletConnected"));
 
         return pubkey;

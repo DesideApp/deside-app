@@ -5,7 +5,7 @@ import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
 
-function WalletButton({ buttonText = "Connect Wallet" }) {
+function WalletButton({ buttonText = "Connect Wallet", openModal }) {
     const [walletAddress, setWalletAddress] = useState(null);
     const [balance, setBalance] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,8 +21,6 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
         };
 
         updateWalletStatus();
-
-        // ✅ Escuchar cambios en la autenticación global
         window.addEventListener("walletConnected", updateWalletStatus);
 
         return () => window.removeEventListener("walletConnected", updateWalletStatus);
@@ -51,8 +49,7 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
                 handleLogout={logout}
             />
 
-            {/* ✅ Ahora usa el mismo modal que Chat.jsx */}
-            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+            <WalletModal isOpen={isModalOpen || openModal} onClose={() => setIsModalOpen(false)} />
         </div>
     );
 }
