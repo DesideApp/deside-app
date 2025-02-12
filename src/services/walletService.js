@@ -20,10 +20,14 @@ export async function connectWallet(wallet) {
     try {
         console.log(`🔵 Intentando conectar con ${wallet}`);
         const provider = getProvider(wallet);
-        const response = await provider.connect({ onlyIfTrusted: false });
 
-        if (!response.publicKey) throw new Error("❌ Conexión cancelada por el usuario.");
-        const pubkey = response.publicKey.toBase58();
+        // Verifica si ya está conectada
+        if (!provider.isConnected) {
+            await provider.connect();
+        }
+
+        if (!provider.publicKey) throw new Error("❌ Conexión cancelada por el usuario.");
+        const pubkey = provider.publicKey.toBase58();
         console.log(`✅ ${wallet} conectado: ${pubkey}`);
 
         const message = "Please sign this message to authenticate.";
@@ -48,10 +52,13 @@ export async function connectWallet(wallet) {
 // 📌 Desconectar la billetera
 export async function disconnectWallet() {
     try {
-        const provider = getProvider(localStorage.getItem('walletType'));
+        const walletType = localStorage.getItem("walletType");
+        if (!walletType) throw new Error("❌ No hay wallet conectada.");
+
+        const provider = getProvider(walletType);
         if (provider?.disconnect) {
             await provider.disconnect();
-            console.log(`✅ Wallet desconectada.`);
+            console.log(`✅ ${walletType} Wallet desconectada.`);
         }
 
         // 📌 Eliminar datos de localStorage y emitir evento
