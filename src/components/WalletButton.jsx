@@ -1,10 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import {
-    connectWallet,
-    getConnectedWallet,
-    disconnectWallet,
-    getWalletBalance
-} from "../services/walletService.js";
+import React, { useState, useEffect } from "react";
+import { getConnectedWallet, connectWallet, disconnectWallet, getWalletBalance } from "../services/walletService.js";
 import { logout } from "../services/authServices.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
@@ -15,45 +10,23 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
     const [balance, setBalance] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const menuRef = useRef(null);
 
     useEffect(() => {
-        console.log("🟡 Comprobando estado de la wallet...");
-        
         const updateWalletStatus = async () => {
             const connectedWallet = await getConnectedWallet();
             if (connectedWallet) {
-                console.log("✅ Wallet detectada:", connectedWallet.walletAddress);
                 setWalletAddress(connectedWallet.walletAddress);
                 setBalance(await getWalletBalance(connectedWallet.walletAddress));
             }
         };
 
         updateWalletStatus();
+
+        // ✅ Escuchar cambios en la autenticación global
+        window.addEventListener("walletConnected", updateWalletStatus);
+
+        return () => window.removeEventListener("walletConnected", updateWalletStatus);
     }, []);
-
-    const handleConnect = async (wallet) => {
-        try {
-            console.log("🔵 Intentando conectar...");
-            const address = await connectWallet(wallet);
-            console.log("✅ Wallet conectada:", address);
-            setWalletAddress(address);
-            localStorage.setItem('selectedWallet', wallet);
-        } catch (error) {
-            console.error("❌ Error al conectar:", error);
-        } finally {
-            setIsModalOpen(false);
-        }
-    };
-
-    const handleLogout = () => {
-        if (!window.confirm("Are you sure you want to disconnect?")) return;
-        disconnectWallet();
-        logout();
-        setWalletAddress(null);
-        setBalance(null);
-        setIsMenuOpen(false);
-    };
 
     return (
         <div className="wallet-container">
@@ -75,10 +48,11 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
                 isOpen={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
                 walletAddress={walletAddress}
-                handleLogout={handleLogout}
+                handleLogout={logout}
             />
 
-            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelectWallet={handleConnect} />
+            {/* ✅ Ahora usa el mismo modal que Chat.jsx */}
+            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </div>
     );
 }
