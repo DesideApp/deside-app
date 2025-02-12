@@ -1,6 +1,6 @@
-import bs58 from 'bs58';
-import { authenticateWithServer } from './authServices';
-import { PublicKey, Connection, clusterApiUrl } from '@solana/web3.js';
+import bs58 from "bs58";
+import { authenticateWithServer } from "./authServices";
+import { PublicKey, Connection, clusterApiUrl } from "@solana/web3.js";
 
 const WALLET_PROVIDERS = {
     phantom: () => window.solana?.isPhantom && window.solana,
@@ -95,12 +95,31 @@ export async function getWalletBalance(walletAddress) {
         const connection = new Connection(clusterApiUrl("mainnet-beta"));
         const balance = await connection.getBalance(new PublicKey(walletAddress));
 
-        if (balance === null) throw new Error("❌ No se pudo obtener el balance de la cuenta.");
-        return balance / 1e9; // Convertimos lamports a SOL
+        if (!balance) throw new Error("❌ No se pudo obtener el balance de la cuenta.");
+        return balance / 1e9;
     } catch (error) {
         console.error("❌ Error obteniendo balance:", error);
         throw error;
     }
 }
 
-export { getConnectedWallet, connectWallet, disconnectWallet, getWalletBalance };
+// 📌 Firmar mensaje (enviar en Base58)
+export async function signMessage(wallet, message) {
+    try {
+        console.log(`🟡 Solicitando firma a ${wallet}...`);
+        const provider = getProvider(wallet);
+        if (!provider) throw new Error("❌ No hay una billetera conectada.");
+
+        const encodedMessage = new TextEncoder().encode(message);
+        const { signature } = await provider.signMessage(encodedMessage);
+        const signatureBase58 = bs58.encode(signature);
+
+        console.log("✅ Firma generada (Base58):", signatureBase58);
+        return { signature: signatureBase58, message, pubkey: provider.publicKey.toBase58() };
+    } catch (error) {
+        console.error("❌ Error en signMessage():", error);
+        throw error;
+    }
+}
+
+export { getProvider, connectWallet, disconnectWallet, getConnectedWallet, getWalletBalance, signMessage };
