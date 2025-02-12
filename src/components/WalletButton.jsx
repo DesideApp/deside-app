@@ -33,9 +33,13 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
         };
     }, []);
 
+    const handleConnect = async () => {
+        setIsModalOpen(true); // ✅ Abre el modal al hacer click en "Connect Wallet"
+    };
+
     return (
         <div className="wallet-container">
-            <button className="wallet-button" onClick={() => setIsModalOpen(true)}>
+            <button className="wallet-button" onClick={handleConnect}>
                 {walletAddress ? `${walletAddress.slice(0, 5)}...` : buttonText}
             </button>
 
