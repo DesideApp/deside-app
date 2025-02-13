@@ -93,18 +93,26 @@ function getConnectedWallet() {
     return { walletAddress: localStorage.getItem("walletAddress") } || null;
 }
 
-// 📌 Obtener el balance de la billetera en SOL
+// 📌 Obtener el balance de la billetera en SOL con control de errores
 async function getWalletBalance(walletAddress) {
     try {
         if (!walletAddress) throw new Error("❌ Se requiere una dirección de wallet.");
 
         const connection = new Connection("https://rpc.ankr.com/solana"); // 🔹 Usamos un RPC más estable
-        const balance = await connection.getBalance(new PublicKey(walletAddress));
+        const balanceResponse = await connection.getBalance(new PublicKey(walletAddress));
 
-        return balance / 1e9;
+        console.log("🔍 Respuesta de getBalance:", balanceResponse); // Debug
+
+        // Si la respuesta no es un número, manejar el error
+        if (typeof balanceResponse !== "number") {
+            console.error("❌ Respuesta inesperada de getBalance:", balanceResponse);
+            throw new Error("Error obteniendo balance. Respuesta inválida.");
+        }
+
+        return balanceResponse / 1e9; // Convertir de lamports a SOL
     } catch (error) {
         console.error("❌ Error obteniendo balance:", error);
-        throw error;
+        return 0; // Devolver 0 en caso de error para evitar fallos en la app
     }
 }
 
