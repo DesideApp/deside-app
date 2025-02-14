@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
-import { signMessage } from '../services/walletService';
-import { loginWithSignature } from '../services/authServices';
+import { signMessage } from '../../services/walletService';
+import { loginWithSignature } from '../../services/authServices';
 
 const SignatureValidation = ({ wallet, onSuccess }) => {
     const isSigning = useRef(false); // Evitar múltiples firmas simultáneas

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getConnectedWallet, disconnectWallet } from '../services/walletService';
+import { getConnectedWallet, disconnectWallet } from '../../services/walletService';
 import WalletModal from './WalletModal';
 import { Copy } from 'lucide-react'; // Usamos icono de copiar
 import './WalletMenu.css';
