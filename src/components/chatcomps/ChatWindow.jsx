@@ -2,13 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import ChatInput from "./ChatInput";
 import { getConnectedWallet } from "../../services/walletService";
 import useSignal from "../../hooks/useSignal";
+import useWebRTC from "../../hooks/useWebRTC"; // ✅ Nuevo hook
 import "./ChatWindow.css";
 
 function ChatWindow({ selectedContact }) {
     const [walletAddress, setWalletAddress] = useState(null);
-    const [messages, setMessages] = useState([]);
     const chatContainerRef = useRef(null);
-
     const { sendSignal, onSignal } = useSignal();
 
     useEffect(() => {
@@ -21,34 +20,8 @@ function ChatWindow({ selectedContact }) {
         initWallet();
     }, []);
 
-    useEffect(() => {
-        if (!walletAddress || !selectedContact) return;
-
-        console.log(`🔵 Estableciendo conexión con ${selectedContact} vía WebRTC`);
-
-        const peer = new RTCPeerConnection({
-            iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-        });
-
-        peer.ondatachannel = (event) => {
-            const receiveChannel = event.channel;
-            receiveChannel.onmessage = (e) => {
-                setMessages((prev) => [...prev, { sender: "peer", text: e.data }]);
-            };
-        };
-
-        return () => {
-            peer.close();
-        };
-    }, [walletAddress, selectedContact]);
-
-    const sendMessage = (text) => {
-        if (!selectedContact) {
-            console.error("❌ No hay contacto seleccionado.");
-            return;
-        }
-        setMessages((prev) => [...prev, { sender: "me", text }]);
-    };
+    // ✅ Usa el nuevo hook de WebRTC
+    const { messages, sendMessage } = useWebRTC(selectedContact, walletAddress, !!walletAddress);
 
     useEffect(() => {
         if (chatContainerRef.current) {

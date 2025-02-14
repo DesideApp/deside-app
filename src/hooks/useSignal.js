@@ -9,37 +9,39 @@ const useSignal = (backendUrl, pubkey, isAuthenticated) => {
 
     useEffect(() => {
         if (!pubkey || !isAuthenticated) {
-            console.error('Pubkey and authentication are required to initialize signaling.');
+            console.warn("⚠️ Pubkey y autenticación son requeridos para la señalización.");
             return;
         }
 
-        // Inicializar el socket con autoConnect: false
-        socket.current = io(backendUrl, {
-            query: { pubkey },
-            autoConnect: false, // No conectar automáticamente
-        });
+        if (!socket.current) {
+            socket.current = io(backendUrl, {
+                query: { pubkey },
+                autoConnect: false,
+            });
+        }
 
-        // Conectar el socket solo cuando sea necesario
         const connectSocket = () => {
             if (!socket.current.connected) {
+                console.log("🔵 Conectando socket de señalización...");
                 socket.current.connect();
             }
         };
 
-        // Conectar el socket solo si el usuario está autenticado
         if (isAuthenticated) {
             connectSocket();
         }
 
-        socket.current.on('connect', () => {
+        socket.current.on("connect", () => {
             setConnected(true);
+            console.log("✅ Socket de señalización conectado.");
         });
 
-        socket.current.on('disconnect', () => {
+        socket.current.on("disconnect", () => {
             setConnected(false);
+            console.warn("⚠️ Socket de señalización desconectado.");
         });
 
-        socket.current.on('signal', (data) => {
+        socket.current.on("signal", (data) => {
             const sanitizedData = DOMPurify.sanitize(data);
             setSignals((prev) => [...prev, sanitizedData]);
         });
@@ -52,11 +54,11 @@ const useSignal = (backendUrl, pubkey, isAuthenticated) => {
     }, [backendUrl, pubkey, isAuthenticated]);
 
     const sendSignal = (targetPubkey, signalData) => {
-        if (socket.current) {
-            socket.current.emit('signal', { target: targetPubkey, signal: signalData });
-        } else {
-            console.error('Socket no está conectado.');
+        if (!socket.current || !socket.current.connected) {
+            console.error("❌ No se puede enviar señal, socket no conectado.");
+            return;
         }
+        socket.current.emit("signal", { target: targetPubkey, signal: signalData });
     };
 
     return { connected, signals, sendSignal };

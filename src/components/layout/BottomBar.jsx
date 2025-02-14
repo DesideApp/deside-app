@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import "./BottomBar.css";
-import NetworkStatus from './NetworkStatus';
+import NetworkStatus from './status/NetworkStatus.jsx';
 
 function BottomBar() {
     const [solPrice, setSolPrice] = useState(null);

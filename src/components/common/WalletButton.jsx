@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { getConnectedWallet, connectWallet, disconnectWallet, getWalletBalance } from "../services/walletService.js";
-import { logout } from "../services/authServices.js";
+import { getConnectedWallet, connectWallet, disconnectWallet, getWalletBalance } from "../../services/walletService.js";
+import { logout } from "../../services/authServices.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";

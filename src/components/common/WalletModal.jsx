@@ -1,5 +1,5 @@
 import React from "react";
-import { connectWallet } from "../services/walletService"; // ✅ Importamos connectWallet
+import { connectWallet } from "../../services/walletService"; // ✅ Importamos connectWallet
 import "./WalletModal.css";
 
 function WalletModal({ isOpen, onClose }) {
