@@ -54,7 +54,6 @@ export async function fetchWithAuth(url, options = {}) {
     return response;
 }
 
-
 // 🚀 3️⃣ **Autenticación con Wallet**
 export async function authenticateWithServer(pubkey, signature, message) {
     try {
@@ -84,23 +83,23 @@ export function logout() {
 }
 
 // 🚀 5️⃣ **Registro Seguro**
-export async function register(pubkey, signature, message) {
+export async function registerWallet(pubkey) {
     try {
-        if (!pubkey || !signature || !message) throw new Error("🔴 Faltan parámetros en el registro.");
+        if (!pubkey) throw new Error("🔴 Faltan parámetros en el registro.");
 
-        const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/auth/register-wallet`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pubkey, signature, message }),
+            body: JSON.stringify({ pubkey }),
         });
 
-        if (!response.ok) throw new Error("❌ Fallo en el registro");
+        if (!response.ok) throw new Error("❌ Fallo en el registro de la wallet");
 
         const data = await response.json();
-        console.log("✅ Usuario registrado con éxito:", data);
+        console.log("✅ Wallet registrada con éxito:", data);
         return data;
     } catch (error) {
-        console.error("❌ Error en `register()`:", error);
+        console.error("❌ Error en `registerWallet()`:", error);
         throw error;
     }
 }

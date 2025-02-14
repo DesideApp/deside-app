@@ -1,7 +1,7 @@
 import bs58 from "bs58";
-import { setToken } from "./tokenService"
+import { setToken } from "./tokenService";
 import { authenticateWithServer, fetchWithAuth } from "./authServices";
-import { PublicKey, Connection, clusterApiUrl } from "@solana/web3.js";
+import { PublicKey, Connection } from "@solana/web3.js";
 
 const WALLET_PROVIDERS = {
     phantom: () => window.solana?.isPhantom && window.solana,
@@ -21,16 +21,24 @@ async function connectWallet(wallet) {
     try {
         console.log(`🔵 Intentando conectar con ${wallet}`);
         const provider = getProvider(wallet);
-        if (!provider.isConnected) await provider.connect();
+        
+        if (!provider.isConnected) {
+            console.log(`⚠️ ${wallet} detectado pero no conectado. Conectando...`);
+            await provider.connect();
+        }
 
         if (!provider.publicKey) throw new Error("❌ Conexión cancelada por el usuario.");
+
         const pubkey = provider.publicKey.toBase58();
         console.log(`✅ ${wallet} conectado: ${pubkey}`);
 
-        // 📌 Firmar el mensaje y autenticar
+        // 📌 Si la wallet está conectada pero no ha firmado, la dejamos en estado "conectado pero no autenticado"
         const message = "Please sign this message to authenticate.";
         const signedData = await signMessage(wallet, message);
-        if (!signedData.signature) throw new Error("❌ No se pudo obtener la firma.");
+        if (!signedData.signature) {
+            console.warn("⚠️ Wallet conectada pero sin autenticación. Esperando firma...");
+            return { pubkey, status: "connected_unverified" }; // Estado intermedio
+        }
 
         console.log("🔵 Firma generada:", signedData);
         const token = await authenticateWithServer(pubkey, signedData.signature, message);
@@ -59,7 +67,7 @@ async function connectWallet(wallet) {
             console.error("❌ Error registrando wallet en el backend:", error);
         }
 
-        return pubkey;
+        return { pubkey, status: "authenticated" };
     } catch (error) {
         console.error("❌ Error en connectWallet():", error);
         throw error;
@@ -96,7 +104,10 @@ function getConnectedWallet() {
 // 📌 Obtener el balance de la billetera en SOL con control de errores
 async function getWalletBalance(walletAddress) {
     try {
-        if (!walletAddress) throw new Error("❌ Se requiere una dirección de wallet.");
+        if (!walletAddress) {
+            console.warn("⚠️ Intento de obtener balance sin dirección de wallet.");
+            return 0; // No lanzar error, solo devolver 0
+        }
 
         const connection = new Connection("https://rpc.ankr.com/solana"); // 🔹 Usamos un RPC más estable
         const balanceResponse = await connection.getBalance(new PublicKey(walletAddress));
@@ -111,8 +122,8 @@ async function getWalletBalance(walletAddress) {
 
         return balanceResponse / 1e9; // Convertir de lamports a SOL
     } catch (error) {
-        console.error("❌ Error obteniendo balance:", error);
-        return 0; // Devolver 0 en caso de error para evitar fallos en la app
+        console.warn("⚠️ No se pudo obtener el balance (puede ser falta de firma).", error);
+        return 0; // Evitar que la app se rompa
     }
 }
 
