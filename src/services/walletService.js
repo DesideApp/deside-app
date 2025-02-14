@@ -61,7 +61,9 @@ async function connectWallet(wallet) {
             });
 
             if (!response.ok) {
-                console.warn("⚠️ La wallet ya estaba registrada o hubo un problema en el backend.");
+                console.warn("⚠️ Wallet registrada previamente.");
+            } else {
+                console.log("✅ Wallet registrada con éxito.");
             }
         } catch (error) {
             console.error("❌ Error registrando wallet en el backend:", error);
@@ -71,6 +73,32 @@ async function connectWallet(wallet) {
     } catch (error) {
         console.error("❌ Error en connectWallet():", error);
         throw error;
+    }
+}
+
+// 📌 Obtener el balance de la billetera en SOL con control de errores
+async function getWalletBalance(walletAddress) {
+    try {
+        if (!walletAddress) {
+            console.warn("⚠️ Intento de obtener balance sin dirección de wallet.");
+            return 0; // No lanzar error, solo devolver 0
+        }
+
+        const connection = new Connection("https://rpc.ankr.com/solana"); // 🔹 Usamos un RPC más estable
+        const balanceResponse = await connection.getBalance(new PublicKey(walletAddress));
+
+        console.log("🔍 Respuesta de getBalance:", balanceResponse); // Debug
+
+        // Si la respuesta no es un número, manejar el error
+        if (typeof balanceResponse !== "number") {
+            console.error("❌ Respuesta inesperada de getBalance:", balanceResponse);
+            throw new Error("Error obteniendo balance. Respuesta inválida.");
+        }
+
+        return balanceResponse / 1e9; // Convertir de lamports a SOL
+    } catch (error) {
+        console.warn("⚠️ No se pudo obtener el balance. Es posible que la firma sea necesaria.");
+        return 0; // Evitar que la app se rompa
     }
 }
 
@@ -96,37 +124,6 @@ async function disconnectWallet() {
     }
 }
 
-// 📌 Obtener la billetera conectada
-function getConnectedWallet() {
-    return { walletAddress: localStorage.getItem("walletAddress") } || null;
-}
-
-// 📌 Obtener el balance de la billetera en SOL con control de errores
-async function getWalletBalance(walletAddress) {
-    try {
-        if (!walletAddress) {
-            console.warn("⚠️ Intento de obtener balance sin dirección de wallet.");
-            return 0; // No lanzar error, solo devolver 0
-        }
-
-        const connection = new Connection("https://rpc.ankr.com/solana"); // 🔹 Usamos un RPC más estable
-        const balanceResponse = await connection.getBalance(new PublicKey(walletAddress));
-
-        console.log("🔍 Respuesta de getBalance:", balanceResponse); // Debug
-
-        // Si la respuesta no es un número, manejar el error
-        if (typeof balanceResponse !== "number") {
-            console.error("❌ Respuesta inesperada de getBalance:", balanceResponse);
-            throw new Error("Error obteniendo balance. Respuesta inválida.");
-        }
-
-        return balanceResponse / 1e9; // Convertir de lamports a SOL
-    } catch (error) {
-        console.warn("⚠️ No se pudo obtener el balance (puede ser falta de firma).", error);
-        return 0; // Evitar que la app se rompa
-    }
-}
-
 // 📌 Firmar mensaje (enviar en Base58)
 async function signMessage(wallet, message) {
     try {
@@ -144,6 +141,11 @@ async function signMessage(wallet, message) {
         console.error("❌ Error en signMessage():", error);
         throw error;
     }
+}
+
+// 📌 Obtener la billetera conectada
+function getConnectedWallet() {
+    return { walletAddress: localStorage.getItem("walletAddress") } || null;
 }
 
 export { 
