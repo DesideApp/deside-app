@@ -15,6 +15,8 @@ function ContactList({ onSelectContact }) {
 
     const [newContact, setNewContact] = useState("");
 
+    console.log("pendingRequests:", pendingRequests);
+
     return (
         <div className="contact-list-container">
             <h3>Contacts</h3>
