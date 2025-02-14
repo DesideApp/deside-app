@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom';
-import WalletButton from "./common/WalletButton.jsx";
+import WalletButton from "../common/WalletButton.jsx";
 import "./Header.css";
 
 function Header() {
