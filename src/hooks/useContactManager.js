@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { getConnectedWallet } from "../../services/walletService";
-import { fetchWithAuth } from "../../services/authServices";
+import { getConnectedWallet } from "../services/walletService";
+import { fetchWithAuth } from "../services/authServices";
 
 export default function useContactManager() {
     const [confirmedContacts, setConfirmedContacts] = useState([]);
