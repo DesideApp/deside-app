@@ -10,7 +10,6 @@ export async function fetchContacts() {
         return {
             confirmed: data.confirmed || [],
             pending: data.pending || [],
-            requests: data.requests || [],
         };
     } catch (error) {
         console.error("❌ Error al obtener contactos:", error);
@@ -43,7 +42,7 @@ export async function sendContactRequest(pubkey) {
 export async function approveContact(pubkey) {
     try {
         const response = await fetchWithAuth("/api/contacts/accept", {
-            method: "PATCH",
+            method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ pubkey }),
         });
@@ -52,23 +51,6 @@ export async function approveContact(pubkey) {
         return await response.json();
     } catch (error) {
         console.error("❌ Error al aceptar contacto:", error);
-        throw error;
-    }
-}
-
-// 📌 Rechazar solicitud
-export async function declineContact(pubkey) {
-    try {
-        const response = await fetchWithAuth("/api/contacts/reject", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ pubkey }),
-        });
-
-        if (!response.ok) throw new Error("Failed to reject contact request.");
-        return await response.json();
-    } catch (error) {
-        console.error("❌ Error al rechazar contacto:", error);
         throw error;
     }
 }

@@ -1,58 +1,41 @@
 import React, { useState } from 'react';
-import { signMessage } from '../../utils/solanaHelpers'; // Importar signMessage
-import { addContact } from '../../services/contactService'; // Importar addContact
+import { sendContactRequest } from '../../services/contactService';
 
 const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
 
     const handleAddContact = async () => {
         if (!pubkey) {
-            setErrorMessage('Por favor, introduce una clave pública.');
+            setErrorMessage('⚠️ Por favor, introduce una clave pública.');
             return;
         }
 
         try {
-            const selectedWallet = localStorage.getItem('selectedWallet'); // Obtener la wallet seleccionada
-            if (!selectedWallet) {
-                throw new Error('No wallet selected.');
-            }
-
-            // Firma automática antes de agregar el contacto
-            const message = "Please sign this message to add a contact.";
-            const signedData = await signMessage(selectedWallet, message);
-            console.log("Signed data:", signedData); // Log de datos firmados
-
-            await addContact({
-                pubkey,
-                signature: signedData.signature,
-                message: signedData.message,
-            });
-
-            alert('Contact request sent!');
+            await sendContactRequest(pubkey);
+            setSuccessMessage('✅ Solicitud de contacto enviada con éxito.');
             setPubkey('');
             setErrorMessage('');
-            onContactAdded(); // Notifica al padre que se actualicen los datos
+            onContactAdded();
         } catch (error) {
-            console.error('Error sending contact request:', error);
-            setErrorMessage('Error sending contact request.');
+            console.error('❌ Error enviando la solicitud:', error);
+            setErrorMessage(error.message || 'Error al enviar solicitud.');
         }
     };
 
     return (
         <div>
-            <h2>Add a Contact</h2>
+            <h2>Añadir Contacto</h2>
             <input
                 type="text"
-                id="pubkey"
-                name="pubkey"
-                autocomplete="on"
                 value={pubkey}
                 onChange={(e) => setPubkey(e.target.value)}
-                placeholder="Enter public key"
+                placeholder="Introduce la clave pública"
             />
-            <button onClick={handleAddContact}>Send Request</button>
+            <button onClick={handleAddContact}>Enviar Solicitud</button>
             {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+            {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
         </div>
     );
 };
