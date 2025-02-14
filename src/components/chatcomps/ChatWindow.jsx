@@ -1,14 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import ChatInput from "./ChatInput";
 import { getConnectedWallet } from "../../services/walletService";
-import useSignal from "../../hooks/useSignal";
-import useWebRTC from "../../hooks/useWebRTC"; // ✅ Nuevo hook
+import useWebRTC from "./useWebRTC"; // ✅ Solo WebRTC
 import "./ChatWindow.css";
 
 function ChatWindow({ selectedContact }) {
     const [walletAddress, setWalletAddress] = useState(null);
     const chatContainerRef = useRef(null);
-    const { sendSignal, onSignal } = useSignal();
 
     useEffect(() => {
         const initWallet = async () => {
@@ -36,6 +34,7 @@ function ChatWindow({ selectedContact }) {
     return (
         <div className="chat-window" ref={chatContainerRef}>
             <h3>Chatting with: {selectedContact}</h3>
+
             <div className="messages-container">
                 {messages.map((msg, index) => (
                     <div key={index} className={`chat-message ${msg.sender === "me" ? "sent" : "received"}`}>
@@ -43,6 +42,7 @@ function ChatWindow({ selectedContact }) {
                     </div>
                 ))}
             </div>
+
             <ChatInput onSendMessage={sendMessage} />
         </div>
     );
