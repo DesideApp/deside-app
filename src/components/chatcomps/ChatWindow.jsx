@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ChatInput from "./ChatInput";
 import { getConnectedWallet } from "../../services/walletService";
-import useWebRTC from "./useWebRTC"; // ✅ Solo WebRTC
+import useWebRTC from "../../hooks/useWebRTC"; // ✅ Solo WebRTC
 import "./ChatWindow.css";
 
 function ChatWindow({ selectedContact }) {
