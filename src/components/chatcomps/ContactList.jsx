@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import useContactManager from "./useContactManager"; // ✅ Nuevo hook
+import useContactManager from "../../hooks/useContactManager"; // ✅ Nuevo hook
 import "./ContactList.css";
 
 function ContactList({ onSelectContact }) {
