@@ -1,9 +1,9 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import Header from "./components/Header.jsx";
+import Header from "./components/layout/Header.jsx";
 import Home from "./pages/Home.jsx";
 import Chat from "./pages/chat/Chat.jsx";
-import BottomBar from "./components/BottomBar.jsx";
+import BottomBar from "./components/layout/BottomBar.jsx";
 
 function Main() {
     return (
