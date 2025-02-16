@@ -47,12 +47,12 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
     }
 }
 
-// 🔹 Corregido: Obtener contactos correctamente
+// 🔹 Obtener contactos correctamente
 export async function getContacts() {
     return apiRequest('/api/contacts', { method: 'GET' });
 }
 
-// 🔹 Corregido: Enviar solicitud de contacto (URL correcta)
+// 🔹 Enviar solicitud de contacto (URL correcta)
 export async function addContact(pubkey) {
     return apiRequest('/api/contacts/send', {
         method: 'POST',
@@ -61,17 +61,17 @@ export async function addContact(pubkey) {
 }
 
 // 🔹 Aceptar contacto correctamente
-export async function acceptContact(pubkey) {
+export async function approveContact(pubkey) {
     return apiRequest('/api/contacts/accept', {
         method: 'POST',
         body: JSON.stringify({ pubkey }),
     });
 }
 
-// 🔹 Corregido: Rechazar contacto eliminándolo correctamente
+// 🔹 Rechazar contacto eliminándolo correctamente
 export async function rejectContact(pubkey) {
     return apiRequest('/api/contacts/remove', {
-        method: 'DELETE', // 🔹 Cambiado de POST a DELETE
+        method: 'DELETE', // 🔹 Confirmado con backend: DELETE es el método correcto
         body: JSON.stringify({ pubkey }),
     });
 }

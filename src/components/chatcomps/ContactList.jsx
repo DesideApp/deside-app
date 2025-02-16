@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import useContactManager from "../../hooks/useContactManager";
-import { getConnectedWallet, isWalletRegistered } from "@/services/walletService";
+import { getConnectedWallet } from "@/services/walletService";
 import AddContactForm from "./AddContactForm";
 import "./ContactList.css";
 
@@ -14,19 +14,13 @@ function ContactList({ onSelectContact }) {
     } = useContactManager();
 
     const [view, setView] = useState("contacts");
-    const [walletStatus, setWalletStatus] = useState({ walletAddress: null, isAuthenticated: false, isRegistered: false });
+    const [walletStatus, setWalletStatus] = useState({ walletAddress: null, isAuthenticated: false });
     const [showAddContactModal, setShowAddContactModal] = useState(false);
 
     // ✅ Optimización de `updateWalletStatus` con `useCallback`
-    const updateWalletStatus = useCallback(async () => {
+    const updateWalletStatus = useCallback(() => {
         const status = getConnectedWallet();
-        
-        if (status.walletAddress) {
-            const registered = await isWalletRegistered(status.walletAddress);
-            setWalletStatus({ ...status, isRegistered: registered });
-        } else {
-            setWalletStatus({ walletAddress: null, isAuthenticated: false, isRegistered: false });
-        }
+        setWalletStatus(status);
     }, []);
 
     useEffect(() => {
@@ -118,7 +112,7 @@ function ContactList({ onSelectContact }) {
             <button 
                 className="floating-add-button" 
                 onClick={() => setShowAddContactModal(true)}
-                disabled={!walletStatus.walletAddress || !walletStatus.isAuthenticated || !walletStatus.isRegistered}
+                disabled={!walletStatus.walletAddress || !walletStatus.isAuthenticated}
             >
                 ➕
             </button>

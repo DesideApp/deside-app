@@ -55,13 +55,6 @@ async function authenticateWallet(wallet) {
         const pubkey = localStorage.getItem("walletAddress");
         if (!pubkey) throw new Error("❌ No hay wallet conectada.");
 
-        // Verificar si la wallet está registrada
-        const isRegistered = await isWalletRegistered(pubkey);
-        if (!isRegistered) {
-            console.warn("⚠️ Wallet no registrada. Registrando automáticamente...");
-            await registerWallet(pubkey);
-        }
-
         const message = "Please sign this message to authenticate.";
         const signedData = await signMessage(wallet, message);
         if (!signedData.signature) throw new Error("❌ Firma rechazada.");
@@ -148,35 +141,6 @@ async function getConnectedWallet() {
     return { walletAddress, isAuthenticated: !!token };
 }
 
-// Registrar wallet en el backend
-async function registerWallet(pubkey) {
-    try {
-        const response = await fetch("/api/auth/register-wallet", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ pubkey }),
-        });
-
-        if (!response.ok) throw new Error("❌ Error registrando wallet.");
-        console.log(`✅ Wallet ${pubkey} registrada correctamente.`);
-    } catch (error) {
-        console.error("❌ Error en registerWallet():", error);
-        throw error;
-    }
-}
-
-// Verificar si una wallet está registrada en el backend
-async function isWalletRegistered(pubkey) {
-    try {
-        const response = await fetch(`/api/auth/check-wallet?pubkey=${pubkey}`);
-        const data = await response.json();
-        return data.isRegistered;
-    } catch (error) {
-        console.error("❌ Error al verificar wallet registrada:", error);
-        return false;
-    }
-}
-
 export {
     getProvider,
     connectWallet,
@@ -184,7 +148,5 @@ export {
     disconnectWallet,
     getConnectedWallet,
     getWalletBalance,
-    signMessage,
-    registerWallet, // ✅ Ahora está correctamente definida y exportada
-    isWalletRegistered,
+    signMessage
 };
