@@ -19,6 +19,14 @@ function ContactList({ onSelectContact }) {
         setWalletStatus(getConnectedWallet());
     }, []);
 
+    const handleAuthIfNeeded = async () => {
+        if (!walletStatus.isAuthenticated) {
+            console.log("🔑 Autenticando wallet...");
+            await authenticateWallet("phantom");
+            setWalletStatus(getConnectedWallet());
+        }
+    };
+
     return (
         <div className="contact-list-container">
             <h3>📞 Contactos</h3>
@@ -32,7 +40,7 @@ function ContactList({ onSelectContact }) {
             )}
 
             {!walletStatus.isAuthenticated && walletStatus.walletAddress && (
-                <p className="auth-warning">⚠️ Firma para autenticarte antes de agregar contactos.</p>
+                <button className="auth-button" onClick={handleAuthIfNeeded}>🔑 Autenticar</button>
             )}
 
             {view === "contacts" ? (

@@ -13,6 +13,14 @@ const AddContactForm = ({ onContactAdded }) => {
         setWalletStatus(getConnectedWallet());
     }, []);
 
+    const handleAuthIfNeeded = async () => {
+        if (!walletStatus.isAuthenticated) {
+            console.log("🔑 Autenticando wallet...");
+            await authenticateWallet("phantom");
+            setWalletStatus(getConnectedWallet());
+        }
+    };
+
     const handleAddContact = async () => {
         if (!pubkey.trim()) {
             setErrorMessage('⚠️ Introduce una clave pública válida.');
@@ -25,11 +33,7 @@ const AddContactForm = ({ onContactAdded }) => {
         }
 
         if (!walletStatus.isAuthenticated) {
-            setErrorMessage('⚠️ Se requiere autenticación para agregar contactos.');
-            setIsLoading(true);
-            await authenticateWallet("phantom");
-            setWalletStatus(getConnectedWallet());
-            setIsLoading(false);
+            await handleAuthIfNeeded();
             return;
         }
 
@@ -55,7 +59,7 @@ const AddContactForm = ({ onContactAdded }) => {
             {!walletStatus.walletAddress ? (
                 <p className="error-message">⚠️ Conéctate a tu wallet para añadir contactos.</p>
             ) : !walletStatus.isAuthenticated ? (
-                <p className="warning-message">⚠️ Firma con tu wallet para autenticarte.</p>
+                <button className="auth-button" onClick={handleAuthIfNeeded}>🔑 Autenticar</button>
             ) : null}
 
             <input

@@ -17,30 +17,25 @@ function WalletModal({ isOpen, onClose }) {
 
     const handleWalletSelection = async (walletType) => {
         try {
-            // 🔍 Si ya está autenticado, cierra el modal sin pedir nada.
             if (walletStatus.walletAddress && walletStatus.isAuthenticated) {
                 console.log("✅ Ya autenticado. No se necesita conexión ni firma.");
                 onClose();
                 return;
             }
 
-            // 🛠️ Si no hay wallet conectada, primero conecta la wallet
             if (!walletStatus.walletAddress) {
                 console.log(`🔵 Conectando con ${walletType}...`);
                 await connectWallet(walletType);
             }
 
-            // 🔑 Si la wallet está conectada pero no autenticada, solicita firma
             const updatedStatus = getConnectedWallet();
             if (updatedStatus.walletAddress && !updatedStatus.isAuthenticated) {
                 console.log("🟡 Autenticando wallet...");
                 await authenticateWallet(walletType);
             }
 
-            // 🚀 Después de conectar y autenticar, actualiza el estado y cierra el modal
             setWalletStatus(getConnectedWallet());
             onClose();
-
         } catch (error) {
             console.error("❌ Error al conectar o autenticar la wallet:", error);
         }

@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import WalletModal from './WalletModal';
-import { Copy } from 'lucide-react'; 
-import './WalletMenu.css';
+import React, { useState, useEffect, useRef } from "react";
+import WalletModal from "./WalletModal";
+import { Copy } from "lucide-react"; 
+import "./WalletMenu.css";
 
-function WalletMenu({ isOpen, onClose, walletAddress, handleLogout }) {
+function WalletMenu({ isOpen, onClose, walletStatus, handleLogout }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const menuRef = useRef(null);
 
@@ -26,18 +26,18 @@ function WalletMenu({ isOpen, onClose, walletAddress, handleLogout }) {
     }, [isOpen]);
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(walletAddress);
+        navigator.clipboard.writeText(walletStatus.walletAddress);
         console.info("✅ Dirección copiada.");
     };
 
     return (
         <>
-            <div className={`wallet-menu ${isOpen ? 'open' : ''}`} ref={menuRef}>
+            <div className={`wallet-menu ${isOpen ? "open" : ""}`} ref={menuRef}>
                 <div className="wallet-menu-content">
-                    {walletAddress ? (
+                    {walletStatus.walletAddress ? (
                         <>
                             <div className="wallet-address-container">
-                                <p className="wallet-address">{walletAddress}</p>
+                                <p className="wallet-address">{walletStatus.walletAddress}</p>
                                 <button className="copy-button" onClick={handleCopy} aria-label="Copy Address">
                                     <Copy size={18} />
                                 </button>

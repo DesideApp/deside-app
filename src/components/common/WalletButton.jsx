@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getConnectedWallet, connectWallet, disconnectWallet, getWalletBalance } from "../../services/walletService.js";
+import { getConnectedWallet, connectWallet, disconnectWallet, getWalletBalance, authenticateWallet } from "../../services/walletService.js";
 import { logout } from "../../services/authServices.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
@@ -8,26 +8,19 @@ import "./WalletButton.css";
 function WalletButton({ buttonText = "Connect Wallet" }) {
     const [walletStatus, setWalletStatus] = useState({
         walletAddress: null,
-        balance: null
+        balance: null,
+        isAuthenticated: false
     });
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const updateWalletStatus = async () => {
-            const connectedWallet = await getConnectedWallet();
-            if (connectedWallet?.walletAddress) {
-                setWalletStatus({
-                    walletAddress: connectedWallet.walletAddress,
-                    balance: await getWalletBalance(connectedWallet.walletAddress),
-                });
-            } else {
-                setWalletStatus({ walletAddress: null, balance: null });
-            }
+            const connectedWallet = getConnectedWallet();
+            setWalletStatus(connectedWallet);
         };
 
         updateWalletStatus();
-
         window.addEventListener("walletConnected", updateWalletStatus);
         window.addEventListener("walletDisconnected", updateWalletStatus);
 
@@ -37,7 +30,15 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
         };
     }, []);
 
-    const handleConnect = () => setIsModalOpen(true);
+    const handleConnect = async () => {
+        if (walletStatus.walletAddress && !walletStatus.isAuthenticated) {
+            console.log("🔐 Solicitando autenticación...");
+            await authenticateWallet("phantom");
+            setWalletStatus(getConnectedWallet());
+        } else {
+            setIsModalOpen(true);
+        }
+    };
 
     return (
         <div className="wallet-container">
@@ -58,7 +59,7 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
             <WalletMenu
                 isOpen={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
-                walletAddress={walletStatus.walletAddress}
+                walletStatus={walletStatus}
                 handleLogout={() => {
                     disconnectWallet();
                     logout();
