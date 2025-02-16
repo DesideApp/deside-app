@@ -1,5 +1,5 @@
 import bs58 from "bs58";
-import { setToken, getToken } from "./tokenService";
+import { setToken, getToken, removeToken } from "./tokenService";
 import { authenticateWithServer } from "./authServices";
 import { PublicKey, Connection } from "@solana/web3.js";
 
@@ -92,12 +92,12 @@ async function getWalletBalance(walletAddress) {
     }
 }
 
-// 📌 Desconectar la wallet
+// 📌 Desconectar la wallet (Limpieza total)
 async function disconnectWallet() {
     try {
         localStorage.removeItem("walletAddress");
         localStorage.removeItem("walletType");
-        localStorage.removeItem("jwtToken");
+        removeToken();
         window.dispatchEvent(new Event("walletDisconnected"));
         console.log("✅ Wallet desconectada.");
     } catch (error) {
@@ -106,7 +106,7 @@ async function disconnectWallet() {
     }
 }
 
-// 📌 Firmar mensaje
+// 📌 Firmar mensaje con la wallet
 async function signMessage(wallet, message) {
     try {
         console.log(`🟡 Solicitando firma a ${wallet}...`);
@@ -125,10 +125,16 @@ async function signMessage(wallet, message) {
     }
 }
 
-// 📌 Obtener la billetera conectada
+// 📌 Obtener el estado de la wallet conectada
 function getConnectedWallet() {
     const walletAddress = localStorage.getItem("walletAddress");
     const isAuthenticated = !!getToken();
+
+    // 🔍 Si hay sesión, validamos si el token es real antes de considerarlo autenticado
+    if (walletAddress && !isAuthenticated) {
+        console.log("⚠️ Se encontró una wallet conectada, pero no autenticada. Requiere firma.");
+    }
+
     return { walletAddress, isAuthenticated };
 }
 

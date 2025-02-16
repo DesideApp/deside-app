@@ -1,5 +1,5 @@
-import { getToken, setToken, removeToken, refreshToken } from './tokenService.js';
-import API_BASE_URL from '../config/apiConfig.js';
+import { getToken, setToken, removeToken, refreshToken } from "./tokenService.js";
+import API_BASE_URL from "../config/apiConfig.js";
 
 // 🚀 **Peticiones con autenticación**
 export async function fetchWithAuth(url, options = {}) {
@@ -7,7 +7,12 @@ export async function fetchWithAuth(url, options = {}) {
     if (!token) {
         console.warn("🔴 No se encontró un token válido, intentando renovar...");
         token = await refreshToken();
-        if (!token) throw new Error("❌ No se pudo renovar el token.");
+
+        if (!token) {
+            console.error("❌ No se pudo renovar el token. Se requiere autenticación.");
+            removeToken();
+            throw new Error("⚠️ Token inválido. Por favor, vuelve a autenticarte.");
+        }
     }
 
     options.headers = {
@@ -20,7 +25,12 @@ export async function fetchWithAuth(url, options = {}) {
     if (response.status === 403) {
         console.warn("⚠️ Token inválido, intentando renovar...");
         token = await refreshToken();
-        if (!token) return response;
+
+        if (!token) {
+            console.error("❌ No se pudo renovar el token. Cerrando sesión.");
+            logout();
+            return response;
+        }
 
         options.headers.Authorization = `Bearer ${token}`;
         return fetch(url, options);
@@ -35,8 +45,8 @@ export async function authenticateWithServer(pubkey, signature, message) {
         console.log("🔵 Enviando autenticación con:", { pubkey, signature, message });
 
         const response = await fetch(`${API_BASE_URL}/api/auth/token`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ pubkey, signature, message }),
         });
 
@@ -44,6 +54,8 @@ export async function authenticateWithServer(pubkey, signature, message) {
 
         const { token, refreshToken } = await response.json();
         setToken(token, refreshToken);
+
+        console.log("✅ Autenticación exitosa. Token almacenado.");
         return token;
     } catch (error) {
         console.error("❌ Error en `authenticateWithServer()`:", error);
@@ -53,6 +65,9 @@ export async function authenticateWithServer(pubkey, signature, message) {
 
 // 🚀 **Cerrar sesión segura**
 export function logout() {
+    console.info("🔵 Cerrando sesión y eliminando credenciales.");
     removeToken();
-    console.info("🔵 Usuario deslogueado correctamente.");
+    localStorage.removeItem("walletAddress");
+    localStorage.removeItem("walletType");
+    window.dispatchEvent(new Event("walletDisconnected"));
 }

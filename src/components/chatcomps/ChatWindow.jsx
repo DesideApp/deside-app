@@ -13,7 +13,19 @@ function ChatWindow({ selectedContact }) {
     const chatContainerRef = useRef(null);
 
     useEffect(() => {
-        setWalletStatus(getConnectedWallet());
+        const updateWalletStatus = async () => {
+            const status = getConnectedWallet();
+            setWalletStatus(status);
+        };
+
+        updateWalletStatus();
+        window.addEventListener("walletConnected", updateWalletStatus);
+        window.addEventListener("walletDisconnected", updateWalletStatus);
+
+        return () => {
+            window.removeEventListener("walletConnected", updateWalletStatus);
+            window.removeEventListener("walletDisconnected", updateWalletStatus);
+        };
     }, []);
 
     // ✅ Usa WebRTC solo si hay contacto seleccionado y wallet autenticada
@@ -36,7 +48,7 @@ function ChatWindow({ selectedContact }) {
             ) : (
                 <>
                     <div className="chat-header">
-                        <h3>💬 Chat con: {selectedContact.slice(0, 6)}...{selectedContact.slice(-4)}</h3>
+                        <h3>💬 Chat con: {selectedContact}</h3>
                     </div>
 
                     {!walletStatus.isAuthenticated && (

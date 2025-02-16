@@ -16,7 +16,19 @@ function ContactList({ onSelectContact }) {
     const [walletStatus, setWalletStatus] = useState({ walletAddress: null, isAuthenticated: false });
 
     useEffect(() => {
-        setWalletStatus(getConnectedWallet());
+        const updateWalletStatus = async () => {
+            const status = getConnectedWallet();
+            setWalletStatus(status);
+        };
+
+        updateWalletStatus();
+        window.addEventListener("walletConnected", updateWalletStatus);
+        window.addEventListener("walletDisconnected", updateWalletStatus);
+
+        return () => {
+            window.removeEventListener("walletConnected", updateWalletStatus);
+            window.removeEventListener("walletDisconnected", updateWalletStatus);
+        };
     }, []);
 
     const handleAuthIfNeeded = async () => {
@@ -35,13 +47,11 @@ function ContactList({ onSelectContact }) {
                 {view === "contacts" ? "📩 Solicitudes" : "⬅️ Volver"}
             </button>
 
-            {!walletStatus.walletAddress && (
+            {!walletStatus.walletAddress ? (
                 <p className="auth-warning">⚠️ Conéctate a una wallet para gestionar contactos.</p>
-            )}
-
-            {!walletStatus.isAuthenticated && walletStatus.walletAddress && (
+            ) : !walletStatus.isAuthenticated ? (
                 <button className="auth-button" onClick={handleAuthIfNeeded}>🔑 Autenticar</button>
-            )}
+            ) : null}
 
             {view === "contacts" ? (
                 <ul className="contact-list">
