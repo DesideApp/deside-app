@@ -1,18 +1,12 @@
-import { getToken, setToken, removeToken, refreshToken } from "./tokenService.js";
+import { getToken, setToken, removeToken } from "./tokenService.js";
 import API_BASE_URL from "../config/apiConfig.js";
 
 // 🚀 **Peticiones con autenticación**
 export async function fetchWithAuth(url, options = {}) {
-    let token = getToken();
+    const token = getToken();
     if (!token) {
-        console.warn("🔴 No se encontró un token válido, intentando renovar...");
-        token = await refreshToken();
-
-        if (!token) {
-            console.error("❌ No se pudo renovar el token. Se requiere autenticación.");
-            removeToken();
-            throw new Error("⚠️ Token inválido. Por favor, vuelve a autenticarte.");
-        }
+        console.warn("🔴 No se encontró un token válido. Por favor, re-autentícate.");
+        throw new Error("Token inválido. Por favor, vuelve a autenticarte.");
     }
 
     options.headers = {
@@ -23,17 +17,9 @@ export async function fetchWithAuth(url, options = {}) {
     const response = await fetch(url, options);
 
     if (response.status === 403) {
-        console.warn("⚠️ Token inválido, intentando renovar...");
-        token = await refreshToken();
-
-        if (!token) {
-            console.error("❌ No se pudo renovar el token. Cerrando sesión.");
-            logout();
-            return response;
-        }
-
-        options.headers.Authorization = `Bearer ${token}`;
-        return fetch(url, options);
+        console.warn("⚠️ Token inválido, cerrando sesión.");
+        logout();
+        throw new Error("Token inválido. Por favor, vuelve a autenticarte.");
     }
 
     return response;

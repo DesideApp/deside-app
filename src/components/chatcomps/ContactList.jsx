@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import useContactManager from "../../hooks/useContactManager";
 import { getConnectedWallet, authenticateWallet } from "../../services/walletService";
+import AddContactForm from "./AddContactForm"; // Importamos el formulario
 import "./ContactList.css";
 
 function ContactList({ onSelectContact }) {
@@ -14,6 +15,7 @@ function ContactList({ onSelectContact }) {
 
     const [view, setView] = useState("contacts");
     const [walletStatus, setWalletStatus] = useState({ walletAddress: null, isAuthenticated: false });
+    const [showAddContactModal, setShowAddContactModal] = useState(false);
 
     useEffect(() => {
         const updateWalletStatus = async () => {
@@ -101,6 +103,24 @@ function ContactList({ onSelectContact }) {
                                 )}
                             </ul>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Botón flotante para agregar contacto */}
+            <button 
+                className="floating-add-button" 
+                onClick={() => setShowAddContactModal(true)}
+            >
+                ➕
+            </button>
+
+            {/* Modal para agregar contacto */}
+            {showAddContactModal && (
+                <div className="modal-overlay" onClick={() => setShowAddContactModal(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <button className="modal-close" onClick={() => setShowAddContactModal(false)}>X</button>
+                        <AddContactForm onContactAdded={() => setShowAddContactModal(false)} />
                     </div>
                 </div>
             )}

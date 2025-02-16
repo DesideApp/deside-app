@@ -28,7 +28,7 @@ function ChatWindow({ selectedContact }) {
         };
     }, []);
 
-    // ✅ Usa WebRTC solo si hay contacto seleccionado y wallet autenticada
+    // Usa WebRTC solo si hay contacto seleccionado y wallet autenticada
     const { messages, sendMessage } = useWebRTC(
         selectedContact, 
         walletStatus.walletAddress, 
@@ -48,7 +48,12 @@ function ChatWindow({ selectedContact }) {
             ) : (
                 <>
                     <div className="chat-header">
-                        <h3>💬 Chat con: {selectedContact}</h3>
+                        <h3>
+                            💬 Chat con:{" "}
+                            <span title={selectedContact}>
+                                {selectedContact.slice(0, 6)}...{selectedContact.slice(-4)}
+                            </span>
+                        </h3>
                     </div>
 
                     {!walletStatus.isAuthenticated && (

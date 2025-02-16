@@ -48,12 +48,8 @@ async function authenticateWallet(wallet) {
     try {
         const pubkey = localStorage.getItem("walletAddress");
         if (!pubkey) throw new Error("❌ No hay wallet conectada.");
-
-        if (getToken()) {
-            console.log("✅ Ya autenticado. No es necesario firmar de nuevo.");
-            return { pubkey, status: "authenticated" };
-        }
-
+        
+        // ⚡ Se elimina la validación previa del token para forzar nueva autenticación
         const message = "Please sign this message to authenticate.";
         const signedData = await signMessage(wallet, message);
         if (!signedData.signature) throw new Error("❌ Firma rechazada.");
@@ -125,17 +121,13 @@ async function signMessage(wallet, message) {
     }
 }
 
-// 📌 Obtener el estado de la wallet conectada
+// 📌 Obtener el estado de la wallet conectada y validar autenticación
 function getConnectedWallet() {
     const walletAddress = localStorage.getItem("walletAddress");
-    const isAuthenticated = !!getToken();
-
-    // 🔍 Si hay sesión, validamos si el token es real antes de considerarlo autenticado
-    if (walletAddress && !isAuthenticated) {
-        console.log("⚠️ Se encontró una wallet conectada, pero no autenticada. Requiere firma.");
-    }
-
-    return { walletAddress, isAuthenticated };
+    // ⚡ Forzamos nueva sesión: eliminamos el token almacenado en cada carga
+    removeToken();
+    // Con token eliminado, el usuario debe autenticarse de nuevo
+    return { walletAddress, isAuthenticated: false };
 }
 
 export { 
