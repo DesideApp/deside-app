@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import useContactManager from "../../hooks/useContactManager";
-import { getConnectedWallet, isWalletRegistered } from "../../services/walletService";
+import { getConnectedWallet, isWalletRegistered } from "../services/walletService";
 import AddContactForm from "./AddContactForm";
 import "./ContactList.css";
 
