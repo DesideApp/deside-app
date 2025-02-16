@@ -1,28 +1,21 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import ChatInput from "./ChatInput";
-import { getConnectedWallet, isWalletRegistered } from "../../services/walletService";
+import { getConnectedWallet } from "../../services/walletService";
 import useWebRTC from "../../hooks/useWebRTC";
 import "./ChatWindow.css";
 
 function ChatWindow({ selectedContact }) {
     const [walletStatus, setWalletStatus] = useState({
         walletAddress: null,
-        isAuthenticated: false,
-        isRegistered: false
+        isAuthenticated: false
     });
 
     const chatContainerRef = useRef(null);
 
-    // ✅ Optimización de `updateWalletStatus` con `useCallback`
-    const updateWalletStatus = useCallback(async () => {
+    // ✅ Eliminado `isWalletRegistered`
+    const updateWalletStatus = useCallback(() => {
         const status = getConnectedWallet();
-        
-        if (status.walletAddress) {
-            const registered = await isWalletRegistered(status.walletAddress);
-            setWalletStatus({ ...status, isRegistered: registered });
-        } else {
-            setWalletStatus({ walletAddress: null, isAuthenticated: false, isRegistered: false });
-        }
+        setWalletStatus(status);
     }, []);
 
     useEffect(() => {
@@ -36,11 +29,11 @@ function ChatWindow({ selectedContact }) {
         };
     }, [updateWalletStatus]);
 
-    // ✅ Se ejecuta WebRTC solo si la wallet está autenticada y registrada
+    // ✅ Eliminado `walletStatus.isRegistered` (el backend maneja esto)
     const { messages, sendMessage } = useWebRTC(
         selectedContact, 
         walletStatus.walletAddress, 
-        walletStatus.isAuthenticated && walletStatus.isRegistered
+        walletStatus.isAuthenticated
     );
 
     useEffect(() => {
