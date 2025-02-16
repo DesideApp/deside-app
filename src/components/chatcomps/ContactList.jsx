@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import useContactManager from "../../hooks/useContactManager"; 
+import useContactManager from "../../hooks/useContactManager";
 import "./ContactList.css";
 
 function ContactList({ onSelectContact }) {
@@ -13,7 +13,7 @@ function ContactList({ onSelectContact }) {
     } = useContactManager();
 
     const [newContact, setNewContact] = useState("");
-    const [view, setView] = useState("contacts"); 
+    const [view, setView] = useState("contacts");
 
     return (
         <div className="contact-list-container">
@@ -48,10 +48,16 @@ function ContactList({ onSelectContact }) {
             ) : (
                 <div>
                     <div className="request-tabs">
-                        <button className={`request-tab ${view === "received" ? "active" : ""}`} onClick={() => setView("received")}>
+                        <button 
+                            className={`request-tab ${view === "received" ? "active" : ""}`} 
+                            onClick={() => setView("received")}
+                        >
                             📥 Recibidas ({receivedRequests.length})
                         </button>
-                        <button className={`request-tab ${view === "sent" ? "active" : ""}`} onClick={() => setView("sent")}>
+                        <button 
+                            className={`request-tab ${view === "sent" ? "active" : ""}`} 
+                            onClick={() => setView("sent")}
+                        >
                             📤 Enviadas ({pendingRequests.length})
                         </button>
                     </div>

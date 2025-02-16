@@ -43,13 +43,12 @@ async function connectWallet(wallet) {
     }
 }
 
-// 📌 Autenticar y obtener JWT
+// 📌 Autenticar y obtener JWT solo si es necesario
 async function authenticateWallet(wallet) {
     try {
         const pubkey = localStorage.getItem("walletAddress");
         if (!pubkey) throw new Error("❌ No hay wallet conectada.");
 
-        // Evitar pedir firma si ya está autenticado
         if (getToken()) {
             console.log("✅ Ya autenticado. No es necesario firmar de nuevo.");
             return { pubkey, status: "authenticated" };

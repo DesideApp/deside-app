@@ -26,23 +26,10 @@ const useWebRTC = (selectedContact, walletAddress, isAuthenticated) => {
 
         peerRef.current = peer;
 
-        return () => {
-            if (peerRef.current) {
-                peerRef.current.close();
-            }
-        };
+        return () => peerRef.current?.close();
     }, [selectedContact, walletAddress, isAuthenticated]);
 
-    const sendMessage = (text) => {
-        if (dataChannelRef.current) {
-            dataChannelRef.current.send(text);
-            setMessages((prev) => [...prev, { sender: "me", text }]);
-        } else {
-            console.error("❌ No se puede enviar el mensaje, el canal de datos no está disponible.");
-        }
-    };
-
-    return { messages, sendMessage };
+    return { messages, sendMessage: (text) => dataChannelRef.current?.send(text) };
 };
 
 export default useWebRTC;

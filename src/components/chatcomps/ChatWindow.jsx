@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ChatInput from "./ChatInput";
 import { getConnectedWallet } from "../../services/walletService";
-import useWebRTC from "../../hooks/useWebRTC"; 
+import useWebRTC from "../../hooks/useWebRTC";
 import "./ChatWindow.css";
 
 function ChatWindow({ selectedContact }) {
@@ -27,29 +27,31 @@ function ChatWindow({ selectedContact }) {
         }
     }, [messages]);
 
-    if (!selectedContact) {
-        return <p className="chat-placeholder">🔍 Selecciona un contacto para empezar a chatear.</p>;
-    }
-
     return (
-        <div className="chat-window" ref={chatContainerRef}>
-            <div className="chat-header">
-                <h3>💬 Chat con: {selectedContact.slice(0, 6)}...{selectedContact.slice(-4)}</h3>
-            </div>
+        <div className="chat-window">
+            {!selectedContact ? (
+                <p className="chat-placeholder">🔍 Selecciona un contacto para empezar a chatear.</p>
+            ) : (
+                <>
+                    <div className="chat-header">
+                        <h3>💬 Chat con: {selectedContact.slice(0, 6)}...{selectedContact.slice(-4)}</h3>
+                    </div>
 
-            <div className="chat-messages">
-                {messages.length > 0 ? (
-                    messages.map((msg, index) => (
-                        <div key={index} className={`chat-message ${msg.sender === "me" ? "sent" : "received"}`}>
-                            {msg.text}
-                        </div>
-                    ))
-                ) : (
-                    <p className="no-messages">🔹 No hay mensajes todavía.</p>
-                )}
-            </div>
+                    <div className="chat-messages" ref={chatContainerRef}>
+                        {messages.length > 0 ? (
+                            messages.map((msg, index) => (
+                                <div key={index} className={`chat-message ${msg.sender === "me" ? "sent" : "received"}`}>
+                                    {msg.text}
+                                </div>
+                            ))
+                        ) : (
+                            <p className="no-messages">🔹 No hay mensajes todavía.</p>
+                        )}
+                    </div>
 
-            <ChatInput onSendMessage={sendMessage} />
+                    <ChatInput onSendMessage={sendMessage} />
+                </>
+            )}
         </div>
     );
 }
