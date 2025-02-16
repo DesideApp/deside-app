@@ -15,7 +15,7 @@ const AddContactForm = ({ onContactAdded }) => {
 
     const handleAuthIfNeeded = async () => {
         if (!walletStatus.isAuthenticated) {
-            console.log("🔑 Autenticando wallet...");
+            console.log("🔑 Autenticando wallet de forma automática...");
             await authenticateWallet("phantom");
             setWalletStatus(getConnectedWallet());
         }
@@ -32,9 +32,9 @@ const AddContactForm = ({ onContactAdded }) => {
             return;
         }
 
+        // Autenticar automáticamente si no está autenticado
         if (!walletStatus.isAuthenticated) {
             await handleAuthIfNeeded();
-            return;
         }
 
         try {
@@ -56,11 +56,9 @@ const AddContactForm = ({ onContactAdded }) => {
         <div className="add-contact-container">
             <h2>📇 Añadir Contacto</h2>
 
-            {!walletStatus.walletAddress ? (
+            {!walletStatus.walletAddress && (
                 <p className="error-message">⚠️ Conéctate a tu wallet para añadir contactos.</p>
-            ) : !walletStatus.isAuthenticated ? (
-                <button className="auth-button" onClick={handleAuthIfNeeded}>🔑 Autenticar</button>
-            ) : null}
+            )}
 
             <input
                 type="text"

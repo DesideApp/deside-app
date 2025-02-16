@@ -33,13 +33,7 @@ function ContactList({ onSelectContact }) {
         };
     }, []);
 
-    const handleAuthIfNeeded = async () => {
-        if (!walletStatus.isAuthenticated) {
-            console.log("🔑 Autenticando wallet...");
-            await authenticateWallet("phantom");
-            setWalletStatus(getConnectedWallet());
-        }
-    };
+    // Se elimina el botón manual de autenticación
 
     return (
         <div className="contact-list-container">
@@ -49,11 +43,9 @@ function ContactList({ onSelectContact }) {
                 {view === "contacts" ? "📩 Solicitudes" : "⬅️ Volver"}
             </button>
 
-            {!walletStatus.walletAddress ? (
+            {!walletStatus.walletAddress && (
                 <p className="auth-warning">⚠️ Conéctate a una wallet para gestionar contactos.</p>
-            ) : !walletStatus.isAuthenticated ? (
-                <button className="auth-button" onClick={handleAuthIfNeeded}>🔑 Autenticar</button>
-            ) : null}
+            )}
 
             {view === "contacts" ? (
                 <ul className="contact-list">
