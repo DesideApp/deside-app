@@ -1,9 +1,9 @@
 import CryptoJS from 'crypto-js';
 
-const SECRET_KEY = process.env.REACT_APP_SECRET_KEY || 'fallback-secret-key';  
+const SECRET_KEY = process.env.REACT_APP_SECRET_KEY || 'fallback-secret-key';
 
-// Guardar token en localStorage de forma encriptada
-export function setToken(token) {
+// 🔐 **Guardar token en localStorage de forma encriptada**
+export function setToken(token, refreshToken) {
     if (!token || typeof token !== "string") {
         console.error("🔴 Intento de almacenar un token inválido:", token);
         return;
@@ -12,13 +12,16 @@ export function setToken(token) {
     try {
         const encryptedToken = CryptoJS.AES.encrypt(token, SECRET_KEY).toString();
         localStorage.setItem("jwtToken", encryptedToken);
+        if (refreshToken) {
+            localStorage.setItem("refreshToken", refreshToken);
+        }
         console.log("✅ Token guardado correctamente.");
     } catch (error) {
         console.error("❌ Error al guardar el token:", error);
     }
 }
 
-// Obtener y desencriptar el token desde localStorage
+// 🔓 **Obtener y desencriptar el token desde localStorage**
 export function getToken() {
     const encryptedToken = localStorage.getItem("jwtToken");
     if (!encryptedToken) return null;
@@ -26,28 +29,26 @@ export function getToken() {
     try {
         const bytes = CryptoJS.AES.decrypt(encryptedToken, SECRET_KEY);
         const decryptedToken = bytes.toString(CryptoJS.enc.Utf8);
-
         if (!decryptedToken || decryptedToken === "undefined") {
             console.warn("🔴 Token inválido o corrupto, eliminando...");
-            localStorage.removeItem("jwtToken");
+            removeToken();
             return null;
         }
-
         return decryptedToken;
     } catch (error) {
         console.error("🔴 Error al desencriptar token:", error);
-        localStorage.removeItem("jwtToken");
+        removeToken();
         return null;
     }
 }
 
-// Eliminar token de localStorage
+// 🗑️ **Eliminar token de localStorage**
 export function removeToken() {
     localStorage.removeItem('jwtToken');
     localStorage.removeItem('refreshToken');  
 }
 
-// Verificar si el token ha expirado
+// ⏳ **Verificar si el token ha expirado**
 export function isTokenExpired() {
     const token = getToken();
     if (!token) return true;
@@ -66,6 +67,7 @@ export async function refreshToken() {
     try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) {
+            console.warn("🔴 No se encontró un refresh token. Se requiere nueva autenticación.");
             removeToken();
             throw new Error('No refresh token found');
         }
@@ -77,21 +79,23 @@ export async function refreshToken() {
         });
 
         if (!response.ok) {
+            console.warn("🔴 No se pudo renovar el token. Se requiere nueva autenticación.");
             removeToken();
             throw new Error('Failed to refresh token');
         }
 
         const data = await response.json();
-        setToken(data.accessToken);
-        return data.accessToken;
+        setToken(data.token, data.refreshToken);
+        console.log("✅ Token renovado correctamente.");
+        return data.token;
     } catch (error) {
         console.error("🔴 Error al renovar token:", error);
-        removeToken(); 
+        removeToken();
         throw error;
     }
 }
 
-// Obtener todos los tokens disponibles
+// 🔍 **Obtener todos los tokens disponibles**
 export function getTokens() {
     return { jwtToken: getToken(), refreshToken: localStorage.getItem('refreshToken') };
 }

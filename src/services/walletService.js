@@ -1,5 +1,5 @@
 import bs58 from "bs58";
-import { setToken, getToken, removeToken } from "./tokenService";
+import { setToken, getToken, removeToken, refreshToken } from "./tokenService";
 import { authenticateWithServer } from "./authServices";
 import { PublicKey, Connection } from "@solana/web3.js";
 
@@ -16,28 +16,44 @@ function getProvider(wallet) {
     return provider;
 }
 
-// Conectar la wallet (forzando el desbloqueo si no se dispone de publicKey)
+// Verificar si una wallet está registrada en el backend
+async function isWalletRegistered(pubkey) {
+    try {
+        const response = await fetch(`/api/auth/check-wallet?pubkey=${pubkey}`);
+        const data = await response.json();
+        return data.isRegistered;
+    } catch (error) {
+        console.error("❌ Error al verificar wallet registrada:", error);
+        return false;
+    }
+}
+
+// Conectar la wallet (forzando el desbloqueo si es necesario)
 async function connectWallet(wallet) {
     try {
         console.log(`🔵 Intentando conectar con ${wallet}`);
         const provider = getProvider(wallet);
+
         if (!provider.isConnected) {
             console.log(`⚠️ ${wallet} detectado pero no conectado. Conectando...`);
             await provider.connect();
         }
-        // Si no se dispone de publicKey (posible estado bloqueado), se intenta forzar el desbloqueo
+
         if (!provider.publicKey) {
-            console.log(`⚠️ ${wallet} no tiene publicKey, forzando desbloqueo...`);
+            console.log(`⚠️ ${wallet} sin publicKey. Intentando reconectar...`);
             await provider.connect();
         }
+
         if (!provider.publicKey) {
-            throw new Error("❌ No se pudo obtener la publicKey. Asegúrate de haber desbloqueado la wallet.");
+            throw new Error("❌ No se pudo obtener la publicKey. Desbloquea la wallet.");
         }
+
         const pubkey = provider.publicKey.toBase58();
         console.log(`✅ ${wallet} conectado: ${pubkey}`);
         localStorage.setItem("walletAddress", pubkey);
         localStorage.setItem("walletType", wallet);
         window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet: pubkey } }));
+
         return { pubkey, status: "connected" };
     } catch (error) {
         console.error("❌ Error en connectWallet():", error);
@@ -45,19 +61,29 @@ async function connectWallet(wallet) {
     }
 }
 
-// Autenticar y obtener JWT (solicitando firma si es necesario)
+// Autenticar wallet y obtener JWT
 async function authenticateWallet(wallet) {
     try {
         const pubkey = localStorage.getItem("walletAddress");
         if (!pubkey) throw new Error("❌ No hay wallet conectada.");
+
+        const registered = await isWalletRegistered(pubkey);
+        if (!registered) {
+            console.warn("⚠️ Wallet no registrada, registrando automáticamente...");
+            await registerWallet(pubkey);
+        }
+
         const message = "Please sign this message to authenticate.";
         const signedData = await signMessage(wallet, message);
         if (!signedData.signature) throw new Error("❌ Firma rechazada.");
+
         console.log("🔵 Firma generada:", signedData);
         const token = await authenticateWithServer(pubkey, signedData.signature, message);
         if (!token) throw new Error("❌ No se recibió un token válido.");
+
         console.log("✅ Token JWT recibido y almacenado.");
         setToken(token);
+
         return { pubkey, status: "authenticated" };
     } catch (error) {
         console.error("❌ Error en authenticateWallet():", error);
@@ -102,10 +128,12 @@ async function signMessage(wallet, message) {
         console.log(`🟡 Solicitando firma a ${wallet}...`);
         const provider = getProvider(wallet);
         if (!provider) throw new Error("❌ No hay una billetera conectada.");
+
         const encodedMessage = new TextEncoder().encode(message);
         const { signature } = await provider.signMessage(encodedMessage);
         const signatureBase58 = bs58.encode(signature);
         console.log("✅ Firma generada (Base58):", signatureBase58);
+
         return { signature: signatureBase58, message, pubkey: provider.publicKey.toBase58() };
     } catch (error) {
         console.error("❌ Error en signMessage():", error);
@@ -113,19 +141,48 @@ async function signMessage(wallet, message) {
     }
 }
 
-// Obtener el estado de la wallet conectada y validar autenticación
-function getConnectedWallet() {
+// Obtener estado de conexión de la wallet
+async function getConnectedWallet() {
     const walletAddress = localStorage.getItem("walletAddress");
-    const token = getToken();
+    let token = getToken();
+
+    if (!token || isTokenExpired()) {
+        console.log("🔄 Intentando renovar token...");
+        try {
+            token = await refreshToken();
+        } catch (error) {
+            console.warn("❌ No se pudo renovar el token.");
+            removeToken();
+        }
+    }
+
     return { walletAddress, isAuthenticated: !!token };
 }
 
-export { 
-    getProvider, 
-    connectWallet, 
+// Registrar wallet en backend si no está registrada
+async function registerWallet(pubkey) {
+    try {
+        const response = await fetch("/api/auth/register-wallet", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pubkey }),
+        });
+
+        if (!response.ok) throw new Error("❌ Error registrando wallet.");
+        console.log(`✅ Wallet ${pubkey} registrada correctamente.`);
+    } catch (error) {
+        console.error("❌ Error en registerWallet():", error);
+        throw error;
+    }
+}
+
+export {
+    getProvider,
+    connectWallet,
     authenticateWallet,
-    disconnectWallet, 
-    getConnectedWallet, 
-    getWalletBalance, 
-    signMessage 
+    disconnectWallet,
+    getConnectedWallet,
+    getWalletBalance,
+    signMessage,
+    registerWallet,
 };

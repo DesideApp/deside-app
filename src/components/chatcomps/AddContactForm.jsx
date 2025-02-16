@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getConnectedWallet, authenticateWallet, connectWallet } from '../../services/walletService';
-import { sendContactRequest } from '../../services/contactService';
+import { getConnectedWallet, authenticateWallet, connectWallet, isWalletRegistered } from '../../services/walletService';
+import { addContact } from '../../services/apiService';
 
 const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState('');
@@ -14,14 +14,16 @@ const AddContactForm = ({ onContactAdded }) => {
     }, []);
 
     const handleAuthIfNeeded = async () => {
-        // Si la wallet no está conectada o el proveedor no tiene publicKey, se fuerza la conexión automática
         if (!walletStatus.walletAddress || (window.solana && !window.solana.publicKey)) {
             await connectWallet("phantom");
             setWalletStatus(getConnectedWallet());
         }
-        console.log("🔑 Autenticando wallet de forma automática...");
-        await authenticateWallet("phantom");
-        setWalletStatus(getConnectedWallet());
+
+        if (!walletStatus.isAuthenticated) {
+            console.log("🔑 Autenticando wallet de forma automática...");
+            await authenticateWallet("phantom");
+            setWalletStatus(getConnectedWallet());
+        }
     };
 
     const handleAddContact = async () => {
@@ -33,13 +35,22 @@ const AddContactForm = ({ onContactAdded }) => {
             setErrorMessage('⚠️ Conéctate a tu wallet antes de agregar contactos.');
             return;
         }
+
         // Autenticar automáticamente si no está autenticado
         if (!walletStatus.isAuthenticated) {
             await handleAuthIfNeeded();
         }
+
         try {
             setIsLoading(true);
-            await sendContactRequest(pubkey);
+
+            // ✅ Validar si la wallet de destino está registrada
+            const isRegistered = await isWalletRegistered(pubkey);
+            if (!isRegistered) {
+                throw new Error('❌ La wallet de destino no está registrada en el sistema.');
+            }
+
+            await addContact(pubkey);
             setSuccessMessage('✅ Solicitud de contacto enviada con éxito.');
             setPubkey('');
             setErrorMessage('');

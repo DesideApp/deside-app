@@ -1,5 +1,5 @@
 import API_BASE_URL from '../config/apiConfig.js';
-import { getAccessToken, refreshToken } from '../services/tokenService.js';
+import { getToken, refreshToken } from '../services/tokenService.js';
 
 const cache = new Map();
 
@@ -13,7 +13,7 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
     }
 
     try {
-        const token = await getAccessToken(); // Obtener el token de acceso
+        const token = getToken(); // 🔹 Corregido, usamos getToken() en lugar de getAccessToken()
         const headers = {
             'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -47,18 +47,20 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
     }
 }
 
-// Funciones específicas para cada tipo de solicitud
+// 🔹 Corregido: Obtener contactos correctamente
 export async function getContacts() {
     return apiRequest('/api/contacts', { method: 'GET' });
 }
 
-export async function addContact(contact) {
-    return apiRequest('/api/contacts/add', {
+// 🔹 Corregido: Enviar solicitud de contacto (URL correcta)
+export async function addContact(pubkey) {
+    return apiRequest('/api/contacts/send', {
         method: 'POST',
-        body: JSON.stringify(contact),
+        body: JSON.stringify({ pubkey }),
     });
 }
 
+// 🔹 Aceptar contacto correctamente
 export async function acceptContact(pubkey) {
     return apiRequest('/api/contacts/accept', {
         method: 'POST',
@@ -66,9 +68,10 @@ export async function acceptContact(pubkey) {
     });
 }
 
+// 🔹 Corregido: Rechazar contacto eliminándolo correctamente
 export async function rejectContact(pubkey) {
-    return apiRequest('/api/contacts/reject', {
-        method: 'POST',
+    return apiRequest('/api/contacts/remove', {
+        method: 'DELETE', // 🔹 Cambiado de POST a DELETE
         body: JSON.stringify({ pubkey }),
     });
 }
