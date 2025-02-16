@@ -1,5 +1,5 @@
 import bs58 from "bs58";
-import { setToken, getToken } from "./tokenService";
+import { setToken, getToken, removeToken } from "./tokenService";
 import { authenticateWithServer } from "./authServices";
 import { PublicKey, Connection } from "@solana/web3.js";
 
@@ -14,6 +14,17 @@ function getProvider(wallet) {
     const provider = WALLET_PROVIDERS[wallet]?.();
     if (!provider) throw new Error(`❌ ${wallet} Wallet no detectada.`);
     return provider;
+}
+
+// 📌 Verifica el estado de conexión y autenticación
+function getWalletStatus() {
+    const pubkey = localStorage.getItem("walletAddress");
+    const token = getToken();
+
+    if (!pubkey) return { status: "disconnected", pubkey: null };
+    if (!token) return { status: "connected", pubkey };
+
+    return { status: "authenticated", pubkey };
 }
 
 // 📌 Conectar la billetera
@@ -72,32 +83,12 @@ async function authenticateWallet(wallet) {
     }
 }
 
-// 📌 Obtener balance en SOL
-async function getWalletBalance(walletAddress) {
-    try {
-        if (!walletAddress) {
-            console.warn("⚠️ Intento de obtener balance sin dirección de wallet.");
-            return 0;
-        }
-
-        const connection = new Connection("https://rpc.ankr.com/solana");
-        const balanceResponse = await connection.getBalance(new PublicKey(walletAddress));
-
-        if (typeof balanceResponse !== "number") throw new Error("❌ Respuesta inesperada de getBalance.");
-
-        return balanceResponse / 1e9;
-    } catch (error) {
-        console.warn("⚠️ No se pudo obtener el balance. Es posible que la firma sea necesaria.");
-        return 0;
-    }
-}
-
 // 📌 Desconectar la wallet
 async function disconnectWallet() {
     try {
         localStorage.removeItem("walletAddress");
         localStorage.removeItem("walletType");
-        localStorage.removeItem("jwtToken");
+        removeToken();
         window.dispatchEvent(new Event("walletDisconnected"));
         console.log("✅ Wallet desconectada.");
     } catch (error) {
@@ -106,36 +97,10 @@ async function disconnectWallet() {
     }
 }
 
-// 📌 Firmar mensaje
-async function signMessage(wallet, message) {
-    try {
-        console.log(`🟡 Solicitando firma a ${wallet}...`);
-        const provider = getProvider(wallet);
-        if (!provider) throw new Error("❌ No hay una billetera conectada.");
-
-        const encodedMessage = new TextEncoder().encode(message);
-        const { signature } = await provider.signMessage(encodedMessage);
-        const signatureBase58 = bs58.encode(signature);
-
-        console.log("✅ Firma generada (Base58):", signatureBase58);
-        return { signature: signatureBase58, message, pubkey: provider.publicKey.toBase58() };
-    } catch (error) {
-        console.error("❌ Error en signMessage():", error);
-        throw error;
-    }
-}
-
-// 📌 Obtener la billetera conectada
-function getConnectedWallet() {
-    return { walletAddress: localStorage.getItem("walletAddress") } || null;
-}
-
 export { 
     getProvider, 
     connectWallet, 
     authenticateWallet,
     disconnectWallet, 
-    getConnectedWallet, 
-    getWalletBalance, 
-    signMessage 
+    getWalletStatus
 };
