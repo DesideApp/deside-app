@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { sendContactRequest, getConnectedWallet, authenticateWallet, connectWallet } from '../../services/walletService';
+import { getConnectedWallet, authenticateWallet, connectWallet } from '../../services/walletService';
+import { sendContactRequest } from '../../services/contactService';
 
 const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState('');
@@ -13,7 +14,7 @@ const AddContactForm = ({ onContactAdded }) => {
     }, []);
 
     const handleAuthIfNeeded = async () => {
-        // Si la wallet no está conectada, se fuerza la conexión automática
+        // Si la wallet no está conectada o el provider no tiene publicKey, se fuerza la conexión automática
         if (!walletStatus.walletAddress || (window.solana && !window.solana.publicKey)) {
             await connectWallet("phantom");
             setWalletStatus(getConnectedWallet());
