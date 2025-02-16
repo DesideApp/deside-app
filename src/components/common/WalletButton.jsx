@@ -6,19 +6,23 @@ import WalletModal from "./WalletModal";
 import "./WalletButton.css";
 
 function WalletButton({ buttonText = "Connect Wallet" }) {
-    const [walletAddress, setWalletAddress] = useState(null);
-    const [balance, setBalance] = useState(null);
+    const [walletStatus, setWalletStatus] = useState({
+        walletAddress: null,
+        balance: null
+    });
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const updateWalletStatus = async () => {
             const connectedWallet = await getConnectedWallet();
-            if (connectedWallet) {
-                setWalletAddress(connectedWallet.walletAddress);
-                setBalance(await getWalletBalance(connectedWallet.walletAddress));
+            if (connectedWallet?.walletAddress) {
+                setWalletStatus({
+                    walletAddress: connectedWallet.walletAddress,
+                    balance: await getWalletBalance(connectedWallet.walletAddress),
+                });
             } else {
-                setWalletAddress(null);
+                setWalletStatus({ walletAddress: null, balance: null });
             }
         };
 
@@ -33,19 +37,17 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
         };
     }, []);
 
-    const handleConnect = async () => {
-        setIsModalOpen(true); // ✅ Abre el modal al hacer click en "Connect Wallet"
-    };
+    const handleConnect = () => setIsModalOpen(true);
 
     return (
         <div className="wallet-container">
             <button className="wallet-button" onClick={handleConnect}>
-                {walletAddress ? `${walletAddress.slice(0, 5)}...` : buttonText}
+                {walletStatus.walletAddress ? `${walletStatus.walletAddress.slice(0, 5)}...` : buttonText}
             </button>
 
-            {balance !== null && !isNaN(balance) && (
+            {walletStatus.balance !== null && !isNaN(walletStatus.balance) && (
                 <div className="wallet-balance">
-                    <p>{parseFloat(balance).toFixed(2)} SOL</p>
+                    <p>{parseFloat(walletStatus.balance).toFixed(2)} SOL</p>
                 </div>
             )}
 
@@ -56,7 +58,7 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
             <WalletMenu
                 isOpen={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
-                walletAddress={walletAddress}
+                walletAddress={walletStatus.walletAddress}
                 handleLogout={() => {
                     disconnectWallet();
                     logout();

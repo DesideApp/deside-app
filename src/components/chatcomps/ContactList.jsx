@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import useContactManager from "../../hooks/useContactManager";
-import { getWalletStatus, authenticateWallet } from "../../services/walletService";
+import { getConnectedWallet, authenticateWallet } from "../../services/walletService";
 import "./ContactList.css";
 
 function ContactList({ onSelectContact }) {
@@ -8,51 +8,31 @@ function ContactList({ onSelectContact }) {
         confirmedContacts, 
         pendingRequests, 
         receivedRequests, 
-        handleAddContact, 
         handleAcceptRequest, 
         handleRejectRequest 
     } = useContactManager();
 
-    const [newContact, setNewContact] = useState("");
     const [view, setView] = useState("contacts");
-    const [walletStatus, setWalletStatus] = useState("disconnected");
+    const [walletStatus, setWalletStatus] = useState({ walletAddress: null, isAuthenticated: false });
 
     useEffect(() => {
-        const status = getWalletStatus();
-        setWalletStatus(status.status);
+        setWalletStatus(getConnectedWallet());
     }, []);
-
-    // ✅ Autenticar solo cuando es necesario
-    const handleAddContactClick = async () => {
-        if (walletStatus !== "authenticated") {
-            console.warn("⚠️ Se requiere autenticación para agregar contactos.");
-            await authenticateWallet("phantom");
-            setWalletStatus("authenticated");
-            return;
-        }
-        handleAddContact(newContact);
-    };
 
     return (
         <div className="contact-list-container">
             <h3>📞 Contactos</h3>
 
-            <div className="wallet-input-container">
-                <input
-                    type="text"
-                    className="contact-input"
-                    placeholder="Introduce wallet"
-                    value={newContact}
-                    onChange={(e) => setNewContact(e.target.value)}
-                />
-                <button className="add-contact-button" onClick={handleAddContactClick}>➕ Agregar</button>
-                <button className="requests-button" onClick={() => setView(view === "contacts" ? "requests" : "contacts")}>
-                    {view === "contacts" ? "📩 Solicitudes" : "⬅️ Volver"}
-                </button>
-            </div>
+            <button className="requests-button" onClick={() => setView(view === "contacts" ? "requests" : "contacts")}>
+                {view === "contacts" ? "📩 Solicitudes" : "⬅️ Volver"}
+            </button>
 
-            {walletStatus !== "authenticated" && (
-                <p className="auth-warning">⚠️ Debes autenticarte para gestionar contactos.</p>
+            {!walletStatus.walletAddress && (
+                <p className="auth-warning">⚠️ Conéctate a una wallet para gestionar contactos.</p>
+            )}
+
+            {!walletStatus.isAuthenticated && walletStatus.walletAddress && (
+                <p className="auth-warning">⚠️ Firma para autenticarte antes de agregar contactos.</p>
             )}
 
             {view === "contacts" ? (
@@ -80,19 +60,27 @@ function ContactList({ onSelectContact }) {
                     <div className="requests-container">
                         {view === "received" ? (
                             <ul className="contact-list">
-                                {receivedRequests.map((contact) => (
-                                    <li key={contact.wallet}>
-                                        {contact.wallet}
-                                        <button onClick={() => handleAcceptRequest(contact.wallet)}>✅</button>
-                                        <button onClick={() => handleRejectRequest(contact.wallet)}>❌</button>
-                                    </li>
-                                ))}
+                                {receivedRequests.length > 0 ? (
+                                    receivedRequests.map((contact) => (
+                                        <li key={contact.wallet}>
+                                            {contact.wallet}
+                                            <button onClick={() => handleAcceptRequest(contact.wallet)}>✅</button>
+                                            <button onClick={() => handleRejectRequest(contact.wallet)}>❌</button>
+                                        </li>
+                                    ))
+                                ) : (
+                                    <p className="no-contacts-message">No tienes solicitudes recibidas.</p>
+                                )}
                             </ul>
                         ) : (
                             <ul className="contact-list">
-                                {pendingRequests.map((contact) => (
-                                    <li key={contact.wallet}>{contact.wallet} (Pendiente)</li>
-                                ))}
+                                {pendingRequests.length > 0 ? (
+                                    pendingRequests.map((contact) => (
+                                        <li key={contact.wallet}>{contact.wallet} (Pendiente)</li>
+                                    ))
+                                ) : (
+                                    <p className="no-contacts-message">No has enviado solicitudes aún.</p>
+                                )}
                             </ul>
                         )}
                     </div>
