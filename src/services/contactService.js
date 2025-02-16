@@ -1,11 +1,10 @@
 import { fetchWithAuth } from './authServices';
 
-// 📌 Obtener contactos y solicitudes pendientes
+// Obtener contactos
 export async function fetchContacts() {
     try {
         const response = await fetchWithAuth("/api/contacts");
         if (!response.ok) throw new Error("Failed to fetch contacts.");
-
         const data = await response.json();
         return {
             confirmed: data.confirmed || [],
@@ -17,7 +16,7 @@ export async function fetchContacts() {
     }
 }
 
-// 📌 Enviar solicitud de amistad
+// Enviar solicitud de contacto
 export async function sendContactRequest(pubkey) {
     try {
         const response = await fetchWithAuth("/api/contacts/send", {
@@ -25,12 +24,10 @@ export async function sendContactRequest(pubkey) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ pubkey }),
         });
-
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(`❌ Error del servidor: ${errorData.message}`);
         }
-
         return await response.json();
     } catch (error) {
         console.error("❌ Error al enviar solicitud de contacto:", error);
@@ -38,7 +35,7 @@ export async function sendContactRequest(pubkey) {
     }
 }
 
-// 📌 Aceptar solicitud
+// Aceptar solicitud de contacto
 export async function approveContact(pubkey) {
     try {
         const response = await fetchWithAuth("/api/contacts/accept", {
@@ -46,7 +43,6 @@ export async function approveContact(pubkey) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ pubkey }),
         });
-
         if (!response.ok) throw new Error("Failed to accept contact request.");
         return await response.json();
     } catch (error) {

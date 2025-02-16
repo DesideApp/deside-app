@@ -14,7 +14,7 @@ const AddContactForm = ({ onContactAdded }) => {
     }, []);
 
     const handleAuthIfNeeded = async () => {
-        // Si la wallet no está conectada o el provider no tiene publicKey, se fuerza la conexión automática
+        // Si la wallet no está conectada o el proveedor no tiene publicKey, se fuerza la conexión automática
         if (!walletStatus.walletAddress || (window.solana && !window.solana.publicKey)) {
             await connectWallet("phantom");
             setWalletStatus(getConnectedWallet());
@@ -29,17 +29,14 @@ const AddContactForm = ({ onContactAdded }) => {
             setErrorMessage('⚠️ Introduce una clave pública válida.');
             return;
         }
-
         if (!walletStatus.walletAddress) {
             setErrorMessage('⚠️ Conéctate a tu wallet antes de agregar contactos.');
             return;
         }
-
         // Autenticar automáticamente si no está autenticado
         if (!walletStatus.isAuthenticated) {
             await handleAuthIfNeeded();
         }
-
         try {
             setIsLoading(true);
             await sendContactRequest(pubkey);
@@ -58,11 +55,9 @@ const AddContactForm = ({ onContactAdded }) => {
     return (
         <div className="add-contact-container">
             <h2>📇 Añadir Contacto</h2>
-
             {!walletStatus.walletAddress && (
                 <p className="error-message">⚠️ Conéctate a tu wallet para añadir contactos.</p>
             )}
-
             <input
                 type="text"
                 value={pubkey}
@@ -70,14 +65,12 @@ const AddContactForm = ({ onContactAdded }) => {
                 placeholder="Introduce la clave pública"
                 disabled={!walletStatus.walletAddress || isLoading}
             />
-
             <button 
                 onClick={handleAddContact} 
                 disabled={isLoading || !walletStatus.walletAddress}
             >
                 {isLoading ? 'Enviando...' : '➕ Enviar Solicitud'}
             </button>
-
             {errorMessage && <p className="error-message">{errorMessage}</p>}
             {successMessage && <p className="success-message">{successMessage}</p>}
         </div>

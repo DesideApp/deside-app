@@ -9,37 +9,30 @@ function ChatWindow({ selectedContact }) {
         walletAddress: null,
         isAuthenticated: false
     });
-
     const chatContainerRef = useRef(null);
-
     useEffect(() => {
         const updateWalletStatus = () => {
             const status = getConnectedWallet();
             setWalletStatus(status);
         };
-
         updateWalletStatus();
         window.addEventListener("walletConnected", updateWalletStatus);
         window.addEventListener("walletDisconnected", updateWalletStatus);
-
         return () => {
             window.removeEventListener("walletConnected", updateWalletStatus);
             window.removeEventListener("walletDisconnected", updateWalletStatus);
         };
     }, []);
-
     const { messages, sendMessage } = useWebRTC(
         selectedContact, 
         walletStatus.walletAddress, 
         walletStatus.isAuthenticated
     );
-
     useEffect(() => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
     }, [messages]);
-
     return (
         <div className="chat-window">
             {!selectedContact ? (
@@ -54,7 +47,6 @@ function ChatWindow({ selectedContact }) {
                             </span>
                         </h3>
                     </div>
-
                     <div className="chat-messages" ref={chatContainerRef}>
                         {messages.length > 0 ? (
                             messages.map((msg, index) => (
@@ -66,7 +58,6 @@ function ChatWindow({ selectedContact }) {
                             <p className="no-messages">🔹 No hay mensajes todavía.</p>
                         )}
                     </div>
-
                     <ChatInput onSendMessage={sendMessage} />
                 </>
             )}

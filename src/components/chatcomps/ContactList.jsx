@@ -22,11 +22,9 @@ function ContactList({ onSelectContact }) {
             const status = getConnectedWallet();
             setWalletStatus(status);
         };
-
         updateWalletStatus();
         window.addEventListener("walletConnected", updateWalletStatus);
         window.addEventListener("walletDisconnected", updateWalletStatus);
-
         return () => {
             window.removeEventListener("walletConnected", updateWalletStatus);
             window.removeEventListener("walletDisconnected", updateWalletStatus);
@@ -36,15 +34,12 @@ function ContactList({ onSelectContact }) {
     return (
         <div className="contact-list-container">
             <h3>📞 Contactos</h3>
-
             <button className="requests-button" onClick={() => setView(view === "contacts" ? "requests" : "contacts")}>
                 {view === "contacts" ? "📩 Solicitudes" : "⬅️ Volver"}
             </button>
-
             {!walletStatus.walletAddress && (
                 <p className="auth-warning">⚠️ Conéctate a una wallet para gestionar contactos.</p>
             )}
-
             {view === "contacts" ? (
                 <ul className="contact-list">
                     {confirmedContacts.length > 0 ? (
@@ -96,7 +91,6 @@ function ContactList({ onSelectContact }) {
                     </div>
                 </div>
             )}
-
             {/* Botón flotante para agregar contacto */}
             <button 
                 className="floating-add-button" 
@@ -104,7 +98,6 @@ function ContactList({ onSelectContact }) {
             >
                 ➕
             </button>
-
             {/* Modal para agregar contacto */}
             {showAddContactModal && (
                 <div className="modal-overlay" onClick={() => setShowAddContactModal(false)}>
