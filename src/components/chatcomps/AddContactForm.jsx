@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getConnectedWallet, authenticateWallet, connectWallet, isWalletRegistered } from '../../services/walletService';
+import { getConnectedWallet, authenticateWallet, connectWallet } from '../../services/walletService';
 import { addContact } from '../../services/apiService';
 
 const AddContactForm = ({ onContactAdded }) => {
@@ -18,7 +18,6 @@ const AddContactForm = ({ onContactAdded }) => {
             await connectWallet("phantom");
             setWalletStatus(getConnectedWallet());
         }
-
         if (!walletStatus.isAuthenticated) {
             console.log("🔑 Autenticando wallet de forma automática...");
             await authenticateWallet("phantom");
@@ -35,21 +34,12 @@ const AddContactForm = ({ onContactAdded }) => {
             setErrorMessage('⚠️ Conéctate a tu wallet antes de agregar contactos.');
             return;
         }
-
-        // Autenticar automáticamente si no está autenticado
         if (!walletStatus.isAuthenticated) {
             await handleAuthIfNeeded();
         }
 
         try {
             setIsLoading(true);
-
-            // ✅ Validar si la wallet de destino está registrada
-            const isRegistered = await isWalletRegistered(pubkey);
-            if (!isRegistered) {
-                throw new Error('❌ La wallet de destino no está registrada en el sistema.');
-            }
-
             await addContact(pubkey);
             setSuccessMessage('✅ Solicitud de contacto enviada con éxito.');
             setPubkey('');

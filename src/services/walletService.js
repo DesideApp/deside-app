@@ -16,18 +16,6 @@ function getProvider(wallet) {
     return provider;
 }
 
-// Verificar si una wallet está registrada en el backend
-async function isWalletRegistered(pubkey) {
-    try {
-        const response = await fetch(`/api/auth/check-wallet?pubkey=${pubkey}`);
-        const data = await response.json();
-        return data.isRegistered;
-    } catch (error) {
-        console.error("❌ Error al verificar wallet registrada:", error);
-        return false;
-    }
-}
-
 // Conectar la wallet (forzando el desbloqueo si es necesario)
 async function connectWallet(wallet) {
     try {
@@ -66,12 +54,6 @@ async function authenticateWallet(wallet) {
     try {
         const pubkey = localStorage.getItem("walletAddress");
         if (!pubkey) throw new Error("❌ No hay wallet conectada.");
-
-        const registered = await isWalletRegistered(pubkey);
-        if (!registered) {
-            console.warn("⚠️ Wallet no registrada, registrando automáticamente...");
-            await registerWallet(pubkey);
-        }
 
         const message = "Please sign this message to authenticate.";
         const signedData = await signMessage(wallet, message);
@@ -159,23 +141,6 @@ async function getConnectedWallet() {
     return { walletAddress, isAuthenticated: !!token };
 }
 
-// Registrar wallet en backend si no está registrada
-async function registerWallet(pubkey) {
-    try {
-        const response = await fetch("/api/auth/register-wallet", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ pubkey }),
-        });
-
-        if (!response.ok) throw new Error("❌ Error registrando wallet.");
-        console.log(`✅ Wallet ${pubkey} registrada correctamente.`);
-    } catch (error) {
-        console.error("❌ Error en registerWallet():", error);
-        throw error;
-    }
-}
-
 export {
     getProvider,
     connectWallet,
@@ -183,6 +148,5 @@ export {
     disconnectWallet,
     getConnectedWallet,
     getWalletBalance,
-    signMessage,
-    registerWallet,
+    signMessage
 };
