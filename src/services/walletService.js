@@ -1,6 +1,6 @@
 import bs58 from "bs58";
-import { setToken } from "./tokenService";
-import { authenticateWithServer, fetchWithAuth } from "./authServices";
+import { setToken, getToken } from "./tokenService";
+import { authenticateWithServer } from "./authServices";
 import { PublicKey, Connection } from "@solana/web3.js";
 
 const WALLET_PROVIDERS = {
@@ -48,6 +48,12 @@ async function authenticateWallet(wallet) {
     try {
         const pubkey = localStorage.getItem("walletAddress");
         if (!pubkey) throw new Error("❌ No hay wallet conectada.");
+
+        // Evitar pedir firma si ya está autenticado
+        if (getToken()) {
+            console.log("✅ Ya autenticado. No es necesario firmar de nuevo.");
+            return { pubkey, status: "authenticated" };
+        }
 
         const message = "Please sign this message to authenticate.";
         const signedData = await signMessage(wallet, message);

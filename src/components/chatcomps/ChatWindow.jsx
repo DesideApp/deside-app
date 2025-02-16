@@ -34,15 +34,19 @@ function ChatWindow({ selectedContact }) {
     return (
         <div className="chat-window" ref={chatContainerRef}>
             <div className="chat-header">
-                <h3>Chat con: {selectedContact.slice(0, 6)}...{selectedContact.slice(-4)}</h3>
+                <h3>💬 Chat con: {selectedContact.slice(0, 6)}...{selectedContact.slice(-4)}</h3>
             </div>
 
             <div className="chat-messages">
-                {messages.map((msg, index) => (
-                    <div key={index} className={`chat-message ${msg.sender === "me" ? "sent" : "received"}`}>
-                        {msg.text}
-                    </div>
-                ))}
+                {messages.length > 0 ? (
+                    messages.map((msg, index) => (
+                        <div key={index} className={`chat-message ${msg.sender === "me" ? "sent" : "received"}`}>
+                            {msg.text}
+                        </div>
+                    ))
+                ) : (
+                    <p className="no-messages">🔹 No hay mensajes todavía.</p>
+                )}
             </div>
 
             <ChatInput onSendMessage={sendMessage} />

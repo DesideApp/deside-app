@@ -48,19 +48,42 @@ function ContactList({ onSelectContact }) {
             ) : (
                 <div>
                     <div className="request-tabs">
-                        <button className="request-tab active">📥 Recibidas ({receivedRequests.length})</button>
-                        <button className="request-tab">📤 Enviadas ({pendingRequests.length})</button>
+                        <button className={`request-tab ${view === "received" ? "active" : ""}`} onClick={() => setView("received")}>
+                            📥 Recibidas ({receivedRequests.length})
+                        </button>
+                        <button className={`request-tab ${view === "sent" ? "active" : ""}`} onClick={() => setView("sent")}>
+                            📤 Enviadas ({pendingRequests.length})
+                        </button>
                     </div>
+
                     <div className="requests-container">
-                        <ul className="contact-list">
-                            {receivedRequests.map((contact) => (
-                                <li key={contact.wallet}>
-                                    {contact.wallet}
-                                    <button className="accept-btn" onClick={() => handleAcceptRequest(contact.wallet)}>✅</button>
-                                    <button className="reject-btn" onClick={() => handleRejectRequest(contact.wallet)}>❌</button>
-                                </li>
-                            ))}
-                        </ul>
+                        {view === "received" ? (
+                            <ul className="contact-list">
+                                {receivedRequests.length > 0 ? (
+                                    receivedRequests.map((contact) => (
+                                        <li key={contact.wallet} className="request-item">
+                                            {contact.wallet}
+                                            <button className="accept-btn" onClick={() => handleAcceptRequest(contact.wallet)}>✅</button>
+                                            <button className="reject-btn" onClick={() => handleRejectRequest(contact.wallet)}>❌</button>
+                                        </li>
+                                    ))
+                                ) : (
+                                    <p className="no-contacts-message">No tienes solicitudes recibidas.</p>
+                                )}
+                            </ul>
+                        ) : (
+                            <ul className="contact-list">
+                                {pendingRequests.length > 0 ? (
+                                    pendingRequests.map((contact) => (
+                                        <li key={contact.wallet} className="request-item">
+                                            {contact.wallet} (Pendiente)
+                                        </li>
+                                    ))
+                                ) : (
+                                    <p className="no-contacts-message">No has enviado solicitudes aún.</p>
+                                )}
+                            </ul>
+                        )}
                     </div>
                 </div>
             )}
