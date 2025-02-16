@@ -16,7 +16,7 @@ function getProvider(wallet) {
     return provider;
 }
 
-// Conectar la wallet
+// Conectar la wallet (forzando el desbloqueo si no se dispone de publicKey)
 async function connectWallet(wallet) {
     try {
         console.log(`🔵 Intentando conectar con ${wallet}`);
@@ -25,7 +25,14 @@ async function connectWallet(wallet) {
             console.log(`⚠️ ${wallet} detectado pero no conectado. Conectando...`);
             await provider.connect();
         }
-        if (!provider.publicKey) throw new Error("❌ Conexión cancelada por el usuario.");
+        // Si no se dispone de publicKey (posible estado bloqueado), se intenta forzar el desbloqueo
+        if (!provider.publicKey) {
+            console.log(`⚠️ ${wallet} no tiene publicKey, forzando desbloqueo...`);
+            await provider.connect();
+        }
+        if (!provider.publicKey) {
+            throw new Error("❌ No se pudo obtener la publicKey. Asegúrate de haber desbloqueado la wallet.");
+        }
         const pubkey = provider.publicKey.toBase58();
         console.log(`✅ ${wallet} conectado: ${pubkey}`);
         localStorage.setItem("walletAddress", pubkey);
@@ -110,7 +117,6 @@ async function signMessage(wallet, message) {
 function getConnectedWallet() {
     const walletAddress = localStorage.getItem("walletAddress");
     const token = getToken();
-    // Se mantiene el token (si existe) para saber si el usuario está autenticado
     return { walletAddress, isAuthenticated: !!token };
 }
 
