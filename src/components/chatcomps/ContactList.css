@@ -1,140 +1,32 @@
 .contact-list-container {
     padding: 20px;
     border-radius: 10px;
-    background-color: #f9f9f9;
+    background-color: #fff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    font-family: 'Inter', sans-serif;
     max-width: 400px;
     margin: auto;
 }
 
-.contact-list-container h3 {
-    text-align: center;
-    color: #2b2323;
-    margin-bottom: 15px;
-    font-weight: 700;
-    font-size: 1.5rem;
-}
-
-.wallet-input-container {
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.contact-input {
-    width: 100%;
-    padding: 10px 15px;
-    font-size: 1rem;
-    border: 2px solid #dcdcdc;
-    border-radius: 8px;
-    resize: none;
-    transition: border-color 0.3s ease;
-}
-
-.contact-input:focus {
-    border-color: #2b2323;
-    outline: none;
-}
-
-.solana-fm-icon {
-    position: absolute;
-    right: 10px;
-    font-size: 1.2rem;
-    color: #2b2323;
-    cursor: pointer;
-    transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.solana-fm-icon:hover {
-    transform: scale(1.2);
-    color: #ff5733;
-}
-
-.add-contact-button {
-    padding: 10px;
-    font-size: 1rem;
-    color: white;
-    background-color: #2b2323;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.add-contact-button:hover {
-    background-color: #ff5733;
-}
-
-.error-message {
-    color: #e74c3c;
-    font-size: 0.9rem;
-    text-align: center;
-}
-
-.balance-info {
-    color: #27ae60;
-    font-size: 0.9rem;
-    text-align: center;
-    margin-top: 10px;
-}
-
-.contacts-list-wrapper {
-    margin-top: 20px;
-    max-height: 200px;
-    overflow-y: auto;
-    border-top: 1px solid #dcdcdc;
-    padding-top: 10px;
-}
-
-.contact-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.contact-item {
+.contact-tabs {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background-color: #fff;
-    border: 1px solid #dcdcdc;
-    border-radius: 8px;
     margin-bottom: 10px;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.contact-item:hover {
-    background-color: #f4f4f4;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.contact-item button {
-    padding: 5px 10px;
-    font-size: 0.9rem;
-    color: white;
-    background-color: #e74c3c;
+.contact-tabs button {
+    flex: 1;
+    padding: 10px;
     border: none;
-    border-radius: 8px;
+    background-color: #f0f0f0;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: 0.3s;
 }
 
-.contact-item button:hover {
-    background-color: #c0392b;
+.contact-tabs button.active {
+    background-color: #007aff;
+    color: white;
 }
 
-.no-contacts-message {
-    color: #7f8c8d;
-    text-align: center;
-    font-size: 1rem;
-    margin-top: 10px;
+.contact-tabs button:hover {
+    background-color: #dcdcdc;
 }

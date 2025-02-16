@@ -16,12 +16,12 @@ function getProvider(wallet) {
     return provider;
 }
 
-// 📌 Conectar la billetera y obtener JWT
+// 📌 Conectar la billetera
 async function connectWallet(wallet) {
     try {
         console.log(`🔵 Intentando conectar con ${wallet}`);
         const provider = getProvider(wallet);
-        
+
         if (!provider.isConnected) {
             console.log(`⚠️ ${wallet} detectado pero no conectado. Conectando...`);
             await provider.connect();
@@ -43,7 +43,7 @@ async function connectWallet(wallet) {
     }
 }
 
-// 📌 Firmar mensaje y autenticar
+// 📌 Autenticar y obtener JWT
 async function authenticateWallet(wallet) {
     try {
         const pubkey = localStorage.getItem("walletAddress");
@@ -57,7 +57,7 @@ async function authenticateWallet(wallet) {
         const token = await authenticateWithServer(pubkey, signedData.signature, message);
         if (!token) throw new Error("❌ No se recibió un token válido.");
 
-        console.log("✅ Token JWT recibido:", token);
+        console.log("✅ Token JWT recibido y almacenado.");
         setToken(token);
 
         return { pubkey, status: "authenticated" };
@@ -67,7 +67,7 @@ async function authenticateWallet(wallet) {
     }
 }
 
-// 📌 Obtener el balance de la billetera en SOL
+// 📌 Obtener balance en SOL
 async function getWalletBalance(walletAddress) {
     try {
         if (!walletAddress) {
@@ -87,7 +87,7 @@ async function getWalletBalance(walletAddress) {
     }
 }
 
-// 📌 Desconectar la billetera
+// 📌 Desconectar la wallet
 async function disconnectWallet() {
     try {
         localStorage.removeItem("walletAddress");

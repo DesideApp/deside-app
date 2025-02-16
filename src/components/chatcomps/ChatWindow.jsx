@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ChatInput from "./ChatInput";
 import { getConnectedWallet } from "../../services/walletService";
-import useWebRTC from "../../hooks/useWebRTC"; // ✅ Solo WebRTC
+import useWebRTC from "../../hooks/useWebRTC"; 
 import "./ChatWindow.css";
 
 function ChatWindow({ selectedContact }) {
@@ -11,14 +11,14 @@ function ChatWindow({ selectedContact }) {
     useEffect(() => {
         const initWallet = async () => {
             const connectedWallet = await getConnectedWallet();
-            if (connectedWallet) {
+            if (connectedWallet?.walletAddress) {
                 setWalletAddress(connectedWallet.walletAddress);
             }
         };
         initWallet();
     }, []);
 
-    // ✅ Usa el nuevo hook de WebRTC
+    // ✅ Usa WebRTC solo si hay contacto seleccionado y wallet autenticada
     const { messages, sendMessage } = useWebRTC(selectedContact, walletAddress, !!walletAddress);
 
     useEffect(() => {
@@ -28,14 +28,16 @@ function ChatWindow({ selectedContact }) {
     }, [messages]);
 
     if (!selectedContact) {
-        return <p>🔍 Selecciona un contacto para empezar a chatear.</p>;
+        return <p className="chat-placeholder">🔍 Selecciona un contacto para empezar a chatear.</p>;
     }
 
     return (
         <div className="chat-window" ref={chatContainerRef}>
-            <h3>Chatting with: {selectedContact}</h3>
+            <div className="chat-header">
+                <h3>Chat con: {selectedContact.slice(0, 6)}...{selectedContact.slice(-4)}</h3>
+            </div>
 
-            <div className="messages-container">
+            <div className="chat-messages">
                 {messages.map((msg, index) => (
                     <div key={index} className={`chat-message ${msg.sender === "me" ? "sent" : "received"}`}>
                         {msg.text}

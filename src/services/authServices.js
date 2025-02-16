@@ -56,25 +56,3 @@ export function logout() {
     removeToken();
     console.info("🔵 Usuario deslogueado correctamente.");
 }
-
-// 🚀 **Registro Seguro**
-export async function registerWallet(pubkey) {
-    try {
-        if (!pubkey) throw new Error("🔴 Faltan parámetros en el registro.");
-
-        const response = await fetchWithAuth(`${API_BASE_URL}/api/auth/register-wallet`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pubkey }),
-        });
-
-        if (!response.ok) throw new Error("❌ Fallo en el registro de la wallet");
-
-        const data = await response.json();
-        console.log("✅ Wallet registrada con éxito:", data);
-        return data;
-    } catch (error) {
-        console.error("❌ Error en `registerWallet()`:", error);
-        throw error;
-    }
-}

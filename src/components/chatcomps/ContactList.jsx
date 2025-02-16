@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import useContactManager from "../../hooks/useContactManager"; // ✅ Nuevo hook
+import useContactManager from "../../hooks/useContactManager"; 
 import "./ContactList.css";
 
 function ContactList({ onSelectContact }) {
@@ -10,59 +10,59 @@ function ContactList({ onSelectContact }) {
         handleAddContact, 
         handleAcceptRequest, 
         handleRejectRequest,
-        handleRemoveContact // ✅ Nuevo
+        handleRemoveContact 
     } = useContactManager();
 
     const [newContact, setNewContact] = useState("");
-
-    console.log("pendingRequests:", pendingRequests);
+    const [view, setView] = useState("contacts"); 
 
     return (
         <div className="contact-list-container">
-            <h3>Contacts</h3>
+            <h3>📞 Contactos</h3>
 
-            {/* 🔵 Input para agregar un nuevo contacto */}
             <div className="wallet-input-container">
                 <input
                     type="text"
                     className="contact-input"
-                    placeholder="Enter wallet address"
+                    placeholder="Introduce wallet"
                     value={newContact}
                     onChange={(e) => setNewContact(e.target.value)}
                 />
-                <button className="add-contact-button" onClick={() => handleAddContact(newContact)}>➕ Add Contact</button>
+                <button className="add-contact-button" onClick={() => handleAddContact(newContact)}>➕ Agregar</button>
             </div>
 
-            {/* 🔵 Lista de contactos confirmados */}
-            <h3>Confirmed Contacts</h3>
-            <ul className="contact-list">
-                {confirmedContacts.length > 0 ? (
-                    confirmedContacts.map((contact) => (
-                        <li key={contact.wallet} className="contact-item">
-                            <div className="contact-info" onClick={() => onSelectContact(contact.wallet)}>
-                                <span className="contact-name">
-                                    {contact.wallet.slice(0, 6)}...{contact.wallet.slice(-4)}
-                                </span>
-                            </div>
-                            <button className="remove-contact-btn" onClick={() => handleRemoveContact(contact.wallet)}>❌</button>
-                        </li>
-                    ))
-                ) : (
-                    <p>No confirmed contacts.</p>
-                )}
-            </ul>
+            {/* Selector de vista */}
+            <div className="contact-tabs">
+                <button onClick={() => setView("contacts")} className={view === "contacts" ? "active" : ""}>Contactos</button>
+                <button onClick={() => setView("requests")} className={view === "requests" ? "active" : ""}>Solicitudes</button>
+            </div>
 
-            {/* 🔵 Lista de solicitudes recibidas */}
-            <h3>Incoming Requests</h3>
-            <ul className="contact-list">
-                {receivedRequests.map((contact) => (
-                    <li key={contact.wallet}>
-                        {contact.wallet}
-                        <button onClick={() => handleAcceptRequest(contact.wallet)}>✅ Accept</button>
-                        <button onClick={() => handleRejectRequest(contact.wallet)}>❌ Reject</button>
-                    </li>
-                ))}
-            </ul>
+            {view === "contacts" ? (
+                <ul className="contact-list">
+                    {confirmedContacts.length > 0 ? (
+                        confirmedContacts.map((contact) => (
+                            <li key={contact.wallet} className="contact-item">
+                                <div className="contact-info" onClick={() => onSelectContact(contact.wallet)}>
+                                    {contact.wallet.slice(0, 6)}...{contact.wallet.slice(-4)}
+                                </div>
+                                <button className="remove-contact-btn" onClick={() => handleRemoveContact(contact.wallet)}>❌</button>
+                            </li>
+                        ))
+                    ) : (
+                        <p className="no-contacts-message">No tienes contactos aún.</p>
+                    )}
+                </ul>
+            ) : (
+                <ul className="contact-list">
+                    {receivedRequests.map((contact) => (
+                        <li key={contact.wallet}>
+                            {contact.wallet}
+                            <button onClick={() => handleAcceptRequest(contact.wallet)}>✅ Aceptar</button>
+                            <button onClick={() => handleRejectRequest(contact.wallet)}>❌ Rechazar</button>
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
     );
 }
