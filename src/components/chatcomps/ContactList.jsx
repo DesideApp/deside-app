@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import useContactManager from "../../hooks/useContactManager";
-import { getConnectedWallet, authenticateWallet } from "../../services/walletService";
+import { getConnectedWallet } from "../../services/walletService";
 import AddContactForm from "./AddContactForm"; // Importamos el formulario
 import "./ContactList.css";
 
@@ -32,8 +32,6 @@ function ContactList({ onSelectContact }) {
             window.removeEventListener("walletDisconnected", updateWalletStatus);
         };
     }, []);
-
-    // Se elimina el botón manual de autenticación
 
     return (
         <div className="contact-list-container">
