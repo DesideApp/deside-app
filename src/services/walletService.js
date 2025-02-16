@@ -141,6 +141,17 @@ async function getConnectedWallet() {
     return { walletAddress, isAuthenticated: !!token };
 }
 
+async function isWalletRegistered(pubkey) {
+    try {
+        const response = await fetch(`/api/auth/check-wallet?pubkey=${pubkey}`);
+        const data = await response.json();
+        return data.isRegistered;
+    } catch (error) {
+        console.error("❌ Error al verificar wallet registrada:", error);
+        return false;
+    }
+}
+
 export {
     getProvider,
     connectWallet,
@@ -148,5 +159,7 @@ export {
     disconnectWallet,
     getConnectedWallet,
     getWalletBalance,
-    signMessage
+    signMessage,
+    registerWallet,
+    isWalletRegistered, // ✅ Debe estar exportado aquí
 };
