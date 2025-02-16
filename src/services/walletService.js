@@ -32,99 +32,76 @@ async function connectWallet(wallet) {
         const pubkey = provider.publicKey.toBase58();
         console.log(`✅ ${wallet} conectado: ${pubkey}`);
 
-        // 📌 Si la wallet está conectada pero no ha firmado, la dejamos en estado "conectado pero no autenticado"
-        const message = "Please sign this message to authenticate.";
-        const signedData = await signMessage(wallet, message);
-        if (!signedData.signature) {
-            console.warn("⚠️ Wallet conectada pero sin autenticación. Esperando firma...");
-            return { pubkey, status: "connected_unverified" }; // Estado intermedio
-        }
-
-        console.log("🔵 Firma generada:", signedData);
-        const token = await authenticateWithServer(pubkey, signedData.signature, message);
-        if (!token) throw new Error("❌ No se recibió un token válido.");
-
-        console.log("✅ Token JWT recibido:", token);
-
-        // 📌 Guardar en localStorage usando `setToken()`
-        setToken(token);
         localStorage.setItem("walletAddress", pubkey);
         localStorage.setItem("walletType", wallet);
         window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet: pubkey } }));
 
-        // 📌 Registrar wallet en el backend y manejar posibles errores
-        try {
-            const response = await fetchWithAuth("/api/auth/register-wallet", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ pubkey }),
-            });
-
-            if (!response.ok) {
-                console.warn("⚠️ Wallet registrada previamente.");
-            } else {
-                console.log("✅ Wallet registrada con éxito.");
-            }
-        } catch (error) {
-            console.error("❌ Error registrando wallet en el backend:", error);
-        }
-
-        return { pubkey, status: "authenticated" };
+        return { pubkey, status: "connected" };
     } catch (error) {
         console.error("❌ Error en connectWallet():", error);
         throw error;
     }
 }
 
-// 📌 Obtener el balance de la billetera en SOL con control de errores
+// 📌 Firmar mensaje y autenticar
+async function authenticateWallet(wallet) {
+    try {
+        const pubkey = localStorage.getItem("walletAddress");
+        if (!pubkey) throw new Error("❌ No hay wallet conectada.");
+
+        const message = "Please sign this message to authenticate.";
+        const signedData = await signMessage(wallet, message);
+        if (!signedData.signature) throw new Error("❌ Firma rechazada.");
+
+        console.log("🔵 Firma generada:", signedData);
+        const token = await authenticateWithServer(pubkey, signedData.signature, message);
+        if (!token) throw new Error("❌ No se recibió un token válido.");
+
+        console.log("✅ Token JWT recibido:", token);
+        setToken(token);
+
+        return { pubkey, status: "authenticated" };
+    } catch (error) {
+        console.error("❌ Error en authenticateWallet():", error);
+        throw error;
+    }
+}
+
+// 📌 Obtener el balance de la billetera en SOL
 async function getWalletBalance(walletAddress) {
     try {
         if (!walletAddress) {
             console.warn("⚠️ Intento de obtener balance sin dirección de wallet.");
-            return 0; // No lanzar error, solo devolver 0
+            return 0;
         }
 
-        const connection = new Connection("https://rpc.ankr.com/solana"); // 🔹 Usamos un RPC más estable
+        const connection = new Connection("https://rpc.ankr.com/solana");
         const balanceResponse = await connection.getBalance(new PublicKey(walletAddress));
 
-        console.log("🔍 Respuesta de getBalance:", balanceResponse); // Debug
+        if (typeof balanceResponse !== "number") throw new Error("❌ Respuesta inesperada de getBalance.");
 
-        // Si la respuesta no es un número, manejar el error
-        if (typeof balanceResponse !== "number") {
-            console.error("❌ Respuesta inesperada de getBalance:", balanceResponse);
-            throw new Error("Error obteniendo balance. Respuesta inválida.");
-        }
-
-        return balanceResponse / 1e9; // Convertir de lamports a SOL
+        return balanceResponse / 1e9;
     } catch (error) {
         console.warn("⚠️ No se pudo obtener el balance. Es posible que la firma sea necesaria.");
-        return 0; // Evitar que la app se rompa
+        return 0;
     }
 }
 
 // 📌 Desconectar la billetera
 async function disconnectWallet() {
     try {
-        const walletType = localStorage.getItem("walletType");
-        if (!walletType) throw new Error("❌ No hay wallet conectada.");
-
-        const provider = getProvider(walletType);
-        if (provider?.disconnect) {
-            await provider.disconnect();
-            console.log(`✅ ${walletType} Wallet desconectada.`);
-        }
-
         localStorage.removeItem("walletAddress");
         localStorage.removeItem("walletType");
         localStorage.removeItem("jwtToken");
         window.dispatchEvent(new Event("walletDisconnected"));
+        console.log("✅ Wallet desconectada.");
     } catch (error) {
         console.error("❌ Error al desconectar la wallet:", error);
         throw error;
     }
 }
 
-// 📌 Firmar mensaje (enviar en Base58)
+// 📌 Firmar mensaje
 async function signMessage(wallet, message) {
     try {
         console.log(`🟡 Solicitando firma a ${wallet}...`);
@@ -151,6 +128,7 @@ function getConnectedWallet() {
 export { 
     getProvider, 
     connectWallet, 
+    authenticateWallet,
     disconnectWallet, 
     getConnectedWallet, 
     getWalletBalance, 
