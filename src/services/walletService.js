@@ -2,6 +2,8 @@ import bs58 from "bs58";
 import { setToken, getToken, removeToken, refreshToken } from "./tokenService";
 import { authenticateWithServer } from "./authServices";
 import { PublicKey, Connection } from "@solana/web3.js";
+import { isTokenExpired } from "./tokenService";
+
 
 const WALLET_PROVIDERS = {
     phantom: () => window.solana?.isPhantom && window.solana,
