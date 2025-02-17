@@ -1,37 +1,42 @@
-import { getToken, setToken, removeToken, refreshToken } from "./tokenService.js";
+import { getToken, setToken, removeToken, refreshToken, isTokenExpired } from "./tokenService.js";
 import API_BASE_URL from "../config/apiConfig.js";
 
 // 🔐 **Realiza solicitudes autenticadas al backend**
 export async function fetchWithAuth(url, options = {}) {
-    let token = getToken();
+    try {
+        let token = getToken();
 
-    // Si no hay token o está expirado, intentamos renovarlo
-    if (!token || isTokenExpired()) {
-        console.warn("🔄 Token inválido o expirado. Intentando renovación...");
-        try {
-            token = await refreshToken();
-        } catch (error) {
-            console.error("❌ No se pudo renovar el token. Cerrando sesión.");
+        // Si el token está expirado o no existe, intentamos renovarlo
+        if (!token || isTokenExpired()) {
+            console.warn("🔄 Token inválido o expirado. Intentando renovación...");
+            try {
+                token = await refreshToken();
+            } catch (error) {
+                console.error("❌ No se pudo renovar el token. Cerrando sesión.");
+                logout();
+                throw new Error("Token inválido. Por favor, vuelve a autenticarte.");
+            }
+        }
+
+        options.headers = {
+            ...options.headers,
+            Authorization: `Bearer ${token}`,
+        };
+
+        const response = await fetch(url, options);
+
+        // Si el token sigue siendo inválido, forzamos logout
+        if (response.status === 403) {
+            console.warn("⚠️ Token inválido, cerrando sesión.");
             logout();
             throw new Error("Token inválido. Por favor, vuelve a autenticarte.");
         }
+
+        return response;
+    } catch (error) {
+        console.error("❌ Error en `fetchWithAuth()`:", error.message || error);
+        throw error;
     }
-
-    options.headers = {
-        ...options.headers,
-        Authorization: `Bearer ${token}`,
-    };
-
-    const response = await fetch(url, options);
-
-    // Si el token sigue siendo inválido, forzamos logout
-    if (response.status === 403) {
-        console.warn("⚠️ Token inválido, cerrando sesión.");
-        logout();
-        throw new Error("Token inválido. Por favor, vuelve a autenticarte.");
-    }
-
-    return response;
 }
 
 // 🔵 **Autenticar con el servidor y obtener JWT**
@@ -53,7 +58,7 @@ export async function authenticateWithServer(pubkey, signature, message) {
         console.log("✅ Autenticación exitosa. Token almacenado.");
         return token;
     } catch (error) {
-        console.error("❌ Error en `authenticateWithServer()`:", error);
+        console.error("❌ Error en `authenticateWithServer()`:", error.message || error);
         throw error;
     }
 }
@@ -61,6 +66,20 @@ export async function authenticateWithServer(pubkey, signature, message) {
 // 🔄 **Registrar wallet en el backend si no está registrada**
 export async function registerWallet(pubkey) {
     try {
+        console.log(`🔵 Verificando si la wallet ${pubkey} ya está registrada...`);
+
+        const checkResponse = await fetch(`${API_BASE_URL}/api/auth/check-wallet`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pubkey }),
+        });
+
+        const { exists } = await checkResponse.json();
+        if (exists) {
+            console.log(`✅ La wallet ${pubkey} ya está registrada.`);
+            return;
+        }
+
         console.log(`🔵 Registrando wallet ${pubkey} en el backend...`);
         const response = await fetch(`${API_BASE_URL}/api/auth/register-wallet`, {
             method: "POST",
@@ -71,16 +90,21 @@ export async function registerWallet(pubkey) {
         if (!response.ok) throw new Error("❌ Error registrando wallet.");
         console.log(`✅ Wallet ${pubkey} registrada correctamente.`);
     } catch (error) {
-        console.error("❌ Error en `registerWallet()`:", error);
+        console.error("❌ Error en `registerWallet()`:", error.message || error);
         throw error;
     }
 }
 
 // 🔐 **Cerrar sesión de manera segura**
-export function logout() {
+export function logout(redirect = true) {
     console.info("🔵 Cerrando sesión y eliminando credenciales.");
     removeToken();
     localStorage.removeItem("walletAddress");
     localStorage.removeItem("walletType");
     window.dispatchEvent(new Event("walletDisconnected"));
+
+    // 🔄 Opcionalmente redirigir a la pantalla de login
+    if (redirect) {
+        window.location.href = "/login";
+    }
 }

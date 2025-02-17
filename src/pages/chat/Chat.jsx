@@ -12,33 +12,22 @@ function Chat() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        const checkWallet = async () => {
+        const updateWalletStatus = async () => {
             const connectedWallet = await getConnectedWallet();
-            if (connectedWallet?.walletAddress) {
-                setWalletAddress(connectedWallet.walletAddress);
-            }
+            setWalletAddress(connectedWallet?.walletAddress || null);
         };
-        checkWallet();
 
+        updateWalletStatus();
         window.addEventListener("walletConnected", (e) => {
             setWalletAddress(e.detail.wallet);
             setIsModalOpen(false); 
         });
 
-        return () => window.removeEventListener("walletConnected", checkWallet);
+        return () => window.removeEventListener("walletConnected", updateWalletStatus);
     }, []);
 
     return (
         <div className="chat-page-container">
-            {!walletAddress && (
-                <div className="overlay">
-                    <div className="overlay-content">
-                        <p>🔑 Connect your wallet to start chatting</p>
-                        <button onClick={() => setIsModalOpen(true)}>Connect Wallet</button>
-                    </div>
-                </div>
-            )}
-
             <div className="left-panel">
                 <ContactList onSelectContact={setSelectedContact} />
             </div>

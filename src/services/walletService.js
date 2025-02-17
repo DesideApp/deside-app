@@ -41,7 +41,7 @@ async function connectWallet(wallet) {
 
         return { pubkey, status: "connected" };
     } catch (error) {
-        console.error("❌ Error en connectWallet():", error);
+        console.error("❌ Error en connectWallet():", error.message || error);
         throw error;
     }
 }
@@ -51,6 +51,12 @@ async function authenticateWallet(wallet) {
     try {
         const pubkey = localStorage.getItem("walletAddress");
         if (!pubkey) throw new Error("❌ No hay wallet conectada.");
+
+        // 🔄 Si el token es válido, evitar autenticación innecesaria
+        if (!isTokenExpired()) {
+            console.log("✅ Token aún válido. Saltando autenticación.");
+            return { pubkey, status: "authenticated" };
+        }
 
         const message = "Please sign this message to authenticate.";
         const signedData = await signMessage(wallet, message);
@@ -65,7 +71,7 @@ async function authenticateWallet(wallet) {
 
         return { pubkey, status: "authenticated" };
     } catch (error) {
-        console.error("❌ Error en authenticateWallet():", error);
+        console.error("❌ Error en authenticateWallet():", error.message || error);
         throw error;
     }
 }
@@ -96,7 +102,7 @@ async function disconnectWallet() {
         window.dispatchEvent(new Event("walletDisconnected"));
         console.log("✅ Wallet desconectada.");
     } catch (error) {
-        console.error("❌ Error al desconectar la wallet:", error);
+        console.error("❌ Error al desconectar la wallet:", error.message || error);
         throw error;
     }
 }
@@ -115,30 +121,35 @@ async function signMessage(wallet, message) {
 
         return { signature: signatureBase58, message, pubkey: provider.publicKey.toBase58() };
     } catch (error) {
-        console.error("❌ Error en signMessage():", error);
+        console.error("❌ Error en signMessage():", error.message || error);
         throw error;
     }
 }
 
 // 🔹 Obtener estado de conexión de la wallet
 async function getConnectedWallet() {
-    const walletAddress = localStorage.getItem("walletAddress");
-    let token = getToken();
+    try {
+        const walletAddress = localStorage.getItem("walletAddress");
+        let token = getToken();
 
-    if (!token || isTokenExpired()) {
-        console.log("🔄 Intentando renovar token...");
-        try {
-            token = await refreshToken();
-        } catch (error) {
-            console.warn("❌ No se pudo renovar el token.");
-            removeToken();
+        if (!token || isTokenExpired()) {
+            console.log("🔄 Intentando renovar token...");
+            try {
+                token = await refreshToken();
+            } catch (error) {
+                console.warn("❌ No se pudo renovar el token.");
+                removeToken();
+            }
         }
-    }
 
-    return {
-        walletAddress,
-        isAuthenticated: !!token,
-    };
+        return {
+            walletAddress,
+            isAuthenticated: !!token,
+        };
+    } catch (error) {
+        console.error("❌ Error en getConnectedWallet():", error.message || error);
+        return { walletAddress: null, isAuthenticated: false };
+    }
 }
 
 export {

@@ -12,7 +12,7 @@ function ChatWindow({ selectedContact }) {
 
     const chatContainerRef = useRef(null);
 
-    // ✅ Eliminado `isWalletRegistered`
+    // ✅ Optimiza la actualización del estado de la wallet
     const updateWalletStatus = useCallback(() => {
         const status = getConnectedWallet();
         setWalletStatus(status);
@@ -29,13 +29,14 @@ function ChatWindow({ selectedContact }) {
         };
     }, [updateWalletStatus]);
 
-    // ✅ Eliminado `walletStatus.isRegistered` (el backend maneja esto)
+    // ✅ Se asegura de que `useWebRTC` se actualiza correctamente cuando cambia el estado de la wallet
     const { messages, sendMessage } = useWebRTC(
         selectedContact, 
         walletStatus.walletAddress, 
         walletStatus.isAuthenticated
     );
 
+    // ✅ Scroll automático cuando llegan nuevos mensajes
     useEffect(() => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
