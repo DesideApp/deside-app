@@ -8,34 +8,39 @@ function WalletModal({ isOpen, onClose }) {
         isAuthenticated: false
     });
 
+    // 🔄 **Actualiza el estado de la wallet al abrir el modal**
     useEffect(() => {
         if (isOpen) {
-            const status = getConnectedWallet();
-            setWalletStatus(status);
+            setWalletStatus(getConnectedWallet());
         }
     }, [isOpen]);
 
     const handleWalletSelection = async (walletType) => {
         try {
-            if (walletStatus.walletAddress && walletStatus.isAuthenticated) {
+            let updatedStatus = getConnectedWallet();
+
+            if (updatedStatus.walletAddress && updatedStatus.isAuthenticated) {
                 console.log("✅ Ya autenticado. No se necesita conexión ni firma.");
                 onClose();
                 return;
             }
 
-            if (!walletStatus.walletAddress) {
+            if (!updatedStatus.walletAddress) {
                 console.log(`🔵 Conectando con ${walletType}...`);
                 await connectWallet(walletType);
+                updatedStatus = getConnectedWallet(); // 🛠️ **Actualizar estado tras conexión**
             }
 
-            const updatedStatus = getConnectedWallet();
             if (updatedStatus.walletAddress && !updatedStatus.isAuthenticated) {
                 console.log("🟡 Autenticando wallet...");
                 await authenticateWallet(walletType);
+                updatedStatus = getConnectedWallet(); // 🛠️ **Actualizar estado tras autenticación**
             }
 
-            setWalletStatus(getConnectedWallet());
-            onClose();
+            setWalletStatus(updatedStatus);
+            if (updatedStatus.isAuthenticated) {
+                onClose(); // 🔄 **Cerrar solo si todo fue exitoso**
+            }
         } catch (error) {
             console.error("❌ Error al conectar o autenticar la wallet:", error);
         }

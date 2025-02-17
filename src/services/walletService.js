@@ -1,9 +1,7 @@
 import bs58 from "bs58";
-import { setToken, getToken, removeToken, refreshToken } from "./tokenService";
+import { setToken, getToken, removeToken, refreshToken, isTokenExpired } from "./tokenService";
 import { authenticateWithServer } from "./authServices";
 import { PublicKey, Connection } from "@solana/web3.js";
-import { isTokenExpired } from "./tokenService";
-
 
 const WALLET_PROVIDERS = {
     phantom: () => window.solana?.isPhantom && window.solana,
@@ -11,14 +9,14 @@ const WALLET_PROVIDERS = {
     magiceden: () => window.magicEden?.solana,
 };
 
-// Obtiene el proveedor de la wallet
+// 🔹 Obtener el proveedor de la wallet
 function getProvider(wallet) {
     const provider = WALLET_PROVIDERS[wallet]?.();
     if (!provider) throw new Error(`❌ ${wallet} Wallet no detectada.`);
     return provider;
 }
 
-// Conectar la wallet (forzando el desbloqueo si es necesario)
+// 🔹 Conectar la wallet
 async function connectWallet(wallet) {
     try {
         console.log(`🔵 Intentando conectar con ${wallet}`);
@@ -30,18 +28,15 @@ async function connectWallet(wallet) {
         }
 
         if (!provider.publicKey) {
-            console.log(`⚠️ ${wallet} sin publicKey. Intentando reconectar...`);
-            await provider.connect();
-        }
-
-        if (!provider.publicKey) {
             throw new Error("❌ No se pudo obtener la publicKey. Desbloquea la wallet.");
         }
 
         const pubkey = provider.publicKey.toBase58();
         console.log(`✅ ${wallet} conectado: ${pubkey}`);
+
         localStorage.setItem("walletAddress", pubkey);
         localStorage.setItem("walletType", wallet);
+
         window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet: pubkey } }));
 
         return { pubkey, status: "connected" };
@@ -51,7 +46,7 @@ async function connectWallet(wallet) {
     }
 }
 
-// Autenticar wallet y obtener JWT
+// 🔹 Autenticar wallet y obtener JWT
 async function authenticateWallet(wallet) {
     try {
         const pubkey = localStorage.getItem("walletAddress");
@@ -75,7 +70,7 @@ async function authenticateWallet(wallet) {
     }
 }
 
-// Obtener balance en SOL
+// 🔹 Obtener balance en SOL
 async function getWalletBalance(walletAddress) {
     try {
         if (!walletAddress) {
@@ -87,12 +82,12 @@ async function getWalletBalance(walletAddress) {
         if (typeof balanceResponse !== "number") throw new Error("❌ Respuesta inesperada de getBalance.");
         return balanceResponse / 1e9;
     } catch (error) {
-        console.warn("⚠️ No se pudo obtener el balance. Es posible que la firma sea necesaria.");
+        console.warn("⚠️ No se pudo obtener el balance.");
         return 0;
     }
 }
 
-// Desconectar la wallet
+// 🔹 Desconectar la wallet
 async function disconnectWallet() {
     try {
         localStorage.removeItem("walletAddress");
@@ -106,7 +101,7 @@ async function disconnectWallet() {
     }
 }
 
-// Firmar mensaje con la wallet
+// 🔹 Firmar mensaje con la wallet
 async function signMessage(wallet, message) {
     try {
         console.log(`🟡 Solicitando firma a ${wallet}...`);
@@ -125,7 +120,7 @@ async function signMessage(wallet, message) {
     }
 }
 
-// Obtener estado de conexión de la wallet
+// 🔹 Obtener estado de conexión de la wallet
 async function getConnectedWallet() {
     const walletAddress = localStorage.getItem("walletAddress");
     let token = getToken();
@@ -140,7 +135,10 @@ async function getConnectedWallet() {
         }
     }
 
-    return { walletAddress, isAuthenticated: !!token };
+    return {
+        walletAddress,
+        isAuthenticated: !!token,
+    };
 }
 
 export {

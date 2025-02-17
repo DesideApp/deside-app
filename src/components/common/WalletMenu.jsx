@@ -7,6 +7,7 @@ function WalletMenu({ isOpen, onClose, walletStatus, handleLogout }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const menuRef = useRef(null);
 
+    // 🛠️ **Cerrar el menú si se hace clic fuera**
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -16,39 +17,42 @@ function WalletMenu({ isOpen, onClose, walletStatus, handleLogout }) {
 
         if (isOpen) {
             document.addEventListener("mousedown", handleClickOutside);
-        } else {
-            document.removeEventListener("mousedown", handleClickOutside);
         }
 
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [isOpen]);
+    }, [isOpen, onClose]);
 
+    // 🛠️ **Copiar dirección de la wallet**
     const handleCopy = () => {
-        navigator.clipboard.writeText(walletStatus.walletAddress);
-        console.info("✅ Dirección copiada.");
+        if (walletStatus.walletAddress) {
+            navigator.clipboard.writeText(walletStatus.walletAddress);
+            alert("✅ Dirección copiada al portapapeles.");
+        }
     };
 
     return (
         <>
-            <div className={`wallet-menu ${isOpen ? "open" : ""}`} ref={menuRef}>
-                <div className="wallet-menu-content">
-                    {walletStatus.walletAddress ? (
-                        <>
-                            <div className="wallet-address-container">
-                                <p className="wallet-address">{walletStatus.walletAddress}</p>
-                                <button className="copy-button" onClick={handleCopy} aria-label="Copy Address">
-                                    <Copy size={18} />
-                                </button>
-                            </div>
-                            <button className="logout-button" onClick={handleLogout}>Disconnect</button>
-                        </>
-                    ) : (
-                        <button className="connect-button" onClick={() => setIsModalOpen(true)}>Connect Wallet</button>
-                    )}
+            {isOpen && (
+                <div className="wallet-menu open" ref={menuRef}>
+                    <div className="wallet-menu-content">
+                        {walletStatus.walletAddress ? (
+                            <>
+                                <div className="wallet-address-container">
+                                    <p className="wallet-address">{walletStatus.walletAddress}</p>
+                                    <button className="copy-button" onClick={handleCopy} aria-label="Copy Address">
+                                        <Copy size={18} />
+                                    </button>
+                                </div>
+                                <button className="logout-button" onClick={handleLogout}>Disconnect</button>
+                            </>
+                        ) : (
+                            <button className="connect-button" onClick={() => setIsModalOpen(true)}>Connect Wallet</button>
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
 
             <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </>
