@@ -15,21 +15,21 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // 🔄 **Sincronizar estado de la wallet al montar el componente**
-    useEffect(() => {
-        const updateWalletStatus = async () => {
-            const status = getConnectedWallet();
-            setWalletStatus(status);
-        };
+    //useEffect(() => {
+        //const updateWalletStatus = async () => {
+            //const status = getConnectedWallet();
+            //setWalletStatus(status);
+        //};
 
-        updateWalletStatus();
-        window.addEventListener("walletConnected", updateWalletStatus);
-        window.addEventListener("walletDisconnected", updateWalletStatus);
+        //updateWalletStatus();
+        //window.addEventListener("walletConnected", updateWalletStatus);
+        //window.addEventListener("walletDisconnected", updateWalletStatus);
 
-        return () => {
-            window.removeEventListener("walletConnected", updateWalletStatus);
-            window.removeEventListener("walletDisconnected", updateWalletStatus);
-        };
-    }, []);
+        //return () => {
+            //window.removeEventListener("walletConnected", updateWalletStatus);
+            //window.removeEventListener("walletDisconnected", updateWalletStatus);
+        //};
+    //}, []);
 
     // 🔹 **Lógica central de conexión**
     const handleConnect = async () => {
