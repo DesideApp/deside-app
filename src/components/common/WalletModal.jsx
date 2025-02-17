@@ -13,6 +13,7 @@ function WalletModal({ isOpen, onClose }) {
             // Verificamos el estado de la wallet centralizadamente.
             const status = await ensureWalletState("authenticated");
 
+            // Si la wallet está conectada y autenticada, cerramos el modal.
             if (status?.walletAddress && status?.isAuthenticated) {
                 console.log("✅ Wallet conectada y autenticada.");
                 onClose(); // Cerramos el modal si ya está conectada y autenticada

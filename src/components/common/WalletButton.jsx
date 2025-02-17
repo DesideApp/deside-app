@@ -64,10 +64,13 @@ function WalletButton() {
     // 🔹 **Lógica de conexión con `ensureWalletState()`**
     const handleConnect = async () => {
         const status = await ensureWalletState();  // Esto abrirá el modal si no estamos conectados.
-        if (status) {
-            const balance = await getWalletBalance(status.walletAddress);
-            setWalletStatus({ ...status, balance });
+        if (!status.walletAddress) {
+            setIsModalOpen(true); // Modal abierto si no estamos conectados
+            return;
         }
+
+        const balance = await getWalletBalance(status.walletAddress);
+        setWalletStatus({ ...status, balance });
     };
 
     return (
@@ -92,6 +95,7 @@ function WalletButton() {
                 }}
             />
 
+            {/* Abre el Modal cuando no estamos conectados */}
             <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </div>
     );
