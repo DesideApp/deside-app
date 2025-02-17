@@ -1,71 +1,69 @@
 .wallet-container {
     display: flex;
-    align-items: center; /* Centra verticalmente los botones */
-    gap: 8px; /* Espaciado entre el botón principal y el botón menú */
+    align-items: center;
+    gap: 10px;
 }
 
-/* Botón principal para conectar */
+/* Botón principal: "Connect Wallet" / "Change Wallet" */
 .wallet-button {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
     background-color: #fc554f;
     color: white;
     height: 40px;
     font-size: 16px;
     font-family: 'Montserrat', sans-serif;
-    font-weight: normal;
-    padding: 0 16px;
+    padding: 0 18px;
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
 }
 
-/* Efecto al pasar el ratón */
 .wallet-button:hover {
-    background-color: #fc564f;
-    opacity: 0.8;
+    background-color: #e84c45;
+    opacity: 0.85;
 }
 
-.wallet-balance {
-    margin-top: 8px;
+/* Información de la wallet conectada */
+.wallet-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
     font-size: 14px;
-    color: #333;
-    font-family: 'Inter', sans-serif;
-    text-align: center;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
 }
 
+.wallet-separator {
+    font-size: 16px;
+    font-weight: bold;
+}
 
-/* Botón del menú */
+/* Botón de menú */
 .menu-button {
-    width: 40px; /* Ancho del botón */
-    height: 40px; /* Altura del botón */
+    width: 40px;
+    height: 40px;
     background-color: #fc554f;
-    color: #ffffff;
-    width: 40px; /* Ancho cuadrado */
-    height: 40px; /* Altura igual al botón "Connect Wallet" */
+    color: white;
     border: none;
-    border-radius: 10px; /* Mismo redondeo que "Connect Wallet" */
+    border-radius: 10px;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: background-color 0.3s ease;
-    padding: 0; /* Sin relleno */
+    transition: background-color 0.3s ease, opacity 0.3s ease;
 }
 
 .menu-button:hover {
-    background-color: #fc564f;
-    opacity: 0.8;
+    background-color: #e84c45;
+    opacity: 0.85;
 }
 
-/* Icono de tres líneas */
+/* Icono del menú */
 .menu-icon {
     position: relative;
-    width: 1.25rem; /* Ancho de las líneas */
-    height: 0.125rem; /* Grosor de la línea central */
-    background-color: white; /* Color de la línea central */
+    width: 1.25rem;
+    height: 0.125rem;
+    background-color: white;
     display: inline-block;
 }
 
@@ -73,16 +71,16 @@
 .menu-icon::after {
     content: "";
     position: absolute;
-    width: 20px; /* Mismo ancho que la línea principal */
-    height: 2px; /* Mismo grosor */
-    background-color: white; /* Mismo color */
-    left: 0; /* Alineación al inicio */
+    width: 20px;
+    height: 2px;
+    background-color: white;
+    left: 0;
 }
 
 .menu-icon::before {
-    top: -6px; /* Línea superior */
+    top: -6px;
 }
 
 .menu-icon::after {
-    top: 6px; /* Línea inferior */
+    top: 6px;
 }

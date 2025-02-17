@@ -36,6 +36,10 @@ function WalletMenu({ isOpen, onClose, walletStatus, handleLogout }) {
         <>
             {isOpen && (
                 <div className="wallet-menu open" ref={menuRef}>
+                    <div className="wallet-menu-header">
+                        <h3>Wallet Menu</h3>
+                        <button className="close-button" onClick={onClose}>✖</button>
+                    </div>
                     <div className="wallet-menu-content">
                         {walletStatus.walletAddress ? (
                             <>
@@ -45,7 +49,8 @@ function WalletMenu({ isOpen, onClose, walletStatus, handleLogout }) {
                                         <Copy size={18} />
                                     </button>
                                 </div>
-                                <button className="logout-button" onClick={handleLogout}>Disconnect</button>
+                                <button className="change-wallet-button" onClick={() => setIsModalOpen(true)}>Change Wallet</button>
+                                <button className="logout-button" onClick={handleLogout}>Logout</button>
                             </>
                         ) : (
                             <button className="connect-button" onClick={() => setIsModalOpen(true)}>Connect Wallet</button>

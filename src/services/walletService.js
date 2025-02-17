@@ -12,7 +12,10 @@ const WALLET_PROVIDERS = {
 // 🔹 Obtener el proveedor de la wallet
 function getProvider(wallet) {
     const provider = WALLET_PROVIDERS[wallet]?.();
-    if (!provider) throw new Error(`❌ ${wallet} Wallet no detectada.`);
+    if (!provider) {
+        console.error(`❌ ${wallet} Wallet no detectada.`);
+        return null;
+    }
     return provider;
 }
 
@@ -21,9 +24,15 @@ async function connectWallet(wallet) {
     try {
         console.log(`🔵 Intentando conectar con ${wallet}`);
         const provider = getProvider(wallet);
+        if (!provider) return { pubkey: null, status: "error" };
 
         if (!provider.isConnected) {
             console.log(`⚠️ ${wallet} detectado pero no conectado. Conectando...`);
+            await provider.connect();
+        }
+
+        if (!provider.publicKey) {
+            console.warn(`⚠️ ${wallet} conectado pero sin publicKey. Intentando reconectar...`);
             await provider.connect();
         }
 
@@ -42,7 +51,7 @@ async function connectWallet(wallet) {
         return { pubkey, status: "connected" };
     } catch (error) {
         console.error("❌ Error en connectWallet():", error.message || error);
-        throw error;
+        return { pubkey: null, status: "error" };
     }
 }
 
@@ -50,11 +59,13 @@ async function connectWallet(wallet) {
 async function authenticateWallet(wallet) {
     try {
         const pubkey = localStorage.getItem("walletAddress");
-        if (!pubkey) throw new Error("❌ No hay wallet conectada.");
+        if (!pubkey) {
+            console.warn("⚠️ No hay wallet conectada. Se requiere conexión antes de autenticar.");
+            return { pubkey: null, status: "not_connected" };
+        }
 
-        // 🔄 Si el token es válido, evitar autenticación innecesaria
         if (!isTokenExpired()) {
-            console.log("✅ Token aún válido. Saltando autenticación.");
+            console.log("✅ Token aún válido. No se necesita autenticación.");
             return { pubkey, status: "authenticated" };
         }
 
@@ -72,7 +83,7 @@ async function authenticateWallet(wallet) {
         return { pubkey, status: "authenticated" };
     } catch (error) {
         console.error("❌ Error en authenticateWallet():", error.message || error);
-        throw error;
+        return { pubkey: null, status: "error" };
     }
 }
 
@@ -96,6 +107,7 @@ async function getWalletBalance(walletAddress) {
 // 🔹 Desconectar la wallet
 async function disconnectWallet() {
     try {
+        console.log("🔴 Desconectando wallet...");
         localStorage.removeItem("walletAddress");
         localStorage.removeItem("walletType");
         removeToken();
@@ -103,7 +115,6 @@ async function disconnectWallet() {
         console.log("✅ Wallet desconectada.");
     } catch (error) {
         console.error("❌ Error al desconectar la wallet:", error.message || error);
-        throw error;
     }
 }
 
@@ -112,7 +123,7 @@ async function signMessage(wallet, message) {
     try {
         console.log(`🟡 Solicitando firma a ${wallet}...`);
         const provider = getProvider(wallet);
-        if (!provider) throw new Error("❌ No hay una billetera conectada.");
+        if (!provider) return { signature: null, error: "No provider found" };
 
         const encodedMessage = new TextEncoder().encode(message);
         const { signature } = await provider.signMessage(encodedMessage);
@@ -122,7 +133,7 @@ async function signMessage(wallet, message) {
         return { signature: signatureBase58, message, pubkey: provider.publicKey.toBase58() };
     } catch (error) {
         console.error("❌ Error en signMessage():", error.message || error);
-        throw error;
+        return { signature: null, error: error.message || error };
     }
 }
 
@@ -132,20 +143,24 @@ async function getConnectedWallet() {
         const walletAddress = localStorage.getItem("walletAddress");
         let token = getToken();
 
+        if (!walletAddress) {
+            console.log("⚠️ No hay wallet conectada.");
+            return { walletAddress: null, isAuthenticated: false };
+        }
+
         if (!token || isTokenExpired()) {
             console.log("🔄 Intentando renovar token...");
             try {
                 token = await refreshToken();
+                if (!token) throw new Error("No se pudo renovar el token.");
             } catch (error) {
-                console.warn("❌ No se pudo renovar el token.");
+                console.warn("❌ Error al renovar token:", error.message || error);
                 removeToken();
+                return { walletAddress, isAuthenticated: false };
             }
         }
 
-        return {
-            walletAddress,
-            isAuthenticated: !!token,
-        };
+        return { walletAddress, isAuthenticated: !!token };
     } catch (error) {
         console.error("❌ Error en getConnectedWallet():", error.message || error);
         return { walletAddress: null, isAuthenticated: false };

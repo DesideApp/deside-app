@@ -14,16 +14,15 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // ✅ Nueva forma segura de sincronizar la wallet
+    // ✅ Sincronizar estado de la wallet
     useEffect(() => {
         const updateWalletStatus = async () => {
-            const status = await getConnectedWallet(); // 🔹 Asegurar que es asíncrono
+            const status = await getConnectedWallet();
             setWalletStatus(status || { walletAddress: null, isAuthenticated: false });
         };
 
         updateWalletStatus();
 
-        // ✅ Usamos funciones separadas para eventos
         const handleWalletConnected = (e) => {
             setWalletStatus({ walletAddress: e.detail.wallet, isAuthenticated: true });
             setIsModalOpen(false);
@@ -42,7 +41,7 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
         };
     }, []);
 
-    // 🔹 **Lógica de conexión simplificada**
+    // 🔹 **Lógica de conexión**
     const handleConnect = async () => {
         try {
             if (!walletStatus.walletAddress) {
@@ -54,7 +53,7 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
             if (!walletStatus.isAuthenticated) {
                 console.log("🔐 Wallet conectada, autenticando...");
                 await authenticateWallet("phantom");
-                setWalletStatus(await getConnectedWallet()); // 🔹 Asegurar actualización del estado
+                setWalletStatus(await getConnectedWallet());
                 return;
             }
 
@@ -67,8 +66,20 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
     return (
         <div className="wallet-container">
             <button className="wallet-button" onClick={handleConnect}>
-                {walletStatus.walletAddress ? `${walletStatus.walletAddress.slice(0, 5)}...` : buttonText}
+                {walletStatus.walletAddress ? "Change Wallet" : buttonText}
             </button>
+
+            <div className="wallet-info">
+                {walletStatus.walletAddress && (
+                    <>
+                        <span className="wallet-address">
+                            {walletStatus.walletAddress.slice(0, 5)}...
+                        </span>
+                        <span className="wallet-separator">|</span>
+                        <span className="wallet-balance">-- SOL</span> {/* Se actualizará dinámicamente */}
+                    </>
+                )}
+            </div>
 
             <button className="menu-button" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Menu">
                 <span className="menu-icon"></span>

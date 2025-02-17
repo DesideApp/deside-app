@@ -11,13 +11,13 @@ function WalletModal({ isOpen, onClose }) {
     // 🔄 **Actualiza el estado de la wallet al abrir el modal**
     useEffect(() => {
         if (isOpen) {
-            setWalletStatus(getConnectedWallet());
+            getConnectedWallet().then(setWalletStatus);
         }
     }, [isOpen]);
 
     const handleWalletSelection = async (walletType) => {
         try {
-            let updatedStatus = getConnectedWallet();
+            let updatedStatus = await getConnectedWallet();
 
             if (updatedStatus.walletAddress && updatedStatus.isAuthenticated) {
                 console.log("✅ Ya autenticado. No se necesita conexión ni firma.");
@@ -28,13 +28,13 @@ function WalletModal({ isOpen, onClose }) {
             if (!updatedStatus.walletAddress) {
                 console.log(`🔵 Conectando con ${walletType}...`);
                 await connectWallet(walletType);
-                updatedStatus = getConnectedWallet(); // 🛠️ **Actualizar estado tras conexión**
+                updatedStatus = await getConnectedWallet(); // 🛠️ **Actualizar estado tras conexión**
             }
 
             if (updatedStatus.walletAddress && !updatedStatus.isAuthenticated) {
                 console.log("🟡 Autenticando wallet...");
                 await authenticateWallet(walletType);
-                updatedStatus = getConnectedWallet(); // 🛠️ **Actualizar estado tras autenticación**
+                updatedStatus = await getConnectedWallet(); // 🛠️ **Actualizar estado tras autenticación**
             }
 
             setWalletStatus(updatedStatus);
@@ -51,8 +51,8 @@ function WalletModal({ isOpen, onClose }) {
     return (
         <div className="wallet-modal-overlay" onClick={onClose}>
             <div className="wallet-modal" onClick={(e) => e.stopPropagation()}>
-                <h2>Connect Wallet</h2>
-                <p>Select a wallet to connect:</p>
+                <h2>🔑 {walletStatus.walletAddress ? "Change Wallet" : "Connect Wallet"}</h2>
+                <p>Select a wallet to continue:</p>
                 <div className="wallet-options">
                     <button onClick={() => handleWalletSelection("phantom")}>Phantom Wallet</button>
                     <button onClick={() => handleWalletSelection("backpack")}>Backpack Wallet</button>
