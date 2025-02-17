@@ -14,24 +14,35 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // 🔄 **Sincronizar estado de la wallet al montar el componente**
-    //useEffect(() => {
-        //const updateWalletStatus = async () => {
-            //const status = getConnectedWallet();
-            //setWalletStatus(status);
-        //};
+    // ✅ Nueva forma segura de sincronizar la wallet
+    useEffect(() => {
+        const updateWalletStatus = async () => {
+            const status = await getConnectedWallet(); // 🔹 Asegurar que es asíncrono
+            setWalletStatus(status || { walletAddress: null, isAuthenticated: false });
+        };
 
-        //updateWalletStatus();
-        //window.addEventListener("walletConnected", updateWalletStatus);
-        //window.addEventListener("walletDisconnected", updateWalletStatus);
+        updateWalletStatus();
 
-        //return () => {
-            //window.removeEventListener("walletConnected", updateWalletStatus);
-            //window.removeEventListener("walletDisconnected", updateWalletStatus);
-        //};
-    //}, []);
+        // ✅ Usamos funciones separadas para eventos
+        const handleWalletConnected = (e) => {
+            setWalletStatus({ walletAddress: e.detail.wallet, isAuthenticated: true });
+            setIsModalOpen(false);
+        };
 
-    // 🔹 **Lógica central de conexión**
+        const handleWalletDisconnected = () => {
+            setWalletStatus({ walletAddress: null, isAuthenticated: false });
+        };
+
+        window.addEventListener("walletConnected", handleWalletConnected);
+        window.addEventListener("walletDisconnected", handleWalletDisconnected);
+
+        return () => {
+            window.removeEventListener("walletConnected", handleWalletConnected);
+            window.removeEventListener("walletDisconnected", handleWalletDisconnected);
+        };
+    }, []);
+
+    // 🔹 **Lógica de conexión simplificada**
     const handleConnect = async () => {
         try {
             if (!walletStatus.walletAddress) {
@@ -43,7 +54,7 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
             if (!walletStatus.isAuthenticated) {
                 console.log("🔐 Wallet conectada, autenticando...");
                 await authenticateWallet("phantom");
-                setWalletStatus(getConnectedWallet());
+                setWalletStatus(await getConnectedWallet()); // 🔹 Asegurar actualización del estado
                 return;
             }
 
