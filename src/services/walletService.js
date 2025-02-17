@@ -26,15 +26,7 @@ async function connectWallet(wallet) {
         const provider = getProvider(wallet);
         if (!provider) return { pubkey: null, status: "error" };
 
-        if (!provider.isConnected) {
-            console.log(`⚠️ ${wallet} detectado pero no conectado. Conectando...`);
-            await provider.connect();
-        }
-
-        if (!provider.publicKey) {
-            console.warn(`⚠️ ${wallet} conectado pero sin publicKey. Intentando reconectar...`);
-            await provider.connect();
-        }
+        await provider.connect();
 
         if (!provider.publicKey) {
             throw new Error("❌ No se pudo obtener la publicKey. Desbloquea la wallet.");
@@ -99,8 +91,8 @@ async function ensureWalletState(requiredState = "authenticated") {
 
     if (requiredState === "authenticated" && !status.isAuthenticated) {
         console.log("🔐 Wallet conectada pero no autenticada, solicitando firma...");
-        await authenticateWallet("phantom");
-        return await getConnectedWallet(); // Actualizar estado después de firmar
+        await authenticateWallet(localStorage.getItem("walletType") || "phantom");
+        return await getConnectedWallet();
     }
 
     return status;
