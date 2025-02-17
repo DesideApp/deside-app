@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import ChatInput from "./ChatInput";
-import { getConnectedWallet } from "../../services/walletService";
+import { ensureWalletState } from "../../services/walletService"; // 🔥 CENTRALIZAMOS AUTENTICACIÓN
 import useWebRTC from "../../hooks/useWebRTC";
 import "./ChatWindow.css";
 
@@ -12,10 +12,10 @@ function ChatWindow({ selectedContact }) {
 
     const chatContainerRef = useRef(null);
 
-    // ✅ Optimiza la actualización del estado de la wallet
-    const updateWalletStatus = useCallback(() => {
-        const status = getConnectedWallet();
-        setWalletStatus(status);
+    // ✅ **Centraliza la autenticación y conexión**
+    const updateWalletStatus = useCallback(async () => {
+        const status = await ensureWalletState(); // 🔥 **Evita duplicar lógica en cada componente**
+        setWalletStatus(status || { walletAddress: null, isAuthenticated: false });
     }, []);
 
     useEffect(() => {
@@ -29,14 +29,14 @@ function ChatWindow({ selectedContact }) {
         };
     }, [updateWalletStatus]);
 
-    // ✅ Se asegura de que `useWebRTC` se actualiza correctamente cuando cambia el estado de la wallet
+    // ✅ **Solo inicializar WebRTC si la wallet está lista**
     const { messages, sendMessage } = useWebRTC(
         selectedContact, 
         walletStatus.walletAddress, 
         walletStatus.isAuthenticated
     );
 
-    // ✅ Scroll automático cuando llegan nuevos mensajes
+    // ✅ **Evita re-renderizados innecesarios y mantiene el scroll en el último mensaje**
     useEffect(() => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -70,7 +70,8 @@ function ChatWindow({ selectedContact }) {
                         )}
                     </div>
 
-                    <ChatInput onSendMessage={sendMessage} />
+                    {/* ✅ **Deshabilita ChatInput si la wallet no está lista** */}
+                    <ChatInput onSendMessage={sendMessage} disabled={!walletStatus.isAuthenticated} />
                 </>
             )}
         </div>

@@ -87,6 +87,25 @@ async function authenticateWallet(wallet) {
     }
 }
 
+// 🔹 **FUNCIÓN CENTRALIZADA: Verifica el estado de la wallet y actúa en consecuencia**
+async function ensureWalletState(requiredState = "authenticated") {
+    const status = await getConnectedWallet();
+
+    if (!status.walletAddress) {
+        console.log("🔵 No hay wallet conectada, abriendo modal...");
+        window.dispatchEvent(new Event("openWalletModal"));
+        return false;
+    }
+
+    if (requiredState === "authenticated" && !status.isAuthenticated) {
+        console.log("🔐 Wallet conectada pero no autenticada, solicitando firma...");
+        await authenticateWallet("phantom");
+        return await getConnectedWallet(); // Actualizar estado después de firmar
+    }
+
+    return status;
+}
+
 // 🔹 Obtener balance en SOL
 async function getWalletBalance(walletAddress) {
     try {
@@ -171,6 +190,7 @@ export {
     getProvider,
     connectWallet,
     authenticateWallet,
+    ensureWalletState,
     disconnectWallet,
     getConnectedWallet,
     getWalletBalance,

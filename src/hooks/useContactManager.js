@@ -1,97 +1,78 @@
-import { useState, useEffect } from "react";
-import { getConnectedWallet } from "../services/walletService";
-import { fetchWithAuth } from "../services/authServices";
+import { useState, useEffect, useCallback } from "react";
+import { getConnectedWallet, ensureWalletState } from "../services/walletService";
+import { fetchContacts, sendContactRequest, approveContact, rejectContact } from "../services/contactService";
 
 export default function useContactManager() {
     const [confirmedContacts, setConfirmedContacts] = useState([]);
     const [pendingRequests, setPendingRequests] = useState([]);
     const [receivedRequests, setReceivedRequests] = useState([]);
 
+    // ✅ Actualizar la lista de contactos
+    const updateContacts = useCallback(async () => {
+        try {
+            const contacts = await fetchContacts();
+            setConfirmedContacts(contacts.confirmed || []);
+            setPendingRequests(contacts.pending || []);
+            setReceivedRequests(contacts.requests || []);
+        } catch (error) {
+            console.error("❌ Error al obtener contactos:", error);
+        }
+    }, []);
+
+    // ✅ Sincronizar estado de la wallet con contactos
     useEffect(() => {
         const checkWalletAndFetchContacts = async () => {
-            const connectedWallet = await getConnectedWallet();
-            if (connectedWallet?.walletAddress) {
-                await fetchContacts();
+            const status = await ensureWalletState();
+            if (status.walletAddress) {
+                await updateContacts();
             }
         };
 
         checkWalletAndFetchContacts();
         window.addEventListener("walletConnected", checkWalletAndFetchContacts);
+        window.addEventListener("walletDisconnected", () => {
+            setConfirmedContacts([]);
+            setPendingRequests([]);
+            setReceivedRequests([]);
+        });
 
-        return () => window.removeEventListener("walletConnected", checkWalletAndFetchContacts);
-    }, []);
+        return () => {
+            window.removeEventListener("walletConnected", checkWalletAndFetchContacts);
+            window.removeEventListener("walletDisconnected", () => {
+                setConfirmedContacts([]);
+                setPendingRequests([]);
+                setReceivedRequests([]);
+            });
+        };
+    }, [updateContacts]);
 
-    // 📌 Obtener contactos
-    const fetchContacts = async () => {
-        try {
-            const response = await fetchWithAuth("/api/contacts");
-            const data = await response.json();
-
-            setConfirmedContacts(data.confirmed || []);
-            setPendingRequests(data.pending || []);
-            setReceivedRequests(data.requests || []);
-        } catch (error) {
-            console.error("Error fetching contacts:", error);
-        }
-    };
-
-    // 📌 Enviar solicitud de contacto
+    // ✅ Enviar solicitud de contacto
     const handleAddContact = async (wallet) => {
         try {
-            await fetchWithAuth("/api/contacts/send", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ pubkey: wallet }),
-            });
-
-            fetchContacts();
+            await sendContactRequest(wallet);
+            await updateContacts();
         } catch (error) {
-            console.error("Error sending contact request:", error);
+            console.error("❌ Error enviando solicitud de contacto:", error);
         }
     };
 
-    // 📌 Aceptar solicitud de contacto
+    // ✅ Aceptar solicitud de contacto
     const handleAcceptRequest = async (wallet) => {
         try {
-            await fetchWithAuth("/api/contacts/accept", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ pubkey: wallet }),
-            });
-
-            fetchContacts();
+            await approveContact(wallet);
+            await updateContacts();
         } catch (error) {
-            console.error("Error accepting contact request:", error);
+            console.error("❌ Error aceptando solicitud de contacto:", error);
         }
     };
 
-    // 📌 Rechazar solicitud de contacto
+    // ✅ Rechazar solicitud de contacto
     const handleRejectRequest = async (wallet) => {
         try {
-            await fetchWithAuth("/api/contacts/reject", {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ pubkey: wallet }),
-            });
-
-            fetchContacts();
+            await rejectContact(wallet);
+            await updateContacts();
         } catch (error) {
-            console.error("Error rejecting contact request:", error);
-        }
-    };
-
-    // 📌 Eliminar contacto
-    const handleRemoveContact = async (wallet) => {
-        try {
-            await fetchWithAuth("/api/contacts/remove", {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ pubkey: wallet }),
-            });
-
-            fetchContacts();
-        } catch (error) {
-            console.error("Error removing contact:", error);
+            console.error("❌ Error rechazando solicitud de contacto:", error);
         }
     };
 
@@ -102,6 +83,5 @@ export default function useContactManager() {
         handleAddContact,
         handleAcceptRequest,
         handleRejectRequest,
-        handleRemoveContact, // ✅ Nuevo
     };
 }

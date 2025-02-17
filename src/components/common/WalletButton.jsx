@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { getConnectedWallet, connectWallet, disconnectWallet, authenticateWallet } from "../../services/walletService.js";
+import { ensureWalletState, disconnectWallet, getConnectedWallet } from "../../services/walletService.js";
 import { logout } from "../../services/authServices.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
 
-function WalletButton({ buttonText = "Connect Wallet" }) {
+function WalletButton() {
     const [walletStatus, setWalletStatus] = useState({
         walletAddress: null,
         isAuthenticated: false
@@ -17,13 +17,12 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
     // ✅ Nueva forma segura de sincronizar la wallet
     useEffect(() => {
         const updateWalletStatus = async () => {
-            const status = await getConnectedWallet(); // 🔹 Asegurar que es asíncrono
+            const status = await getConnectedWallet();
             setWalletStatus(status || { walletAddress: null, isAuthenticated: false });
         };
 
         updateWalletStatus();
 
-        // ✅ Usamos funciones separadas para eventos
         const handleWalletConnected = (e) => {
             setWalletStatus({ walletAddress: e.detail.wallet, isAuthenticated: true });
             setIsModalOpen(false);
@@ -42,32 +41,16 @@ function WalletButton({ buttonText = "Connect Wallet" }) {
         };
     }, []);
 
-    // 🔹 **Lógica de conexión simplificada**
+    // 🔹 **Lógica de conexión simplificada con `ensureWalletState()`**
     const handleConnect = async () => {
-        try {
-            if (!walletStatus.walletAddress) {
-                console.log("🔵 No hay wallet conectada, abriendo modal...");
-                setIsModalOpen(true);
-                return;
-            }
-
-            if (!walletStatus.isAuthenticated) {
-                console.log("🔐 Wallet conectada, autenticando...");
-                await authenticateWallet("phantom");
-                setWalletStatus(await getConnectedWallet()); // 🔹 Asegurar actualización del estado
-                return;
-            }
-
-            console.log("✅ Wallet ya autenticada.");
-        } catch (error) {
-            console.error("❌ Error en handleConnect():", error);
-        }
+        const status = await ensureWalletState();
+        if (status) setWalletStatus(status);
     };
 
     return (
         <div className="wallet-container">
             <button className="wallet-button" onClick={handleConnect}>
-                {walletStatus.walletAddress ? `${walletStatus.walletAddress.slice(0, 5)}...` : buttonText}
+                {walletStatus.walletAddress ? "Change Wallet" : "Connect Wallet"}
             </button>
 
             <button className="menu-button" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Menu">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getConnectedWallet, authenticateWallet, connectWallet } from '../../services/walletService';
+import { ensureWalletState } from '../../services/walletService';
 import { addContact } from '../../services/apiService';
 
 const AddContactForm = ({ onContactAdded }) => {
@@ -8,11 +8,11 @@ const AddContactForm = ({ onContactAdded }) => {
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isAuthenticating, setIsAuthenticating] = useState(false);
 
-    // ✅ Actualiza el estado de la wallet automáticamente cuando cambia
-    const updateWalletStatus = useCallback(() => {
-        setWalletStatus(getConnectedWallet());
+    // ✅ **Actualiza el estado de la wallet cuando cambia**
+    const updateWalletStatus = useCallback(async () => {
+        const status = await ensureWalletState(); // **Ahora usamos la lógica centralizada**
+        setWalletStatus(status || { walletAddress: null, isAuthenticated: false });
     }, []);
 
     useEffect(() => {
@@ -26,44 +26,24 @@ const AddContactForm = ({ onContactAdded }) => {
         };
     }, [updateWalletStatus]);
 
-    // ✅ Manejo de conexión y autenticación
-    const handleAuthIfNeeded = async () => {
-        try {
-            if (!walletStatus.walletAddress) {
-                console.log("🔵 Conectando wallet...");
-                await connectWallet("phantom");
-                updateWalletStatus();
-            }
-            if (!walletStatus.isAuthenticated) {
-                setIsAuthenticating(true);
-                console.log("🔑 Autenticando wallet...");
-                await authenticateWallet("phantom");
-                updateWalletStatus();
-                setIsAuthenticating(false);
-            }
-        } catch (error) {
-            console.error("❌ Error en autenticación:", error);
-            setErrorMessage("❌ Error al autenticar la wallet.");
-            setIsAuthenticating(false);
-        }
-    };
-
-    // ✅ Manejo de envío de solicitud de contacto
+    // ✅ **Enviar solicitud de contacto**
     const handleAddContact = async () => {
         if (!pubkey.trim()) {
             setErrorMessage('⚠️ Introduce una clave pública válida.');
             return;
         }
-        if (!walletStatus.walletAddress) {
-            setErrorMessage('⚠️ Conéctate a tu wallet antes de agregar contactos.');
-            return;
-        }
-        if (!walletStatus.isAuthenticated) {
-            await handleAuthIfNeeded();
-        }
+
+        setIsLoading(true);
 
         try {
-            setIsLoading(true);
+            // **Nos aseguramos de que la wallet esté lista antes de continuar**
+            const status = await ensureWalletState();
+            if (!status || !status.walletAddress || !status.isAuthenticated) {
+                setErrorMessage('⚠️ Error al conectar o autenticar la wallet.');
+                setIsLoading(false);
+                return;
+            }
+
             await addContact(pubkey);
             setSuccessMessage('✅ Solicitud de contacto enviada con éxito.');
             setPubkey('');
@@ -80,11 +60,11 @@ const AddContactForm = ({ onContactAdded }) => {
     return (
         <div className="add-contact-container">
             <h2>📇 Añadir Contacto</h2>
-            
+
             {!walletStatus.walletAddress && (
                 <p className="error-message">⚠️ Conéctate a tu wallet para añadir contactos.</p>
             )}
-            
+
             <input
                 type="text"
                 value={pubkey}
@@ -94,16 +74,16 @@ const AddContactForm = ({ onContactAdded }) => {
                     setSuccessMessage('');
                 }}
                 placeholder="Introduce la clave pública"
-                disabled={!walletStatus.walletAddress || isLoading || isAuthenticating}
+                disabled={!walletStatus.walletAddress || isLoading}
             />
-            
+
             <button 
                 onClick={handleAddContact} 
-                disabled={isLoading || isAuthenticating || !walletStatus.walletAddress}
+                disabled={isLoading || !walletStatus.walletAddress}
             >
-                {isLoading ? 'Enviando...' : isAuthenticating ? 'Autenticando...' : '➕ Enviar Solicitud'}
+                {isLoading ? 'Enviando...' : '➕ Enviar Solicitud'}
             </button>
-            
+
             {errorMessage && <p className="error-message">{errorMessage}</p>}
             {successMessage && <p className="success-message">{successMessage}</p>}
         </div>

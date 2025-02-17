@@ -1,27 +1,21 @@
-import React, { useState } from "react";
+import React from "react";
 import ContactList from "../../components/chatcomps/ContactList.jsx";
 import ChatWindow from "../../components/chatcomps/ChatWindow.jsx";
 import RightPanel from "../../components/chatcomps/RightPanel.jsx";
-import WalletModal from "../../components/common/WalletModal.jsx"; 
 import "./Chat.css";
 
 function Chat() {
-    const [selectedContact, setSelectedContact] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
     return (
         <div className="chat-page-container">
             <div className="left-panel">
-                <ContactList onSelectContact={setSelectedContact} />
+                <ContactList />
             </div>
             <div className="chat-window-panel">
-                <ChatWindow selectedContact={selectedContact} />
+                <ChatWindow />
             </div>
             <div className="right-panel">
-                <RightPanel selectedContact={selectedContact} />
+                <RightPanel />
             </div>
-
-            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </div>
     );
 }

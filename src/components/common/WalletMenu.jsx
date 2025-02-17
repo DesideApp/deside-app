@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
-import WalletModal from "./WalletModal";
-import { Copy } from "lucide-react"; 
+import React, { useRef } from "react";
+import { Copy } from "lucide-react";
 import "./WalletMenu.css";
 
-function WalletMenu({ isOpen, onClose, walletStatus, handleLogout }) {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+function WalletMenu({ isOpen, onClose, walletStatus, handleLogout, handleChangeWallet }) {
     const menuRef = useRef(null);
 
     // 🛠️ **Cerrar el menú si se hace clic fuera**
-    useEffect(() => {
+    React.useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
                 onClose();
@@ -45,16 +43,19 @@ function WalletMenu({ isOpen, onClose, walletStatus, handleLogout }) {
                                         <Copy size={18} />
                                     </button>
                                 </div>
-                                <button className="logout-button" onClick={handleLogout}>Disconnect</button>
+                                <button className="change-wallet-button" onClick={handleChangeWallet}>
+                                    Change Wallet
+                                </button>
+                                <button className="logout-button" onClick={handleLogout}>Logout</button>
                             </>
                         ) : (
-                            <button className="connect-button" onClick={() => setIsModalOpen(true)}>Connect Wallet</button>
+                            <button className="connect-button" onClick={handleChangeWallet}>
+                                Connect Wallet
+                            </button>
                         )}
                     </div>
                 </div>
             )}
-
-            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </>
     );
 }

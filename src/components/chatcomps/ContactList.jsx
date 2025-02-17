@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import useContactManager from "../../hooks/useContactManager";
-import { getConnectedWallet } from "../../services/walletService"; // 🔧 Corregida la ruta
+import { ensureWalletState } from "../../services/walletService"; // 🔥 AHORA CENTRALIZADO
 import AddContactForm from "./AddContactForm";
 import "./ContactList.css";
 
@@ -11,16 +11,17 @@ function ContactList({ onSelectContact }) {
         receivedRequests, 
         handleAcceptRequest, 
         handleRejectRequest, 
-        fetchContacts // ✅ Agregado para actualizar lista tras acciones
+        fetchContacts
     } = useContactManager();
 
     const [view, setView] = useState("contacts");
     const [walletStatus, setWalletStatus] = useState({ walletAddress: null, isAuthenticated: false });
     const [showAddContactModal, setShowAddContactModal] = useState(false);
 
-    // ✅ Optimización de `updateWalletStatus`
-    const updateWalletStatus = useCallback(() => {
-        setWalletStatus(getConnectedWallet());
+    // ✅ **Actualiza el estado de la wallet de forma reactiva**
+    const updateWalletStatus = useCallback(async () => {
+        const status = await ensureWalletState(); // **Lógica centralizada**
+        setWalletStatus(status || { walletAddress: null, isAuthenticated: false });
     }, []);
 
     useEffect(() => {
@@ -34,13 +35,9 @@ function ContactList({ onSelectContact }) {
         };
     }, [updateWalletStatus]);
 
-    // ✅ Mejoramos cambio de vista de solicitudes
+    // ✅ **Cambio de vista entre contactos y solicitudes**
     const toggleView = () => {
-        if (view === "contacts") {
-            setView("received"); // 🔧 Por defecto mostrar solicitudes recibidas al cambiar a "Solicitudes"
-        } else {
-            setView("contacts");
-        }
+        setView(view === "contacts" ? "received" : "contacts"); // 🔄 Alterna entre vistas
     };
 
     return (
@@ -96,11 +93,11 @@ function ContactList({ onSelectContact }) {
                                             {contact.wallet}
                                             <button onClick={async () => { 
                                                 await handleAcceptRequest(contact.wallet);
-                                                fetchContacts(); // ✅ Recargar contactos tras acción
+                                                fetchContacts(); // 🔄 Actualiza tras aceptar
                                             }}>✅</button>
                                             <button onClick={async () => { 
                                                 await handleRejectRequest(contact.wallet);
-                                                fetchContacts(); // ✅ Recargar contactos tras acción
+                                                fetchContacts(); // 🔄 Actualiza tras rechazar
                                             }}>❌</button>
                                         </li>
                                     ))
@@ -140,7 +137,7 @@ function ContactList({ onSelectContact }) {
                         <AddContactForm onContactAdded={() => {
                             setShowAddContactModal(false);
                             updateWalletStatus();
-                            fetchContacts(); // ✅ Actualizar la lista después de agregar un contacto
+                            fetchContacts(); // ✅ Actualiza lista tras agregar contacto
                         }} />
                     </div>
                 </div>
