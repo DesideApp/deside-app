@@ -1,12 +1,11 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { Copy } from "lucide-react";
 import "./WalletMenu.css";
 
-function WalletMenu({ isOpen, onClose, walletStatus, handleLogout, handleChangeWallet }) {
+function WalletMenu({ isOpen, onClose, walletStatus, handleLogout }) {
     const menuRef = useRef(null);
 
-    // 🛠️ **Cerrar el menú si se hace clic fuera**
-    React.useEffect(() => {
+    useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
                 onClose();
@@ -22,9 +21,8 @@ function WalletMenu({ isOpen, onClose, walletStatus, handleLogout, handleChangeW
         };
     }, [isOpen, onClose]);
 
-    // 🛠️ **Copiar dirección de la wallet**
     const handleCopy = () => {
-        if (walletStatus.walletAddress) {
+        if (walletStatus?.walletAddress) {
             navigator.clipboard.writeText(walletStatus.walletAddress);
             alert("✅ Dirección copiada al portapapeles.");
         }
@@ -35,23 +33,26 @@ function WalletMenu({ isOpen, onClose, walletStatus, handleLogout, handleChangeW
             {isOpen && (
                 <div className="wallet-menu open" ref={menuRef}>
                     <div className="wallet-menu-content">
-                        {walletStatus.walletAddress ? (
+                        {walletStatus?.walletAddress ? (
                             <>
+                                <div className="wallet-header">
+                                    <p className="wallet-network">🔗 Solana</p>
+                                    <p className="wallet-balance">
+                                        {walletStatus.balance ? `${walletStatus.balance.toFixed(2)} SOL` : "-- SOL"}
+                                    </p>
+                                </div>
+
                                 <div className="wallet-address-container">
                                     <p className="wallet-address">{walletStatus.walletAddress}</p>
                                     <button className="copy-button" onClick={handleCopy} aria-label="Copy Address">
                                         <Copy size={18} />
                                     </button>
                                 </div>
-                                <button className="change-wallet-button" onClick={handleChangeWallet}>
-                                    Change Wallet
-                                </button>
-                                <button className="logout-button" onClick={handleLogout}>Logout</button>
+
+                                <button className="logout-button" onClick={handleLogout}>Disconnect</button>
                             </>
                         ) : (
-                            <button className="connect-button" onClick={handleChangeWallet}>
-                                Connect Wallet
-                            </button>
+                            <p className="no-wallet">⚠️ No wallet connected.</p>
                         )}
                     </div>
                 </div>

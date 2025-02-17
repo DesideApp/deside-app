@@ -12,8 +12,7 @@ function Main() {
             <main>
                 <Routes>
                     <Route path="/" element={<Home />} />
-                    {/* ✅ Permite abrir chat con o sin walletAddress */}
-                    <Route path="/chat/:walletAddress?" element={<Chat />} />
+                    <Route path="/chat" element={<Chat />} />
                 </Routes>
             </main>
             <BottomBar />

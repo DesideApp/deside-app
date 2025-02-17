@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ensureWalletState, disconnectWallet, getConnectedWallet } from "../../services/walletService.js";
+import { ensureWalletState, disconnectWallet, getConnectedWallet, getWalletBalance } from "../../services/walletService.js";
 import { logout } from "../../services/authServices.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
@@ -8,49 +8,74 @@ import "./WalletButton.css";
 function WalletButton() {
     const [walletStatus, setWalletStatus] = useState({
         walletAddress: null,
-        isAuthenticated: false
+        isAuthenticated: false,
+        balance: null
     });
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // ✅ Nueva forma segura de sincronizar la wallet
+    // ✅ **Sincronizar estado de la wallet y el balance**
     useEffect(() => {
         const updateWalletStatus = async () => {
             const status = await getConnectedWallet();
-            setWalletStatus(status || { walletAddress: null, isAuthenticated: false });
+            if (status.walletAddress) {
+                const balance = await getWalletBalance(status.walletAddress);
+                setWalletStatus({ ...status, balance });
+            } else {
+                setWalletStatus({ walletAddress: null, isAuthenticated: false, balance: null });
+            }
         };
 
         updateWalletStatus();
 
-        const handleWalletConnected = (e) => {
-            setWalletStatus({ walletAddress: e.detail.wallet, isAuthenticated: true });
+        const handleWalletConnected = async (e) => {
+            const balance = await getWalletBalance(e.detail.wallet);
+            setWalletStatus({ walletAddress: e.detail.wallet, isAuthenticated: true, balance });
             setIsModalOpen(false);
         };
 
         const handleWalletDisconnected = () => {
-            setWalletStatus({ walletAddress: null, isAuthenticated: false });
+            setWalletStatus({ walletAddress: null, isAuthenticated: false, balance: null });
         };
+
+        // 📌 **Escuchar cambios en la wallet (ej: cambio de cuenta en Phantom)**
+        if (window.solana) {
+            window.solana.on("connect", updateWalletStatus);
+            window.solana.on("disconnect", handleWalletDisconnected);
+            window.solana.on("accountChanged", updateWalletStatus);
+        }
 
         window.addEventListener("walletConnected", handleWalletConnected);
         window.addEventListener("walletDisconnected", handleWalletDisconnected);
 
         return () => {
+            if (window.solana) {
+                window.solana.off("connect", updateWalletStatus);
+                window.solana.off("disconnect", handleWalletDisconnected);
+                window.solana.off("accountChanged", updateWalletStatus);
+            }
+
             window.removeEventListener("walletConnected", handleWalletConnected);
             window.removeEventListener("walletDisconnected", handleWalletDisconnected);
         };
     }, []);
 
-    // 🔹 **Lógica de conexión simplificada con `ensureWalletState()`**
+    // 🔹 **Lógica de conexión con `ensureWalletState()`**
     const handleConnect = async () => {
         const status = await ensureWalletState();
-        if (status) setWalletStatus(status);
+        if (status) {
+            const balance = await getWalletBalance(status.walletAddress);
+            setWalletStatus({ ...status, balance });
+        }
     };
 
     return (
         <div className="wallet-container">
             <button className="wallet-button" onClick={handleConnect}>
-                {walletStatus.walletAddress ? "Change Wallet" : "Connect Wallet"}
+                {walletStatus.walletAddress
+                    ? `${walletStatus.balance ? walletStatus.balance.toFixed(2) : "--"} SOL`
+                    : "Connect Wallet"}
             </button>
 
             <button className="menu-button" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Menu">
