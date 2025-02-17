@@ -8,20 +8,18 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 100;
 }
 
-/* 📌 Modal principal */
 .wallet-modal {
     background: white;
-    padding: 25px;
-    border-radius: 10px;
+    padding: 20px;
+    border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     text-align: center;
-    width: 320px;
+    width: 300px;
 }
 
-/* 📌 Opciones de wallet */
 .wallet-options {
     margin-top: 15px;
     display: flex;
@@ -29,36 +27,51 @@
     gap: 10px;
 }
 
-/* 📌 Botones de selección */
 .wallet-options button {
-    padding: 12px;
+    padding: 10px 20px;
     background-color: #fc554f;
     color: white;
     border: none;
-    border-radius: 10px;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
-    font-family: 'Montserrat', sans-serif;
-    transition: background-color 0.3s ease, opacity 0.3s ease;
+    margin-bottom: 10px;
+    transition: background-color 0.3s ease;
 }
 
 .wallet-options button:hover {
-    background-color: #e84c45;
-    opacity: 0.85;
+    background-color: #fc564f;
+    opacity: 0.8;
 }
 
-/* 📌 Botón de cierre */
 .close-modal {
     margin-top: 20px;
     background: none;
     border: none;
     color: #fc554f;
     cursor: pointer;
-    font-size: 15px;
-    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
     text-decoration: underline;
 }
 
-.close-modal:hover {
-    color: #e84c45;
+.wallet-address-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f2f2f2;
+    padding: 10px;
+    border-radius: 10px;
+    word-wrap: break-word;
+    margin-bottom: 15px;
+}
+
+.copy-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.copy-button:hover {
+    opacity: 0.7;
 }

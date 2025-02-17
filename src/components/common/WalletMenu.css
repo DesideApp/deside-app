@@ -2,12 +2,12 @@
     position: fixed;
     top: 0;
     right: -100%;
-    width: 280px;
+    width: 300px; /* Ajuste para hacerlo más compacto */
     height: 100%;
     background: white;
     border-left: 1px solid #ccc;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-    transition: right 0.3s ease-in-out;
+    transition: right 0.3s ease;
     z-index: 1000;
     padding: 20px;
 }
@@ -16,16 +16,14 @@
     right: 0;
 }
 
-/* Header del menú */
 .wallet-menu-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 10px;
+    padding: 15px;
     border-bottom: 1px solid #e6dfda;
 }
 
-/* Botón cerrar menú */
 .close-button {
     background: none;
     border: none;
@@ -39,7 +37,6 @@
     color: #fc554f;
 }
 
-/* Contenido */
 .wallet-menu-content {
     padding: 15px;
     text-align: center;
@@ -51,12 +48,9 @@
     border-radius: 10px;
     word-wrap: break-word;
     margin-bottom: 15px;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 14px;
 }
 
-/* Botones */
-.connect-button, .change-wallet-button, .logout-button {
+.connect-button, .logout-button {
     width: 100%;
     padding: 10px 20px;
     background-color: #fc554f;
@@ -67,16 +61,14 @@
     border-radius: 10px;
     color: white;
     cursor: pointer;
-    transition: background-color 0.3s ease, opacity 0.3s ease;
-    margin-bottom: 10px;
+    transition: background-color 0.3s ease;
 }
 
-.connect-button:hover, .change-wallet-button:hover {
-    background-color: #e84c45;
-    opacity: 0.85;
+.connect-button:hover, .logout-button:hover {
+    background-color: #fc564f;
+    opacity: 0.8;
 }
 
-/* Logout */
 .logout-button {
     background-color: #ff4d4d;
 }
