@@ -13,9 +13,9 @@ const useSignal = (backendUrl, pubkey, isAuthenticated, onContactRequest, onCont
             return;
         }
 
-        if (!socket.current) {
-            socket.current = io(backendUrl, { autoConnect: false });
-        }
+        //if (!socket.current) {
+            //socket.current = io(backendUrl, { autoConnect: false });
+        //}
 
         const connectSocket = () => {
             if (!socket.current.connected) {
