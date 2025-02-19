@@ -7,13 +7,15 @@
     background: white;
     border-left: 1px solid #ccc;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-    transition: right 0.3s ease;
+    transition: right 0.5s ease, opacity 0.3s ease; /* Suavizamos el deslizamiento y la visibilidad */
     z-index: 1000;
     padding: 20px;
+    opacity: 0;
 }
 
 .wallet-menu.open {
     right: 0;
+    opacity: 1; /* Añadimos un desvanecimiento suave */
 }
 
 .wallet-menu-header {

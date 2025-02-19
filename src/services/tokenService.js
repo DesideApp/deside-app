@@ -1,3 +1,5 @@
+import API_BASE_URL from "../config/apiConfig.js";
+
 // 🔐 **Guardar token en localStorage**
 export function setToken(token, refreshToken) {
     if (!token || typeof token !== "string") {
@@ -44,41 +46,40 @@ export function isTokenExpired() {
     }
 }
 
-// 🔄 **Renovar token usando el refreshToken**
+// 🔄 **Renovar JWT usando el refreshToken**
 export async function refreshToken() {
     try {
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (!refreshToken) {
-            console.warn("🔴 No se encontró refresh token. Se requiere re-autenticación.");
-            removeToken();
-            throw new Error("No refresh token found");
-        }
+        console.warn("🔄 Intentando renovar el JWT con el refresh token...");
 
-        const response = await fetch("https://backend-deside.onrender.com/api/auth/refresh", {
+        const storedRefreshToken = localStorage.getItem("refreshToken");
+        if (!storedRefreshToken) throw new Error("No hay refreshToken almacenado.");
+
+        const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ refreshToken }),
+            body: JSON.stringify({ refreshToken: storedRefreshToken }),
         });
 
-        if (response.status === 401) {
-            console.warn("🔴 Refresh token inválido. Cerrando sesión.");
-            removeToken();
-            throw new Error("Unauthorized - Refresh token invalid");
-        }
+        if (!response.ok) throw new Error("Error al renovar el token.");
 
-        if (!response.ok) {
-            console.warn("🔴 No se pudo renovar el token. Se requiere nueva autenticación.");
-            removeToken();
-            throw new Error("Failed to refresh token");
-        }
+        const { token } = await response.json();
+        setToken(token); // Guardamos el nuevo token
 
-        const data = await response.json();
-        setToken(data.token, data.refreshToken);
-        console.log("✅ Token renovado correctamente.");
-        return data.token;
+        console.log("✅ JWT renovado con éxito.");
+        return token;
     } catch (error) {
-        console.error("🔴 Error al renovar token:", error);
-        removeToken();
+        console.error("❌ No se pudo renovar el JWT:", error);
+        removeToken(); // Eliminamos credenciales si falla
+        throw new Error("Token inválido. Se requiere autenticación.");
+    }
+}
+
+// 🔄 **Renovación del JWT usando refreshToken**
+export async function renewJWT() {
+    try {
+        return await refreshToken(); // Simplemente llamamos a la función que renueva el JWT
+    } catch (error) {
+        console.error("❌ Error en renewJWT():", error.message || error);
         throw error;
     }
 }

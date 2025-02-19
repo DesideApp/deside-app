@@ -1,27 +1,20 @@
 import React from "react";
-import { ensureWalletState } from "../../services/walletService"; 
+import { ensureWalletState, STATES } from "../../services/walletStateService.js";
 import "./WalletModal.css";
 
 function WalletModal({ isOpen, onClose }) {
     if (!isOpen) return null;
 
-    // ✅ Simplificamos el flujo, sin repetir la lógica
     const handleWalletSelection = async (walletType) => {
-        try {
-            console.log(`🔵 Intentando conectar con ${walletType}...`);
+        console.log(`🔵 Intentando conectar con ${walletType}...`);
 
-            // Verificamos el estado de la wallet centralizadamente.
-            const status = await ensureWalletState("authenticated");
+        const state = await ensureWalletState();
 
-            // Si la wallet está conectada y autenticada, cerramos el modal.
-            if (status?.walletAddress && status?.isAuthenticated) {
-                console.log("✅ Wallet conectada y autenticada.");
-                onClose(); // Cerramos el modal si ya está conectada y autenticada
-            } else {
-                console.warn("⚠️ No se pudo conectar o autenticar la wallet.");
-            }
-        } catch (error) {
-            console.error("❌ Error al conectar la wallet:", error);
+        if (state === STATES.STATE_6) {
+            console.log("✅ Wallet conectada y autenticada.");
+            onClose(); // 🔥 Cerramos el modal solo si la autenticación fue exitosa.
+        } else {
+            console.warn("⚠️ No se pudo conectar o autenticar la wallet.");
         }
     };
 

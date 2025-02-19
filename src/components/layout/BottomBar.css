@@ -1,19 +1,34 @@
+/* Estilo general del bottom bar */
 .bottom-bar {
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 30px;
+    height: 50px;
     background-color: #ffffff;
-    border-top: 0px solid #ccc;
+    border-top: 1px solid #ccc;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 20px;
-    box-shadow: 0 -2px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2);
     z-index: 1000;
+    transition: all 0.5s ease;  /* Transición suave para visibilidad */
 }
 
+/* Cuando está oculto */
+.bottom-bar.hidden {
+    opacity: 0;
+    transform: translateY(100%);  /* Desliza hacia abajo cuando está oculto */
+}
+
+/* Cuando es visible */
+.bottom-bar.visible {
+    opacity: 1;
+    transform: translateY(0);  /* Vuelve a su posición normal */
+}
+
+/* Estilos para los botones de funciones en el bottom bar */
 .bottom-bar-button {
     background: none;
     border: none;

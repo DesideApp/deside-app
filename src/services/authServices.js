@@ -1,23 +1,12 @@
-import { getToken, setToken, removeToken, refreshToken, isTokenExpired } from "./tokenService.js";
+import { getToken, setToken, removeToken } from "./tokenService.js";
 import API_BASE_URL from "../config/apiConfig.js";
 
-// 🔐 **Realiza solicitudes autenticadas al backend**
+// **Realiza solicitudes autenticadas al backend**
 export async function fetchWithAuth(url, options = {}) {
     try {
-        let token = getToken();
+        await renewJWT(); // Verificamos y renovamos el JWT si es necesario
 
-        // Si el token está expirado o no existe, intentamos renovarlo
-        if (!token || isTokenExpired()) {
-            console.warn("🔄 Token inválido o expirado. Intentando renovación...");
-            try {
-                token = await refreshToken();
-            } catch (error) {
-                console.error("❌ No se pudo renovar el token. Cerrando sesión.");
-                logout();
-                throw new Error("Token inválido. Por favor, vuelve a autenticarte.");
-            }
-        }
-
+        let token = getToken(); // Obtenemos el JWT (ya debería estar renovado si era necesario)
         options.headers = {
             ...options.headers,
             Authorization: `Bearer ${token}`,
@@ -101,7 +90,6 @@ export function logout(redirect = true) {
     removeToken();
     localStorage.removeItem("walletAddress");
     localStorage.removeItem("walletType");
-    window.dispatchEvent(new Event("walletDisconnected"));
 
     // 🔄 Opcionalmente redirigir a la pantalla de login
     if (redirect) {

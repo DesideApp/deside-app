@@ -1,13 +1,12 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom';
-import WalletButton from "../common/WalletButton.jsx";
+import WalletButton from "../common/WalletButton.jsx"; // Asegúrate de que WalletButton está funcionando
 import "./Header.css";
 
 function Header() {
     const navigate = useNavigate();
 
     const handleNavigation = (path) => {
-        console.log(`Navigating to ${path}`); // Log de navegación
         navigate(path);
     };
 
@@ -26,7 +25,7 @@ function Header() {
 
             {/* Contenedor de la wallet */}
             <div className="header-buttons-container">
-                <WalletButton buttonText="Connect Wallet" /> {/* Instancia de WalletButton con texto "Connect Wallet" */}
+                <WalletButton /> {/* Eliminamos el prop innecesario */}
             </div>
         </header>
     );

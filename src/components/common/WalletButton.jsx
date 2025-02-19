@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { ensureWalletState, disconnectWallet, getConnectedWallet, getWalletBalance } from "../../services/walletService.js";
+import { ensureWalletState, STATES } from "../../services/walletStateService.js";
+import { disconnectWallet, getWalletBalance } from "../../services/walletService.js";
 import { logout } from "../../services/authServices.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
@@ -15,13 +16,13 @@ function WalletButton() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // ✅ **Sincronizar estado de la wallet y el balance**
     useEffect(() => {
         const updateWalletStatus = async () => {
-            const status = await getConnectedWallet();
-            if (status.walletAddress) {
-                const balance = await getWalletBalance(status.walletAddress);
-                setWalletStatus({ ...status, balance });
+            const state = await ensureWalletState();
+
+            if (state === STATES.STATE_6) {
+                const balance = await getWalletBalance(state.walletAddress);
+                setWalletStatus({ walletAddress: state.walletAddress, isAuthenticated: true, balance });
             } else {
                 setWalletStatus({ walletAddress: null, isAuthenticated: false, balance: null });
             }
@@ -39,7 +40,6 @@ function WalletButton() {
             setWalletStatus({ walletAddress: null, isAuthenticated: false, balance: null });
         };
 
-        // 📌 **Escuchar cambios en la wallet (ej: cambio de cuenta en Phantom)**
         if (window.solana) {
             window.solana.on("connect", updateWalletStatus);
             window.solana.on("disconnect", handleWalletDisconnected);
@@ -61,16 +61,21 @@ function WalletButton() {
         };
     }, []);
 
-    // 🔹 **Lógica de conexión con `ensureWalletState()`**
     const handleConnect = async () => {
-        const status = await ensureWalletState();  // Esto abrirá el modal si no estamos conectados.
-        if (!status.walletAddress) {
-            setIsModalOpen(true); // Modal abierto si no estamos conectados
-            return;
-        }
+        setIsModalOpen(true); // 🔥 Solo abrimos el modal, la lógica se maneja dentro de WalletModal.jsx
+    };
 
-        const balance = await getWalletBalance(status.walletAddress);
-        setWalletStatus({ ...status, balance });
+    const handleWalletSelect = async (walletType) => {
+        console.log(`🔵 Seleccionando wallet: ${walletType}`);
+
+        const state = await ensureWalletState(); 
+
+        if (state === STATES.STATE_6) {
+            console.log("✅ Wallet conectada y autenticada.");
+            setIsModalOpen(false); // 🔥 Cerramos el modal tras autenticación exitosa
+        } else {
+            console.warn("⚠️ No se pudo conectar o autenticar la wallet.");
+        }
     };
 
     return (
@@ -92,11 +97,12 @@ function WalletButton() {
                 handleLogout={() => {
                     disconnectWallet();
                     logout();
+                    setWalletStatus({ walletAddress: null, isAuthenticated: false, balance: null });
+                    setIsModalOpen(true);
                 }}
             />
 
-            {/* Abre el Modal cuando no estamos conectados */}
-            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+            <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onWalletSelect={handleWalletSelect} />
         </div>
     );
 }

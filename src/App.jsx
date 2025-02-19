@@ -1,12 +1,15 @@
 import React from "react";
 import { BrowserRouter as Router } from "react-router-dom";
-import Main from "./Main.jsx";
+import { WalletProvider } from './contexts/WalletContext';  // Importamos el WalletProvider
+import Main from "./Main.jsx";  // Tu componente principal
 
 function App() {
     return (
-        <Router>
-            <Main />
-        </Router>
+        <WalletProvider>  {/* Envolvemos toda la app con el WalletProvider */}
+            <Router>
+                <Main />
+            </Router>
+        </WalletProvider>
     );
 }
 

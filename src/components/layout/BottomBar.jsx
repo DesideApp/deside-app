@@ -4,6 +4,7 @@ import NetworkStatus from '../status/NetworkStatus.jsx';
 
 function BottomBar() {
     const [solPrice, setSolPrice] = useState(null);
+    const [isVisible, setIsVisible] = useState(true);  // Para controlar la visibilidad
 
     useEffect(() => {
         let isMounted = true;
@@ -40,8 +41,21 @@ function BottomBar() {
         };
     }, []);
 
+    // Agregar lógica para ocultar el BottomBar (por ejemplo, si el header desaparece)
+    const handleMouseEnter = () => {
+        setIsVisible(true);  // Vuelve a mostrar el BottomBar cuando el ratón entra
+    };
+
+    const handleMouseLeave = () => {
+        setIsVisible(false);  // Oculta el BottomBar cuando el ratón sale
+    };
+
     return (
-        <footer className="bottom-bar">
+        <footer
+            className={`bottom-bar ${isVisible ? 'visible' : 'hidden'}`}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
             {/* Botones de funciones */}
             <button className="bottom-bar-button">LIVE</button>
             <button className="bottom-bar-button">Lite</button>

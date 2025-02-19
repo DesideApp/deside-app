@@ -1,6 +1,6 @@
 import API_BASE_URL from "../config/apiConfig.js";
-import { getToken, refreshToken } from "../services/tokenService.js";
-import { ensureWalletState } from "../services/walletService.js"; // 🔥 Nueva validación unificada
+import { getToken, refreshToken } from "./tokenService.js";
+import { ensureWalletState } from "./walletStateService.js";
 
 const cache = new Map();
 
@@ -15,8 +15,9 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
     }
 
     try {
-        const status = await ensureWalletState(); // 🔥 **Asegurar autenticación**
-        if (!status.isAuthenticated) {
+        // Aseguramos que la wallet esté conectada y autenticada antes de hacer la solicitud
+        const { isAuthenticated } = await ensureWalletState(); // 🔥 **Reutilizamos la lógica centralizada**
+        if (!isAuthenticated) {
             throw new Error("❌ Wallet no autenticada. No se puede hacer la solicitud.");
         }
 
@@ -35,8 +36,8 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
         if (!response.ok) {
             if (response.status === 401 && retry) {
                 console.warn("⚠️ Token expirado. Intentando renovación...");
-                await refreshToken();
-                return apiRequest(endpoint, options, false); // 🔄 **Reintento con nuevo token**
+                await refreshToken(); // Renovamos el token
+                return apiRequest(endpoint, options, false); // 🔄 Reintento con nuevo token
             }
             const errorData = await response.json();
             throw new Error(`❌ Error ${response.status}: ${errorData.message || response.statusText}`);

@@ -1,12 +1,10 @@
 import { apiRequest } from "./apiService";
-import { ensureWalletState } from "../services/walletService.js"; // 🔥 Nueva validación de estado
+import { ensureWalletState } from "../services/walletStateService.js"; // ✅ Importación corregida
 
 // 🔹 **Obtener contactos**
 export async function fetchContacts() {
     try {
-        const status = await ensureWalletState(); // 🔥 **Validar autenticación**
-        if (!status.isAuthenticated) throw new Error("❌ Wallet no autenticada.");
-
+        await ensureWalletState(); // ✅ Esto ya maneja autenticación
         return apiRequest("/api/contacts", { method: "GET" });
     } catch (error) {
         console.error("❌ Error al obtener contactos:", error);
@@ -17,9 +15,7 @@ export async function fetchContacts() {
 // 🔹 **Enviar solicitud de contacto**
 export async function sendContactRequest(pubkey) {
     try {
-        const status = await ensureWalletState();
-        if (!status.isAuthenticated) throw new Error("❌ Wallet no autenticada.");
-
+        await ensureWalletState();
         return apiRequest("/api/contacts/send", {
             method: "POST",
             body: JSON.stringify({ pubkey }),
@@ -33,9 +29,7 @@ export async function sendContactRequest(pubkey) {
 // 🔹 **Aceptar solicitud de contacto**
 export async function approveContact(pubkey) {
     try {
-        const status = await ensureWalletState();
-        if (!status.isAuthenticated) throw new Error("❌ Wallet no autenticada.");
-
+        await ensureWalletState();
         return apiRequest("/api/contacts/accept", {
             method: "POST",
             body: JSON.stringify({ pubkey }),
@@ -49,9 +43,7 @@ export async function approveContact(pubkey) {
 // 🔹 **Eliminar contacto**
 export async function rejectContact(pubkey) {
     try {
-        const status = await ensureWalletState();
-        if (!status.isAuthenticated) throw new Error("❌ Wallet no autenticada.");
-
+        await ensureWalletState();
         return apiRequest("/api/contacts/remove", {
             method: "DELETE",
             body: JSON.stringify({ pubkey }),

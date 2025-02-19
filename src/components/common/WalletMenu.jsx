@@ -52,7 +52,10 @@ function WalletMenu({ isOpen, onClose, walletStatus, handleLogout }) {
                                 <button className="logout-button" onClick={handleLogout}>Disconnect</button>
                             </>
                         ) : (
-                            <p className="no-wallet">⚠️ No wallet connected.</p>
+                            <div className="wallet-disconnected">
+                                <p className="no-wallet">⚠️ No wallet connected.</p>
+                                <button className="connect-button" onClick={onClose}>Connect Wallet</button>
+                            </div>
                         )}
                     </div>
                 </div>

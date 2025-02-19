@@ -9,7 +9,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #fc554f;
+    background-color: #fc554f;  /* Mantenemos el color base */
     color: white;
     height: 40px;
     font-size: 16px;
@@ -21,8 +21,9 @@
     transition: background-color 0.3s ease;
 }
 
+/* Hover para wallet-button */
 .wallet-button:hover {
-    background-color: #fc564f;
+    background-color: #fc564f;  /* Ligera variación en el hover */
     opacity: 0.85;
 }
 
@@ -30,7 +31,7 @@
 .menu-button {
     width: 40px;
     height: 40px;
-    background-color: #fc554f;
+    background-color: #fc554f;  /* Mantenemos el color base */
     border: none;
     border-radius: 10px;
     cursor: pointer;
@@ -41,11 +42,11 @@
 }
 
 .menu-button:hover {
-    background-color: #fc564f;
+    background-color: #fc564f;  /* Hover color */
     opacity: 0.85;
 }
 
-/* 🔹 Icono de menú: 3 líneas */
+/* 🔹 Icono del menú: 3 líneas */
 .menu-icon {
     position: relative;
     width: 20px;
