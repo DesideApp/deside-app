@@ -23,12 +23,17 @@ export const WalletProvider = ({ children }) => {
     setJwt(token && !isTokenExpired() ? token : null);
 
     const fetchWalletState = async () => {
-      const walletState = await getConnectedWallet();
-      setWalletAddress(walletState.walletAddress);
-      setWalletStatus(walletState.isAuthenticated ? WALLET_STATUS.AUTHENTICATED : WALLET_STATUS.CONNECTED);
+      try {
+        const walletState = await getConnectedWallet();
+        setWalletAddress(walletState.walletAddress);
+        setWalletStatus(walletState.isAuthenticated ? WALLET_STATUS.AUTHENTICATED : WALLET_STATUS.CONNECTED);
+      } catch (error) {
+        console.error("❌ Error al obtener el estado de la wallet:", error);
+        setWalletStatus(WALLET_STATUS.NOT_CONNECTED); // 🔥 En caso de error, marcamos la wallet como no conectada
+      }
     };
 
-    fetchWalletState();
+    fetchWalletState().catch(error => console.error("❌ Error en fetchWalletState:", error)); // 🔥 Evitamos fallos silenciosos
   }, []);
 
   return (
