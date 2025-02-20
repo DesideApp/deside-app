@@ -19,21 +19,22 @@ export const WalletProvider = ({ children }) => {
   const [walletStatus, setWalletStatus] = useState(WALLET_STATUS.NOT_CONNECTED);
 
   useEffect(() => {
-    const token = getToken();
-    setJwt(token && !isTokenExpired() ? token : null);
-
-    const fetchWalletState = async () => {
+    const fetchData = async () => {
       try {
+        const token = getToken();
+        setJwt(token && !isTokenExpired() ? token : null);
+
         const walletState = await getConnectedWallet();
         setWalletAddress(walletState.walletAddress);
         setWalletStatus(walletState.isAuthenticated ? WALLET_STATUS.AUTHENTICATED : WALLET_STATUS.CONNECTED);
       } catch (error) {
         console.error("❌ Error al obtener el estado de la wallet:", error);
-        setWalletStatus(WALLET_STATUS.NOT_CONNECTED); // 🔥 En caso de error, marcamos la wallet como no conectada
+        setWalletStatus(WALLET_STATUS.NOT_CONNECTED);
       }
     };
 
-    fetchWalletState().catch(error => console.error("❌ Error en fetchWalletState:", error)); // 🔥 Evitamos fallos silenciosos
+    fetchData(); // ✅ Ahora `fetchData()` se llama correctamente
+
   }, []);
 
   return (
