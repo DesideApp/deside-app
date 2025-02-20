@@ -33,9 +33,9 @@ export const WalletProvider = ({ children }) => {
       }
     };
 
-    fetchData(); // ✅ Ahora `fetchData()` se llama correctamente
+    fetchData().catch(error => console.error("❌ Error en fetchData:", error)); // ✅ Manejo correcto del error
 
-  }, []);
+  }, []); // ✅ `useEffect()` ya no tiene problemas con `async`
 
   return (
     <WalletContext.Provider value={{ jwt, walletAddress, walletType, walletStatus }}>
