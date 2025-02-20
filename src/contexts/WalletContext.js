@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { getToken, isTokenExpired } from '../../services/tokenService'; 
 import { getConnectedWallet } from '../../services/walletService'; 
 
@@ -18,24 +18,24 @@ export const WalletProvider = ({ children }) => {
   const [walletType, setWalletType] = useState(null);
   const [walletStatus, setWalletStatus] = useState(WALLET_STATUS.NOT_CONNECTED);
 
+  const fetchData = useCallback(async () => {
+    try {
+      const token = getToken();
+      setJwt(token && !isTokenExpired() ? token : null);
+
+      const walletState = await getConnectedWallet();
+      setWalletAddress(walletState.walletAddress || null);
+      setWalletType(walletState.walletType || null);
+      setWalletStatus(walletState.isAuthenticated ? WALLET_STATUS.AUTHENTICATED : WALLET_STATUS.CONNECTED);
+    } catch (error) {
+      console.error("❌ Error al obtener el estado de la wallet:", error);
+      setWalletStatus(WALLET_STATUS.NOT_CONNECTED);
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = getToken();
-        setJwt(token && !isTokenExpired() ? token : null);
-
-        const walletState = await getConnectedWallet();
-        setWalletAddress(walletState.walletAddress);
-        setWalletStatus(walletState.isAuthenticated ? WALLET_STATUS.AUTHENTICATED : WALLET_STATUS.CONNECTED);
-      } catch (error) {
-        console.error("❌ Error al obtener el estado de la wallet:", error);
-        setWalletStatus(WALLET_STATUS.NOT_CONNECTED);
-      }
-    };
-
-    fetchData().catch(error => console.error("❌ Error en fetchData:", error)); // ✅ Manejo correcto del error
-
-  }, []); // ✅ `useEffect()` ya no tiene problemas con `async`
+    fetchData();
+  }, [fetchData]);
 
   return (
     <WalletContext.Provider value={{ jwt, walletAddress, walletType, walletStatus }}>
