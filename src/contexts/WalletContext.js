@@ -19,17 +19,15 @@ export const WalletProvider = ({ children }) => {
   const [walletStatus, setWalletStatus] = useState(WALLET_STATUS.NOT_CONNECTED);
 
   useEffect(() => {
-    async function fetchData() {
+    const fetchData = async () => {
       try {
-        // ✅ Verificar token JWT
         const token = getToken();
         setJwt(token && !isTokenExpired() ? token : null);
 
-        // ✅ Obtener estado de la wallet
         const walletState = await getConnectedWallet();
         if (walletState) {
-          setWalletAddress(walletState.walletAddress || null);
-          setWalletType(walletState.walletType || null);
+          setWalletAddress(walletState.walletAddress ?? null);
+          setWalletType(walletState.walletType ?? null);
           setWalletStatus(walletState.isAuthenticated ? WALLET_STATUS.AUTHENTICATED : WALLET_STATUS.CONNECTED);
         } else {
           setWalletStatus(WALLET_STATUS.NOT_CONNECTED);
@@ -38,15 +36,16 @@ export const WalletProvider = ({ children }) => {
         console.error("❌ Error en fetchData():", error);
         setWalletStatus(WALLET_STATUS.NOT_CONNECTED);
       }
-    }
+    };
 
     fetchData();
-
-  }, []); // ✅ Eliminamos dependencias innecesarias
+  }, []);
 
   return (
     <WalletContext.Provider value={{ jwt, walletAddress, walletType, walletStatus }}>
-      {children} 
+      {children}
     </WalletContext.Provider>
   );
 };
+
+export default WalletProvider;
