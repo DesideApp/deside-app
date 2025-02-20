@@ -26,8 +26,8 @@ export const WalletProvider = ({ children }) => {
 
         const walletState = await getConnectedWallet();
         if (walletState) {
-          setWalletAddress(walletState.walletAddress ?? null);
-          setWalletType(walletState.walletType ?? null);
+          setWalletAddress(walletState.walletAddress || null);
+          setWalletType(walletState.walletType || null);
           setWalletStatus(walletState.isAuthenticated ? WALLET_STATUS.AUTHENTICATED : WALLET_STATUS.CONNECTED);
         } else {
           setWalletStatus(WALLET_STATUS.NOT_CONNECTED);
@@ -38,8 +38,9 @@ export const WalletProvider = ({ children }) => {
       }
     };
 
-    fetchData();
-  }, []);
+    fetchData().catch(err => console.error("❌ Error en fetchData ejecución:", err));
+
+  }, []); // 🔥 Eliminamos dependencias innecesarias en `useEffect`
 
   return (
     <WalletContext.Provider value={{ jwt, walletAddress, walletType, walletStatus }}>
