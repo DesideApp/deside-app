@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import DOMPurify from 'dompurify';
-import { ensureWalletState } from "../services/walletService"; // 🔥 CENTRALIZAMOS AUTENTICACIÓN
+import { ensureWalletState } from "../services/walletStateService"; // 🔥 CENTRALIZAMOS AUTENTICACIÓN
 
 const useSignal = (backendUrl, onContactRequest, onContactAccepted) => {
     const socket = useRef(null);

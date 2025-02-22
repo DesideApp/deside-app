@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ensureWalletState } from "../services/walletService"; // 🔥 Centralizamos autenticación
+import { ensureWalletState } from "../services/walletStateService"; // 🔥 Centralizamos autenticación
 
 const useWebRTC = (selectedContact) => {
     const [messages, setMessages] = useState([]);
