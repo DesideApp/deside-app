@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getToken, isTokenExpired } from '../../services/tokenService'; 
-import { getConnectedWallet } from '../../services/walletService'; 
+import { getToken, isTokenExpired } from '../services/tokenService';
+import { getConnectedWallet } from '../services/walletService';
 
 const WalletContext = createContext();
 

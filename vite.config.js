@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
-const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://backend-deside.onrender.com';
+const backendUrl = process.env.VITE_BACKEND_URL || 'https://backend-deside.onrender.com';
 
 export default defineConfig({
   plugins: [react()],
@@ -10,12 +10,16 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          solana: ['@solana/web3.js'], // Crea un chunk separado para Solana
+          solana: ['@solana/web3.js'], // Separar chunk para Solana
         },
+      },
+      onwarn(warning, warn) {
+        if (warning.code === 'DYNAMIC_IMPORT_VARIABLE') return; // Ignorar errores de importación dinámica
+        warn(warning);
       },
     },
     chunkSizeWarningLimit: 1000, // Aumentar el límite de tamaño de los chunks a 1000 KiB
-  },
+  }, // ✅ Llave cerrada correctamente aquí
   base: '/', // 🔥 Corrección clave: Se mantiene para rutas absolutas
   resolve: {
     alias: {

@@ -1,6 +1,6 @@
-import { useWallet } from "../context/WalletContext"; // Importamos el contexto global
+import { useWallet } from "../contexts/WalletContext.jsx"; // Importamos el contexto global
 import { removeToken, renewJWT } from "./tokenService";
-import { authenticateWallet } from "./walletAuthServices";
+import { authenticateWallet } from "./walletAuthService";
 
 // 📌 **Definimos los 6 posibles estados de la wallet y JWT**
 const STATES = {

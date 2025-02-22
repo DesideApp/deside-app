@@ -29,6 +29,17 @@ function ChatWindow({ selectedContact }) {
         };
     }, [updateWalletStatus]);
 
+    // ✅ **Forzar autenticación al intentar abrir un chat**
+    useEffect(() => {
+        const authenticateOnSelection = async () => {
+            if (selectedContact && !walletStatus.isAuthenticated && walletStatus.walletAddress) {
+                console.log("🔒 Intentando autenticar al seleccionar contacto...");
+                await updateWalletStatus();
+            }
+        };
+        authenticateOnSelection();
+    }, [selectedContact, walletStatus.walletAddress, walletStatus.isAuthenticated, updateWalletStatus]);
+
     // ✅ **Solo inicializar WebRTC si la wallet está lista**
     const { messages, sendMessage } = useWebRTC(
         selectedContact, 

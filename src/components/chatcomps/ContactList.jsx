@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import useContactManager from "../../hooks/useContactManager";
-import { ensureWalletState } from "../../services/walletService"; // 🔥 AHORA CENTRALIZADO
+import { ensureWalletState } from "../../services/walletStateService"; // ✅ CORRECTO
 import AddContactForm from "./AddContactForm";
 import "./ContactList.css";
 
@@ -18,9 +18,9 @@ function ContactList({ onSelectContact }) {
     const [walletStatus, setWalletStatus] = useState({ walletAddress: null, isAuthenticated: false });
     const [showAddContactModal, setShowAddContactModal] = useState(false);
 
-    // ✅ **Actualiza el estado de la wallet de forma reactiva**
+    // ✅ Actualizar estado de la wallet de forma reactiva
     const updateWalletStatus = useCallback(async () => {
-        const status = await ensureWalletState(); // **Lógica centralizada**
+        const status = await ensureWalletState();
         setWalletStatus(status || { walletAddress: null, isAuthenticated: false });
     }, []);
 
@@ -35,9 +35,18 @@ function ContactList({ onSelectContact }) {
         };
     }, [updateWalletStatus]);
 
-    // ✅ **Cambio de vista entre contactos y solicitudes**
+    // ✅ Cambio de vista entre contactos y solicitudes
     const toggleView = () => {
-        setView(view === "contacts" ? "received" : "contacts"); // 🔄 Alterna entre vistas
+        setView(view === "contacts" ? "received" : "contacts");
+    };
+
+    // 🔒 Verifica autenticación antes de abrir el modal
+    const handleAddContact = () => {
+        if (!walletStatus.isAuthenticated) {
+            alert("⚠️ Debes estar autenticado para agregar un contacto.");
+            return;
+        }
+        setShowAddContactModal(true);
     };
 
     return (
@@ -93,11 +102,11 @@ function ContactList({ onSelectContact }) {
                                             {contact.wallet}
                                             <button onClick={async () => { 
                                                 await handleAcceptRequest(contact.wallet);
-                                                fetchContacts(); // 🔄 Actualiza tras aceptar
+                                                fetchContacts();
                                             }}>✅</button>
                                             <button onClick={async () => { 
                                                 await handleRejectRequest(contact.wallet);
-                                                fetchContacts(); // 🔄 Actualiza tras rechazar
+                                                fetchContacts();
                                             }}>❌</button>
                                         </li>
                                     ))
@@ -123,7 +132,7 @@ function ContactList({ onSelectContact }) {
             {/* Botón flotante para agregar contacto */}
             <button 
                 className="floating-add-button" 
-                onClick={() => setShowAddContactModal(true)}
+                onClick={handleAddContact}
                 disabled={!walletStatus.walletAddress || !walletStatus.isAuthenticated}
             >
                 ➕
@@ -137,7 +146,7 @@ function ContactList({ onSelectContact }) {
                         <AddContactForm onContactAdded={() => {
                             setShowAddContactModal(false);
                             updateWalletStatus();
-                            fetchContacts(); // ✅ Actualiza lista tras agregar contacto
+                            fetchContacts();
                         }} />
                     </div>
                 </div>
