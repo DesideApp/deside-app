@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { getConnectedWallet, ensureWalletState } from "../services/walletService";
+import { ensureWalletState } from "../services/walletStateService";
 import { fetchContacts, sendContactRequest, approveContact, rejectContact } from "../services/contactService";
 
 export default function useContactManager() {
