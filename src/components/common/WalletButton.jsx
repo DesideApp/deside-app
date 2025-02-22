@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { ensureWalletState } from "../../services/walletStateService.js";
+import React, { useState, useEffect, useContext } from "react";
+import { WalletContext } from "../../contexts/WalletContext.jsx"; // Importar el contexto
 import { disconnectWallet, getWalletBalance } from "../../services/walletService.js";
 import { logout } from "../../services/authServices.js";
 import WalletMenu from "./WalletMenu";
@@ -7,12 +7,7 @@ import WalletModal from "./WalletModal";
 import "./WalletButton.css";
 
 function WalletButton() {
-  const [walletStatus, setWalletStatus] = useState({
-    walletAddress: null,
-    isAuthenticated: false,
-    balance: null,
-  });
-
+  const { walletStatus, setWalletStatus } = useContext(WalletContext); // Usar el contexto
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -20,7 +15,6 @@ function WalletButton() {
     const updateWalletStatus = async () => {
       const { state, walletAddress } = await ensureWalletState();
 
-      // ✅ Revisamos directamente el estado sin importar STATES
       if (state === "AUTENTICADO Y SI") {
         const balance = await getWalletBalance(walletAddress);
         setWalletStatus({ walletAddress, isAuthenticated: true, balance });
@@ -60,10 +54,10 @@ function WalletButton() {
       window.removeEventListener("walletConnected", handleWalletConnected);
       window.removeEventListener("walletDisconnected", handleWalletDisconnected);
     };
-  }, []);
+  }, [setWalletStatus]);
 
   const handleConnect = () => {
-    setIsModalOpen(true); // 🔥 Solo abrimos el modal, la lógica se maneja en WalletModal.jsx
+    setIsModalOpen(true);
   };
 
   const handleWalletSelect = async (walletType) => {
@@ -73,7 +67,7 @@ function WalletButton() {
 
     if (state === "AUTENTICADO Y SI") {
       console.log("✅ Wallet conectada y autenticada.");
-      setIsModalOpen(false); // 🔥 Cerramos el modal tras autenticación exitosa
+      setIsModalOpen(false);
     } else {
       console.warn("⚠️ No se pudo conectar o autenticar la wallet.");
     }

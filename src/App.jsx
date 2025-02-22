@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router } from "react-router-dom";
-import { WalletProvider } from './contexts/WalletContext';  // Importamos el WalletProvider
+import { WalletProvider } from './contexts/WalletContext.jsx';  // Importamos el WalletProvider
 import Main from "./Main.jsx";  // Tu componente principal
 
 function App() {
