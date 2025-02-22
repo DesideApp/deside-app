@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import ChatInput from "./ChatInput";
-import { ensureWalletState } from "../../services/walletService"; // 🔥 CENTRALIZAMOS AUTENTICACIÓN
+import { ensureWalletState } from "../../services/walletStateService"; // 🔥 CENTRALIZAMOS AUTENTICACIÓN
 import useWebRTC from "../../hooks/useWebRTC";
 import "./ChatWindow.css";
 

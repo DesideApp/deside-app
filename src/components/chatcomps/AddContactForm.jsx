@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ensureWalletState } from '../../services/walletService';
+import { ensureWalletState } from '../../services/walletStateService';
 import { addContact } from '../../services/apiService';
 
 const AddContactForm = ({ onContactAdded }) => {
