@@ -4,7 +4,14 @@ import { getConnectedWallet } from '../services/walletService';
 
 const WalletContext = createContext();
 
-export const useWallet = () => useContext(WalletContext);
+// ✅ Verificación añadida para evitar el error de contexto fuera del proveedor
+export const useWallet = () => {
+  const context = useContext(WalletContext);
+  if (!context) {
+    throw new Error("useWallet debe ser usado dentro de un WalletProvider");
+  }
+  return context;
+};
 
 const WALLET_STATUS = {
   NOT_CONNECTED: 'not_connected',
@@ -49,8 +56,7 @@ export const WalletProvider = ({ children }) => {
       }
     };
 
-    fetchData()
-      .catch(err => console.error("❌ Error en fetchData ejecución:", err));
+    fetchData().catch(err => console.error("❌ Error en fetchData ejecución:", err));
 
   }, []); // ✅ useEffect correctamente estructurado
 
