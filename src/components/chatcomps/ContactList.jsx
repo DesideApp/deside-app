@@ -6,6 +6,8 @@ import "./ContactList.css";
 
 function ContactList({ onSelectContact }) {
   const { walletAddress, walletStatus } = useWallet(); // ✅ Obtener datos del contexto global
+  const isAuthenticated = walletStatus === "authenticated"; // ✅ Validación correcta de autenticación
+
   const {
     confirmedContacts,
     pendingRequests,
@@ -18,6 +20,11 @@ function ContactList({ onSelectContact }) {
   const [view, setView] = useState("contacts");
   const [showAddContactModal, setShowAddContactModal] = useState(false);
 
+  // ✅ Verificar si la wallet está lista
+  if (!walletAddress || walletStatus === "not_connected") {
+    return <p className="auth-warning">🔒 Esperando conexión de la wallet para gestionar contactos...</p>;
+  }
+
   // ✅ Cambio de vista entre contactos y solicitudes
   const toggleView = () => {
     setView(view === "contacts" ? "received" : "contacts");
@@ -25,7 +32,7 @@ function ContactList({ onSelectContact }) {
 
   // 🔒 Verifica autenticación antes de abrir el modal
   const handleAddContact = () => {
-    if (walletStatus !== "authenticated") {
+    if (!isAuthenticated) {
       alert("⚠️ Debes estar autenticado para agregar un contacto.");
       return;
     }
@@ -43,12 +50,6 @@ function ContactList({ onSelectContact }) {
       >
         {view === "contacts" ? "📩 Solicitudes" : "⬅️ Volver"}
       </button>
-
-      {!walletAddress && (
-        <p className="auth-warning">
-          ⚠️ Conéctate a una wallet para gestionar contactos.
-        </p>
-      )}
 
       {view === "contacts" ? (
         <ul className="contact-list">
@@ -70,9 +71,7 @@ function ContactList({ onSelectContact }) {
         <div>
           <div className="request-tabs">
             <button
-              className={`request-tab ${
-                view === "received" ? "active" : ""
-              }`}
+              className={`request-tab ${view === "received" ? "active" : ""}`}
               onClick={() => setView("received")}
             >
               📥 Recibidas ({receivedRequests.length})
@@ -136,7 +135,7 @@ function ContactList({ onSelectContact }) {
       <button
         className="floating-add-button"
         onClick={handleAddContact}
-        disabled={!walletAddress || walletStatus !== "authenticated"}
+        disabled={!walletAddress || !isAuthenticated}
       >
         ➕
       </button>

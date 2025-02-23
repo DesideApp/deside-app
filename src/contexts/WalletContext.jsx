@@ -26,6 +26,7 @@ export const WalletProvider = ({ children }) => {
   const [walletAddress, setWalletAddress] = useState(null);
   const [walletType, setWalletType] = useState(null);
   const [walletStatus, setWalletStatus] = useState(WALLET_STATUS.NOT_CONNECTED);
+  const [isLoading, setIsLoading] = useState(true); // ✅ NUEVO: Estado de carga
 
   useEffect(() => {
     console.log("🟡 Ejecutando useEffect en WalletProvider");
@@ -53,12 +54,19 @@ export const WalletProvider = ({ children }) => {
       } catch (error) {
         console.error("❌ Error en fetchData():", error);
         setWalletStatus(WALLET_STATUS.NOT_CONNECTED);
+      } finally {
+        setIsLoading(false); // ✅ Indicar que la carga ha terminado
       }
     };
 
     fetchData().catch(err => console.error("❌ Error en fetchData ejecución:", err));
 
   }, []); // ✅ useEffect correctamente estructurado
+
+  // ✅ Mostrar pantalla de carga mientras se espera el estado de la wallet
+  if (isLoading) {
+    return <div>Cargando estado de la wallet...</div>;
+  }
 
   return (
     <WalletContext.Provider value={{ jwt, walletAddress, walletType, walletStatus }}>

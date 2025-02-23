@@ -30,6 +30,11 @@ function WalletMenu({ isOpen, onClose, handleLogout }) {
     }
   };
 
+  // ✅ Verificar que el contexto esté cargado correctamente
+  if (!walletAddress || walletStatus === "not_connected") {
+    return null; // No renderizar nada si la wallet no está conectada
+  }
+
   return (
     <>
       {isOpen && (
@@ -39,6 +44,7 @@ function WalletMenu({ isOpen, onClose, handleLogout }) {
               <>
                 <div className="wallet-header">
                   <p className="wallet-network">🔗 Solana</p>
+                  {/* ✅ Evitar error si walletStatus.balance está undefined */}
                   <p className="wallet-balance">
                     {walletStatus.balance
                       ? `${walletStatus.balance.toFixed(2)} SOL`

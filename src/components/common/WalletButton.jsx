@@ -13,6 +13,11 @@ function WalletButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [balance, setBalance] = useState(null);
 
+  // ✅ Verificar que el contexto esté listo
+  if (!walletAddress || walletStatus === 'not_connected') {
+    return <div>Cargando datos de la wallet...</div>;
+  }
+
   useEffect(() => {
     const updateWalletStatus = async () => {
       const { state, walletAddress } = await ensureWalletState();
