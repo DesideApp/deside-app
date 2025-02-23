@@ -6,18 +6,13 @@ import "./WalletModal.css";
 function WalletModal({ isOpen, onClose }) {
   const { walletStatus } = useWallet(); // ✅ Obtener estado desde el contexto global
 
-  // ✅ Verificar que el contexto esté cargado correctamente
-  if (!walletStatus || walletStatus === "not_connected") {
-    return null; // No renderizar nada si la wallet no está lista
-  }
-
   if (!isOpen) return null;
 
   const handleWalletSelection = async (walletType) => {
     console.log(`🔵 Intentando conectar con ${walletType}...`);
 
     // ✅ Revisar el estado actual de la wallet desde el contexto
-    if (walletStatus === "authenticated") {
+    if (walletStatus.isAuthenticated) {
       console.log("✅ Wallet ya está autenticada.");
       onClose(); // 🔥 Cerramos el modal si ya está autenticada
       return;
@@ -28,7 +23,7 @@ function WalletModal({ isOpen, onClose }) {
 
     if (state === "AUTENTICADO Y SI") {
       console.log("✅ Wallet conectada y autenticada.");
-      onClose(); // 🔥 Cerramos el modal solo si la autenticación fue exitosa
+      onClose(); // 🔥 Cerramos el modal solo si la autenticación fue exitosa.
     } else {
       console.warn("⚠️ No se pudo conectar o autenticar la wallet.");
     }

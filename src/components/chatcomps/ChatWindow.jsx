@@ -8,27 +8,19 @@ function ChatWindow({ selectedContact }) {
   const { walletAddress, walletStatus } = useWallet(); // ✅ Obtener estado desde el contexto global
   const chatContainerRef = useRef(null);
 
-  // ✅ Evitar inicialización prematura de WebRTC
-  const isWalletAuthenticated = walletStatus === "authenticated";
-
-  // ✅ Inicializar WebRTC solo si la wallet está autenticada
+  // ✅ **Inicializar WebRTC solo si la wallet está autenticada**
   const { messages, sendMessage } = useWebRTC(
     selectedContact,
-    isWalletAuthenticated ? walletAddress : null,
-    isWalletAuthenticated
+    walletAddress,
+    walletStatus === "authenticated"
   );
 
-  // ✅ Mantener el scroll en el último mensaje solo si hay mensajes
+  // ✅ **Evita re-renderizados innecesarios y mantiene el scroll en el último mensaje**
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
-
-  // ✅ Evitar renderizar el componente si la wallet aún no está lista
-  if (!walletAddress || walletStatus === "not_connected") {
-    return <p className="chat-placeholder">🔒 Esperando conexión de la wallet...</p>;
-  }
 
   return (
     <div className="chat-window">
@@ -62,10 +54,10 @@ function ChatWindow({ selectedContact }) {
             )}
           </div>
 
-          {/* ✅ Deshabilitar ChatInput si la wallet no está autenticada */}
+          {/* ✅ **Deshabilita ChatInput si la wallet no está autenticada** */}
           <ChatInput
             onSendMessage={sendMessage}
-            disabled={!isWalletAuthenticated}
+            disabled={walletStatus !== "authenticated"}
           />
         </>
       )}
