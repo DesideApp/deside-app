@@ -8,10 +8,15 @@ import WalletModal from "./WalletModal";
 import "./WalletButton.css";
 
 function WalletButton() {
-  const { walletStatus, walletAddress } = useWallet(); // ✅ Obtener datos desde el contexto
+  const { walletStatus, walletAddress, isReady } = useWallet(); // ✅ Obtener datos desde el contexto
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [balance, setBalance] = useState(null);
+
+  // ✅ Evitar ejecutar lógica antes de que el contexto esté listo
+  if (!isReady) {
+    return <p>Cargando datos de la wallet...</p>;
+  }
 
   useEffect(() => {
     const updateWalletStatus = async () => {
@@ -76,7 +81,7 @@ function WalletButton() {
 
   return (
     <div className="wallet-container">
-      <button className="wallet-button" onClick={handleConnect}>
+      <button className="wallet-button" onClick={handleConnect} disabled={!isReady}>
         {walletAddress
           ? `${balance ? balance.toFixed(2) : "--"} SOL`
           : "Connect Wallet"}
@@ -86,6 +91,7 @@ function WalletButton() {
         className="menu-button"
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         aria-label="Menu"
+        disabled={!isReady}
       >
         <span className="menu-icon"></span>
       </button>

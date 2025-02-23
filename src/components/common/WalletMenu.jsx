@@ -5,7 +5,7 @@ import "./WalletMenu.css";
 
 function WalletMenu({ isOpen, onClose, handleLogout }) {
   const menuRef = useRef(null);
-  const { walletAddress, walletStatus } = useWallet(); // ✅ Obtener el estado global de la wallet
+  const { walletAddress, walletStatus, isReady } = useWallet(); // ✅ Obtener el estado global de la wallet
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -29,6 +29,11 @@ function WalletMenu({ isOpen, onClose, handleLogout }) {
       alert("✅ Dirección copiada al portapapeles.");
     }
   };
+
+  // ✅ Verificar si el contexto está listo antes de renderizar
+  if (!isReady) {
+    return null; // Evitar renderizar si el contexto aún no está cargado
+  }
 
   return (
     <>

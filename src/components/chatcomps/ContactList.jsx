@@ -5,7 +5,7 @@ import AddContactForm from "./AddContactForm";
 import "./ContactList.css";
 
 function ContactList({ onSelectContact }) {
-  const { walletAddress, walletStatus } = useWallet(); // ✅ Obtener datos del contexto global
+  const { walletAddress, walletStatus, isReady } = useWallet(); // ✅ Obtener datos del contexto global
   const isAuthenticated = walletStatus === "authenticated"; // ✅ Validación correcta de autenticación
 
   const {
@@ -19,6 +19,11 @@ function ContactList({ onSelectContact }) {
 
   const [view, setView] = useState("contacts");
   const [showAddContactModal, setShowAddContactModal] = useState(false);
+
+  // ✅ Verificar que el contexto esté cargado
+  if (!isReady) {
+    return <p className="auth-warning">🔒 Cargando datos de la wallet...</p>;
+  }
 
   // ✅ Cambio de vista entre contactos y solicitudes
   const toggleView = () => {
