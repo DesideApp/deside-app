@@ -1,11 +1,13 @@
-import React, { useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Copy } from "lucide-react";
 import { useWallet } from "../../contexts/WalletContext"; // ✅ Usar el contexto global
+import DonationModal from "./DonationModal"; // ✅ Se importa el modal de donaciones
 import "./WalletMenu.css";
 
 function WalletMenu({ isOpen, onClose, handleLogout }) {
   const menuRef = useRef(null);
-  const { walletAddress, walletStatus, isReady } = useWallet(); // ✅ Obtener el estado global de la wallet
+  const { walletAddress, walletStatus, isReady } = useWallet();
+  const [isDonationOpen, setIsDonationOpen] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -30,9 +32,8 @@ function WalletMenu({ isOpen, onClose, handleLogout }) {
     }
   };
 
-  // ✅ Verificar si el contexto está listo antes de renderizar
   if (!isReady) {
-    return null; // Evitar renderizar si el contexto aún no está cargado
+    return null;
   }
 
   return (
@@ -65,6 +66,11 @@ function WalletMenu({ isOpen, onClose, handleLogout }) {
                 <button className="logout-button" onClick={handleLogout}>
                   Disconnect
                 </button>
+
+                {/* ✅ Botón para abrir el modal de donaciones */}
+                <button className="donate-button" onClick={() => setIsDonationOpen(true)}>
+                  Support Us 💜
+                </button>
               </>
             ) : (
               <div className="wallet-disconnected">
@@ -77,6 +83,9 @@ function WalletMenu({ isOpen, onClose, handleLogout }) {
           </div>
         </div>
       )}
+
+      {/* ✅ Modal de donaciones */}
+      <DonationModal isOpen={isDonationOpen} onClose={() => setIsDonationOpen(false)} />
     </>
   );
 }

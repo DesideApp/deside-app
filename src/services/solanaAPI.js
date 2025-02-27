@@ -1,31 +1,20 @@
 import { apiRequest } from '../services/apiService.js';
 
-export async function fetchSolanaPrice() {
+// 🔹 **Función genérica para obtener datos de Solana**
+async function fetchSolanaData(endpoint, errorMessage) {
     try {
-        const data = await apiRequest('/api/solana-price', { method: 'GET' });
-        return data;
+        return await apiRequest(`/api/${endpoint}`, { method: 'GET' });
     } catch (error) {
-        console.error('Error fetching Solana price:', error);
-        throw error;
+        console.error(`❌ ${errorMessage}:`, error);
+        return { error: true, message: errorMessage };
     }
 }
 
-export async function fetchSolanaTPS() {
-    try {
-        const data = await apiRequest('/api/solana-tps', { method: 'GET' });
-        return data;
-    } catch (error) {
-        console.error('Error fetching Solana TPS:', error);
-        throw error;
-    }
-}
+// 🔹 **Obtener precio de Solana**
+export const fetchSolanaPrice = () => fetchSolanaData('solana-price', 'Error obteniendo el precio de Solana');
 
-export async function fetchSolanaStatus() {
-    try {
-        const data = await apiRequest('/api/solana-status', { method: 'GET' });
-        return data;
-    } catch (error) {
-        console.error('Error fetching Solana network status:', error);
-        throw error;
-    }
-}
+// 🔹 **Obtener TPS de Solana**
+export const fetchSolanaTPS = () => fetchSolanaData('solana-tps', 'Error obteniendo TPS de Solana');
+
+// 🔹 **Obtener estado de la red de Solana**
+export const fetchSolanaStatus = () => fetchSolanaData('solana-status', 'Error obteniendo el estado de la red de Solana');

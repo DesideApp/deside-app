@@ -1,50 +1,67 @@
 import API_BASE_URL from "../config/apiConfig.js";
-import { getToken, refreshToken } from "./tokenService.js";
+import { getTokenFromCookie, refreshToken, getCSRFTokenFromCookie } from "./tokenService.js";
 import { ensureWalletState } from "./walletStateService.js";
 
 const cache = new Map();
+const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutos
 
-// 🔹 **Función central para manejar solicitudes a la API**
+/**
+ * 🔹 **Función central para manejar solicitudes a la API con autenticación y CSRF**
+ */
 export async function apiRequest(endpoint, options = {}, retry = true) {
     const cacheKey = `${endpoint}:${JSON.stringify(options)}`;
 
-    // ✅ Si la respuesta está en caché, la devolvemos
+    // ✅ Verificar caché antes de hacer la solicitud
     if (cache.has(cacheKey)) {
-        console.log(`⚡ Usando caché para ${endpoint}`);
-        return cache.get(cacheKey);
+        const cachedData = cache.get(cacheKey);
+        const isExpired = Date.now() - cachedData.timestamp > CACHE_EXPIRATION;
+        if (!isExpired) {
+            console.log(`⚡ Usando caché para ${endpoint}`);
+            return cachedData.data;
+        } else {
+            cache.delete(cacheKey); // ❌ Expirar caché si ha pasado el tiempo límite
+        }
     }
 
     try {
-        // Aseguramos que la wallet esté conectada y autenticada antes de hacer la solicitud
-        const { isAuthenticated } = await ensureWalletState(); // 🔥 **Reutilizamos la lógica centralizada**
-        if (!isAuthenticated) {
-            throw new Error("❌ Wallet no autenticada. No se puede hacer la solicitud.");
+        // ✅ Verificar autenticación solo si no es una solicitud pública
+        if (!endpoint.includes("/public/")) {
+            const { isAuthenticated } = await ensureWalletState();
+            if (!isAuthenticated) {
+                throw new Error("❌ Wallet no autenticada. No se puede hacer la solicitud.");
+            }
         }
 
-        let token = getToken();
+        let token = getTokenFromCookie();
+        let csrfToken = getCSRFTokenFromCookie();
+
+        // ✅ Construcción segura de headers
         const headers = {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-            ...options.headers, // ✅ Preservamos cualquier header adicional
+            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+            ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+            ...options.headers,
         };
 
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             ...options,
+            credentials: "include", // ✅ Asegurar que se envían cookies
             headers,
         });
 
         if (!response.ok) {
             if (response.status === 401 && retry) {
                 console.warn("⚠️ Token expirado. Intentando renovación...");
-                await refreshToken(); // Renovamos el token
-                return apiRequest(endpoint, options, false); // 🔄 Reintento con nuevo token
+                await refreshToken(); // 🔄 Renovamos el token
+                return apiRequest(endpoint, options, false); // 🔄 Reintentar con nuevo token
             }
+
             const errorData = await response.json();
             throw new Error(`❌ Error ${response.status}: ${errorData.message || response.statusText}`);
         }
 
         const responseData = await response.json();
-        cache.set(cacheKey, responseData); // ✅ Guardamos en caché
+        cache.set(cacheKey, { data: responseData, timestamp: Date.now() }); // ✅ Guardamos en caché con timestamp
         return responseData;
     } catch (error) {
         console.error(`❌ Error en API request (${endpoint}):`, error);
@@ -52,12 +69,13 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
     }
 }
 
-// 🔹 **Obtener contactos**
+/**
+ * 🔹 **Funciones específicas para interacciones con la API**
+ */
 export async function getContacts() {
     return apiRequest("/api/contacts", { method: "GET" });
 }
 
-// 🔹 **Enviar solicitud de contacto**
 export async function addContact(pubkey) {
     return apiRequest("/api/contacts/send", {
         method: "POST",
@@ -65,7 +83,6 @@ export async function addContact(pubkey) {
     });
 }
 
-// 🔹 **Aceptar solicitud de contacto**
 export async function approveContact(pubkey) {
     return apiRequest("/api/contacts/accept", {
         method: "POST",
@@ -73,7 +90,6 @@ export async function approveContact(pubkey) {
     });
 }
 
-// 🔹 **Rechazar o eliminar contacto**
 export async function rejectContact(pubkey) {
     return apiRequest("/api/contacts/remove", {
         method: "DELETE",

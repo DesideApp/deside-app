@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import useContactManager from "../../hooks/useContactManager";
-import { useWallet } from "../../contexts/WalletContext"; // ✅ USAR CONTEXTO GLOBAL
+import { useWallet } from "../../contexts/WalletContext"; // ✅ Contexto Global
 import AddContactForm from "./AddContactForm";
+import { checkAuthStatus } from "../../services/authServices.js"; // ✅ Validación de autenticación con el backend
 import "./ContactList.css";
 
 function ContactList({ onSelectContact }) {
-  const { walletAddress, walletStatus, isReady } = useWallet(); // ✅ Obtener datos del contexto global
-  const isAuthenticated = walletStatus === "authenticated"; // ✅ Validación correcta de autenticación
+  const { walletAddress, walletStatus, isReady } = useWallet(); // ✅ Estado de la wallet
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // ✅ Estado autenticado
 
   const {
     confirmedContacts,
@@ -20,15 +21,27 @@ function ContactList({ onSelectContact }) {
   const [view, setView] = useState("contacts");
   const [showAddContactModal, setShowAddContactModal] = useState(false);
 
-  // ✅ Verificar que el contexto esté cargado
+  // ✅ Verificar autenticación con el backend antes de gestionar contactos
+  useEffect(() => {
+    const verifyAuth = async () => {
+      if (walletStatus === "authenticated" && walletAddress) {
+        const status = await checkAuthStatus();
+        setIsAuthenticated(status.isAuthenticated);
+      } else {
+        setIsAuthenticated(false);
+      }
+    };
+
+    verifyAuth();
+  }, [walletStatus, walletAddress]);
+
+  // ✅ Si la wallet aún está cargando, mostrar mensaje
   if (!isReady) {
     return <p className="auth-warning">🔒 Cargando datos de la wallet...</p>;
   }
 
   // ✅ Cambio de vista entre contactos y solicitudes
-  const toggleView = () => {
-    setView(view === "contacts" ? "received" : "contacts");
-  };
+  const toggleView = () => setView(view === "contacts" ? "received" : "contacts");
 
   // 🔒 Verifica autenticación antes de abrir el modal
   const handleAddContact = () => {
@@ -52,9 +65,7 @@ function ContactList({ onSelectContact }) {
       </button>
 
       {!walletAddress && (
-        <p className="auth-warning">
-          ⚠️ Conéctate a una wallet para gestionar contactos.
-        </p>
+        <p className="auth-warning">⚠️ Conéctate a una wallet para gestionar contactos.</p>
       )}
 
       {view === "contacts" ? (
@@ -77,9 +88,7 @@ function ContactList({ onSelectContact }) {
         <div>
           <div className="request-tabs">
             <button
-              className={`request-tab ${
-                view === "received" ? "active" : ""
-              }`}
+              className={`request-tab ${view === "received" ? "active" : ""}`}
               onClick={() => setView("received")}
             >
               📥 Recibidas ({receivedRequests.length})
@@ -100,6 +109,7 @@ function ContactList({ onSelectContact }) {
                       {contact.wallet}
                       <button
                         onClick={async () => {
+                          if (!isAuthenticated) return;
                           await handleAcceptRequest(contact.wallet);
                           fetchContacts();
                         }}
@@ -108,6 +118,7 @@ function ContactList({ onSelectContact }) {
                       </button>
                       <button
                         onClick={async () => {
+                          if (!isAuthenticated) return;
                           await handleRejectRequest(contact.wallet);
                           fetchContacts();
                         }}
@@ -117,9 +128,7 @@ function ContactList({ onSelectContact }) {
                     </li>
                   ))
                 ) : (
-                  <p className="no-contacts-message">
-                    No tienes solicitudes recibidas.
-                  </p>
+                  <p className="no-contacts-message">No tienes solicitudes recibidas.</p>
                 )}
               </ul>
             ) : (
@@ -129,9 +138,7 @@ function ContactList({ onSelectContact }) {
                     <li key={contact.wallet}>{contact.wallet} (Pendiente)</li>
                   ))
                 ) : (
-                  <p className="no-contacts-message">
-                    No has enviado solicitudes aún.
-                  </p>
+                  <p className="no-contacts-message">No has enviado solicitudes aún.</p>
                 )}
               </ul>
             )}
@@ -150,18 +157,9 @@ function ContactList({ onSelectContact }) {
 
       {/* Modal para agregar contacto */}
       {showAddContactModal && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowAddContactModal(false)}
-        >
-          <div
-            className="modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="modal-close"
-              onClick={() => setShowAddContactModal(false)}
-            >
+        <div className="modal-overlay" onClick={() => setShowAddContactModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowAddContactModal(false)}>
               X
             </button>
             <AddContactForm

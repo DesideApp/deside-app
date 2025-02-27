@@ -2,12 +2,12 @@
     position: fixed;
     top: 0;
     right: -100%;
-    width: 300px; /* Ajuste para hacerlo más compacto */
+    width: 300px;
     height: 100%;
     background: white;
     border-left: 1px solid #ccc;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-    transition: right 0.5s ease, opacity 0.3s ease; /* Suavizamos el deslizamiento y la visibilidad */
+    transition: right 0.4s ease-in-out, opacity 0.3s ease-in-out;
     z-index: 1000;
     padding: 20px;
     opacity: 0;
@@ -15,7 +15,7 @@
 
 .wallet-menu.open {
     right: 0;
-    opacity: 1; /* Añadimos un desvanecimiento suave */
+    opacity: 1;
 }
 
 .wallet-menu-header {
@@ -44,7 +44,10 @@
     text-align: center;
 }
 
-.wallet-address {
+.wallet-address-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     background: #f2f2f2;
     padding: 10px;
     border-radius: 10px;
@@ -52,7 +55,18 @@
     margin-bottom: 15px;
 }
 
-.connect-button, .logout-button {
+.copy-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.copy-button:hover {
+    opacity: 0.7;
+}
+
+.connect-button, .logout-button, .donate-button {
     width: 100%;
     padding: 10px 20px;
     background-color: #fc554f;
@@ -64,9 +78,10 @@
     color: white;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    margin-bottom: 10px;
 }
 
-.connect-button:hover, .logout-button:hover {
+.connect-button:hover, .logout-button:hover, .donate-button:hover {
     background-color: #fc564f;
     opacity: 0.8;
 }
@@ -77,4 +92,12 @@
 
 .logout-button:hover {
     background-color: #e04343;
+}
+
+.donate-button {
+    background-color: #ffbd4d;
+}
+
+.donate-button:hover {
+    background-color: #e0a43d;
 }

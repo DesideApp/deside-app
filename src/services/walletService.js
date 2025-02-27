@@ -1,23 +1,29 @@
 import { PublicKey, Connection } from "@solana/web3.js";
 import { getProvider } from "./walletProviders";  
 
-// **Obtener balance en SOL**
+const SOLANA_RPC_URL = "https://rpc.ankr.com/solana";
+
+/**
+ * 🔹 **Obtener balance en SOL**
+ */
 export async function getWalletBalance(walletAddress) {
     try {
         if (!walletAddress) {
             console.warn("⚠️ Intento de obtener balance sin dirección de wallet.");
             return 0;
         }
-        const connection = new Connection("https://rpc.ankr.com/solana");
+        const connection = new Connection(SOLANA_RPC_URL);
         const balanceResponse = await connection.getBalance(new PublicKey(walletAddress));
         return balanceResponse / 1e9;
-    } catch {
-        console.warn("⚠️ No se pudo obtener el balance.");
+    } catch (error) {
+        console.warn("⚠️ No se pudo obtener el balance:", error);
         return 0;
     }
 }
 
-// **Conectar la wallet**
+/**
+ * 🔹 **Conectar la wallet**
+ */
 export async function connectWallet(wallet) {
     try {
         console.log(`🔵 Conectando con ${wallet}...`);
@@ -25,27 +31,35 @@ export async function connectWallet(wallet) {
         if (!provider) return { pubkey: null, status: "error" };
 
         await provider.connect();
-        const pubkey = provider.publicKey.toBase58();
-
-        localStorage.setItem("walletAddress", pubkey);
-        localStorage.setItem("walletType", wallet);
-
-        return { pubkey, status: "connected" };
-    } catch {
+        return { pubkey: provider.publicKey.toBase58(), status: "connected" };
+    } catch (error) {
+        console.error("❌ Error conectando wallet:", error);
         return { pubkey: null, status: "error" };
     }
 }
 
-// **Desconectar la wallet**
+/**
+ * 🔹 **Desconectar la wallet**
+ */
 export async function disconnectWallet() {
-    localStorage.removeItem("walletAddress");
-    localStorage.removeItem("walletType");
+    try {
+        if (window.solana && window.solana.disconnect) {
+            await window.solana.disconnect();
+        }
+        console.log("🔴 Wallet desconectada correctamente.");
+    } catch (error) {
+        console.error("❌ Error desconectando wallet:", error);
+    }
 }
 
-// **Obtener estado de la wallet**
+/**
+ * 🔹 **Obtener estado de la wallet**
+ */
 export async function getConnectedWallet() {
-    const walletAddress = localStorage.getItem("walletAddress");
-    const isAuthenticated = !!localStorage.getItem("jwtToken");
+    if (!window.solana || !window.solana.isConnected) {
+        return { walletAddress: null, isAuthenticated: false };
+    }
 
-    return { walletAddress, isAuthenticated };
+    const walletAddress = window.solana.publicKey ? window.solana.publicKey.toBase58() : null;
+    return { walletAddress, isAuthenticated: !!walletAddress };
 }

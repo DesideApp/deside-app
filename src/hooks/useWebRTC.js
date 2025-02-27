@@ -1,68 +1,103 @@
 import { useEffect, useRef, useState } from "react";
-import { ensureWalletState } from "../services/walletStateService"; // 🔥 Centralizamos autenticación
+import { fetchWithAuth } from "../services/authServices"; // ✅ Verifica autenticación con CSRF y JWT
 
-const useWebRTC = (selectedContact) => {
-    const [messages, setMessages] = useState([]);
-    const [connectionStatus, setConnectionStatus] = useState("idle"); // ✅ Estado de conexión
-    const peerRef = useRef(null);
-    const dataChannelRef = useRef(null);
-    const [walletStatus, setWalletStatus] = useState({ walletAddress: null, isAuthenticated: false });
+const useWebRTC = (selectedContact, walletAddress) => {
+  const [messages, setMessages] = useState([]);
+  const [connectionStatus, setConnectionStatus] = useState("idle"); // ✅ Estado de conexión
+  const peerRef = useRef(null);
+  const dataChannelRef = useRef(null);
+  const [isContactConfirmed, setIsContactConfirmed] = useState(false);
 
-    // ✅ Inicializa WebRTC solo si la wallet está autenticada y hay un contacto seleccionado
-    const initializeWebRTC = async () => {
-        const status = await ensureWalletState(); // 🔥 **Asegurar autenticación**
-        setWalletStatus(status);
+  // ✅ **Verificar si el contacto está confirmado antes de iniciar WebRTC**
+  const validateContactStatus = async () => {
+    try {
+      const response = await fetchWithAuth(`/api/contacts/status/${selectedContact}`);
+      const data = await response.json();
+      const confirmed = data.isConfirmed && !data.isBlocked;
 
-        if (!status.walletAddress || !status.isAuthenticated || !selectedContact) {
-            console.warn("⚠️ WebRTC no puede iniciarse sin autenticación y contacto seleccionado.");
-            return;
-        }
+      setIsContactConfirmed(confirmed);
+      return confirmed;
+    } catch (error) {
+      console.error("❌ Error al verificar el estado del contacto:", error);
+      return false;
+    }
+  };
 
-        console.log(`🔵 Estableciendo conexión WebRTC con ${selectedContact}`);
+  // ✅ **Inicializa WebRTC solo si el contacto está confirmado**
+  const initializeWebRTC = async () => {
+    const isAllowed = await validateContactStatus();
+    if (!isAllowed) {
+      console.warn("⚠️ WebRTC no puede iniciarse sin contacto confirmado.");
+      return;
+    }
 
-        const peer = new RTCPeerConnection({
-            iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-        });
+    console.log(`🔵 Estableciendo conexión WebRTC con ${selectedContact}`);
 
-        peer.ondatachannel = (event) => {
-            dataChannelRef.current = event.channel;
-            dataChannelRef.current.onmessage = (e) => {
-                setMessages((prev) => [...prev, { sender: "peer", text: e.data }]);
-            };
-            setConnectionStatus("connected");
-        };
+    const peer = new RTCPeerConnection({
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+    });
 
-        peer.oniceconnectionstatechange = () => {
-            if (peer.iceConnectionState === "disconnected") {
-                console.warn("⚠️ WebRTC desconectado.");
-                setConnectionStatus("disconnected");
-            }
-        };
-
-        peerRef.current = peer;
+    peer.ondatachannel = (event) => {
+      dataChannelRef.current = event.channel;
+      dataChannelRef.current.onmessage = (e) => {
+        setMessages((prev) => [...prev, { sender: "peer", text: e.data }]);
+      };
+      setConnectionStatus("connected");
     };
 
-    useEffect(() => {
-        initializeWebRTC();
-
-        return () => {
-            if (peerRef.current) {
-                peerRef.current.close();
-                console.log("🔴 Conexión WebRTC cerrada.");
-            }
-        };
-    }, [selectedContact]);
-
-    const sendMessage = (text) => {
-        if (!dataChannelRef.current) {
-            console.error("❌ No se puede enviar mensaje, canal de datos no inicializado.");
-            return;
-        }
-        dataChannelRef.current.send(text);
-        setMessages((prev) => [...prev, { sender: "me", text }]);
+    peer.oniceconnectionstatechange = () => {
+      if (peer.iceConnectionState === "disconnected") {
+        console.warn("⚠️ WebRTC desconectado.");
+        setConnectionStatus("disconnected");
+        attemptReconnection();
+      }
     };
 
-    return { messages, connectionStatus, sendMessage };
+    peerRef.current = peer;
+  };
+
+  // 🔄 **Intentar reconexión automática solo si el contacto sigue confirmado**
+  const attemptReconnection = async () => {
+    console.log("🔄 Intentando reconexión...");
+    const isAllowed = await validateContactStatus();
+    if (isAllowed) {
+      await initializeWebRTC();
+    } else {
+      console.warn("❌ No se puede reconectar. El contacto ya no está confirmado.");
+    }
+  };
+
+  // 💬 **Enviar mensaje solo si el contacto sigue confirmado**
+  const sendMessage = async (text) => {
+    if (!isContactConfirmed) {
+      console.error("❌ No se puede enviar el mensaje. El contacto ya no está confirmado.");
+      return;
+    }
+
+    if (!dataChannelRef.current) {
+      console.error("❌ No se puede enviar mensaje, canal de datos no inicializado.");
+      return;
+    }
+
+    dataChannelRef.current.send(text);
+    setMessages((prev) => [...prev, { sender: "me", text }]);
+  };
+
+  // ✅ **Gestión del ciclo de vida del WebRTC**
+  useEffect(() => {
+    if (selectedContact) {
+      initializeWebRTC();
+    }
+
+    return () => {
+      if (peerRef.current) {
+        peerRef.current.close();
+        console.log("🔴 Conexión WebRTC cerrada.");
+      }
+    };
+  }, [selectedContact]);
+
+  return { messages, connectionStatus, sendMessage };
 };
 
 export default useWebRTC;

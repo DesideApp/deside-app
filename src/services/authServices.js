@@ -1,98 +1,80 @@
-import { getToken, setToken, removeToken } from "./tokenService.js";
+import { getCSRFTokenFromCookie, clearSession } from "./tokenService.js";
 import API_BASE_URL from "../config/apiConfig.js";
 
-// **Realiza solicitudes autenticadas al backend**
+// 🔒 **Enviar solicitud autenticada al backend**
 export async function fetchWithAuth(url, options = {}) {
-    try {
-        await renewJWT(); // Verificamos y renovamos el JWT si es necesario
+  const response = await fetch(url, {
+    ...options,
+    credentials: "include", // ✅ Incluir cookies en las solicitudes
+    headers: {
+      ...options.headers,
+      "X-CSRF-Token": getCSRFTokenFromCookie(), // ✅ Enviar CSRF token desde cookie
+    },
+  });
 
-        let token = getToken(); // Obtenemos el JWT (ya debería estar renovado si era necesario)
-        options.headers = {
-            ...options.headers,
-            Authorization: `Bearer ${token}`,
-        };
+  // ✅ Si no está autenticado o hay problema con CSRF, limpiar sesión
+  if (response.status === 401 || response.status === 403) {
+    console.warn("⚠️ La sesión ha expirado o el CSRF token no es válido. Cerrando sesión.");
+    clearSession();
+    window.location.href = "/login";
+  }
 
-        const response = await fetch(url, options);
-
-        // Si el token sigue siendo inválido, forzamos logout
-        if (response.status === 403) {
-            console.warn("⚠️ Token inválido, cerrando sesión.");
-            logout();
-            throw new Error("Token inválido. Por favor, vuelve a autenticarte.");
-        }
-
-        return response;
-    } catch (error) {
-        console.error("❌ Error en `fetchWithAuth()`:", error.message || error);
-        throw error;
-    }
+  return response;
 }
 
-// 🔵 **Autenticar con el servidor y obtener JWT**
+// 🔵 **Autenticar con el servidor usando la firma de Solana**
 export async function authenticateWithServer(pubkey, signature, message) {
-    try {
-        console.log("🔵 Enviando autenticación con:", { pubkey, signature, message });
+  try {
+    console.log("🔵 Enviando autenticación al backend con firma válida...");
 
-        const response = await fetch(`${API_BASE_URL}/api/auth/token`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ pubkey, signature, message }),
-        });
+    const response = await fetch(`${API_BASE_URL}/api/auth/auth`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ pubkey, signature, message }),
+    });
 
-        if (!response.ok) throw new Error("❌ Fallo en autenticación");
+    if (!response.ok) throw new Error("❌ Fallo en autenticación");
 
-        const { token, refreshToken } = await response.json();
-        setToken(token, refreshToken);
-
-        console.log("✅ Autenticación exitosa. Token almacenado.");
-        return token;
-    } catch (error) {
-        console.error("❌ Error en `authenticateWithServer()`:", error.message || error);
-        throw error;
-    }
+    console.log("✅ Autenticación exitosa, el backend gestionará los tokens.");
+    return await response.json();
+  } catch (error) {
+    console.error("❌ Error en `authenticateWithServer()`:", error.message || error);
+    throw error;
+  }
 }
 
-// 🔄 **Registrar wallet en el backend si no está registrada**
-export async function registerWallet(pubkey) {
-    try {
-        console.log(`🔵 Verificando si la wallet ${pubkey} ya está registrada...`);
+// 🔄 **Verificar estado de autenticación directamente desde el backend**
+export async function checkAuthStatus() {
+  try {
+    console.log("🔄 Verificando estado de autenticación...");
 
-        const checkResponse = await fetch(`${API_BASE_URL}/api/auth/check-wallet`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ pubkey }),
-        });
+    const response = await fetch(`${API_BASE_URL}/api/auth/status`, {
+      method: "GET",
+      credentials: "include",
+    });
 
-        const { exists } = await checkResponse.json();
-        if (exists) {
-            console.log(`✅ La wallet ${pubkey} ya está registrada.`);
-            return;
-        }
-
-        console.log(`🔵 Registrando wallet ${pubkey} en el backend...`);
-        const response = await fetch(`${API_BASE_URL}/api/auth/register-wallet`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ pubkey }),
-        });
-
-        if (!response.ok) throw new Error("❌ Error registrando wallet.");
-        console.log(`✅ Wallet ${pubkey} registrada correctamente.`);
-    } catch (error) {
-        console.error("❌ Error en `registerWallet()`:", error.message || error);
-        throw error;
+    if (!response.ok) {
+      console.warn("❌ El usuario no está autenticado.");
+      return { isAuthenticated: false };
     }
+
+    const data = await response.json();
+    console.log("✅ Estado de autenticación verificado:", data);
+    return data;
+  } catch (error) {
+    console.error("❌ Error al verificar el estado de autenticación:", error.message || error);
+    return { isAuthenticated: false };
+  }
 }
 
-// 🔐 **Cerrar sesión de manera segura**
+// 🔐 **Cerrar sesión de manera segura eliminando cookies**
 export function logout(redirect = true) {
-    console.info("🔵 Cerrando sesión y eliminando credenciales.");
-    removeToken();
-    localStorage.removeItem("walletAddress");
-    localStorage.removeItem("walletType");
+  console.info("🔵 Cerrando sesión y eliminando credenciales.");
+  clearSession(); // ✅ Elimina las cookies de sesión
 
-    // 🔄 Opcionalmente redirigir a la pantalla de login
-    if (redirect) {
-        window.location.href = "/login";
-    }
+  // 🔄 Redireccionar al login
+  if (redirect) {
+    window.location.href = "/login";
+  }
 }

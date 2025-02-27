@@ -1,30 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { ensureWalletState } from '../../services/walletStateService';
 import { addContact } from '../../services/apiService';
 
 const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState('');
-    const [walletStatus, setWalletStatus] = useState({ walletAddress: null, isAuthenticated: false });
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-
-    // ✅ **Actualiza el estado de la wallet cuando cambia**
-    const updateWalletStatus = useCallback(async () => {
-        const status = await ensureWalletState(); // **Ahora usamos la lógica centralizada**
-        setWalletStatus(status || { walletAddress: null, isAuthenticated: false });
-    }, []);
-
-    useEffect(() => {
-        updateWalletStatus();
-        window.addEventListener("walletConnected", updateWalletStatus);
-        window.addEventListener("walletDisconnected", updateWalletStatus);
-
-        return () => {
-            window.removeEventListener("walletConnected", updateWalletStatus);
-            window.removeEventListener("walletDisconnected", updateWalletStatus);
-        };
-    }, [updateWalletStatus]);
 
     // ✅ **Enviar solicitud de contacto**
     const handleAddContact = async () => {
@@ -34,20 +16,18 @@ const AddContactForm = ({ onContactAdded }) => {
         }
 
         setIsLoading(true);
+        setErrorMessage('');
+        setSuccessMessage('');
 
         try {
-            // **Nos aseguramos de que la wallet esté lista antes de continuar**
-            const status = await ensureWalletState();
-            if (!status || !status.walletAddress || !status.isAuthenticated) {
-                setErrorMessage('⚠️ Error al conectar o autenticar la wallet.');
-                setIsLoading(false);
-                return;
+            const status = await ensureWalletState(); // ✅ **Asegurar autenticación**
+            if (!status.isAuthenticated) {
+                throw new Error('⚠️ Debes estar autenticado para añadir contactos.');
             }
 
             await addContact(pubkey);
             setSuccessMessage('✅ Solicitud de contacto enviada con éxito.');
             setPubkey('');
-            setErrorMessage('');
             onContactAdded();
         } catch (error) {
             console.error('❌ Error enviando la solicitud:', error);
@@ -61,26 +41,19 @@ const AddContactForm = ({ onContactAdded }) => {
         <div className="add-contact-container">
             <h2>📇 Añadir Contacto</h2>
 
-            {!walletStatus.walletAddress && (
-                <p className="error-message">⚠️ Conéctate a tu wallet para añadir contactos.</p>
-            )}
-
             <input
                 type="text"
                 value={pubkey}
                 onChange={(e) => {
                     setPubkey(e.target.value);
-                    setErrorMessage(''); // ✅ Limpia el error al escribir
+                    setErrorMessage('');
                     setSuccessMessage('');
                 }}
                 placeholder="Introduce la clave pública"
-                disabled={!walletStatus.walletAddress || isLoading}
+                disabled={isLoading}
             />
 
-            <button 
-                onClick={handleAddContact} 
-                disabled={isLoading || !walletStatus.walletAddress}
-            >
+            <button onClick={handleAddContact} disabled={isLoading}>
                 {isLoading ? 'Enviando...' : '➕ Enviar Solicitud'}
             </button>
 

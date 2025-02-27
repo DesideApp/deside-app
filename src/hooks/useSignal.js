@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import DOMPurify from 'dompurify';
-import { ensureWalletState } from "../services/walletStateService"; // 🔥 CENTRALIZAMOS AUTENTICACIÓN
+import { checkAuthStatus } from "../services/authServices"; // ✅ Consultamos autenticación solo cuando sea necesario
 
 const useSignal = (backendUrl, onContactRequest, onContactAccepted) => {
     const socket = useRef(null);
@@ -9,13 +9,13 @@ const useSignal = (backendUrl, onContactRequest, onContactAccepted) => {
     const [signals, setSignals] = useState([]);
     const [walletStatus, setWalletStatus] = useState({ walletAddress: null, isAuthenticated: false });
 
-    // ✅ **Revisar estado de la wallet antes de conectar**
+    // ✅ **Revisar estado de autenticación antes de conectar**
     const initializeSocket = async () => {
-        const status = await ensureWalletState(); // 🔥 **Centralizamos autenticación**
+        const status = await checkAuthStatus(); // 🔥 **Validamos autenticación directamente**
         setWalletStatus(status);
 
-        if (!status.walletAddress || !status.isAuthenticated) {
-            console.warn("⚠️ Wallet no conectada o autenticada. No se inicia la señalización.");
+        if (!status.isAuthenticated) {
+            console.warn("⚠️ Usuario no autenticado. No se inicia la señalización.");
             return;
         }
 
@@ -31,7 +31,7 @@ const useSignal = (backendUrl, onContactRequest, onContactAccepted) => {
         socket.current.on("connect", () => {
             setConnected(true);
             console.log("✅ Socket de señalización conectado.");
-            socket.current.emit("register_wallet", status.walletAddress);
+            socket.current.emit("register_wallet", status.wallet);
         });
 
         socket.current.on("disconnect", () => {
@@ -62,6 +62,7 @@ const useSignal = (backendUrl, onContactRequest, onContactAccepted) => {
         return () => {
             if (socket.current) {
                 socket.current.disconnect();
+                console.log("🔴 Socket desconectado al desmontar el componente.");
             }
         };
     }, []);
@@ -81,7 +82,7 @@ const useSignal = (backendUrl, onContactRequest, onContactAccepted) => {
             return;
         }
         console.log(`📨 Enviando solicitud de contacto a ${targetPubkey}...`);
-        socket.current.emit("contact_request", { from: walletStatus.walletAddress, to: targetPubkey });
+        socket.current.emit("contact_request", { from: walletStatus.wallet, to: targetPubkey });
     };
 
     const notifyContactAccepted = (targetPubkey) => {
@@ -90,7 +91,7 @@ const useSignal = (backendUrl, onContactRequest, onContactAccepted) => {
             return;
         }
         console.log(`✅ Notificando a ${targetPubkey} que se aceptó la solicitud.`);
-        socket.current.emit("contact_accepted", { from: walletStatus.walletAddress, to: targetPubkey });
+        socket.current.emit("contact_accepted", { from: walletStatus.wallet, to: targetPubkey });
     };
 
     return { connected, signals, sendSignal, sendContactRequest, notifyContactAccepted };

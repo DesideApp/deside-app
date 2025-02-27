@@ -13,12 +13,9 @@ function WalletButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [balance, setBalance] = useState(null);
 
-  // ✅ Evitar ejecutar lógica antes de que el contexto esté listo
-  if (!isReady) {
-    return <p>Cargando datos de la wallet...</p>;
-  }
-
   useEffect(() => {
+    if (!isReady) return;
+
     const updateWalletStatus = async () => {
       const { state, walletAddress } = await ensureWalletState();
 
@@ -42,29 +39,19 @@ function WalletButton() {
       setBalance(null);
     };
 
-    if (window.solana) {
-      window.solana.on("connect", updateWalletStatus);
-      window.solana.on("disconnect", handleWalletDisconnected);
-      window.solana.on("accountChanged", updateWalletStatus);
-    }
-
     window.addEventListener("walletConnected", handleWalletConnected);
     window.addEventListener("walletDisconnected", handleWalletDisconnected);
 
     return () => {
-      if (window.solana) {
-        window.solana.off("connect", updateWalletStatus);
-        window.solana.off("disconnect", handleWalletDisconnected);
-        window.solana.off("accountChanged", updateWalletStatus);
-      }
-
       window.removeEventListener("walletConnected", handleWalletConnected);
       window.removeEventListener("walletDisconnected", handleWalletDisconnected);
     };
-  }, []);
+  }, [isReady]);
 
   const handleConnect = () => {
-    setIsModalOpen(true);
+    if (!walletAddress) {
+      setIsModalOpen(true); // ✅ Se abre el modal solo si no hay wallet conectada
+    }
   };
 
   const handleWalletSelect = async (walletType) => {
@@ -82,7 +69,7 @@ function WalletButton() {
   return (
     <div className="wallet-container">
       <button className="wallet-button" onClick={handleConnect} disabled={!isReady}>
-        {walletAddress
+        {walletAddress && walletStatus === "authenticated"
           ? `${balance ? balance.toFixed(2) : "--"} SOL`
           : "Connect Wallet"}
       </button>

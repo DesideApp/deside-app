@@ -1,83 +1,63 @@
-import { useWallet } from "../contexts/WalletContext.jsx"; // Importamos el contexto global
-import { removeToken, renewJWT } from "./tokenService";
+import { useWallet } from "../contexts/WalletContext.jsx"; 
+import { clearSession } from "./tokenService"; 
 import { authenticateWallet } from "./walletAuthService";
+import { checkAuthStatus } from "./authServices"; 
 
-// 📌 **Definimos los 6 posibles estados de la wallet y JWT**
+// 📌 **Definimos estados en base a lo que dice el backend**
 const STATES = {
-  STATE_1: "NO Y NO",
-  STATE_2: "NO Y SI",
-  STATE_3: "CONECTADO Y NO",
-  STATE_4: "CONECTADO Y SI",
-  STATE_5: "AUTENTICADO Y NO",
-  STATE_6: "AUTENTICADO Y SI"
+  DISCONNECTED: "disconnected",
+  CONNECTED: "connected",
+  AUTHENTICATED: "authenticated",
 };
 
-// 📌 **Definimos las acciones exactas a tomar según el estado**
-const STATE_ACTIONS = {
-  [STATES.STATE_1]: ["OPEN_MODAL"], // 🔵 Abrir modal de conexión
-  [STATES.STATE_2]: ["EXPIRE_JWT", "OPEN_MODAL"], // ❌ Expirar JWT y abrir modal
-  [STATES.STATE_3]: ["SIGN_AND_NEW_JWT"], // 🔄 Firmar y obtener nuevo JWT
-  [STATES.STATE_4]: ["EXPIRE_JWT", "SIGN_AND_NEW_JWT"], // ❌ Expirar JWT → Firmar
-  [STATES.STATE_5]: ["RENEW_JWT"], // 🔄 Renovar JWT
-  [STATES.STATE_6]: ["NO_ACTION"] // ✅ Todo correcto, no hacer nada
-};
+// 🔥 **Consulta el estado desde el backend**
+async function determineWalletState() {
+  const { walletAddress, isReady } = useWallet();
 
-// 🔥 **Función para determinar el estado actual usando `WalletContext`**
-function determineWalletState() {
-  const { jwt, walletAddress, walletStatus, isReady } = useWallet(); // 🚀 Ahora usa `WalletContext`
-
-  // ✅ Evitar acceso prematuro si el contexto aún no está listo
   if (!isReady) {
-    console.warn("⏳ El contexto aún no está listo.");
+    console.warn("⏳ Contexto aún no listo.");
     return { state: "LOADING", actions: [] };
   }
 
-  if (!walletAddress && !jwt) return { state: STATES.STATE_1, actions: STATE_ACTIONS[STATES.STATE_1] };
-  if (!walletAddress && jwt) return { state: STATES.STATE_2, actions: STATE_ACTIONS[STATES.STATE_2] };
-  if (walletStatus === "connected" && !jwt) return { state: STATES.STATE_3, actions: STATE_ACTIONS[STATES.STATE_3] };
-  if (walletStatus === "connected" && jwt) return { state: STATES.STATE_4, actions: STATE_ACTIONS[STATES.STATE_4] };
-  if (walletStatus === "authenticated" && !jwt) return { state: STATES.STATE_5, actions: STATE_ACTIONS[STATES.STATE_5] };
-  if (walletStatus === "authenticated" && jwt) return { state: STATES.STATE_6, actions: STATE_ACTIONS[STATES.STATE_6] };
+  const authStatus = await checkAuthStatus();
+
+  return {
+    state: authStatus.isAuthenticated
+      ? STATES.AUTHENTICATED
+      : walletAddress
+      ? STATES.CONNECTED
+      : STATES.DISCONNECTED,
+    actions: authStatus.isAuthenticated
+      ? ["NO_ACTION"]
+      : walletAddress
+      ? ["AUTHENTICATE_WALLET"]
+      : ["OPEN_MODAL"],
+  };
 }
 
-// 🔥 **Función para ejecutar las acciones en orden exacto**
+// 🔥 **Ejecuta las acciones necesarias**
 async function executeWalletAction({ actions }) {
   for (const action of actions) {
     switch (action) {
       case "OPEN_MODAL":
-        console.log("🛑 No wallet y no JWT -> Abrir modal de conexión.");
+        console.log("🛑 Wallet no conectada, abrir modal.");
         window.dispatchEvent(new Event("openWalletModal"));
         break;
-      case "SIGN_AND_NEW_JWT":
-        console.log("🖊 Solicitar firma y generar nuevo JWT.");
+      case "AUTHENTICATE_WALLET":
+        console.log("🖊 Autenticando wallet con firma...");
         await authenticateWallet();
-        break;
-      case "EXPIRE_JWT":
-        console.log("❌ Eliminando JWT...");
-        removeToken();
-        break;
-      case "RENEW_JWT":
-        console.log("🔄 Intentando renovar JWT...");
-        try {
-          await renewJWT();
-          console.log("✅ JWT renovado con éxito.");
-        } catch (error) {
-          console.error("❌ No se pudo renovar el JWT, requiriendo autenticación.");
-          console.log("🔁 Ejecutando `SIGN_AND_NEW_JWT`...");
-          await authenticateWallet();
-        }
         break;
       case "NO_ACTION":
       default:
-        console.log("✅ No acción necesaria.");
+        console.log("✅ Estado correcto, sin acción requerida.");
         break;
     }
   }
 }
 
-// 🔥 **Función principal para garantizar el estado de la wallet**
+// 🔥 **Punto de entrada para verificar y sincronizar estado**
 async function ensureWalletState() {
-  const stateData = determineWalletState(); // 🚀 Ahora usa estados globales
+  const stateData = await determineWalletState(); 
   if (stateData.state === "LOADING") {
     console.warn("⏳ Esperando que el contexto esté listo...");
     return "LOADING";
