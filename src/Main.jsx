@@ -7,27 +7,29 @@ import Home from "./pages/Home.jsx";
 import Chat from "./pages/chat/Chat.jsx";
 import BottomBar from "./components/layout/BottomBar.jsx";
 
-function Main() {
-    const { walletStatus, isReady } = useWallet(); // ✅ Obtener estado global
+function Main({ isAuthenticated }) {
+    const { isReady } = useWallet(); // ✅ Obtener estado global
     const navigate = useNavigate();
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [checkedAuth, setCheckedAuth] = useState(false);
 
     useEffect(() => {
         const verifyAuthentication = async () => {
             if (!isReady) return;
 
             const authStatus = await checkAuthStatus();
-            if (authStatus.isAuthenticated) {
-                setIsAuthenticated(true);
-            } else {
-                console.warn("⚠️ Usuario no autenticado. Redirigiendo a Home...");
+            if (!authStatus.isAuthenticated) {
+                console.warn("⚠️ Usuario no autenticado.");
                 logout();
-                navigate("/");
             }
+            setCheckedAuth(true);
         };
 
         verifyAuthentication();
-    }, [walletStatus, isReady, navigate]);
+    }, [isReady]);
+
+    if (!checkedAuth) {
+        return <div className="loading-screen">Cargando...</div>;
+    }
 
     return (
         <>
@@ -35,10 +37,7 @@ function Main() {
             <main>
                 <Routes>
                     <Route path="/" element={<Home />} />
-                    <Route 
-                        path="/chat" 
-                        element={isAuthenticated ? <Chat /> : <Home />} 
-                    />
+                    <Route path="/chat" element={isAuthenticated ? <Chat /> : <Home />} />
                 </Routes>
             </main>
             <BottomBar />

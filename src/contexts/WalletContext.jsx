@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 
 // ✅ Nueva función para obtener el estado desde el backend
 const fetchAuthStatus = async () => {
@@ -39,28 +39,32 @@ export const WalletProvider = ({ children }) => {
   const [walletAddress, setWalletAddress] = useState(null);
   const [walletStatus, setWalletStatus] = useState(WALLET_STATUS.NOT_CONNECTED);
   const [isReady, setIsReady] = useState(false);
+  const isSynced = useRef(false); // 🔥 Controlar si ya sincronizamos
+
+  const syncWalletStatus = useCallback(async () => {
+    if (isSynced.current) return; // 🔥 Evita múltiples ejecuciones innecesarias
+
+    console.log("🟡 Obteniendo estado de autenticación...");
+    const authStatus = await fetchAuthStatus();
+
+    // 🔥 Solo actualizamos si hay cambios reales para evitar re-render innecesario
+    if (authStatus.isAuthenticated && walletStatus !== WALLET_STATUS.AUTHENTICATED) {
+      setWalletAddress(authStatus.wallet);
+      setWalletStatus(WALLET_STATUS.AUTHENTICATED);
+    } else if (authStatus.wallet && walletStatus !== WALLET_STATUS.CONNECTED) {
+      setWalletAddress(authStatus.wallet);
+      setWalletStatus(WALLET_STATUS.CONNECTED);
+    } else if (!authStatus.wallet && walletStatus !== WALLET_STATUS.NOT_CONNECTED) {
+      setWalletStatus(WALLET_STATUS.NOT_CONNECTED);
+    }
+
+    setIsReady(true);
+    isSynced.current = true; // ✅ Marcamos que ya sincronizamos
+  }, [walletStatus]); // ✅ Se ejecuta solo cuando cambia `walletStatus`
 
   useEffect(() => {
-    console.log("🟡 Obteniendo estado de autenticación...");
-
-    const syncWalletStatus = async () => {
-      const authStatus = await fetchAuthStatus();
-
-      if (authStatus.isAuthenticated) {
-        setWalletAddress(authStatus.wallet);
-        setWalletStatus(WALLET_STATUS.AUTHENTICATED);
-      } else if (authStatus.wallet) {
-        setWalletAddress(authStatus.wallet);
-        setWalletStatus(WALLET_STATUS.CONNECTED);
-      } else {
-        setWalletStatus(WALLET_STATUS.NOT_CONNECTED);
-      }
-
-      setIsReady(true);
-    };
-
     syncWalletStatus();
-  }, []);
+  }, [syncWalletStatus]);
 
   // ✅ Mostrar pantalla de carga mientras se espera la autenticación
   if (!isReady) {

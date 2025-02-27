@@ -5,19 +5,20 @@ import { checkAuthStatus } from "./services/authServices"; // ✅ Verifica auten
 import Main from "./Main.jsx";
 
 function App() {
-    const [isAuthenticated, setIsAuthenticated] = useState(null);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isLoading, setIsLoading] = useState(true); // ✅ Nuevo estado de carga
 
     useEffect(() => {
         const verifyAuth = async () => {
             const status = await checkAuthStatus();
             setIsAuthenticated(status.isAuthenticated);
+            setIsLoading(false); // ✅ Solo cambia después de verificar autenticación
         };
 
         verifyAuth();
     }, []);
 
-    // ✅ Evitar renderizar antes de confirmar autenticación
-    if (isAuthenticated === null) {
+    if (isLoading) {
         return <div className="loading-screen">Cargando...</div>;
     }
 
@@ -25,7 +26,7 @@ function App() {
         <WalletProvider>
             <Router>
                 <Suspense fallback={<div>Cargando contenido...</div>}>
-                    <Main />
+                    <Main isAuthenticated={isAuthenticated} />
                 </Suspense>
             </Router>
         </WalletProvider>
