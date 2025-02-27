@@ -1,5 +1,5 @@
 import API_BASE_URL from "../config/apiConfig.js";
-import { getTokenFromCookie, refreshToken, getCSRFTokenFromCookie } from "./tokenService.js";
+import { refreshToken, getCSRFTokenFromCookie } from "./tokenService.js";
 import { ensureWalletState } from "./walletStateService.js";
 
 const cache = new Map();
@@ -32,13 +32,11 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
             }
         }
 
-        let token = getTokenFromCookie();
         let csrfToken = getCSRFTokenFromCookie();
 
         // ✅ Construcción segura de headers
         const headers = {
             "Content-Type": "application/json",
-            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
             ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
             ...options.headers,
         };
