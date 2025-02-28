@@ -12,7 +12,7 @@ function App() {
         };
 
         verifyAuth();
-    }, []);
+    }, []);// a ver
 
     if (isLoading) {
         return <div className="loading-screen">Cargando...</div>;
