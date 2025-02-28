@@ -1,31 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
-import { useWallet } from "./contexts/WalletContext"; // ✅ Importar contexto global
-import { checkAuthStatus, logout } from "./services/authServices"; // ✅ Verificar autenticación
+import { useWallet } from "./contexts/WalletContext"; // ✅ Contexto global
+import { checkAuthStatus } from "./services/authServices"; // ✅ Verificar autenticación
 import Header from "./components/layout/Header.jsx";
 import Home from "./pages/Home.jsx";
 import Chat from "./pages/chat/Chat.jsx";
 import BottomBar from "./components/layout/BottomBar.jsx";
 
-function Main({ isAuthenticated }) {
-    const { isReady } = useWallet(); // ✅ Obtener estado global
+function Main() {
+    const { isReady, walletStatus } = useWallet(); // ✅ Obtener estado global
     const navigate = useNavigate();
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [checkedAuth, setCheckedAuth] = useState(false);
 
     useEffect(() => {
         const verifyAuthentication = async () => {
             if (!isReady) return;
-
             const authStatus = await checkAuthStatus();
-            if (!authStatus.isAuthenticated) {
-                console.warn("⚠️ Usuario no autenticado.");
-                logout();
-            }
+            setIsAuthenticated(authStatus.isAuthenticated);
             setCheckedAuth(true);
         };
 
         verifyAuthentication();
-    }, [isReady]);
+    }, [isReady, walletStatus]);
 
     if (!checkedAuth) {
         return <div className="loading-screen">Cargando...</div>;

@@ -3,11 +3,12 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 70vh;
+    height: 100%; /* ✅ Mantiene la altura del ChatWindow */
+    min-height: 70vh; /* ✅ Asegura proporción en diferentes pantallas */
     background-color: #ffffff;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08); /* ✅ Suaviza la sombra */
     text-align: center;
 }
 
@@ -22,6 +23,19 @@
     font-family: 'Montserrat', sans-serif;
     color: #555;
     font-size: 1rem;
-    max-width: 80%;
+    max-width: 90%; /* ✅ Mejora la lectura en pantallas pequeñas */
     line-height: 1.5;
+}
+
+/* 🔹 Responsive para mejorar la apariencia en móviles */
+@media (max-width: 768px) {
+    .right-panel {
+        padding: 15px;
+        min-height: 60vh;
+    }
+
+    .right-panel p {
+        font-size: 0.95rem;
+        max-width: 100%;
+    }
 }

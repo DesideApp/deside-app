@@ -3,7 +3,9 @@ import { getProvider } from "./walletProviders"; // ✅ Usa correctamente `getPr
 import { getConnectedWallet } from "./walletService"; // ✅ Importamos `getConnectedWallet()`
 import bs58 from "bs58"; // Codificación Base58
 
-// **Firmar mensaje con la wallet**
+/**
+ * **Firmar mensaje con la wallet**
+ */
 async function signMessage(wallet, message) {
     try {
         console.log(`🟡 Solicitando firma a ${wallet}...`);
@@ -22,7 +24,9 @@ async function signMessage(wallet, message) {
     }
 }
 
-// **Autenticar wallet con el backend**
+/**
+ * **Autenticar wallet con el backend**
+ */
 async function authenticateWallet(wallet) {
     try {
         const { walletAddress } = await getConnectedWallet();
@@ -42,6 +46,10 @@ async function authenticateWallet(wallet) {
             signedData.signature, 
             message
         );
+
+        if (!response || !response.message) {
+            throw new Error("❌ Respuesta inválida del backend.");
+        }
 
         console.log("✅ Autenticación exitosa en backend.");
         return { pubkey: walletAddress, status: "authenticated" };

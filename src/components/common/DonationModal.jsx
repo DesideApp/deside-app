@@ -2,12 +2,12 @@ import React from "react";
 import { Copy } from "lucide-react";
 import "./DonationModal.css";
 
-const DONATION_WALLET = "9X7yR...F8dZ"; // 🔥 Dirección real de donaciones
+const DONATION_WALLET = process.env.REACT_APP_DONATION_WALLET || "9X7yR...F8dZ"; // ✅ Ahora se obtiene desde `.env`
 
 function DonationModal({ isOpen, onClose }) {
   const handleCopy = () => {
     navigator.clipboard.writeText(DONATION_WALLET);
-    alert("✅ Wallet address copied!");
+    alert("✅ Wallet address copied! Thank you for your support. 💜");
   };
 
   if (!isOpen) return null;

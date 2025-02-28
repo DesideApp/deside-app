@@ -1,18 +1,14 @@
 import React, { useEffect, useState, Suspense } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { WalletProvider } from "./contexts/WalletContext.jsx";
-import { checkAuthStatus } from "./services/authServices"; // ✅ Verifica autenticación
 import Main from "./Main.jsx";
 
 function App() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isLoading, setIsLoading] = useState(true); // ✅ Nuevo estado de carga
+    const [isLoading, setIsLoading] = useState(true); // ✅ Estado de carga inicializado
 
     useEffect(() => {
         const verifyAuth = async () => {
-            const status = await checkAuthStatus();
-            setIsAuthenticated(status.isAuthenticated);
-            setIsLoading(false); // ✅ Solo cambia después de verificar autenticación
+            setIsLoading(false); // ✅ Eliminamos la autenticación redundante aquí
         };
 
         verifyAuth();
@@ -26,7 +22,7 @@ function App() {
         <WalletProvider>
             <Router>
                 <Suspense fallback={<div>Cargando contenido...</div>}>
-                    <Main isAuthenticated={isAuthenticated} />
+                    <Main />
                 </Suspense>
             </Router>
         </WalletProvider>

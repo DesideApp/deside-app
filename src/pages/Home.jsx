@@ -22,10 +22,14 @@ function Home() {
 
             {!isReady ? (
                 <p className="loading-message">🔄 Cargando estado de la wallet...</p>
-            ) : walletStatus === "authenticated" ? (
-                <button onClick={handleNavigate}>Ir al Chat</button>
             ) : (
-                <p className="auth-warning">⚠️ Conéctate y autentícate para acceder al chat.</p>
+                <>
+                    {walletStatus === "authenticated" ? (
+                        <button onClick={handleNavigate}>Enter Chat</button>
+                    ) : (
+                        <p className="auth-warning">⚠️ Connect and authenticate to access the chat.</p>
+                    )}
+                </>
             )}
         </div>
     );

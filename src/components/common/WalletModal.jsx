@@ -1,33 +1,26 @@
 import React, { useState } from "react";
-import { useWallet } from "../../contexts/WalletContext"; // ✅ Importar el contexto
+import { useWallet } from "../../contexts/WalletContext"; // ✅ Contexto Global
 import { ensureWalletState } from "../../services/walletStateService.js";
 import { getProvider } from "../../services/walletProviders.js"; // ✅ Importar los providers
 import "./WalletModal.css";
 
 function WalletModal({ isOpen, onClose }) {
-  const { walletStatus, isReady } = useWallet(); // ✅ Obtener estado desde el contexto global
+  const { walletStatus, isReady } = useWallet();
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // ✅ Evitar mostrar el modal si el contexto aún no está listo
   if (!isOpen || !isReady) return null;
 
   const handleWalletSelection = async (walletType) => {
     console.log(`🔵 Intentando conectar con ${walletType}...`);
-
     setIsLoading(true);
+    setErrorMessage("");
 
-    // ✅ Verificar si la wallet ya está autenticada
-    if (walletStatus === "authenticated") {
-      console.log("✅ Wallet ya autenticada.");
-      setIsLoading(false);
-      onClose();
-      return;
-    }
-
-    // ✅ Obtener el provider correcto
     const provider = getProvider(walletType);
     if (!provider) {
       console.error("❌ Provider no encontrado para", walletType);
+      setErrorMessage("❌ Wallet provider not found.");
       setIsLoading(false);
       return;
     }
@@ -38,12 +31,14 @@ function WalletModal({ isOpen, onClose }) {
 
       if (state === "AUTENTICADO Y SI") {
         console.log("✅ Wallet conectada y autenticada.");
-        onClose();
+        onClose(); // ✅ Cerrar modal tras conexión exitosa
       } else {
         console.warn("⚠️ No se pudo conectar o autenticar la wallet.");
+        setErrorMessage("⚠️ Authentication failed. Please try again.");
       }
     } catch (error) {
       console.error("❌ Error al conectar la wallet:", error);
+      setErrorMessage("❌ Connection error. Please retry.");
     }
 
     setIsLoading(false);
@@ -66,6 +61,9 @@ function WalletModal({ isOpen, onClose }) {
             {isLoading ? "Connecting..." : "Magic Eden Wallet"}
           </button>
         </div>
+
+        {/* ✅ Mostrar mensaje de error si la conexión falla */}
+        {errorMessage && <p className="error-message">{errorMessage}</p>}
 
         <button className="close-modal" onClick={onClose} disabled={isLoading}>
           Close

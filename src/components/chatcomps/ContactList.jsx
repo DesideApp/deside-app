@@ -24,7 +24,7 @@ function ContactList({ onSelectContact }) {
   // ✅ Verificar autenticación con el backend antes de gestionar contactos
   useEffect(() => {
     const verifyAuth = async () => {
-      if (walletStatus === "authenticated" && walletAddress) {
+      if (walletAddress) {
         const status = await checkAuthStatus();
         setIsAuthenticated(status.isAuthenticated);
       } else {
@@ -33,7 +33,7 @@ function ContactList({ onSelectContact }) {
     };
 
     verifyAuth();
-  }, [walletStatus, walletAddress]);
+  }, [walletAddress]);
 
   // ✅ Si la wallet aún está cargando, mostrar mensaje
   if (!isReady) {
@@ -56,27 +56,17 @@ function ContactList({ onSelectContact }) {
     <div className="contact-list-container">
       <h3>📞 Contactos</h3>
 
-      <button
-        className="requests-button"
-        onClick={toggleView}
-        disabled={!walletAddress}
-      >
+      <button className="requests-button" onClick={toggleView} disabled={!walletAddress}>
         {view === "contacts" ? "📩 Solicitudes" : "⬅️ Volver"}
       </button>
 
-      {!walletAddress && (
-        <p className="auth-warning">⚠️ Conéctate a una wallet para gestionar contactos.</p>
-      )}
+      {!walletAddress && <p className="auth-warning">⚠️ Conéctate a una wallet para gestionar contactos.</p>}
 
       {view === "contacts" ? (
         <ul className="contact-list">
           {confirmedContacts.length > 0 ? (
             confirmedContacts.map((contact) => (
-              <li
-                key={contact.wallet}
-                className="contact-item"
-                onClick={() => onSelectContact(contact.wallet)}
-              >
+              <li key={contact.wallet} className="contact-item" onClick={() => onSelectContact(contact.wallet)}>
                 {contact.wallet.slice(0, 6)}...{contact.wallet.slice(-4)}
               </li>
             ))
@@ -87,16 +77,10 @@ function ContactList({ onSelectContact }) {
       ) : (
         <div>
           <div className="request-tabs">
-            <button
-              className={`request-tab ${view === "received" ? "active" : ""}`}
-              onClick={() => setView("received")}
-            >
+            <button className={`request-tab ${view === "received" ? "active" : ""}`} onClick={() => setView("received")}>
               📥 Recibidas ({receivedRequests.length})
             </button>
-            <button
-              className={`request-tab ${view === "sent" ? "active" : ""}`}
-              onClick={() => setView("sent")}
-            >
+            <button className={`request-tab ${view === "sent" ? "active" : ""}`} onClick={() => setView("sent")}>
               📤 Enviadas ({pendingRequests.length})
             </button>
           </div>
@@ -134,9 +118,7 @@ function ContactList({ onSelectContact }) {
             ) : (
               <ul className="contact-list">
                 {pendingRequests.length > 0 ? (
-                  pendingRequests.map((contact) => (
-                    <li key={contact.wallet}>{contact.wallet} (Pendiente)</li>
-                  ))
+                  pendingRequests.map((contact) => <li key={contact.wallet}>{contact.wallet} (Pendiente)</li>)
                 ) : (
                   <p className="no-contacts-message">No has enviado solicitudes aún.</p>
                 )}
@@ -147,11 +129,7 @@ function ContactList({ onSelectContact }) {
       )}
 
       {/* Botón flotante para agregar contacto */}
-      <button
-        className="floating-add-button"
-        onClick={handleAddContact}
-        disabled={!walletAddress || !isAuthenticated}
-      >
+      <button className="floating-add-button" onClick={handleAddContact} disabled={!walletAddress || !isAuthenticated}>
         ➕
       </button>
 

@@ -1,7 +1,9 @@
 import { getCSRFTokenFromCookie, clearSession } from "./tokenService.js";
 import API_BASE_URL from "../config/apiConfig.js";
 
-// 🔒 **Enviar solicitud autenticada al backend**
+/**
+ * 🔒 **Enviar solicitud autenticada al backend**
+ */
 export async function fetchWithAuth(url, options = {}) {
   const response = await fetch(url, {
     ...options,
@@ -22,7 +24,9 @@ export async function fetchWithAuth(url, options = {}) {
   return response;
 }
 
-// 🔵 **Autenticar con el servidor usando la firma de Solana**
+/**
+ * 🔵 **Autenticar con el servidor usando la firma de Solana**
+ */
 export async function authenticateWithServer(pubkey, signature, message) {
   try {
     console.log("🔵 Enviando autenticación al backend con firma válida...");
@@ -44,7 +48,9 @@ export async function authenticateWithServer(pubkey, signature, message) {
   }
 }
 
-// 🔄 **Verificar estado de autenticación directamente desde el backend**
+/**
+ * 🔄 **Verificar estado de autenticación directamente desde el backend**
+ */
 export async function checkAuthStatus() {
   try {
     console.log("🔄 Verificando estado de autenticación...");
@@ -68,7 +74,9 @@ export async function checkAuthStatus() {
   }
 }
 
-// 🔐 **Cerrar sesión de manera segura eliminando cookies**
+/**
+ * 🔐 **Cerrar sesión de manera segura eliminando cookies**
+ */
 export function logout(redirect = true) {
   console.info("🔵 Cerrando sesión y eliminando credenciales.");
   clearSession(); // ✅ Elimina las cookies de sesión

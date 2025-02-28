@@ -6,17 +6,13 @@ const useWebRTC = (selectedContact, walletAddress) => {
   const [connectionStatus, setConnectionStatus] = useState("idle"); // ✅ Estado de conexión
   const peerRef = useRef(null);
   const dataChannelRef = useRef(null);
-  const [isContactConfirmed, setIsContactConfirmed] = useState(false);
 
   // ✅ **Verificar si el contacto está confirmado antes de iniciar WebRTC**
   const validateContactStatus = async () => {
     try {
       const response = await fetchWithAuth(`/api/contacts/status/${selectedContact}`);
       const data = await response.json();
-      const confirmed = data.isConfirmed && !data.isBlocked;
-
-      setIsContactConfirmed(confirmed);
-      return confirmed;
+      return data.isConfirmed && !data.isBlocked;
     } catch (error) {
       console.error("❌ Error al verificar el estado del contacto:", error);
       return false;
@@ -25,8 +21,7 @@ const useWebRTC = (selectedContact, walletAddress) => {
 
   // ✅ **Inicializa WebRTC solo si el contacto está confirmado**
   const initializeWebRTC = async () => {
-    const isAllowed = await validateContactStatus();
-    if (!isAllowed) {
+    if (!(await validateContactStatus())) {
       console.warn("⚠️ WebRTC no puede iniciarse sin contacto confirmado.");
       return;
     }
@@ -59,8 +54,7 @@ const useWebRTC = (selectedContact, walletAddress) => {
   // 🔄 **Intentar reconexión automática solo si el contacto sigue confirmado**
   const attemptReconnection = async () => {
     console.log("🔄 Intentando reconexión...");
-    const isAllowed = await validateContactStatus();
-    if (isAllowed) {
+    if (await validateContactStatus()) {
       await initializeWebRTC();
     } else {
       console.warn("❌ No se puede reconectar. El contacto ya no está confirmado.");
@@ -69,7 +63,7 @@ const useWebRTC = (selectedContact, walletAddress) => {
 
   // 💬 **Enviar mensaje solo si el contacto sigue confirmado**
   const sendMessage = async (text) => {
-    if (!isContactConfirmed) {
+    if (!(await validateContactStatus())) {
       console.error("❌ No se puede enviar el mensaje. El contacto ya no está confirmado.");
       return;
     }

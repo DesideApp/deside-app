@@ -1,14 +1,31 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Copy } from "lucide-react";
-import { useWallet } from "../../contexts/WalletContext"; // ✅ Usar el contexto global
-import DonationModal from "./DonationModal"; // ✅ Se importa el modal de donaciones
+import { useWallet } from "../../contexts/WalletContext"; // ✅ Contexto Global
+import { checkAuthStatus, logout } from "../../services/authServices"; // ✅ Validación con el backend
+import DonationModal from "./DonationModal"; // ✅ Modal de donaciones
 import "./WalletMenu.css";
 
-function WalletMenu({ isOpen, onClose, handleLogout }) {
+function WalletMenu({ isOpen, onClose }) {
   const menuRef = useRef(null);
   const { walletAddress, walletStatus, isReady } = useWallet();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDonationOpen, setIsDonationOpen] = useState(false);
 
+  // ✅ Verificar autenticación con el backend
+  useEffect(() => {
+    const verifyAuth = async () => {
+      if (walletAddress) {
+        const status = await checkAuthStatus();
+        setIsAuthenticated(status.isAuthenticated);
+      } else {
+        setIsAuthenticated(false);
+      }
+    };
+
+    verifyAuth();
+  }, [walletAddress]);
+
+  // ✅ Cerrar menú al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -32,6 +49,11 @@ function WalletMenu({ isOpen, onClose, handleLogout }) {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    onClose(); // ✅ Cerrar menú después de cerrar sesión
+  };
+
   if (!isReady) {
     return null;
   }
@@ -41,24 +63,18 @@ function WalletMenu({ isOpen, onClose, handleLogout }) {
       {isOpen && (
         <div className="wallet-menu open" ref={menuRef}>
           <div className="wallet-menu-content">
-            {walletAddress ? (
+            {isAuthenticated ? (
               <>
                 <div className="wallet-header">
                   <p className="wallet-network">🔗 Solana</p>
                   <p className="wallet-balance">
-                    {walletStatus.balance
-                      ? `${walletStatus.balance.toFixed(2)} SOL`
-                      : "-- SOL"}
+                    {walletStatus.balance ? `${walletStatus.balance.toFixed(2)} SOL` : "-- SOL"}
                   </p>
                 </div>
 
                 <div className="wallet-address-container">
                   <p className="wallet-address">{walletAddress}</p>
-                  <button
-                    className="copy-button"
-                    onClick={handleCopy}
-                    aria-label="Copy Address"
-                  >
+                  <button className="copy-button" onClick={handleCopy} aria-label="Copy Address">
                     <Copy size={18} />
                   </button>
                 </div>
