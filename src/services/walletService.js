@@ -9,7 +9,7 @@ export async function connectWallet(wallet) {
     try {
         console.log(`🔵 Conectando con ${wallet}...`);
         const provider = getProvider(wallet);
-        if (!provider) return { pubkey: null, status: "error" };
+        if (!provider) return { pubkey: null, status: "error", error: "Provider not found" };
 
         await provider.connect();
         const pubkey = provider.publicKey.toBase58();
@@ -18,7 +18,7 @@ export async function connectWallet(wallet) {
         return { pubkey, status: "connected" };
     } catch (error) {
         console.error("❌ Error conectando wallet:", error);
-        return { pubkey: null, status: "error" };
+        return { pubkey: null, status: "error", error: error.message || error };
     }
 }
 
@@ -54,13 +54,16 @@ export async function getConnectedWallet() {
             credentials: "include",
         });
 
-        const authData = await authResponse.json();
-        const isAuthenticated = authData.isAuthenticated || false;
+        if (!authResponse.ok) {
+            console.warn("⚠️ No autenticado en el backend.");
+            return { walletAddress, isAuthenticated: false };
+        }
 
-        return { walletAddress, isAuthenticated };
+        const authData = await authResponse.json();
+        return { walletAddress, isAuthenticated: authData.isAuthenticated || false };
     } catch (error) {
         console.error("❌ Error obteniendo estado de la wallet:", error);
-        return { walletAddress: null, isAuthenticated: false };
+        return { walletAddress: null, isAuthenticated: false, error: error.message || error };
     }
 }
 
@@ -74,8 +77,11 @@ async function signMessage(wallet, message) {
         if (!provider) return { signature: null, error: "No provider found" };
 
         const encodedMessage = new TextEncoder().encode(message);
-        const { signature } = await provider.signMessage(encodedMessage);
-        const signatureBase58 = bs58.encode(signature);
+        const signatureResponse = await provider.signMessage(encodedMessage);
+
+        if (!signatureResponse) throw new Error("Firma fallida o rechazada.");
+
+        const signatureBase58 = bs58.encode(signatureResponse.signature);
 
         console.log("✅ Firma generada:", signatureBase58);
         return { signature: signatureBase58, message, pubkey: provider.publicKey.toBase58() };
@@ -99,7 +105,11 @@ export async function authenticateWallet(wallet) {
         console.log("🔄 Iniciando autenticación...");
         const message = "Please sign this message to authenticate.";
         const signedData = await signMessage(wallet, message);
-        if (!signedData.signature) throw new Error("❌ Firma rechazada.");
+
+        if (!signedData.signature) {
+            console.error("❌ Firma rechazada.");
+            return { pubkey: null, status: "signature_failed" };
+        }
 
         console.log("🔵 Enviando firma al backend...");
         const response = await authenticateWithServer(
@@ -109,13 +119,14 @@ export async function authenticateWallet(wallet) {
         );
 
         if (!response || !response.message) {
-            throw new Error("❌ Respuesta inválida del backend.");
+            console.error("❌ Respuesta inválida del backend.");
+            return { pubkey: null, status: "server_error" };
         }
 
         console.log("✅ Autenticación exitosa en backend.");
         return { pubkey: walletAddress, status: "authenticated" };
     } catch (error) {
         console.error("❌ Error en authenticateWallet():", error.message || error);
-        return { pubkey: null, status: "error" };
+        return { pubkey: null, status: "error", error: error.message || error };
     }
 }

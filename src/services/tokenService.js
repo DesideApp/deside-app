@@ -7,8 +7,9 @@ export function getCSRFTokenFromCookie() {
 // 🔓 **Eliminar las cookies al cerrar sesión**
 export function clearSession() {
   console.warn("⚠️ Eliminando credenciales del usuario...");
-  document.cookie = "accessToken=; Max-Age=0; path=/; secure; SameSite=Strict";
-  document.cookie = "csrfToken=; Max-Age=0; path=/; secure; SameSite=Strict";
+  document.cookie = "accessToken=; Max-Age=0; path=/; secure; SameSite=None";
+  document.cookie = "refreshToken=; Max-Age=0; path=/; secure; SameSite=None";
+  document.cookie = "csrfToken=; Max-Age=0; path=/; secure; SameSite=None";
   window.dispatchEvent(new Event("walletDisconnected")); // 🔄 Notificar a la app
 }
 

@@ -13,13 +13,11 @@ export async function apiRequest(endpoint, options = {}) {
     // ✅ Verificar caché antes de hacer la solicitud
     if (cache.has(cacheKey)) {
         const cachedData = cache.get(cacheKey);
-        const isExpired = Date.now() - cachedData.timestamp > CACHE_EXPIRATION;
-        if (!isExpired) {
+        if (Date.now() - cachedData.timestamp <= CACHE_EXPIRATION) {
             console.log(`⚡ Usando caché para ${endpoint}`);
             return cachedData.data;
-        } else {
-            cache.delete(cacheKey); // ❌ Expirar caché si ha pasado el tiempo límite
         }
+        cache.delete(cacheKey); // ❌ Expirar caché si ha pasado el tiempo límite
     }
 
     try {
@@ -39,7 +37,12 @@ export async function apiRequest(endpoint, options = {}) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch {
+                errorData = { message: "Unknown error", status: response.status };
+            }
             throw new Error(`❌ Error ${response.status}: ${errorData.message || response.statusText}`);
         }
 
@@ -47,7 +50,7 @@ export async function apiRequest(endpoint, options = {}) {
         cache.set(cacheKey, { data: responseData, timestamp: Date.now() }); // ✅ Guardamos en caché con timestamp
         return responseData;
     } catch (error) {
-        console.error(`❌ Error en API request (${endpoint}):`, error);
+        console.error(`❌ Error en API request (${endpoint}):`, error.message || error);
         throw error;
     }
 }
