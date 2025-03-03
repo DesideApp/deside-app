@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ensureWalletState } from "../../services/walletService.js";
+import { checkAuthStatus } from "../../services/apiService.js";
 import { addContact } from "../../services/apiService.js";
 
 const AddContactForm = ({ onContactAdded }) => {
@@ -21,7 +21,7 @@ const AddContactForm = ({ onContactAdded }) => {
         setSuccessMessage("");
 
         try {
-            const { isAuthenticated } = await ensureWalletState(); // ✅ **Validar autenticación correctamente**
+            const { isAuthenticated } = await checkAuthStatus();
             if (!isAuthenticated) {
                 throw new Error("⚠️ Debes estar autenticado para añadir contactos.");
             }
