@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { fetchWithAuth } from "../services/authServices"; // ✅ Verifica autenticación con CSRF y JWT
+import { apiRequest as fetchWithAuth } from "../services/apiService.js"; // ✅ Actualizado
 
 const useWebRTC = (selectedContact, walletAddress) => {
   const [messages, setMessages] = useState([]);

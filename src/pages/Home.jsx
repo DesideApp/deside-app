@@ -1,15 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWallet } from "../contexts/WalletContext"; // ✅ Importamos el contexto global
 import "./Home.css";
 
 function Home() {
     const navigate = useNavigate();
-    const { walletStatus, isReady } = useWallet(); // ✅ Obtener estado global
+    const { walletStatus, isReady } = useWallet();
+    const [errorMessage, setErrorMessage] = useState(""); // 🔹 Estado para mostrar mensajes de error
 
     const handleNavigate = () => {
         if (walletStatus !== "authenticated") {
-            alert("⚠️ Debes autenticarte antes de acceder al chat.");
+            setErrorMessage("⚠️ Debes autenticarte antes de acceder al chat."); // ✅ Mostrar mensaje en lugar de `alert()`
             return;
         }
         navigate("/chat");
@@ -27,7 +28,10 @@ function Home() {
                     {walletStatus === "authenticated" ? (
                         <button onClick={handleNavigate}>Enter Chat</button>
                     ) : (
-                        <p className="auth-warning">⚠️ Connect and authenticate to access the chat.</p>
+                        <>
+                            <p className="auth-warning">⚠️ Connect and authenticate to access the chat.</p>
+                            {errorMessage && <p className="error-message">{errorMessage}</p>} {/* ✅ Mensaje dinámico */}
+                        </>
                     )}
                 </>
             )}

@@ -1,11 +1,11 @@
 import React from "react";
-import "./RightPanel.css"; // ✅ Se mantiene la coherencia visual
+import ContactRequests from "../chatcomps/ContactRequests"; // ✅ Sección de solicitudes de contacto
+import "./RightPanel.css"; 
 
 function RightPanel() {
   return (
     <div className="right-panel">
-      <h2>🚀 Coming Soon...</h2>
-      <p>We're working on exciting new features for DeChat. Stay tuned!</p>
+      <ContactRequests /> {/* 🔹 Muestra solicitudes de contacto */}
     </div>
   );
 }

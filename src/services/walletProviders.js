@@ -18,3 +18,30 @@ export function getProvider(wallet) {
     }
     return provider;
 }
+
+/**
+ * 🔄 **Verificar si la wallet ya está conectada**
+ * @returns {boolean} - `true` si hay una wallet conectada, `false` en caso contrario.
+ */
+export function isWalletConnected() {
+    return window.solana?.isConnected || false;
+}
+
+/**
+ * 📡 **Detectar conexión y desconexión de la wallet**
+ * @param {function} onConnect - Callback cuando la wallet se conecta.
+ * @param {function} onDisconnect - Callback cuando la wallet se desconecta.
+ */
+export function listenToWalletEvents(onConnect, onDisconnect) {
+    if (window.solana) {
+        window.solana.on("connect", () => {
+            console.log("✅ Wallet conectada.");
+            if (onConnect) onConnect();
+        });
+
+        window.solana.on("disconnect", () => {
+            console.warn("❌ Wallet desconectada.");
+            if (onDisconnect) onDisconnect();
+        });
+    }
+}

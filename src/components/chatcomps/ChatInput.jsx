@@ -8,27 +8,29 @@ function ChatInput({ onSendMessage, disabled }) {
 
     // ✅ **Enviar mensaje solo si no está deshabilitado y el input tiene texto**
     const handleSendMessage = () => {
-        if (!message.trim() || disabled) return;
+        if (disabled || !message.trim()) return;
+        
         onSendMessage(message.trim());
-        setMessage(""); // ✅ Limpiar input después de enviar
-        inputRef.current.focus(); // ✅ Mantener el focus en el input
+        if (message.trim() !== "") setMessage(""); // ✅ Evitamos llamada innecesaria
+        inputRef.current?.focus(); // ✅ Mantener el focus en el input
     };
 
     // ✅ **Manejo de la tecla "Enter"**
     const handleKeyDown = (event) => {
-        if (disabled) {
-            setAuthWarning(true);
-            setTimeout(() => setAuthWarning(false), 3000); // ✅ Ocultar el aviso tras 3 segundos
-        }
-
-        if (event.key === "Enter" && !event.shiftKey && !disabled) {
+        if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault();
-            handleSendMessage();
+            if (disabled) {
+                setAuthWarning(true);
+                setTimeout(() => setAuthWarning(false), 3000);
+            } else {
+                handleSendMessage();
+            }
         }
     };
 
+    // ✅ **Ocultar mensaje de advertencia al habilitar el input**
     useEffect(() => {
-        if (!disabled) setAuthWarning(false); // ✅ Ocultar el mensaje si el usuario se autentica
+        if (!disabled) setAuthWarning(false);
     }, [disabled]);
 
     return (

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchContacts, sendContactRequest, approveContact, rejectContact } from "../services/contactService";
-import { checkAuthStatus } from "../services/authServices"; // ✅ Validación de autenticación
+import { checkAuthStatus } from "../services/apiService.js"; // ✅ Validación de autenticación
 
 export default function useContactManager() {
     const [confirmedContacts, setConfirmedContacts] = useState([]);

@@ -2,7 +2,7 @@ import React from "react";
 import { Copy } from "lucide-react";
 import "./DonationModal.css";
 
-const DONATION_WALLET = process.env.REACT_APP_DONATION_WALLET || "9X7yR...F8dZ"; // ✅ Ahora se obtiene desde `.env`
+const DONATION_WALLET = import.meta.env.VITE_DONATION_WALLET || "9X7yR...F8dZ"; // ✅ Usamos Vite correctamente
 
 function DonationModal({ isOpen, onClose }) {
   const handleCopy = () => {

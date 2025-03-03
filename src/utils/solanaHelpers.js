@@ -1,12 +1,18 @@
 import { Connection, PublicKey } from "@solana/web3.js";
-import { apiRequest } from '../services/apiService'; // ✅ Centralizamos peticiones API
 
-const RPC_URL = 'https://rpc.ankr.com/solana_devnet/84d7f098a02eb4c502839fa2cff526bb9d0ee07aa75c19ecf28f8925a824ba59';
+const RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com"; // ✅ Ahora configurable desde `.env`
 
-// 🔹 **Obtener balance en SOL**
+/**
+ * 🔹 **Obtener balance en SOL**
+ */
 export async function getBalance(walletAddress) {
     try {
-        const connection = new Connection(RPC_URL, 'confirmed');
+        if (!walletAddress) {
+            console.error("❌ Dirección de wallet inválida.");
+            return null;
+        }
+
+        const connection = new Connection(RPC_URL, "confirmed");
         const publicKey = new PublicKey(walletAddress);
 
         const balanceLamports = await connection.getBalance(publicKey);
@@ -16,14 +22,19 @@ export async function getBalance(walletAddress) {
         return balanceSol;
     } catch (error) {
         console.error(`❌ Error obteniendo balance para ${walletAddress}:`, error);
-        return null; // 🔄 Evita bloquear la app si hay error
+        return null;
     }
 }
 
-// 🔹 **Hacer solicitudes a la API de Solana**
+/**
+ * 🔹 **Obtener datos de Solana sin pasar por nuestro backend**
+ */
 export async function fetchSolanaData(endpoint) {
     try {
-        const data = await apiRequest(endpoint, { method: 'GET' });
+        const response = await fetch(`https://api.mainnet-beta.solana.com/${endpoint}`);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+        const data = await response.json();
         console.log(`🔗 Datos de Solana recibidos (${endpoint}):`, data);
         return data;
     } catch (error) {
@@ -32,14 +43,17 @@ export async function fetchSolanaData(endpoint) {
     }
 }
 
-// 🔹 **Crear conexión a la red de Solana**
+/**
+ * 🔹 **Crear conexión a la red de Solana**
+ */
 export function createSolanaConnection(cluster = RPC_URL) {
     try {
-        const connection = new Connection(cluster, 'confirmed');
+        if (!cluster) throw new Error("Cluster de Solana no definido.");
+        const connection = new Connection(cluster, "confirmed");
         console.log(`✅ Conectado a Solana (${cluster})`);
         return connection;
     } catch (error) {
-        console.error('❌ Error creando conexión a Solana:', error);
+        console.error("❌ Error creando conexión a Solana:", error);
         return null;
     }
 }

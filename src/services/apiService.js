@@ -1,6 +1,6 @@
 import API_BASE_URL from "../config/apiConfig.js";
-import { getCSRFTokenFromCookie } from "./tokenService.js"; // ❌ Eliminamos refreshToken
-import { ensureWalletState } from "./walletStateService.js";
+import { getCSRFTokenFromCookie } from "./tokenService.js";
+import { ensureWalletState } from "./walletService.js"; // ✅ Se unifica autenticación en walletService.js
 
 const cache = new Map();
 const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutos
@@ -43,7 +43,7 @@ export async function apiRequest(endpoint, options = {}) {
 
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             ...options,
-            credentials: "include", // ✅ Asegurar que se envían cookies
+            credentials: "include",
             headers,
         });
 
@@ -62,7 +62,25 @@ export async function apiRequest(endpoint, options = {}) {
 }
 
 /**
- * 🔹 **Funciones específicas para interacciones con la API**
+ * 🔹 **Funciones de autenticación**
+ */
+export async function authenticateWithServer(pubkey, signature, message) {
+    return apiRequest("/api/auth/auth", {
+        method: "POST",
+        body: JSON.stringify({ pubkey, signature, message }),
+    });
+}
+
+export async function checkAuthStatus() {
+    return apiRequest("/api/auth/status", { method: "GET" });
+}
+
+export async function logout() {
+    await apiRequest("/api/auth/revoke", { method: "POST" });
+}
+
+/**
+ * 🔹 **Funciones de contactos**
  */
 export async function getContacts() {
     return apiRequest("/api/contacts", { method: "GET" });
@@ -87,4 +105,23 @@ export async function rejectContact(pubkey) {
         method: "DELETE",
         body: JSON.stringify({ pubkey }),
     });
+}
+
+/**
+ * 🔹 **Funciones de Solana (llamadas al backend, no a la blockchain)**
+ */
+export async function getSolanaPrice() {
+    return apiRequest("/api/solana/solana-price", { method: "GET" });
+}
+
+export async function getSolanaTPS() {
+    return apiRequest("/api/solana/solana-tps", { method: "GET" });
+}
+
+export async function getSolanaStatus() {
+    return apiRequest("/api/solana/solana-status", { method: "GET" });
+}
+
+export async function verifyTransaction(signature) {
+    return apiRequest(`/api/solana/verify-transaction/${signature}`, { method: "GET" });
 }

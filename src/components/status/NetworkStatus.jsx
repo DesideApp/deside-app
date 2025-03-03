@@ -1,76 +1,78 @@
-import React, { useEffect, useState } from 'react';
-import './NetworkStatus.css';
+import React, { useEffect, useState } from "react";
+import "./NetworkStatus.css";
+import { getSolanaStatus, getSolanaTPS } from "../../services/apiService.js"; // ✅ API centralizada
 
 function NetworkStatus({ className }) {
-    const [status, setStatus] = useState('offline');
-    const [tps, setTps] = useState(null);
-    const [error, setError] = useState(null);
+  const [status, setStatus] = useState("offline");
+  const [tps, setTps] = useState(null);
+  const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchNetworkStatus = async () => {
-            try {
-                const response = await fetch('https://backend-deside.onrender.com/api/solana-status');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const data = await response.json();
-                setStatus(data.status);
-            } catch (error) {
-                console.error('Failed to fetch network status:', error);
-                setError('Failed to fetch network status');
-                setStatus('offline');
-            }
-        };
+  useEffect(() => {
+    let isMounted = true;
+    let interval;
 
-        const fetchTps = async () => {
-            try {
-                const response = await fetch('https://backend-deside.onrender.com/api/solana-tps');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const data = await response.json();
-                setTps(data.tps);
-            } catch (error) {
-                console.error('Failed to fetch TPS:', error);
-                setError('Failed to fetch TPS');
-                setTps('N/A');
-            }
-        };
+    const fetchData = async () => {
+      try {
+        const [statusData, tpsData] = await Promise.all([getSolanaStatus(), getSolanaTPS()]);
 
-        fetchNetworkStatus();
-        fetchTps();
-
-        const interval = setInterval(() => {
-            fetchNetworkStatus();
-            fetchTps();
-        }, 10000);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    const getStatusColor = () => {
-        if (status === 'connected') return 'green';
-        if (status === 'congested') return 'yellow';
-        return 'red';
+        if (isMounted) {
+          setStatus(statusData.status);
+          setTps(tpsData.tps);
+          setError(null);
+        }
+      } catch (error) {
+        console.error("❌ Error obteniendo estado de la red:", error);
+        if (isMounted) {
+          setError("🔴 Error obteniendo datos de la red.");
+          setStatus("offline");
+          setTps(null);
+        }
+      }
     };
 
-    return (
-        <div className={`network-status-container ${className}`}>
-            <div className="status-container">
-                <span className="network-status-label">Status:</span>
-                <div className={`status-light ${getStatusColor()}`}></div>
-            </div>
-            <div className="tps-container">
-                <span className="network-status-label">TPS:</span>
-                <div className="tps-bars">
-                    {[...Array(4)].map((_, index) => (
-                        <div key={index} className="tps-bar"></div>
-                    ))}
-                </div>
-            </div>
-            {error && <span className="error">{error}</span>}
+    fetchData();
+    interval = setInterval(fetchData, 10000);
+
+    return () => {
+      clearInterval(interval);
+      isMounted = false;
+    };
+  }, []);
+
+  const getStatusColor = () => {
+    if (status === "connected") return "green";
+    if (status === "congested") return "yellow";
+    return "red";
+  };
+
+  const getTpsBars = () => {
+    if (tps === null) return [0, 0, 0, 0]; // Estado desconocido
+
+    if (tps > 3000) return [100, 90, 80, 70]; // Alto rendimiento
+    if (tps > 2000) return [80, 70, 60, 50]; // Carga media-alta
+    if (tps > 1000) return [60, 50, 40, 30]; // Congestión moderada
+    return [40, 30, 20, 10]; // Red congestionada
+  };
+
+  return (
+    <div className={`network-status-container ${className}`}>
+      <div className="status-container">
+        <span className="network-status-label">Status:</span>
+        <div className={`status-bar ${getStatusColor()}`}></div>
+      </div>
+
+      <div className="tps-container">
+        <span className="network-status-label">TPS:</span>
+        <div className="tps-bars">
+          {getTpsBars().map((height, index) => (
+            <div key={index} className="tps-bar" style={{ height: `${height}%` }}></div>
+          ))}
         </div>
-    );
+      </div>
+
+      {error && <span className="error">{error}</span>}
+    </div>
+  );
 }
 
 export default NetworkStatus;

@@ -1,15 +1,14 @@
 import React, { useState } from "react";
-import { useWallet } from "../../contexts/WalletContext"; // ✅ Contexto Global
-import { ensureWalletState } from "../../services/walletStateService.js";
-import { getProvider } from "../../services/walletProviders.js"; // ✅ Importar los providers
+import { useWallet } from "../../contexts/WalletContext";
+import { authenticateWallet } from "../../services/walletService.js"; // ✅ Se usa autenticación correcta
+import { getProvider } from "../../services/walletProviders.js";
 import "./WalletModal.css";
 
 function WalletModal({ isOpen, onClose }) {
-  const { walletStatus, isReady } = useWallet();
+  const { isReady } = useWallet();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // ✅ Evitar mostrar el modal si el contexto aún no está listo
   if (!isOpen || !isReady) return null;
 
   const handleWalletSelection = async (walletType) => {
@@ -27,13 +26,19 @@ function WalletModal({ isOpen, onClose }) {
 
     try {
       await provider.connect();
-      const { state } = await ensureWalletState();
 
-      if (state === "AUTENTICADO Y SI") {
+      if (!provider.publicKey) {
+        throw new Error("❌ No se pudo obtener la clave pública de la wallet.");
+      }
+
+      console.log("🔄 Autenticando wallet en el backend...");
+      const authResult = await authenticateWallet(walletType);
+
+      if (authResult.status === "authenticated") {
         console.log("✅ Wallet conectada y autenticada.");
-        onClose(); // ✅ Cerrar modal tras conexión exitosa
+        onClose();
       } else {
-        console.warn("⚠️ No se pudo conectar o autenticar la wallet.");
+        console.warn("⚠️ No se pudo autenticar la wallet.");
         setErrorMessage("⚠️ Authentication failed. Please try again.");
       }
     } catch (error) {
@@ -62,7 +67,6 @@ function WalletModal({ isOpen, onClose }) {
           </button>
         </div>
 
-        {/* ✅ Mostrar mensaje de error si la conexión falla */}
         {errorMessage && <p className="error-message">{errorMessage}</p>}
 
         <button className="close-modal" onClick={onClose} disabled={isLoading}>

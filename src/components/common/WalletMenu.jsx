@@ -1,28 +1,44 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Copy } from "lucide-react";
-import { useWallet } from "../../contexts/WalletContext"; // ✅ Contexto Global
-import { checkAuthStatus, logout } from "../../services/authServices"; // ✅ Validación con el backend
-import DonationModal from "./DonationModal"; // ✅ Modal de donaciones
+import { useWallet } from "../../contexts/WalletContext";
+import { checkAuthStatus, logout } from "../../services/apiService.js";
+import { disconnectWallet } from "../../services/walletService.js"; // ✅ Se gestiona correctamente la desconexión
+import { getBalance } from "../../utils/solanaHelpers.js"; // ✅ Obtener balance de Solana
+import DonationModal from "./DonationModal";
 import "./WalletMenu.css";
 
 function WalletMenu({ isOpen, onClose }) {
   const menuRef = useRef(null);
-  const { walletAddress, walletStatus, isReady } = useWallet();
+  const { walletAddress, isReady } = useWallet();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDonationOpen, setIsDonationOpen] = useState(false);
+  const [balance, setBalance] = useState(null);
 
   // ✅ Verificar autenticación con el backend
   useEffect(() => {
+    let isMounted = true;
+
     const verifyAuth = async () => {
       if (walletAddress) {
         const status = await checkAuthStatus();
-        setIsAuthenticated(status.isAuthenticated);
+        if (isMounted) {
+          setIsAuthenticated(status.isAuthenticated);
+          const walletBalance = await getBalance(walletAddress);
+          setBalance(walletBalance);
+        }
       } else {
-        setIsAuthenticated(false);
+        if (isMounted) {
+          setIsAuthenticated(false);
+          setBalance(null);
+        }
       }
     };
 
     verifyAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, [walletAddress]);
 
   // ✅ Cerrar menú al hacer clic fuera
@@ -49,14 +65,13 @@ function WalletMenu({ isOpen, onClose }) {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    onClose(); // ✅ Cerrar menú después de cerrar sesión
+  const handleLogout = async () => {
+    await disconnectWallet(); // ✅ Desconectar la wallet antes de hacer logout
+    await logout();
+    onClose();
   };
 
-  if (!isReady) {
-    return null;
-  }
+  if (!isReady) return null;
 
   return (
     <>
@@ -68,7 +83,7 @@ function WalletMenu({ isOpen, onClose }) {
                 <div className="wallet-header">
                   <p className="wallet-network">🔗 Solana</p>
                   <p className="wallet-balance">
-                    {walletStatus.balance ? `${walletStatus.balance.toFixed(2)} SOL` : "-- SOL"}
+                    {balance !== null ? `${balance.toFixed(2)} SOL` : "0 SOL"}
                   </p>
                 </div>
 
@@ -83,7 +98,6 @@ function WalletMenu({ isOpen, onClose }) {
                   Disconnect
                 </button>
 
-                {/* ✅ Botón para abrir el modal de donaciones */}
                 <button className="donate-button" onClick={() => setIsDonationOpen(true)}>
                   Support Us 💜
                 </button>
@@ -100,7 +114,6 @@ function WalletMenu({ isOpen, onClose }) {
         </div>
       )}
 
-      {/* ✅ Modal de donaciones */}
       <DonationModal isOpen={isDonationOpen} onClose={() => setIsDonationOpen(false)} />
     </>
   );

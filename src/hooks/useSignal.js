@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import DOMPurify from 'dompurify';
-import { checkAuthStatus } from "../services/authServices"; // ✅ Validamos autenticación directamente
+import { checkAuthStatus } from "../services/apiService.js"; // ✅ Validamos autenticación directamente
 
 const useSignal = (backendUrl, onContactRequest, onContactAccepted) => {
     const socket = useRef(null);

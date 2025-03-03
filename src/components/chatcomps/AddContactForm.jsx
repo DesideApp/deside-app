@@ -1,37 +1,38 @@
-import React, { useState } from 'react';
-import { ensureWalletState } from '../../services/walletStateService';
-import { addContact } from '../../services/apiService';
+import React, { useState } from "react";
+import { ensureWalletState } from "../../services/walletService.js";
+import { addContact } from "../../services/apiService.js";
 
 const AddContactForm = ({ onContactAdded }) => {
-    const [pubkey, setPubkey] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
+    const [pubkey, setPubkey] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
     // ✅ **Enviar solicitud de contacto**
     const handleAddContact = async () => {
-        if (!pubkey.trim()) {
-            setErrorMessage('⚠️ Introduce una clave pública válida.');
+        const trimmedPubkey = pubkey.trim();
+        if (!trimmedPubkey) {
+            setErrorMessage("⚠️ Introduce una clave pública válida.");
             return;
         }
 
         setIsLoading(true);
-        setErrorMessage('');
-        setSuccessMessage('');
+        setErrorMessage("");
+        setSuccessMessage("");
 
         try {
-            const status = await ensureWalletState(); // ✅ **Asegurar autenticación**
-            if (!status.isAuthenticated) {
-                throw new Error('⚠️ Debes estar autenticado para añadir contactos.');
+            const { isAuthenticated } = await ensureWalletState(); // ✅ **Validar autenticación correctamente**
+            if (!isAuthenticated) {
+                throw new Error("⚠️ Debes estar autenticado para añadir contactos.");
             }
 
-            await addContact(pubkey);
-            setSuccessMessage('✅ Solicitud de contacto enviada con éxito.');
-            setPubkey('');
+            await addContact(trimmedPubkey);
+            setSuccessMessage("✅ Solicitud de contacto enviada con éxito.");
+            setPubkey(""); // ✅ Reset del input tras el éxito
             onContactAdded();
         } catch (error) {
-            console.error('❌ Error enviando la solicitud:', error);
-            setErrorMessage(error.message || '❌ Error al enviar solicitud.');
+            console.error("❌ Error enviando la solicitud:", error);
+            setErrorMessage(error.message || "❌ Error al enviar solicitud.");
         } finally {
             setIsLoading(false);
         }
@@ -44,21 +45,18 @@ const AddContactForm = ({ onContactAdded }) => {
             <input
                 type="text"
                 value={pubkey}
-                onChange={(e) => {
-                    setPubkey(e.target.value);
-                    setErrorMessage('');
-                    setSuccessMessage('');
-                }}
+                onChange={(e) => setPubkey(e.target.value)}
                 placeholder="Introduce la clave pública"
                 disabled={isLoading}
             />
 
             <button onClick={handleAddContact} disabled={isLoading}>
-                {isLoading ? 'Enviando...' : '➕ Enviar Solicitud'}
+                {isLoading ? "Enviando..." : "➕ Enviar Solicitud"}
             </button>
 
-            {errorMessage && <p className="error-message">{errorMessage}</p>}
-            {successMessage && <p className="success-message">{successMessage}</p>}
+            {/* ✅ Mejora de accesibilidad con `aria-live` */}
+            {errorMessage && <p className="error-message" aria-live="polite">{errorMessage}</p>}
+            {successMessage && <p className="success-message" aria-live="polite">{successMessage}</p>}
         </div>
     );
 };

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useWallet } from "../../contexts/WalletContext"; // ✅ Usar el contexto global
-import { getWalletBalance, disconnectWallet } from "../../services/walletService.js";
-import { checkAuthStatus, logout } from "../../services/authServices.js"; // ✅ Validar autenticación con el backend
+import { useWallet } from "../../contexts/WalletContext";
+import { getBalance } from "../../utils/solanaHelpers.js"; // ✅ Se usa la función centralizada
+import { disconnectWallet } from "../../services/walletService.js";
+import { checkAuthStatus, logout } from "../../services/apiService.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
 
 function WalletButton() {
-  const { walletStatus, walletAddress, isReady } = useWallet(); // ✅ Obtener datos desde el contexto
+  const { walletStatus, walletAddress, isReady } = useWallet();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [balance, setBalance] = useState(null);
@@ -18,43 +19,29 @@ function WalletButton() {
 
     const updateWalletStatus = async () => {
       const status = await checkAuthStatus();
-      setIsAuthenticated(status.isAuthenticated);
-
       if (status.isAuthenticated) {
-        const walletBalance = await getWalletBalance(walletAddress);
+        setIsAuthenticated(true);
+        const walletBalance = await getBalance(walletAddress);
         setBalance(walletBalance);
       } else {
-        setBalance(null);
+        setIsAuthenticated(false);
+        setBalance(0); // ✅ Mostramos 0 SOL en lugar de "--"
       }
     };
 
     updateWalletStatus();
-  }, [isReady, walletAddress]);
+  }, [walletAddress]);
 
   const handleConnect = () => {
     if (!walletAddress) {
-      setIsModalOpen(true); // ✅ Se abre el modal solo si no hay wallet conectada
-    }
-  };
-
-  const handleWalletSelect = async (walletType) => {
-    console.log(`🔵 Seleccionando wallet: ${walletType}`);
-    const status = await checkAuthStatus();
-
-    if (status.isAuthenticated) {
-      console.log("✅ Wallet conectada y autenticada.");
-      setIsModalOpen(false);
-    } else {
-      console.warn("⚠️ No se pudo conectar o autenticar la wallet.");
+      setIsModalOpen(true);
     }
   };
 
   return (
     <div className="wallet-container">
       <button className="wallet-button" onClick={handleConnect} disabled={!isReady}>
-        {isAuthenticated
-          ? `${balance ? balance.toFixed(2) : "--"} SOL`
-          : "Connect Wallet"}
+        {isAuthenticated ? `${balance ? balance.toFixed(2) : "0.00"} SOL` : "Connect Wallet"}
       </button>
 
       <button
@@ -77,11 +64,7 @@ function WalletButton() {
         }}
       />
 
-      <WalletModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onWalletSelect={handleWalletSelect}
-      />
+      <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }
