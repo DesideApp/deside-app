@@ -1,6 +1,5 @@
 import API_BASE_URL from "../config/apiConfig.js";
 import { getCSRFTokenFromCookie } from "./tokenService.js";
-import { checkAuthStatus } from "./apiService.js"; // ✅ Reemplazo de `ensureWalletState`
 
 const cache = new Map();
 const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutos
@@ -24,14 +23,6 @@ export async function apiRequest(endpoint, options = {}) {
     }
 
     try {
-        // ✅ Verificar autenticación solo si no es una solicitud pública
-        if (!endpoint.includes("/public/")) {
-            const { isAuthenticated } = await checkAuthStatus(); // ✅ Corrección aplicada aquí
-            if (!isAuthenticated) {
-                throw new Error("❌ Wallet no autenticada. No se puede hacer la solicitud.");
-            }
-        }
-
         let csrfToken = getCSRFTokenFromCookie();
 
         // ✅ Construcción segura de headers
