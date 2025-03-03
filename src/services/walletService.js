@@ -1,6 +1,6 @@
 import { getProvider } from "./walletProviders";  
-import { authenticateWithServer } from "./apiService"; // ✅ Unificamos autenticación
-import bs58 from "bs58"; // Codificación Base58
+import { authenticateWithServer } from "./apiService"; 
+import bs58 from "bs58"; 
 
 /**
  * 🔹 **Conectar la wallet**
@@ -27,7 +27,7 @@ export async function connectWallet(wallet) {
  */
 export async function disconnectWallet() {
     try {
-        if (window.solana && window.solana.disconnect) {
+        if (window.solana?.disconnect) {
             await window.solana.disconnect();
         }
         console.log("🔴 Wallet desconectada correctamente.");
@@ -41,14 +41,19 @@ export async function disconnectWallet() {
  */
 export async function getConnectedWallet() {
     try {
-        if (!window.solana || !window.solana.isConnected) {
+        if (!window.solana?.isConnected) {
             return { walletAddress: null, isAuthenticated: false };
         }
 
-        const walletAddress = window.solana.publicKey ? window.solana.publicKey.toBase58() : null;
+        const walletAddress = window.solana.publicKey?.toBase58() || null;
         console.log(`✅ Wallet detectada: ${walletAddress}`);
 
-        // 🔥 **Nuevo: Comprobamos si está autenticada en el backend**
+        if (!walletAddress) {
+            console.warn("⚠️ No hay wallet conectada.");
+            return { walletAddress: null, isAuthenticated: false };
+        }
+
+        // 🔥 **Nuevo: Solo hacemos la petición si hay una wallet conectada**
         const authResponse = await fetch("/api/auth/status", {
             method: "GET",
             credentials: "include",
@@ -79,11 +84,11 @@ async function signMessage(wallet, message) {
         const encodedMessage = new TextEncoder().encode(message);
         const signatureResponse = await provider.signMessage(encodedMessage);
 
-        if (!signatureResponse) throw new Error("Firma fallida o rechazada.");
+        if (!signatureResponse?.signature) throw new Error("Firma fallida o rechazada.");
 
         const signatureBase58 = bs58.encode(signatureResponse.signature);
-
         console.log("✅ Firma generada:", signatureBase58);
+        
         return { signature: signatureBase58, message, pubkey: provider.publicKey.toBase58() };
     } catch (error) {
         console.error("❌ Error en signMessage():", error.message || error);
@@ -96,10 +101,16 @@ async function signMessage(wallet, message) {
  */
 export async function authenticateWallet(wallet) {
     try {
-        const { walletAddress } = await getConnectedWallet();
+        const { walletAddress, isAuthenticated } = await getConnectedWallet();
+
         if (!walletAddress) {
             console.warn("⚠️ No hay wallet conectada. Se requiere conexión antes de autenticar.");
             return { pubkey: null, status: "not_connected" };
+        }
+
+        if (isAuthenticated) {
+            console.log("✅ Ya autenticado en el backend.");
+            return { pubkey: walletAddress, status: "already_authenticated" };
         }
 
         console.log("🔄 Iniciando autenticación...");

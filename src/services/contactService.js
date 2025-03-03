@@ -7,11 +7,16 @@ export async function fetchContacts() {
     try {
         console.log("📡 Obteniendo lista de contactos...");
         const response = await apiRequest("/api/contacts", { method: "GET" });
-        console.log("✅ Contactos obtenidos:", response);
-        return response;
+
+        if (!response || !Array.isArray(response.contacts)) {
+            throw new Error("❌ Respuesta inválida del servidor");
+        }
+
+        console.log("✅ Contactos obtenidos:", response.contacts);
+        return response.contacts;
     } catch (error) {
-        console.error("❌ Error al obtener contactos:", error);
-        throw error;
+        console.error("❌ Error al obtener contactos:", error.message || error);
+        return []; // Evita que la app se rompa si hay un error
     }
 }
 
@@ -25,11 +30,17 @@ export async function sendContactRequest(pubkey) {
             method: "POST",
             body: JSON.stringify({ pubkey }),
         });
+
+        if (response.error) {
+            console.warn("⚠️ No se pudo enviar la solicitud:", response.error);
+            return { success: false, error: response.error };
+        }
+
         console.log("✅ Solicitud enviada:", response);
-        return response;
+        return { success: true, message: response.message };
     } catch (error) {
-        console.error("❌ Error al enviar solicitud de contacto:", error);
-        throw error;
+        console.error("❌ Error al enviar solicitud de contacto:", error.message || error);
+        return { success: false, error: error.message || error };
     }
 }
 
@@ -43,11 +54,17 @@ export async function approveContact(pubkey) {
             method: "POST",
             body: JSON.stringify({ pubkey }),
         });
+
+        if (response.error) {
+            console.warn("⚠️ No se pudo aceptar el contacto:", response.error);
+            return { success: false, error: response.error };
+        }
+
         console.log("✅ Contacto aceptado:", response);
-        return response;
+        return { success: true, message: response.message };
     } catch (error) {
-        console.error("❌ Error al aceptar contacto:", error);
-        throw error;
+        console.error("❌ Error al aceptar contacto:", error.message || error);
+        return { success: false, error: error.message || error };
     }
 }
 
@@ -61,10 +78,16 @@ export async function rejectContact(pubkey) {
             method: "DELETE",
             body: JSON.stringify({ pubkey }),
         });
+
+        if (response.error) {
+            console.warn("⚠️ No se pudo eliminar el contacto:", response.error);
+            return { success: false, error: response.error };
+        }
+
         console.log("✅ Contacto eliminado:", response);
-        return response;
+        return { success: true, message: response.message };
     } catch (error) {
-        console.error("❌ Error al eliminar contacto:", error);
-        throw error;
+        console.error("❌ Error al eliminar contacto:", error.message || error);
+        return { success: false, error: error.message || error };
     }
 }

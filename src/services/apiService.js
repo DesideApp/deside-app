@@ -1,5 +1,5 @@
 import API_BASE_URL from "../config/apiConfig.js";
-import { getCSRFTokenFromCookie } from "./tokenService.js";
+import { getCSRFTokenFromCookie, refreshToken } from "./tokenService.js";
 
 const cache = new Map();
 const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutos
@@ -7,7 +7,7 @@ const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutos
 /**
  * 🔹 **Función central para manejar solicitudes a la API con autenticación y CSRF**
  */
-export async function apiRequest(endpoint, options = {}) {
+export async function apiRequest(endpoint, options = {}, retry = true) {
     const cacheKey = `${endpoint}:${JSON.stringify(options)}`;
 
     // ✅ Verificar caché antes de hacer la solicitud
@@ -43,6 +43,13 @@ export async function apiRequest(endpoint, options = {}) {
             } catch {
                 errorData = { message: "Unknown error", status: response.status };
             }
+
+            if (response.status === 401 && retry) {
+                console.warn("⚠️ Token expirado. Intentando renovar...");
+                await refreshToken();
+                return apiRequest(endpoint, options, false); // 🔄 Reintentar sin loop infinito
+            }
+
             throw new Error(`❌ Error ${response.status}: ${errorData.message || response.statusText}`);
         }
 

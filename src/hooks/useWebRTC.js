@@ -6,13 +6,17 @@ const useWebRTC = (selectedContact, walletAddress) => {
   const [connectionStatus, setConnectionStatus] = useState("idle"); // ✅ Estado de conexión
   const peerRef = useRef(null);
   const dataChannelRef = useRef(null);
+  const isReconnecting = useRef(false);
 
   // ✅ **Verificar si el contacto está confirmado antes de iniciar WebRTC**
   const validateContactStatus = async () => {
     try {
       const response = await fetchWithAuth(`/api/contacts/status/${selectedContact}`);
-      const data = await response.json();
-      return data.isConfirmed && !data.isBlocked;
+      if (!response || !response.isConfirmed) {
+        console.warn("⚠️ Contacto no confirmado o bloqueado.");
+        return false;
+      }
+      return true;
     } catch (error) {
       console.error("❌ Error al verificar el estado del contacto:", error);
       return false;
@@ -41,9 +45,9 @@ const useWebRTC = (selectedContact, walletAddress) => {
     };
 
     peer.oniceconnectionstatechange = () => {
-      if (peer.iceConnectionState === "disconnected") {
-        console.warn("⚠️ WebRTC desconectado.");
-        setConnectionStatus("disconnected");
+      if (peer.iceConnectionState === "disconnected" && !isReconnecting.current) {
+        console.warn("⚠️ WebRTC desconectado. Intentando reconectar...");
+        isReconnecting.current = true;
         attemptReconnection();
       }
     };
@@ -56,6 +60,7 @@ const useWebRTC = (selectedContact, walletAddress) => {
     console.log("🔄 Intentando reconexión...");
     if (await validateContactStatus()) {
       await initializeWebRTC();
+      isReconnecting.current = false;
     } else {
       console.warn("❌ No se puede reconectar. El contacto ya no está confirmado.");
     }
@@ -68,8 +73,8 @@ const useWebRTC = (selectedContact, walletAddress) => {
       return;
     }
 
-    if (!dataChannelRef.current) {
-      console.error("❌ No se puede enviar mensaje, canal de datos no inicializado.");
+    if (!dataChannelRef.current || dataChannelRef.current.readyState !== "open") {
+      console.error("❌ No se puede enviar mensaje, canal de datos no inicializado o cerrado.");
       return;
     }
 
@@ -86,6 +91,7 @@ const useWebRTC = (selectedContact, walletAddress) => {
     return () => {
       if (peerRef.current) {
         peerRef.current.close();
+        peerRef.current = null;
         console.log("🔴 Conexión WebRTC cerrada.");
       }
     };
