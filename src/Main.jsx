@@ -15,16 +15,21 @@ function Main() {
     useEffect(() => {
         const verifyAuthentication = async () => {
             if (!isReady) return;
-            const authStatus = await checkAuthStatus();
-            setIsAuthenticated(authStatus.isAuthenticated);
-            setCheckedAuth(true);
+            try {
+                const authStatus = await checkAuthStatus();
+                setIsAuthenticated(authStatus.isAuthenticated);
+            } catch (error) {
+                console.error("❌ Error verificando autenticación:", error);
+            } finally {
+                setCheckedAuth(true); // ✅ Se asegura de avanzar siempre
+            }
         };
 
         verifyAuthentication();
     }, [isReady, walletStatus]);
 
     if (!checkedAuth) {
-        return <div className="loading-screen">Cargando...</div>;
+        return <div className="loading-screen">🔄 Verificando autenticación...</div>;
     }
 
     return (
@@ -35,7 +40,7 @@ function Main() {
                     <Route path="/" element={<Home />} />
                     <Route 
                         path="/chat" 
-                        element={isAuthenticated ? <Chat /> : <div>🔐 Debes iniciar sesión para acceder al chat.</div>} 
+                        element={isAuthenticated ? <Chat /> : <div className="auth-warning">🔐 Debes iniciar sesión para acceder al chat.</div>} 
                     />
                 </Routes>
             </main>

@@ -17,15 +17,24 @@ function Chat() {
         let isMounted = true; // ✅ Evitar actualizaciones en componentes desmontados
 
         const verifyAuthentication = async () => {
-            if (!isReady || isAuthenticated) return; // ✅ Evitar llamadas innecesarias
+            if (!isReady) return; // ✅ Esperar a que la wallet esté lista
 
-            const status = await checkAuthStatus();
-            if (isMounted) {
-                setIsAuthenticated(status.isAuthenticated);
-                setIsLoading(false);
+            try {
+                const status = await checkAuthStatus();
+                if (isMounted) {
+                    setIsAuthenticated(status.isAuthenticated);
+                    setIsLoading(false);
 
-                if (!status.isAuthenticated) {
-                    console.warn("⚠️ Usuario no autenticado. Redirigiendo a Home...");
+                    if (!status.isAuthenticated) {
+                        console.warn("⚠️ Usuario no autenticado. Redirigiendo a Home...");
+                        navigate("/");
+                    }
+                }
+            } catch (error) {
+                console.error("❌ Error verificando autenticación:", error);
+                if (isMounted) {
+                    setIsLoading(false);
+                    setIsAuthenticated(false);
                     navigate("/");
                 }
             }
@@ -36,7 +45,7 @@ function Chat() {
         return () => {
             isMounted = false; // ✅ Limpiar efecto
         };
-    }, [isReady, isAuthenticated, navigate]);
+    }, [isReady, navigate]);
 
     if (isLoading) {
         return <div className="loading-screen">🔄 Verificando autenticación...</div>;

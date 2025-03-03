@@ -9,8 +9,12 @@ function Home() {
     const [errorMessage, setErrorMessage] = useState(""); // 🔹 Estado para mostrar mensajes de error
 
     const handleNavigate = () => {
+        if (!isReady) {
+            setErrorMessage("⏳ Espera a que la wallet esté lista.");
+            return;
+        }
         if (walletStatus !== "authenticated") {
-            setErrorMessage("⚠️ Debes autenticarte antes de acceder al chat."); // ✅ Mostrar mensaje en lugar de `alert()`
+            setErrorMessage("⚠️ Debes autenticarte antes de acceder al chat.");
             return;
         }
         navigate("/chat");
@@ -19,7 +23,7 @@ function Home() {
     return (
         <div className="home-container">
             <h1>DeChat</h1>
-            <p>Discover a new decentralised social network built in Solana</p>
+            <p>Discover a new decentralized social network built on Solana</p>
 
             {!isReady ? (
                 <p className="loading-message">🔄 Cargando estado de la wallet...</p>
