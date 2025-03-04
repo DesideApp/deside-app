@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import "./NetworkStatus.css";
-import { getSolanaStatus, getSolanaTPS } from "../../services/apiService.js";
+import { getSolanaStatus, getSolanaTPS } from "../../services/solanaService.js"; // ✅ Nuevo import correcto
 
 const NetworkStatus = React.memo(({ className = "" }) => {
     const [status, setStatus] = useState("offline");
