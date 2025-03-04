@@ -1,6 +1,6 @@
 import React, { useEffect, useState, memo, useCallback } from "react";
 import { useWallet } from "../../contexts/WalletContext";
-import { getContacts, approveContact, rejectContact } from "../../services/contactService.js";
+import { fetchContacts, approveContact, rejectContact } from "../../services/contactService.js";
 import "./ContactRequests.css";
 
 const ContactRequests = ({ openAuthModal }) => {
@@ -17,10 +17,10 @@ const ContactRequests = ({ openAuthModal }) => {
 
         const fetchContactRequests = async () => {
             try {
-                const { incoming, outgoing } = await getContacts();
+                const contacts = await fetchContacts();
                 if (isMounted) {
-                    setReceivedRequests(incoming || []);
-                    setSentRequests(outgoing || []);
+                    setReceivedRequests(contacts.incoming || []);
+                    setSentRequests(contacts.outgoing || []);
                 }
             } catch (error) {
                 console.error("❌ Error al obtener solicitudes de contacto:", error);
