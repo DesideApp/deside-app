@@ -1,19 +1,20 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import "./ChatInput.css";
 
-function ChatInput({ onSendMessage, disabled }) {
+const ChatInput = React.memo(({ onSendMessage, disabled }) => {
     const [message, setMessage] = useState("");
     const [authWarning, setAuthWarning] = useState(false);
     const inputRef = useRef(null);
 
     // ✅ **Enviar mensaje solo si no está deshabilitado y el input tiene texto**
-    const handleSendMessage = () => {
-        if (disabled || !message.trim()) return;
-        
-        onSendMessage(message.trim());
-        if (message.trim() !== "") setMessage(""); // ✅ Evitamos llamada innecesaria
-        inputRef.current?.focus(); // ✅ Mantener el focus en el input
-    };
+    const handleSendMessage = useCallback(() => {
+        const trimmedMessage = message.trim();
+        if (disabled || !trimmedMessage) return;
+
+        onSendMessage(trimmedMessage);
+        setMessage(""); // ✅ Limpia el input tras enviar el mensaje
+        inputRef.current?.focus(); // ✅ Mantiene el focus en el input para seguir escribiendo
+    }, [message, disabled, onSendMessage]);
 
     // ✅ **Manejo de la tecla "Enter"**
     const handleKeyDown = (event) => {
@@ -44,6 +45,7 @@ function ChatInput({ onSendMessage, disabled }) {
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
                 disabled={disabled}
+                aria-disabled={disabled}
             />
             <button
                 className="send-button"
@@ -51,7 +53,7 @@ function ChatInput({ onSendMessage, disabled }) {
                 aria-label="Enviar mensaje"
                 disabled={disabled}
             >
-                Enviar
+                ➤
             </button>
 
             {/* 🔔 Aviso de autenticación */}
@@ -60,6 +62,6 @@ function ChatInput({ onSendMessage, disabled }) {
             )}
         </div>
     );
-}
+});
 
 export default ChatInput;

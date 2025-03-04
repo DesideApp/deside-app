@@ -11,6 +11,11 @@ const useSignal = (backendUrl, onContactRequest, onContactAccepted) => {
     // ✅ **Inicializar WebSocket solo si el usuario está autenticado**
     const initializeSocket = async () => {
         try {
+            if (socket.current && socket.current.connected) {
+                console.log("⚡ WebSocket ya conectado, evitando reconexión.");
+                return;
+            }
+
             const status = await checkAuthStatus();
             if (!status.isAuthenticated) {
                 console.warn("⚠️ Usuario no autenticado. No se inicia la señalización.");
@@ -21,10 +26,7 @@ const useSignal = (backendUrl, onContactRequest, onContactAccepted) => {
                 socket.current = io(backendUrl, { autoConnect: false });
             }
 
-            if (!socket.current.connected) {
-                console.log("🔵 Conectando socket de señalización...");
-                socket.current.connect();
-            }
+            socket.current.connect();
 
             socket.current.on("connect", () => {
                 setConnected(true);
@@ -38,19 +40,25 @@ const useSignal = (backendUrl, onContactRequest, onContactAccepted) => {
             });
 
             socket.current.on("signal", (data) => {
-                const sanitizedData = DOMPurify.sanitize(data);
-                setSignals((prev) => [...prev, sanitizedData]);
+                if (data) {
+                    const sanitizedData = DOMPurify.sanitize(data);
+                    setSignals((prev) => [...prev, sanitizedData]);
+                }
             });
 
             // ✅ **Eventos de contactos**
             socket.current.on("contact_request", ({ from }) => {
-                console.log(`📨 Nueva solicitud de contacto recibida de ${from}`);
-                if (onContactRequest) onContactRequest(from);
+                if (from && onContactRequest) {
+                    console.log(`📨 Nueva solicitud de contacto recibida de ${from}`);
+                    onContactRequest(from);
+                }
             });
 
             socket.current.on("contact_accepted", ({ from }) => {
-                console.log(`✅ Contacto aceptado: ${from}`);
-                if (onContactAccepted) onContactAccepted(from);
+                if (from && onContactAccepted) {
+                    console.log(`✅ Contacto aceptado: ${from}`);
+                    onContactAccepted(from);
+                }
             });
         } catch (error) {
             console.error("❌ Error inicializando WebSocket:", error);
@@ -62,8 +70,13 @@ const useSignal = (backendUrl, onContactRequest, onContactAccepted) => {
 
         return () => {
             if (socket.current) {
+                console.log("🔴 Desconectando y limpiando WebSocket...");
+                socket.current.off("connect");
+                socket.current.off("disconnect");
+                socket.current.off("signal");
+                socket.current.off("contact_request");
+                socket.current.off("contact_accepted");
                 socket.current.disconnect();
-                console.log("🔴 Socket desconectado al desmontar el componente.");
             }
         };
     }, []);

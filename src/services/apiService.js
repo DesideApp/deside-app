@@ -1,11 +1,11 @@
 import API_BASE_URL from "../config/apiConfig.js";
-import { getCSRFTokenFromCookie, refreshToken } from "./tokenService.js";
+import { getCSRFTokenFromCookie, refreshToken, clearSession } from "./tokenService.js";
 
 const cache = new Map();
 const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutos
 
 /**
- * 🔹 **Función central para manejar solicitudes a la API con autenticación y CSRF**
+ * 🔹 **Manejo centralizado de solicitudes a la API**
  */
 export async function apiRequest(endpoint, options = {}, retry = true) {
     const cacheKey = `${endpoint}:${JSON.stringify(options)}`;
@@ -21,9 +21,7 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
     }
 
     try {
-        let csrfToken = getCSRFTokenFromCookie();
-
-        // ✅ Construcción segura de headers
+        const csrfToken = getCSRFTokenFromCookie();
         const headers = {
             "Content-Type": "application/json",
             ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
@@ -37,24 +35,25 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
         });
 
         if (!response.ok) {
-            let errorData;
-            try {
-                errorData = await response.json();
-            } catch {
-                errorData = { message: "Unknown error", status: response.status };
-            }
-
             if (response.status === 401 && retry) {
                 console.warn("⚠️ Token expirado. Intentando renovar...");
-                await refreshToken();
+                const refreshed = await refreshToken();
+
+                if (!refreshed) {
+                    console.warn("❌ No se pudo renovar el token. Cerrando sesión...");
+                    clearSession();
+                    throw new Error("Sesión expirada. Reautenticación requerida.");
+                }
+
                 return apiRequest(endpoint, options, false); // 🔄 Reintentar sin loop infinito
             }
 
+            const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
             throw new Error(`❌ Error ${response.status}: ${errorData.message || response.statusText}`);
         }
 
         const responseData = await response.json();
-        cache.set(cacheKey, { data: responseData, timestamp: Date.now() }); // ✅ Guardamos en caché con timestamp
+        cache.set(cacheKey, { data: responseData, timestamp: Date.now() }); // ✅ Solo cacheamos respuestas exitosas
         return responseData;
     } catch (error) {
         console.error(`❌ Error en API request (${endpoint}):`, error.message || error);
@@ -77,6 +76,7 @@ export async function checkAuthStatus() {
 }
 
 export async function logout() {
+    clearSession();
     return apiRequest("/api/auth/revoke", { method: "POST" });
 }
 

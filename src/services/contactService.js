@@ -9,7 +9,8 @@ export async function fetchContacts() {
         const response = await apiRequest("/api/contacts", { method: "GET" });
 
         if (!response || !Array.isArray(response.contacts)) {
-            throw new Error("❌ Respuesta inválida del servidor");
+            console.warn("⚠️ Respuesta inesperada del backend:", response);
+            return [];
         }
 
         console.log("✅ Contactos obtenidos:", response.contacts);
@@ -31,16 +32,16 @@ export async function sendContactRequest(pubkey) {
             body: JSON.stringify({ pubkey }),
         });
 
-        if (response.error) {
-            console.warn("⚠️ No se pudo enviar la solicitud:", response.error);
-            return { success: false, error: response.error };
+        if (!response || response.error) {
+            console.warn("⚠️ No se pudo enviar la solicitud:", response?.error || "Respuesta inválida");
+            return { success: false, error: response?.error || "Error desconocido" };
         }
 
         console.log("✅ Solicitud enviada:", response);
         return { success: true, message: response.message };
     } catch (error) {
         console.error("❌ Error al enviar solicitud de contacto:", error.message || error);
-        return { success: false, error: error.message || error };
+        return { success: false, error: error.message || "Error desconocido" };
     }
 }
 
@@ -55,16 +56,16 @@ export async function approveContact(pubkey) {
             body: JSON.stringify({ pubkey }),
         });
 
-        if (response.error) {
-            console.warn("⚠️ No se pudo aceptar el contacto:", response.error);
-            return { success: false, error: response.error };
+        if (!response || response.error) {
+            console.warn("⚠️ No se pudo aceptar el contacto:", response?.error || "Respuesta inválida");
+            return { success: false, error: response?.error || "Error desconocido" };
         }
 
         console.log("✅ Contacto aceptado:", response);
         return { success: true, message: response.message };
     } catch (error) {
         console.error("❌ Error al aceptar contacto:", error.message || error);
-        return { success: false, error: error.message || error };
+        return { success: false, error: error.message || "Error desconocido" };
     }
 }
 
@@ -79,15 +80,15 @@ export async function rejectContact(pubkey) {
             body: JSON.stringify({ pubkey }),
         });
 
-        if (response.error) {
-            console.warn("⚠️ No se pudo eliminar el contacto:", response.error);
-            return { success: false, error: response.error };
+        if (!response || response.error) {
+            console.warn("⚠️ No se pudo eliminar el contacto:", response?.error || "Respuesta inválida");
+            return { success: false, error: response?.error || "Error desconocido" };
         }
 
         console.log("✅ Contacto eliminado:", response);
         return { success: true, message: response.message };
     } catch (error) {
         console.error("❌ Error al eliminar contacto:", error.message || error);
-        return { success: false, error: error.message || error };
+        return { success: false, error: error.message || "Error desconocido" };
     }
 }

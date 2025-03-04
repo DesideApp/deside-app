@@ -14,38 +14,26 @@ function Chat() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        let isMounted = true; // ✅ Evitar actualizaciones en componentes desmontados
-
         const verifyAuthentication = async () => {
-            if (!isReady) return; // ✅ Esperar a que la wallet esté lista
+            if (!isReady || isLoading) return; // ✅ No repetir verificación si ya está cargando
 
             try {
                 const status = await checkAuthStatus();
-                if (isMounted) {
-                    setIsAuthenticated(status.isAuthenticated);
-                    setIsLoading(false);
-
-                    if (!status.isAuthenticated) {
-                        console.warn("⚠️ Usuario no autenticado. Redirigiendo a Home...");
-                        navigate("/");
-                    }
-                }
+                setIsAuthenticated(status.isAuthenticated);
             } catch (error) {
                 console.error("❌ Error verificando autenticación:", error);
-                if (isMounted) {
-                    setIsLoading(false);
-                    setIsAuthenticated(false);
+                setIsAuthenticated(false);
+            } finally {
+                setIsLoading(false);
+                if (!status?.isAuthenticated) {
+                    console.warn("⚠️ Usuario no autenticado. Redirigiendo a Home...");
                     navigate("/");
                 }
             }
         };
 
         verifyAuthentication();
-
-        return () => {
-            isMounted = false; // ✅ Limpiar efecto
-        };
-    }, [isReady, navigate]);
+    }, [isReady, navigate]); // ✅ Eliminado `isAuthenticated` para evitar loops infinitos
 
     if (isLoading) {
         return <div className="loading-screen">🔄 Verificando autenticación...</div>;

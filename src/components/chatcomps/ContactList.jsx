@@ -13,27 +13,22 @@ function ContactList({ onSelectContact }) {
   const { confirmedContacts, fetchContacts } = useContactManager();
   const [showAddContactModal, setShowAddContactModal] = useState(false);
 
-  // ✅ Solo verificar autenticación cuando cambia la wallet
+  // ✅ Verifica autenticación solo cuando cambia la wallet y si aún no está autenticado
   useEffect(() => {
-    let isMounted = true;
-
     const verifyAuth = async () => {
-      if (walletAddress) {
+      if (!walletAddress || isAuthenticated) return;
+
+      try {
         const status = await checkAuthStatus();
-        if (isMounted) {
-          setIsAuthenticated(status.isAuthenticated);
-        }
-      } else {
-        if (isMounted) setIsAuthenticated(false);
+        setIsAuthenticated(status.isAuthenticated);
+      } catch (error) {
+        console.error("❌ Error verificando autenticación:", error);
+        setIsAuthenticated(false);
       }
     };
 
     verifyAuth();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [walletAddress]);
+  }, [walletAddress, isAuthenticated]);
 
   if (!isReady) {
     return <p className="auth-warning">🔒 Cargando datos de la wallet...</p>;
@@ -52,19 +47,19 @@ function ContactList({ onSelectContact }) {
     <div className="contact-list-container">
       <h3>📞 Contactos</h3>
 
-      {!walletAddress && <p className="auth-warning">⚠️ Conéctate a una wallet para gestionar contactos.</p>}
-
-      <ul className="contact-list">
-        {confirmedContacts.length > 0 ? (
-          confirmedContacts.map((contact) => (
+      {!walletAddress ? (
+        <p className="auth-warning">⚠️ Conéctate a una wallet para gestionar contactos.</p>
+      ) : confirmedContacts.length > 0 ? (
+        <ul className="contact-list">
+          {confirmedContacts.map((contact) => (
             <li key={contact.wallet} className="contact-item" onClick={() => onSelectContact(contact.wallet)}>
               {contact.wallet.slice(0, 6)}...{contact.wallet.slice(-4)}
             </li>
-          ))
-        ) : (
-          <p className="no-contacts-message">Aún no tienes contactos.</p>
-        )}
-      </ul>
+          ))}
+        </ul>
+      ) : (
+        <p className="no-contacts-message">Aún no tienes contactos.</p>
+      )}
 
       {/* ✅ Mostrar mensaje de error en la interfaz en lugar de usar alert() */}
       {errorMessage && <p className="error-message">{errorMessage}</p>}

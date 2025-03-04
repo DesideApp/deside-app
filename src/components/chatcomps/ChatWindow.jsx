@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import ChatInput from "./ChatInput";
 import { useWallet } from "../../contexts/WalletContext";
 import useWebRTC from "../../hooks/useWebRTC";
 import { io } from "socket.io-client";
-import { checkAuthStatus, getContacts } from "../../services/apiService.js"; // ✅ Validación con backend
+import { checkAuthStatus, getContacts } from "../../services/apiService.js"; 
 import "./ChatWindow.css";
 
 function ChatWindow({ selectedContact }) {
@@ -14,28 +14,43 @@ function ChatWindow({ selectedContact }) {
   const [socket, setSocket] = useState(null);
   const [confirmedContacts, setConfirmedContacts] = useState([]);
 
-  // ✅ Obtener lista de contactos confirmados al cambiar la wallet
+  // ✅ Obtener lista de contactos confirmados solo cuando cambia la wallet
   useEffect(() => {
     if (!walletAddress) return;
 
+    let isMounted = true;
     const fetchContacts = async () => {
-      const contacts = await getContacts();
-      setConfirmedContacts(contacts.confirmed.map(c => c.wallet));
+      try {
+        const contacts = await getContacts();
+        if (isMounted) {
+          setConfirmedContacts(contacts.confirmed.map(c => c.wallet));
+        }
+      } catch (error) {
+        console.error("❌ Error obteniendo contactos:", error);
+      }
     };
 
     fetchContacts();
+    return () => { isMounted = false; };
   }, [walletAddress]);
 
-  // ✅ Verificar autenticación con el backend
+  // ✅ Verificar autenticación solo si cambia la wallet
   useEffect(() => {
     if (!walletAddress) return;
 
+    let isMounted = true;
     const verifyAuth = async () => {
-      const status = await checkAuthStatus();
-      setIsAuthenticated(status.isAuthenticated);
+      try {
+        const status = await checkAuthStatus();
+        if (isMounted) setIsAuthenticated(status.isAuthenticated);
+      } catch (error) {
+        console.error("❌ Error verificando autenticación:", error);
+        if (isMounted) setIsAuthenticated(false);
+      }
     };
 
     verifyAuth();
+    return () => { isMounted = false; };
   }, [walletAddress]);
 
   // ✅ Manejo de conexión WebSocket dentro de `useEffect()`
@@ -47,7 +62,7 @@ function ChatWindow({ selectedContact }) {
       return;
     }
 
-    const newSocket = io(import.meta.env.VITE_API_BASE_URL, {
+    const newSocket = io(import.meta.env.VITE_WEBSOCKET_URL, {
       transports: ["websocket"],
       withCredentials: true,
     });

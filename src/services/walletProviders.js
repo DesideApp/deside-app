@@ -13,17 +13,12 @@ const WALLET_PROVIDERS = {
  * @returns {object|null} - Objeto del proveedor o null si no está disponible.
  */
 export function getProvider(wallet) {
-    if (!WALLET_PROVIDERS[wallet]) {
-        console.error(`❌ Proveedor desconocido: ${wallet}`);
-        return null;
-    }
-
     const provider = WALLET_PROVIDERS[wallet]?.();
     if (!provider) {
         console.warn(`⚠️ ${wallet} Wallet no detectada.`);
         return null;
     }
-    
+
     console.log(`✅ Proveedor detectado: ${wallet}`);
     return provider;
 }
@@ -33,27 +28,27 @@ export function getProvider(wallet) {
  * @returns {boolean} - `true` si hay una wallet conectada, `false` en caso contrario.
  */
 export function isWalletConnected() {
-    return Object.values(WALLET_PROVIDERS).some(getProvider => getProvider()?.isConnected) || false;
+    return Object.keys(WALLET_PROVIDERS).some(wallet => getProvider(wallet)?.isConnected);
 }
 
 /**
- * 📡 **Detectar conexión y desconexión de la wallet**
+ * 📡 **Detectar conexión y desconexión de cualquier wallet disponible**
  * @param {function} onConnect - Callback cuando la wallet se conecta.
  * @param {function} onDisconnect - Callback cuando la wallet se desconecta.
  */
 export function listenToWalletEvents(onConnect, onDisconnect) {
-    const solanaProvider = getProvider("phantom"); // ✅ Detectamos Phantom por defecto
-    if (solanaProvider) {
-        solanaProvider.on("connect", () => {
-            console.log("✅ Wallet conectada.");
-            if (onConnect) onConnect();
-        });
+    Object.keys(WALLET_PROVIDERS).forEach(wallet => {
+        const provider = getProvider(wallet);
+        if (provider) {
+            provider.on("connect", () => {
+                console.log(`✅ ${wallet} Wallet conectada.`);
+                if (onConnect) onConnect(wallet);
+            });
 
-        solanaProvider.on("disconnect", () => {
-            console.warn("❌ Wallet desconectada.");
-            if (onDisconnect) onDisconnect();
-        });
-    } else {
-        console.warn("⚠️ No hay wallets detectadas para escuchar eventos.");
-    }
+            provider.on("disconnect", () => {
+                console.warn(`❌ ${wallet} Wallet desconectada.`);
+                if (onDisconnect) onDisconnect(wallet);
+            });
+        }
+    });
 }

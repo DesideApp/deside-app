@@ -16,8 +16,8 @@ function NetworkStatus({ className }) {
         const [statusData, tpsData] = await Promise.all([getSolanaStatus(), getSolanaTPS()]);
 
         if (isMounted) {
-          setStatus(statusData.status);
-          setTps(tpsData.tps);
+          setStatus(statusData?.status || "offline");
+          setTps(typeof tpsData?.tps === "number" ? tpsData.tps : null);
           setError(null);
         }
       } catch (error) {
@@ -40,9 +40,14 @@ function NetworkStatus({ className }) {
   }, []);
 
   const getStatusColor = () => {
-    if (status === "connected") return "green";
-    if (status === "congested") return "yellow";
-    return "red";
+    switch (status) {
+      case "connected":
+        return "green";
+      case "congested":
+        return "yellow";
+      default:
+        return "red";
+    }
   };
 
   const getTpsBars = () => {

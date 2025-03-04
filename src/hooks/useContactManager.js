@@ -6,92 +6,91 @@ export default function useContactManager() {
     const [confirmedContacts, setConfirmedContacts] = useState([]);
     const [pendingRequests, setPendingRequests] = useState([]);
     const [receivedRequests, setReceivedRequests] = useState([]);
-    const [isAuthenticated, setIsAuthenticated] = useState(false); // ✅ Estado de autenticación
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    // ✅ **Verificar autenticación y actualizar estado**
+    // ✅ **Actualizar estado de contactos**
+    const updateContactsState = async () => {
+        try {
+            const contacts = await fetchContacts();
+            setConfirmedContacts(contacts.confirmed || []);
+            setPendingRequests(contacts.pending || []);
+            setReceivedRequests(contacts.requests || []);
+        } catch (error) {
+            console.error("❌ Error al actualizar contactos:", error);
+        }
+    };
+
+    // ✅ **Verificar autenticación y cargar contactos**
     useEffect(() => {
+        let isMounted = true;
+
         const verifyAuthAndFetchContacts = async () => {
             try {
                 const status = await checkAuthStatus();
-                setIsAuthenticated(status.isAuthenticated);
-
-                if (status.isAuthenticated) {
-                    const contacts = await fetchContacts();
-                    setConfirmedContacts(contacts.confirmed || []);
-                    setPendingRequests(contacts.pending || []);
-                    setReceivedRequests(contacts.requests || []);
+                if (isMounted) {
+                    setIsAuthenticated(status.isAuthenticated);
+                    if (status.isAuthenticated) await updateContactsState();
                 }
             } catch (error) {
-                console.error("❌ Error verificando autenticación o contactos:", error);
+                console.error("❌ Error verificando autenticación:", error);
             }
         };
 
         verifyAuthAndFetchContacts();
 
-        window.addEventListener("walletConnected", verifyAuthAndFetchContacts);
-        window.addEventListener("walletDisconnected", () => {
+        const handleWalletConnected = () => {
+            console.log("🔵 Wallet conectada. Verificando autenticación...");
+            verifyAuthAndFetchContacts();
+        };
+
+        const handleWalletDisconnected = () => {
+            console.warn("🔴 Wallet desconectada. Reseteando contactos...");
             setConfirmedContacts([]);
             setPendingRequests([]);
             setReceivedRequests([]);
-        });
+            setIsAuthenticated(false);
+        };
+
+        window.addEventListener("walletConnected", handleWalletConnected);
+        window.addEventListener("walletDisconnected", handleWalletDisconnected);
 
         return () => {
-            window.removeEventListener("walletConnected", verifyAuthAndFetchContacts);
-            window.removeEventListener("walletDisconnected", () => {
-                setConfirmedContacts([]);
-                setPendingRequests([]);
-                setReceivedRequests([]);
-            });
+            isMounted = false;
+            window.removeEventListener("walletConnected", handleWalletConnected);
+            window.removeEventListener("walletDisconnected", handleWalletDisconnected);
         };
     }, []);
 
-    // ✅ **Enviar solicitud de contacto**
-    const handleAddContact = async (wallet) => {
+    // ✅ **Funciones de gestión de contactos**
+    const handleAddContact = useCallback(async (wallet) => {
         if (!isAuthenticated) return alert("⚠️ Debes estar autenticado para agregar contactos.");
-
         try {
             await sendContactRequest(wallet);
-            await fetchContacts().then(({ confirmed, pending, requests }) => {
-                setConfirmedContacts(confirmed || []);
-                setPendingRequests(pending || []);
-                setReceivedRequests(requests || []);
-            });
+            await updateContactsState();
         } catch (error) {
             console.error("❌ Error enviando solicitud de contacto:", error);
         }
-    };
+    }, [isAuthenticated]);
 
-    // ✅ **Aceptar solicitud de contacto**
-    const handleAcceptRequest = async (wallet) => {
+    const handleAcceptRequest = useCallback(async (wallet) => {
         if (!isAuthenticated) return alert("⚠️ Debes estar autenticado para aceptar contactos.");
-
         try {
             await approveContact(wallet);
-            await fetchContacts().then(({ confirmed, pending, requests }) => {
-                setConfirmedContacts(confirmed || []);
-                setPendingRequests(pending || []);
-                setReceivedRequests(requests || []);
-            });
+            await updateContactsState();
         } catch (error) {
             console.error("❌ Error aceptando solicitud de contacto:", error);
         }
-    };
+    }, [isAuthenticated]);
 
-    // ✅ **Rechazar solicitud de contacto**
-    const handleRejectRequest = async (wallet) => {
+    const handleRejectRequest = useCallback(async (wallet) => {
         if (!isAuthenticated) return alert("⚠️ Debes estar autenticado para rechazar contactos.");
-
         try {
             await rejectContact(wallet);
-            await fetchContacts().then(({ confirmed, pending, requests }) => {
-                setConfirmedContacts(confirmed || []);
-                setPendingRequests(pending || []);
-                setReceivedRequests(requests || []);
-            });
+            await updateContactsState();
         } catch (error) {
             console.error("❌ Error rechazando solicitud de contacto:", error);
         }
-    };
+    }, [isAuthenticated]);
 
     return {
         confirmedContacts,

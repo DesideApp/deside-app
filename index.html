@@ -1,17 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"> <!-- ✅ Se cambia a inglés para audiencias globales -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- ✅ Mejor compatibilidad con navegadores antiguos -->
+    <meta name="description" content="Deside App - Decentralized communication on Solana.">
+    <meta name="theme-color" content="#ffffff"> <!-- ✅ Mejora UX en móviles -->
+
     <title>Deside App</title>
+
     <!-- Favicon -->
     <link rel="icon" href="/favicon.ico" />
-    <!-- Fuente Roboto desde Google Fonts -->
+
+    <!-- Google Fonts optimizado -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Estilos globales -->
+
+    <!-- Global Styles -->
     <link rel="stylesheet" href="/styles/global.css">
+
     <style>
-        /* Estilos globales */
+        /* Global Styles */
         body {
             margin: 0;
             padding: 0;
@@ -19,16 +29,17 @@
             height: 100%;
             overflow-x: hidden;
             background-color: #ffffff;
+            font-family: 'Roboto', sans-serif;
         }
 
-        /* Contenedor principal */
+        /* Main container */
         .container {
             max-width: 1920px;
             margin: 0 auto;
             padding: 0 20px;
         }
 
-        /* Ajustes de #root */
+        /* React Root */
         #root {
             display: flex;
             flex-direction: column;
@@ -37,9 +48,10 @@
     </style>
 </head>
 <body>
-    <!-- Contenedor principal de React -->
+    <!-- React Root -->
     <div id="root"></div>
-    <!-- Entrada principal de React -->
-    <script type="module" src="/src/main.jsx"></script> <!-- 🔥 Cambio clave -->
+
+    <!-- Main React Entry -->
+    <script type="module" src="/src/main.jsx" defer></script> <!-- ✅ Optimized loading with "defer" -->
 </body>
 </html>

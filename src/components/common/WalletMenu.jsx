@@ -1,32 +1,43 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Copy } from "lucide-react";
 import { useWallet } from "../../contexts/WalletContext";
 import { checkAuthStatus, logout } from "../../services/apiService.js";
-import { disconnectWallet } from "../../services/walletService.js"; // ✅ Se gestiona correctamente la desconexión
-import { getBalance } from "../../utils/solanaHelpers.js"; // ✅ Obtener balance de Solana
+import { disconnectWallet } from "../../services/walletService.js"; 
+import { getBalance } from "../../utils/solanaHelpers.js"; 
 import DonationModal from "./DonationModal";
 import "./WalletMenu.css";
 
-function WalletMenu({ isOpen, onClose }) {
+const WalletMenu = React.memo(({ isOpen, onClose }) => {
   const menuRef = useRef(null);
   const { walletAddress, isReady } = useWallet();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDonationOpen, setIsDonationOpen] = useState(false);
   const [balance, setBalance] = useState(null);
 
-  // ✅ Verificar autenticación con el backend
+  // ✅ Verificar autenticación con el backend solo si cambia la wallet
   useEffect(() => {
+    if (!walletAddress) {
+      setIsAuthenticated(false);
+      setBalance(null);
+      return;
+    }
+
     let isMounted = true;
 
     const verifyAuth = async () => {
-      if (walletAddress) {
+      try {
         const status = await checkAuthStatus();
         if (isMounted) {
           setIsAuthenticated(status.isAuthenticated);
-          const walletBalance = await getBalance(walletAddress);
-          setBalance(walletBalance);
+          if (status.isAuthenticated) {
+            const walletBalance = await getBalance(walletAddress);
+            setBalance(walletBalance);
+          } else {
+            setBalance(null);
+          }
         }
-      } else {
+      } catch (error) {
+        console.error("❌ Error verificando autenticación:", error);
         if (isMounted) {
           setIsAuthenticated(false);
           setBalance(null);
@@ -58,18 +69,29 @@ function WalletMenu({ isOpen, onClose }) {
     };
   }, [isOpen, onClose]);
 
-  const handleCopy = () => {
-    if (walletAddress) {
-      navigator.clipboard.writeText(walletAddress);
-      alert("✅ Dirección copiada al portapapeles.");
+  const handleCopy = useCallback(async () => {
+    try {
+      if (walletAddress) {
+        await navigator.clipboard.writeText(walletAddress);
+        alert("✅ Dirección copiada al portapapeles.");
+      }
+    } catch (error) {
+      console.error("❌ Error copiando la dirección:", error);
     }
-  };
+  }, [walletAddress]);
 
-  const handleLogout = async () => {
-    await disconnectWallet(); // ✅ Desconectar la wallet antes de hacer logout
+  const handleLogout = useCallback(async () => {
+    await disconnectWallet();
     await logout();
+    setIsAuthenticated(false);
+    setBalance(null);
     onClose();
-  };
+  }, [onClose]);
+
+  const formattedBalance = useMemo(
+    () => (balance !== null ? `${balance.toFixed(2)} SOL` : "0 SOL"),
+    [balance]
+  );
 
   if (!isReady) return null;
 
@@ -82,9 +104,7 @@ function WalletMenu({ isOpen, onClose }) {
               <>
                 <div className="wallet-header">
                   <p className="wallet-network">🔗 Solana</p>
-                  <p className="wallet-balance">
-                    {balance !== null ? `${balance.toFixed(2)} SOL` : "0 SOL"}
-                  </p>
+                  <p className="wallet-balance">{formattedBalance}</p>
                 </div>
 
                 <div className="wallet-address-container">
@@ -117,6 +137,6 @@ function WalletMenu({ isOpen, onClose }) {
       <DonationModal isOpen={isDonationOpen} onClose={() => setIsDonationOpen(false)} />
     </>
   );
-}
+});
 
 export default WalletMenu;

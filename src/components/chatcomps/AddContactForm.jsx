@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { checkAuthStatus } from "../../services/apiService.js";
-import { addContact } from "../../services/apiService.js";
+import React, { useState, useCallback } from "react";
+import { checkAuthStatus, addContact } from "../../services/apiService.js";
 
 const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState("");
@@ -9,7 +8,7 @@ const AddContactForm = ({ onContactAdded }) => {
     const [isLoading, setIsLoading] = useState(false);
 
     // ✅ **Enviar solicitud de contacto**
-    const handleAddContact = async () => {
+    const handleAddContact = useCallback(async () => {
         const trimmedPubkey = pubkey.trim();
         if (!trimmedPubkey) {
             setErrorMessage("⚠️ Introduce una clave pública válida.");
@@ -36,7 +35,7 @@ const AddContactForm = ({ onContactAdded }) => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [pubkey, onContactAdded]);
 
     return (
         <div className="add-contact-container">
@@ -48,15 +47,17 @@ const AddContactForm = ({ onContactAdded }) => {
                 onChange={(e) => setPubkey(e.target.value)}
                 placeholder="Introduce la clave pública"
                 disabled={isLoading}
+                aria-disabled={isLoading}
+                aria-label="Clave pública del contacto"
             />
 
-            <button onClick={handleAddContact} disabled={isLoading}>
+            <button onClick={handleAddContact} disabled={isLoading} aria-disabled={isLoading}>
                 {isLoading ? "Enviando..." : "➕ Enviar Solicitud"}
             </button>
 
             {/* ✅ Mejora de accesibilidad con `aria-live` */}
-            {errorMessage && <p className="error-message" aria-live="polite">{errorMessage}</p>}
-            {successMessage && <p className="success-message" aria-live="polite">{successMessage}</p>}
+            {errorMessage && <p className="error-message" aria-live="assertive">{errorMessage}</p>}
+            {successMessage && <p className="success-message" aria-live="assertive">{successMessage}</p>}
         </div>
     );
 };

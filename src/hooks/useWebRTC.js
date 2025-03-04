@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { apiRequest as fetchWithAuth } from "../services/apiService.js"; // ✅ Actualizado
+import { apiRequest as fetchWithAuth } from "../services/apiService.js"; // ✅ API centralizada
 
 const useWebRTC = (selectedContact, walletAddress) => {
   const [messages, setMessages] = useState([]);
@@ -23,8 +23,13 @@ const useWebRTC = (selectedContact, walletAddress) => {
     }
   };
 
-  // ✅ **Inicializa WebRTC solo si el contacto está confirmado**
+  // ✅ **Inicializar WebRTC solo si el contacto está confirmado**
   const initializeWebRTC = async () => {
+    if (peerRef.current) {
+      console.log("🔵 WebRTC ya inicializado. Evitando duplicación.");
+      return;
+    }
+
     if (!(await validateContactStatus())) {
       console.warn("⚠️ WebRTC no puede iniciarse sin contacto confirmado.");
       return;
@@ -66,7 +71,7 @@ const useWebRTC = (selectedContact, walletAddress) => {
     }
   };
 
-  // 💬 **Enviar mensaje solo si el contacto sigue confirmado**
+  // 💬 **Enviar mensaje solo si el contacto sigue confirmado y el canal está activo**
   const sendMessage = async (text) => {
     if (!(await validateContactStatus())) {
       console.error("❌ No se puede enviar el mensaje. El contacto ya no está confirmado.");
@@ -90,9 +95,9 @@ const useWebRTC = (selectedContact, walletAddress) => {
 
     return () => {
       if (peerRef.current) {
+        console.log("🔴 Cerrando conexión WebRTC...");
         peerRef.current.close();
         peerRef.current = null;
-        console.log("🔴 Conexión WebRTC cerrada.");
       }
     };
   }, [selectedContact]);

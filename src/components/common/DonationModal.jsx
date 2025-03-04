@@ -1,14 +1,21 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { Copy } from "lucide-react";
 import "./DonationModal.css";
 
-const DONATION_WALLET = import.meta.env.VITE_DONATION_WALLET || "9X7yR...F8dZ"; // ✅ Usamos Vite correctamente
+const DONATION_WALLET = import.meta.env.VITE_DONATION_WALLET || "9X7yR...F8dZ";
 
-function DonationModal({ isOpen, onClose }) {
-  const handleCopy = () => {
-    navigator.clipboard.writeText(DONATION_WALLET);
-    alert("✅ Wallet address copied! Thank you for your support. 💜");
-  };
+const DonationModal = ({ isOpen, onClose }) => {
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(DONATION_WALLET);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 3000);
+    } catch (error) {
+      console.error("❌ Error al copiar la dirección:", error);
+    }
+  }, []);
 
   if (!isOpen) return null;
 
@@ -27,12 +34,14 @@ function DonationModal({ isOpen, onClose }) {
           </button>
         </div>
 
+        {copySuccess && <p className="copy-success" aria-live="polite">✅ Wallet address copied! Thank you! 💜</p>}
+
         <button className="donation-close-button" onClick={onClose}>
           Close
         </button>
       </div>
     </div>
   );
-}
+};
 
 export default DonationModal;

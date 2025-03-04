@@ -1,13 +1,13 @@
-import React from "react";
-import ContactRequests from "../chatcomps/ContactRequests"; // ✅ Sección de solicitudes de contacto
+import React, { memo } from "react";
+import ContactRequests from "../chatcomps/ContactRequests"; 
 import "./RightPanel.css"; 
 
-function RightPanel() {
+const RightPanel = memo(() => {
   return (
-    <div className="right-panel">
-      <ContactRequests /> {/* 🔹 Muestra solicitudes de contacto */}
-    </div>
+    <aside className="right-panel" aria-label="Panel lateral de solicitudes de contacto">
+      <ContactRequests /> 
+    </aside>
   );
-}
+});
 
 export default RightPanel;

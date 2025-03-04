@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, memo } from "react";
 import { useWallet } from "../../contexts/WalletContext";
 import { getContacts, approveContact, rejectContact } from "../../services/apiService.js";
 import "./ContactRequests.css";
 
-function ContactRequests() {
+const ContactRequests = memo(() => {
   const { walletAddress, isReady } = useWallet();
   const [receivedRequests, setReceivedRequests] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
@@ -12,24 +12,32 @@ function ContactRequests() {
   useEffect(() => {
     if (!isReady || !walletAddress) return;
 
+    let isMounted = true;
+
     const fetchContactRequests = async () => {
       try {
         const { pending, received } = await getContacts();
-        setReceivedRequests(received || []);
-        setSentRequests(pending || []);
+        if (isMounted) {
+          setReceivedRequests(received || []);
+          setSentRequests(pending || []);
+        }
       } catch (error) {
         console.error("❌ Error al obtener solicitudes de contacto:", error);
-        setErrorMessage("❌ Error al cargar solicitudes.");
+        if (isMounted) setErrorMessage("❌ Error al cargar solicitudes.");
       }
     };
 
     fetchContactRequests();
+
+    return () => {
+      isMounted = false;
+    };
   }, [isReady, walletAddress]);
 
   const handleApprove = async (pubkey) => {
     try {
       await approveContact(pubkey);
-      setReceivedRequests(receivedRequests.filter((req) => req.wallet !== pubkey));
+      setReceivedRequests((prev) => prev.filter((req) => req.wallet !== pubkey));
     } catch (error) {
       console.error("❌ Error al aceptar contacto:", error);
       setErrorMessage("❌ No se pudo aceptar la solicitud.");
@@ -39,7 +47,7 @@ function ContactRequests() {
   const handleReject = async (pubkey) => {
     try {
       await rejectContact(pubkey);
-      setReceivedRequests(receivedRequests.filter((req) => req.wallet !== pubkey));
+      setReceivedRequests((prev) => prev.filter((req) => req.wallet !== pubkey));
     } catch (error) {
       console.error("❌ Error al rechazar contacto:", error);
       setErrorMessage("❌ No se pudo rechazar la solicitud.");
@@ -74,7 +82,9 @@ function ContactRequests() {
         {sentRequests.length > 0 ? (
           <ul className="requests-list">
             {sentRequests.map((contact) => (
-              <li key={contact.wallet}>{contact.wallet.slice(0, 6)}...{contact.wallet.slice(-4)} (Pendiente)</li>
+              <li key={contact.wallet}>
+                {contact.wallet.slice(0, 6)}...{contact.wallet.slice(-4)} (Pendiente)
+              </li>
             ))}
           </ul>
         ) : (
@@ -83,6 +93,6 @@ function ContactRequests() {
       </div>
     </div>
   );
-}
+});
 
 export default ContactRequests;

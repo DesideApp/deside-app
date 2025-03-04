@@ -14,19 +14,20 @@ function Main() {
 
     useEffect(() => {
         const verifyAuthentication = async () => {
-            if (!isReady) return;
+            if (!isReady || checkedAuth) return; // ✅ No repetir verificación si ya se comprobó
             try {
                 const authStatus = await checkAuthStatus();
-                setIsAuthenticated(authStatus.isAuthenticated);
+                setIsAuthenticated(authStatus?.isAuthenticated || false);
             } catch (error) {
                 console.error("❌ Error verificando autenticación:", error);
+                setIsAuthenticated(false);
             } finally {
                 setCheckedAuth(true); // ✅ Se asegura de avanzar siempre
             }
         };
 
         verifyAuthentication();
-    }, [isReady, walletStatus]);
+    }, [isReady, walletStatus]); // ✅ Eliminado `isAuthenticated` para evitar loops innecesarios
 
     if (!checkedAuth) {
         return <div className="loading-screen">🔄 Verificando autenticación...</div>;

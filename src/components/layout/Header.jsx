@@ -3,12 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import WalletButton from "../common/WalletButton.jsx"; // Asegúrate de que WalletButton está funcionando
 import "./Header.css";
 
-function Header() {
+const Header = React.memo(() => {
     const navigate = useNavigate();
 
-    const handleNavigation = (path) => {
-        navigate(path);
-    };
+    const goToHome = () => navigate('/');
+    const goToChat = () => navigate('/chat');
 
     return (
         <header className="header">
@@ -19,16 +18,16 @@ function Header() {
 
             {/* Contenedor de navegación */}
             <nav className="header-nav-container">
-                <span onClick={() => handleNavigation('/')} className="nav-link">Home</span>
-                <span onClick={() => handleNavigation('/chat')} className="nav-link">Chat</span>
+                <span onClick={goToHome} className="nav-link" aria-label="Ir a Home">Home</span>
+                <span onClick={goToChat} className="nav-link" aria-label="Ir a Chat">Chat</span>
             </nav>
 
             {/* Contenedor de la wallet */}
             <div className="header-buttons-container">
-                <WalletButton /> {/* Eliminamos el prop innecesario */}
+                <WalletButton />
             </div>
         </header>
     );
-}
+});
 
 export default Header;
