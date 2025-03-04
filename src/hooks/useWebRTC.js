@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { apiRequest as fetchWithAuth } from "../services/apiService.js"; // ✅ API centralizada
 
 const useWebRTC = (selectedContact, walletAddress) => {
@@ -9,10 +9,10 @@ const useWebRTC = (selectedContact, walletAddress) => {
   const isReconnecting = useRef(false);
 
   // ✅ **Verificar si el contacto está confirmado antes de iniciar WebRTC**
-  const validateContactStatus = async () => {
+  const validateContactStatus = useCallback(async () => {
     try {
       const response = await fetchWithAuth(`/api/contacts/status/${selectedContact}`);
-      if (!response || !response.isConfirmed) {
+      if (!response?.isConfirmed) {
         console.warn("⚠️ Contacto no confirmado o bloqueado.");
         return false;
       }
@@ -21,10 +21,10 @@ const useWebRTC = (selectedContact, walletAddress) => {
       console.error("❌ Error al verificar el estado del contacto:", error);
       return false;
     }
-  };
+  }, [selectedContact]);
 
   // ✅ **Inicializar WebRTC solo si el contacto está confirmado**
-  const initializeWebRTC = async () => {
+  const initializeWebRTC = useCallback(async () => {
     if (peerRef.current) {
       console.log("🔵 WebRTC ya inicializado. Evitando duplicación.");
       return;
@@ -58,10 +58,10 @@ const useWebRTC = (selectedContact, walletAddress) => {
     };
 
     peerRef.current = peer;
-  };
+  }, [validateContactStatus, selectedContact]);
 
   // 🔄 **Intentar reconexión automática solo si el contacto sigue confirmado**
-  const attemptReconnection = async () => {
+  const attemptReconnection = useCallback(async () => {
     console.log("🔄 Intentando reconexión...");
     if (await validateContactStatus()) {
       await initializeWebRTC();
@@ -69,10 +69,10 @@ const useWebRTC = (selectedContact, walletAddress) => {
     } else {
       console.warn("❌ No se puede reconectar. El contacto ya no está confirmado.");
     }
-  };
+  }, [validateContactStatus, initializeWebRTC]);
 
   // 💬 **Enviar mensaje solo si el contacto sigue confirmado y el canal está activo**
-  const sendMessage = async (text) => {
+  const sendMessage = useCallback(async (text) => {
     if (!(await validateContactStatus())) {
       console.error("❌ No se puede enviar el mensaje. El contacto ya no está confirmado.");
       return;
@@ -85,7 +85,7 @@ const useWebRTC = (selectedContact, walletAddress) => {
 
     dataChannelRef.current.send(text);
     setMessages((prev) => [...prev, { sender: "me", text }]);
-  };
+  }, [validateContactStatus]);
 
   // ✅ **Gestión del ciclo de vida del WebRTC**
   useEffect(() => {
@@ -100,7 +100,7 @@ const useWebRTC = (selectedContact, walletAddress) => {
         peerRef.current = null;
       }
     };
-  }, [selectedContact]);
+  }, [selectedContact, initializeWebRTC]);
 
   return { messages, connectionStatus, sendMessage };
 };

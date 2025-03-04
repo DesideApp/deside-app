@@ -15,10 +15,7 @@ export async function getBalance(walletAddress) {
 
         const publicKey = new PublicKey(walletAddress);
         const balanceLamports = await connection.getBalance(publicKey);
-        const balanceSol = balanceLamports / 1e9;
-
-        console.log(`💰 Balance de ${walletAddress}: ${balanceSol} SOL`);
-        return balanceSol;
+        return balanceLamports / 1e9;
     } catch (error) {
         console.error(`❌ Error obteniendo balance para ${walletAddress}:`, error);
         return null;
@@ -30,4 +27,30 @@ export async function getBalance(walletAddress) {
  */
 export function getSolanaConnection() {
     return connection; // ✅ Reutiliza la conexión única
+}
+
+/**
+ * 🔹 **Obtener estado actual de Solana**
+ */
+export async function getSolanaStatus() {
+    try {
+        const status = await connection.getHealth();
+        return status === "ok" ? "connected" : "degraded";
+    } catch (error) {
+        console.error("❌ Error obteniendo estado de la red Solana:", error);
+        return "offline";
+    }
+}
+
+/**
+ * 🔹 **Obtener TPS de Solana**
+ */
+export async function getSolanaTPS() {
+    try {
+        const tps = await connection.getRecentPerformanceSamples(1);
+        return tps?.[0]?.numTransactions / tps?.[0]?.samplePeriodSecs || null;
+    } catch (error) {
+        console.error("❌ Error obteniendo TPS de Solana:", error);
+        return null;
+    }
 }

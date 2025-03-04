@@ -24,12 +24,7 @@ export async function refreshToken() {
     }
 
     const data = await response.json();
-
-    // ✅ Actualizar cookies con los nuevos tokens
-    setCookie("accessToken", data.accessToken);
-    setCookie("refreshToken", data.refreshToken);
-
-    console.log("🔄 Token renovado correctamente.");
+    updateSessionTokens(data.accessToken, data.refreshToken);
     return data;
   } catch (error) {
     console.error("❌ Error en refreshToken():", error.message || error);
@@ -44,22 +39,30 @@ export function clearSession() {
 
   ["accessToken", "refreshToken", "csrfToken"].forEach(clearCookie);
 
-  // ✅ También limpiar `localStorage` y `sessionStorage`
   localStorage.clear();
   sessionStorage.clear();
 
   window.dispatchEvent(new Event("walletDisconnected")); // 🔄 Notificar a la app
 }
 
+// 🔹 **Actualizar cookies con nuevos tokens**
+function updateSessionTokens(accessToken, refreshToken) {
+  setCookie("accessToken", accessToken);
+  setCookie("refreshToken", refreshToken);
+  console.log("🔄 Token renovado correctamente.");
+}
+
 // 📝 **Setear cookies de manera segura**
 function setCookie(name, value) {
-  const secure = process.env.NODE_ENV === "production";
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; domain=.deside-app.vercel.app; ${secure ? "secure; SameSite=None" : "SameSite=Lax"}`;
+  const domain = import.meta.env.VITE_APP_DOMAIN || "deside-app.vercel.app";
+  const secure = import.meta.env.PROD ? "secure; SameSite=None" : "SameSite=Lax";
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; domain=.${domain}; ${secure}`;
 }
 
 // 📝 **Eliminar cookies de manera segura**
 function clearCookie(name) {
-  document.cookie = `${name}=; Max-Age=0; path=/; domain=.deside-app.vercel.app; secure; SameSite=None`;
+  const domain = import.meta.env.VITE_APP_DOMAIN || "deside-app.vercel.app";
+  document.cookie = `${name}=; Max-Age=0; path=/; domain=.${domain}; secure; SameSite=None`;
 }
 
 // 🔍 **Obtener CSRF token actual**

@@ -1,13 +1,13 @@
-import React from "react";
-import { useNavigate } from 'react-router-dom';
-import WalletButton from "../common/WalletButton.jsx"; // Asegúrate de que WalletButton está funcionando
+import React, { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import WalletButton from "../common/WalletButton.jsx";
 import "./Header.css";
 
 const Header = React.memo(() => {
     const navigate = useNavigate();
 
-    const goToHome = () => navigate('/');
-    const goToChat = () => navigate('/chat');
+    const goToHome = useCallback(() => navigate("/"), [navigate]);
+    const goToChat = useCallback(() => navigate("/chat"), [navigate]);
 
     return (
         <header className="header">
@@ -17,9 +17,23 @@ const Header = React.memo(() => {
             </div>
 
             {/* Contenedor de navegación */}
-            <nav className="header-nav-container">
-                <span onClick={goToHome} className="nav-link" aria-label="Ir a Home">Home</span>
-                <span onClick={goToChat} className="nav-link" aria-label="Ir a Chat">Chat</span>
+            <nav className="header-nav-container" role="navigation">
+                <span
+                    onClick={goToHome}
+                    className="nav-link"
+                    aria-label="Ir a Home"
+                    tabIndex="0"
+                >
+                    Home
+                </span>
+                <span
+                    onClick={goToChat}
+                    className="nav-link"
+                    aria-label="Ir a Chat"
+                    tabIndex="0"
+                >
+                    Chat
+                </span>
             </nav>
 
             {/* Contenedor de la wallet */}

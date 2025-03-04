@@ -1,55 +1,53 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import "./BottomBar.css";
 import NetworkStatus from "../status/NetworkStatus.jsx";
-import { getSolanaPrice } from "../../services/apiService.js"; // ✅ Usamos la API centralizada
+import { getSolanaPrice } from "../../services/apiService.js";
 
-function BottomBar() {
+const BottomBar = React.memo(() => {
     const [solPrice, setSolPrice] = useState(null);
-    const [hasError, setHasError] = useState(false); // ✅ Manejo de errores
+    const [hasError, setHasError] = useState(false);
+    const intervalRef = useRef(null);
+
+    const fetchSolPrice = useCallback(async () => {
+        try {
+            const data = await getSolanaPrice();
+            setSolPrice(data?.price || null);
+            setHasError(false);
+        } catch (error) {
+            console.error("❌ Error obteniendo el precio de Solana:", error);
+            setHasError(true);
+            setSolPrice(null);
+        }
+    }, []);
 
     useEffect(() => {
-        let isMounted = true;
-
-        const fetchSolPrice = async () => {
-            try {
-                const data = await getSolanaPrice();
-                if (isMounted) {
-                    setSolPrice(data.price);
-                    setHasError(false);
-                }
-            } catch (error) {
-                console.error("❌ Error al obtener el precio de Solana:", error);
-                if (isMounted) {
-                    setHasError(true);
-                    setSolPrice(null);
-                }
-            }
-        };
-
         fetchSolPrice();
-        const intervalId = setInterval(fetchSolPrice, 10000);
+        intervalRef.current = setInterval(fetchSolPrice, 10000);
 
         return () => {
-            isMounted = false;
-            clearInterval(intervalId);
+            clearInterval(intervalRef.current);
         };
-    }, []);
+    }, [fetchSolPrice]);
+
+    const displayedPrice = useMemo(() => {
+        return hasError ? "🔴 Error" : solPrice ? `SOL: $${solPrice}` : "Cargando...";
+    }, [solPrice, hasError]);
 
     return (
         <footer className="bottom-bar">
-            <button className="bottom-bar-button">LIVE</button>
-            <button className="bottom-bar-button">Lite</button>
-            <button className="bottom-bar-button">Pro</button>
-            <button className="bottom-bar-button">Ajustes</button>
+            <button className="bottom-bar-button" aria-label="Modo en vivo">LIVE</button>
+            <button className="bottom-bar-button" aria-label="Modo Lite">Lite</button>
+            <button className="bottom-bar-button" aria-label="Modo Pro">Pro</button>
+            <button className="bottom-bar-button" aria-label="Ajustes">Ajustes</button>
 
             <div className="network-info">
                 <NetworkStatus className="network-status" />
-                <div className="solana-price">
-                    <span>{hasError ? "🔴 Error" : solPrice ? `SOL: $${solPrice}` : "Cargando..."}</span>
+                <div className="solana-price" aria-live="polite">
+                    <span>{displayedPrice}</span>
                 </div>
             </div>
         </footer>
     );
-}
+});
 
 export default BottomBar;

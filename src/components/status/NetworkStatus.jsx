@@ -1,83 +1,68 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import "./NetworkStatus.css";
-import { getSolanaStatus, getSolanaTPS } from "../../services/apiService.js"; // ✅ API centralizada
+import { getSolanaStatus, getSolanaTPS } from "../../services/apiService.js";
 
-function NetworkStatus({ className }) {
-  const [status, setStatus] = useState("offline");
-  const [tps, setTps] = useState(null);
-  const [error, setError] = useState(null);
+const NetworkStatus = React.memo(({ className = "" }) => {
+    const [status, setStatus] = useState("offline");
+    const [tps, setTps] = useState(null);
+    const [error, setError] = useState(null);
+    const intervalRef = useRef(null);
 
-  useEffect(() => {
-    let isMounted = true;
-    let interval;
-
-    const fetchData = async () => {
-      try {
-        const [statusData, tpsData] = await Promise.all([getSolanaStatus(), getSolanaTPS()]);
-
-        if (isMounted) {
-          setStatus(statusData?.status || "offline");
-          setTps(typeof tpsData?.tps === "number" ? tpsData.tps : null);
-          setError(null);
+    const fetchData = useCallback(async () => {
+        try {
+            const [statusData, tpsData] = await Promise.all([getSolanaStatus(), getSolanaTPS()]);
+            setStatus(statusData?.status || "offline");
+            setTps(typeof tpsData?.tps === "number" ? tpsData.tps : null);
+            setError(null);
+        } catch (error) {
+            console.error("❌ Error obteniendo estado de la red:", error);
+            setError("🔴 Error obteniendo datos de la red.");
+            setStatus("offline");
+            setTps(null);
         }
-      } catch (error) {
-        console.error("❌ Error obteniendo estado de la red:", error);
-        if (isMounted) {
-          setError("🔴 Error obteniendo datos de la red.");
-          setStatus("offline");
-          setTps(null);
-        }
-      }
-    };
+    }, []);
 
-    fetchData();
-    interval = setInterval(fetchData, 10000);
+    useEffect(() => {
+        fetchData();
+        intervalRef.current = setInterval(fetchData, 10000);
 
-    return () => {
-      clearInterval(interval);
-      isMounted = false;
-    };
-  }, []);
+        return () => {
+            clearInterval(intervalRef.current);
+        };
+    }, [fetchData]);
 
-  const getStatusColor = () => {
-    switch (status) {
-      case "connected":
-        return "green";
-      case "congested":
-        return "yellow";
-      default:
-        return "red";
-    }
-  };
+    const statusColor = useMemo(() => {
+        return status === "connected" ? "green" : status === "congested" ? "yellow" : "red";
+    }, [status]);
 
-  const getTpsBars = () => {
-    if (tps === null) return [0, 0, 0, 0]; // Estado desconocido
+    const tpsBars = useMemo(() => {
+        if (tps === null) return [0, 0, 0, 0];
 
-    if (tps > 3000) return [100, 90, 80, 70]; // Alto rendimiento
-    if (tps > 2000) return [80, 70, 60, 50]; // Carga media-alta
-    if (tps > 1000) return [60, 50, 40, 30]; // Congestión moderada
-    return [40, 30, 20, 10]; // Red congestionada
-  };
+        if (tps > 3000) return [100, 90, 80, 70];
+        if (tps > 2000) return [80, 70, 60, 50];
+        if (tps > 1000) return [60, 50, 40, 30];
+        return [40, 30, 20, 10];
+    }, [tps]);
 
-  return (
-    <div className={`network-status-container ${className}`}>
-      <div className="status-container">
-        <span className="network-status-label">Status:</span>
-        <div className={`status-bar ${getStatusColor()}`}></div>
-      </div>
+    return (
+        <div className={`network-status-container ${className}`}>
+            <div className="status-container">
+                <span className="network-status-label" aria-live="polite">Status:</span>
+                <div className={`status-bar ${statusColor}`}></div>
+            </div>
 
-      <div className="tps-container">
-        <span className="network-status-label">TPS:</span>
-        <div className="tps-bars">
-          {getTpsBars().map((height, index) => (
-            <div key={index} className="tps-bar" style={{ height: `${height}%` }}></div>
-          ))}
+            <div className="tps-container">
+                <span className="network-status-label">TPS:</span>
+                <div className="tps-bars">
+                    {tpsBars.map((height, index) => (
+                        <div key={index} className="tps-bar" style={{ height: `${height}%` }}></div>
+                    ))}
+                </div>
+            </div>
+
+            {error && <span className="error">{error}</span>}
         </div>
-      </div>
-
-      {error && <span className="error">{error}</span>}
-    </div>
-  );
-}
+    );
+});
 
 export default NetworkStatus;

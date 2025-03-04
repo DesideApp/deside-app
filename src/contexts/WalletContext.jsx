@@ -36,32 +36,38 @@ const WALLET_STATUS = {
 
 // ✅ Proveedor del contexto de la wallet
 export const WalletProvider = ({ children }) => {
-  console.log("🔵 WalletProvider Mounted");
-
   const [walletAddress, setWalletAddress] = useState(null);
   const [walletStatus, setWalletStatus] = useState(WALLET_STATUS.NOT_CONNECTED);
   const [isReady, setIsReady] = useState(false);
 
   // ✅ Función para sincronizar el estado de la wallet
   const syncWalletStatus = useCallback(async () => {
-    console.log("🟡 Syncing wallet authentication status...");
     const authStatus = await fetchAuthStatus();
 
-    setWalletAddress(authStatus.wallet);
-    setWalletStatus(
-      authStatus.isAuthenticated
-        ? WALLET_STATUS.AUTHENTICATED
-        : authStatus.wallet
-        ? WALLET_STATUS.CONNECTED
-        : WALLET_STATUS.NOT_CONNECTED
-    );
+    if (authStatus.wallet !== walletAddress || authStatus.isAuthenticated !== (walletStatus === WALLET_STATUS.AUTHENTICATED)) {
+      setWalletAddress(authStatus.wallet);
+      setWalletStatus(
+        authStatus.isAuthenticated
+          ? WALLET_STATUS.AUTHENTICATED
+          : authStatus.wallet
+          ? WALLET_STATUS.CONNECTED
+          : WALLET_STATUS.NOT_CONNECTED
+      );
+    }
 
     setIsReady(true);
-  }, []);
+  }, [walletAddress, walletStatus]);
 
-  // ✅ Se ejecuta solo una vez para evitar llamadas dobles en `React.StrictMode`
+  // ✅ Se ejecuta solo si cambia la wallet o el estado de autenticación
   useEffect(() => {
     syncWalletStatus();
+    window.addEventListener("walletConnected", syncWalletStatus);
+    window.addEventListener("walletDisconnected", syncWalletStatus);
+
+    return () => {
+      window.removeEventListener("walletConnected", syncWalletStatus);
+      window.removeEventListener("walletDisconnected", syncWalletStatus);
+    };
   }, [syncWalletStatus]);
 
   // ✅ Memorizamos el contexto para evitar re-render innecesarios
@@ -71,10 +77,6 @@ export const WalletProvider = ({ children }) => {
     isReady,
     syncWalletStatus,
   }), [walletAddress, walletStatus, isReady]);
-
-  if (!isReady) {
-    return <div className="loading-screen">🔄 Loading wallet state...</div>;
-  }
 
   return (
     <WalletContext.Provider value={walletContextValue}>

@@ -1,20 +1,20 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo, memo } from "react";
 import { Copy } from "lucide-react";
 import { useWallet } from "../../contexts/WalletContext";
 import { checkAuthStatus, logout } from "../../services/apiService.js";
-import { disconnectWallet } from "../../services/walletService.js"; 
-import { getBalance } from "../../utils/solanaHelpers.js"; 
+import { disconnectWallet } from "../../services/walletService.js";
+import { getBalance } from "../../utils/solanaHelpers.js";
 import DonationModal from "./DonationModal";
 import "./WalletMenu.css";
 
-const WalletMenu = React.memo(({ isOpen, onClose }) => {
+const WalletMenu = memo(({ isOpen, onClose }) => {
   const menuRef = useRef(null);
   const { walletAddress, isReady } = useWallet();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDonationOpen, setIsDonationOpen] = useState(false);
   const [balance, setBalance] = useState(null);
 
-  // ✅ Verificar autenticación con el backend solo si cambia la wallet
+  // ✅ Verificar autenticación y balance solo si la wallet cambia
   useEffect(() => {
     if (!walletAddress) {
       setIsAuthenticated(false);
@@ -24,17 +24,12 @@ const WalletMenu = React.memo(({ isOpen, onClose }) => {
 
     let isMounted = true;
 
-    const verifyAuth = async () => {
+    const fetchAuthAndBalance = async () => {
       try {
         const status = await checkAuthStatus();
         if (isMounted) {
           setIsAuthenticated(status.isAuthenticated);
-          if (status.isAuthenticated) {
-            const walletBalance = await getBalance(walletAddress);
-            setBalance(walletBalance);
-          } else {
-            setBalance(null);
-          }
+          setBalance(status.isAuthenticated ? await getBalance(walletAddress) : null);
         }
       } catch (error) {
         console.error("❌ Error verificando autenticación:", error);
@@ -45,11 +40,9 @@ const WalletMenu = React.memo(({ isOpen, onClose }) => {
       }
     };
 
-    verifyAuth();
+    fetchAuthAndBalance();
 
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [walletAddress]);
 
   // ✅ Cerrar menú al hacer clic fuera
@@ -70,13 +63,13 @@ const WalletMenu = React.memo(({ isOpen, onClose }) => {
   }, [isOpen, onClose]);
 
   const handleCopy = useCallback(async () => {
-    try {
-      if (walletAddress) {
+    if (walletAddress) {
+      try {
         await navigator.clipboard.writeText(walletAddress);
         alert("✅ Dirección copiada al portapapeles.");
+      } catch (error) {
+        console.error("❌ Error copiando la dirección:", error);
       }
-    } catch (error) {
-      console.error("❌ Error copiando la dirección:", error);
     }
   }, [walletAddress]);
 
@@ -102,10 +95,10 @@ const WalletMenu = React.memo(({ isOpen, onClose }) => {
           <div className="wallet-menu-content">
             {isAuthenticated ? (
               <>
-                <div className="wallet-header">
+                <header className="wallet-header">
                   <p className="wallet-network">🔗 Solana</p>
                   <p className="wallet-balance">{formattedBalance}</p>
-                </div>
+                </header>
 
                 <div className="wallet-address-container">
                   <p className="wallet-address">{walletAddress}</p>

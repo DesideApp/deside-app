@@ -1,23 +1,15 @@
 import { apiRequest } from "./apiService";
 
 /**
- * 🔹 **Obtener contactos**
+ * 🔹 **Gestión centralizada de contactos**
  */
 export async function fetchContacts() {
     try {
-        console.log("📡 Obteniendo lista de contactos...");
         const response = await apiRequest("/api/contacts", { method: "GET" });
-
-        if (!response || !Array.isArray(response.contacts)) {
-            console.warn("⚠️ Respuesta inesperada del backend:", response);
-            return [];
-        }
-
-        console.log("✅ Contactos obtenidos:", response.contacts);
-        return response.contacts;
+        return response?.contacts || [];
     } catch (error) {
         console.error("❌ Error al obtener contactos:", error.message || error);
-        return []; // Evita que la app se rompa si hay un error
+        return [];
     }
 }
 
@@ -25,70 +17,43 @@ export async function fetchContacts() {
  * 🔹 **Enviar solicitud de contacto**
  */
 export async function sendContactRequest(pubkey) {
-    try {
-        console.log(`📨 Enviando solicitud de contacto a: ${pubkey}...`);
-        const response = await apiRequest("/api/contacts/send", {
-            method: "POST",
-            body: JSON.stringify({ pubkey }),
-        });
-
-        if (!response || response.error) {
-            console.warn("⚠️ No se pudo enviar la solicitud:", response?.error || "Respuesta inválida");
-            return { success: false, error: response?.error || "Error desconocido" };
-        }
-
-        console.log("✅ Solicitud enviada:", response);
-        return { success: true, message: response.message };
-    } catch (error) {
-        console.error("❌ Error al enviar solicitud de contacto:", error.message || error);
-        return { success: false, error: error.message || "Error desconocido" };
-    }
+    return handleContactAction("/api/contacts/send", "POST", pubkey, "enviar solicitud de contacto");
 }
 
 /**
  * 🔹 **Aceptar solicitud de contacto**
  */
 export async function approveContact(pubkey) {
-    try {
-        console.log(`✅ Aceptando solicitud de contacto de: ${pubkey}...`);
-        const response = await apiRequest("/api/contacts/accept", {
-            method: "POST",
-            body: JSON.stringify({ pubkey }),
-        });
-
-        if (!response || response.error) {
-            console.warn("⚠️ No se pudo aceptar el contacto:", response?.error || "Respuesta inválida");
-            return { success: false, error: response?.error || "Error desconocido" };
-        }
-
-        console.log("✅ Contacto aceptado:", response);
-        return { success: true, message: response.message };
-    } catch (error) {
-        console.error("❌ Error al aceptar contacto:", error.message || error);
-        return { success: false, error: error.message || "Error desconocido" };
-    }
+    return handleContactAction("/api/contacts/accept", "POST", pubkey, "aceptar solicitud de contacto");
 }
 
 /**
  * 🔹 **Eliminar contacto**
  */
 export async function rejectContact(pubkey) {
+    return handleContactAction("/api/contacts/remove", "DELETE", pubkey, "eliminar contacto");
+}
+
+/**
+ * 🔹 **Manejo unificado de acciones sobre contactos**
+ */
+async function handleContactAction(endpoint, method, pubkey, actionDescription) {
     try {
-        console.log(`🗑 Eliminando contacto: ${pubkey}...`);
-        const response = await apiRequest("/api/contacts/remove", {
-            method: "DELETE",
+        if (!pubkey) throw new Error("Clave pública no proporcionada.");
+
+        const response = await apiRequest(endpoint, {
+            method,
             body: JSON.stringify({ pubkey }),
         });
 
         if (!response || response.error) {
-            console.warn("⚠️ No se pudo eliminar el contacto:", response?.error || "Respuesta inválida");
+            console.warn(`⚠️ No se pudo ${actionDescription}:`, response?.error || "Respuesta inválida");
             return { success: false, error: response?.error || "Error desconocido" };
         }
 
-        console.log("✅ Contacto eliminado:", response);
         return { success: true, message: response.message };
     } catch (error) {
-        console.error("❌ Error al eliminar contacto:", error.message || error);
+        console.error(`❌ Error al ${actionDescription}:`, error.message || error);
         return { success: false, error: error.message || "Error desconocido" };
     }
 }

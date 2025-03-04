@@ -1,25 +1,29 @@
 // 🔹 Definir proveedores de wallets compatibles
 const WALLET_PROVIDERS = {
-    phantom: () => window.solana?.isPhantom ? window.solana : null,
-    backpack: () => window.xnft?.solana || null,
-    magiceden: () => window.magicEden?.solana || null,
-    solflare: () => window.solflare?.isSolflare ? window.solflare : null,
-    glow: () => window.glow?.solana || null,
+    phantom: () => window?.solana?.isPhantom ? window.solana : null,
+    backpack: () => window?.xnft?.solana || null,
+    magiceden: () => window?.magicEden?.solana || null,
+    solflare: () => window?.solflare?.isSolflare ? window.solflare : null,
+    glow: () => window?.glow?.solana || null,
 };
 
 /**
  * 🔍 **Obtener el proveedor de la wallet**
  * @param {string} wallet - Nombre del proveedor (phantom, backpack, etc.).
- * @returns {object|null} - Objeto del proveedor o null si no está disponible.
+ * @returns {object|null} - Objeto del proveedor o `null` si no está disponible.
  */
 export function getProvider(wallet) {
+    if (!wallet || !WALLET_PROVIDERS[wallet]) {
+        console.warn(`⚠️ Proveedor de wallet desconocido: ${wallet}`);
+        return null;
+    }
+
     const provider = WALLET_PROVIDERS[wallet]?.();
     if (!provider) {
         console.warn(`⚠️ ${wallet} Wallet no detectada.`);
         return null;
     }
 
-    console.log(`✅ Proveedor detectado: ${wallet}`);
     return provider;
 }
 
@@ -28,7 +32,7 @@ export function getProvider(wallet) {
  * @returns {boolean} - `true` si hay una wallet conectada, `false` en caso contrario.
  */
 export function isWalletConnected() {
-    return Object.keys(WALLET_PROVIDERS).some(wallet => getProvider(wallet)?.isConnected);
+    return Object.values(WALLET_PROVIDERS).some(getProvider => getProvider()?.isConnected);
 }
 
 /**
@@ -37,17 +41,21 @@ export function isWalletConnected() {
  * @param {function} onDisconnect - Callback cuando la wallet se desconecta.
  */
 export function listenToWalletEvents(onConnect, onDisconnect) {
-    Object.keys(WALLET_PROVIDERS).forEach(wallet => {
-        const provider = getProvider(wallet);
+    Object.entries(WALLET_PROVIDERS).forEach(([wallet, providerFn]) => {
+        const provider = providerFn();
         if (provider) {
+            // ✅ Evita múltiples registros de eventos en la misma instancia
+            provider.removeAllListeners?.("connect");
+            provider.removeAllListeners?.("disconnect");
+
             provider.on("connect", () => {
                 console.log(`✅ ${wallet} Wallet conectada.`);
-                if (onConnect) onConnect(wallet);
+                onConnect?.(wallet);
             });
 
             provider.on("disconnect", () => {
                 console.warn(`❌ ${wallet} Wallet desconectada.`);
-                if (onDisconnect) onDisconnect(wallet);
+                onDisconnect?.(wallet);
             });
         }
     });

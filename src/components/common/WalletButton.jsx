@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { useWallet } from "../../contexts/WalletContext";
-import { getBalance } from "../../utils/solanaHelpers.js"; 
+import { getBalance } from "../../utils/solanaHelpers.js";
 import { disconnectWallet } from "../../services/walletService.js";
 import { checkAuthStatus, logout } from "../../services/apiService.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
 
-const WalletButton = React.memo(() => {
+const WalletButton = memo(() => {
   const { walletStatus, walletAddress, isReady } = useWallet();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [balance, setBalance] = useState(null); 
+  const [balance, setBalance] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -24,12 +24,7 @@ const WalletButton = React.memo(() => {
         const status = await checkAuthStatus();
         if (isMounted) {
           setIsAuthenticated(status.isAuthenticated);
-          if (status.isAuthenticated) {
-            const walletBalance = await getBalance(walletAddress);
-            setBalance(walletBalance);
-          } else {
-            setBalance(null);
-          }
+          setBalance(status.isAuthenticated ? await getBalance(walletAddress) : null);
         }
       } catch (error) {
         console.error("❌ Error verificando la wallet:", error);
@@ -42,15 +37,11 @@ const WalletButton = React.memo(() => {
 
     updateWalletStatus();
 
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [walletAddress, isReady]);
 
   const handleConnect = useCallback(() => {
-    if (!walletAddress) {
-      setIsModalOpen(true);
-    }
+    if (!walletAddress) setIsModalOpen(true);
   }, [walletAddress]);
 
   const formattedBalance = useMemo(
@@ -66,7 +57,7 @@ const WalletButton = React.memo(() => {
 
       <button
         className="menu-button"
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
+        onClick={() => setIsMenuOpen((prev) => !prev)}
         aria-label="Menu"
         disabled={!isReady}
       >

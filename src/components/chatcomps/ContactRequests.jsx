@@ -1,14 +1,15 @@
-import React, { useEffect, useState, memo } from "react";
+import React, { useEffect, useState, memo, useCallback } from "react";
 import { useWallet } from "../../contexts/WalletContext";
 import { getContacts, approveContact, rejectContact } from "../../services/apiService.js";
 import "./ContactRequests.css";
 
-const ContactRequests = memo(() => {
+const ContactRequests = () => {
   const { walletAddress, isReady } = useWallet();
   const [receivedRequests, setReceivedRequests] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // ✅ **Obtener solicitudes de contacto**
   useEffect(() => {
     if (!isReady || !walletAddress) return;
 
@@ -34,25 +35,21 @@ const ContactRequests = memo(() => {
     };
   }, [isReady, walletAddress]);
 
-  const handleApprove = async (pubkey) => {
+  // ✅ **Manejo de solicitudes de contacto**
+  const handleAction = useCallback(async (pubkey, action) => {
     try {
-      await approveContact(pubkey);
-      setReceivedRequests((prev) => prev.filter((req) => req.wallet !== pubkey));
+      if (action === "approve") {
+        await approveContact(pubkey);
+        setReceivedRequests((prev) => prev.filter((req) => req.wallet !== pubkey));
+      } else {
+        await rejectContact(pubkey);
+        setReceivedRequests((prev) => prev.filter((req) => req.wallet !== pubkey));
+      }
     } catch (error) {
-      console.error("❌ Error al aceptar contacto:", error);
-      setErrorMessage("❌ No se pudo aceptar la solicitud.");
+      console.error(`❌ Error al ${action === "approve" ? "aceptar" : "rechazar"} contacto:`, error);
+      setErrorMessage(`❌ No se pudo ${action === "approve" ? "aceptar" : "rechazar"} la solicitud.`);
     }
-  };
-
-  const handleReject = async (pubkey) => {
-    try {
-      await rejectContact(pubkey);
-      setReceivedRequests((prev) => prev.filter((req) => req.wallet !== pubkey));
-    } catch (error) {
-      console.error("❌ Error al rechazar contacto:", error);
-      setErrorMessage("❌ No se pudo rechazar la solicitud.");
-    }
-  };
+  }, []);
 
   return (
     <div className="contact-requests-container">
@@ -64,11 +61,11 @@ const ContactRequests = memo(() => {
         <h4>📥 Recibidas</h4>
         {receivedRequests.length > 0 ? (
           <ul className="requests-list">
-            {receivedRequests.map((contact) => (
-              <li key={contact.wallet}>
-                {contact.wallet.slice(0, 6)}...{contact.wallet.slice(-4)}
-                <button onClick={() => handleApprove(contact.wallet)}>✅</button>
-                <button onClick={() => handleReject(contact.wallet)}>❌</button>
+            {receivedRequests.map(({ wallet }) => (
+              <li key={wallet}>
+                {wallet.slice(0, 6)}...{wallet.slice(-4)}
+                <button onClick={() => handleAction(wallet, "approve")}>✅</button>
+                <button onClick={() => handleAction(wallet, "reject")}>❌</button>
               </li>
             ))}
           </ul>
@@ -81,9 +78,9 @@ const ContactRequests = memo(() => {
         <h4>📤 Enviadas</h4>
         {sentRequests.length > 0 ? (
           <ul className="requests-list">
-            {sentRequests.map((contact) => (
-              <li key={contact.wallet}>
-                {contact.wallet.slice(0, 6)}...{contact.wallet.slice(-4)} (Pendiente)
+            {sentRequests.map(({ wallet }) => (
+              <li key={wallet}>
+                {wallet.slice(0, 6)}...{wallet.slice(-4)} (Pendiente)
               </li>
             ))}
           </ul>
@@ -93,6 +90,6 @@ const ContactRequests = memo(() => {
       </div>
     </div>
   );
-});
+};
 
-export default ContactRequests;
+export default memo(ContactRequests);

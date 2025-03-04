@@ -1,37 +1,34 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, memo } from "react";
 import { checkAuthStatus, addContact } from "../../services/apiService.js";
+import "./AddContactForm.css";
 
 const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
-    const [successMessage, setSuccessMessage] = useState("");
+    const [message, setMessage] = useState({ type: "", text: "" });
     const [isLoading, setIsLoading] = useState(false);
 
-    // ✅ **Enviar solicitud de contacto**
+    // ✅ **Manejo de solicitudes de contacto**
     const handleAddContact = useCallback(async () => {
         const trimmedPubkey = pubkey.trim();
         if (!trimmedPubkey) {
-            setErrorMessage("⚠️ Introduce una clave pública válida.");
+            setMessage({ type: "error", text: "⚠️ Introduce una clave pública válida." });
             return;
         }
 
         setIsLoading(true);
-        setErrorMessage("");
-        setSuccessMessage("");
+        setMessage({ type: "", text: "" });
 
         try {
             const { isAuthenticated } = await checkAuthStatus();
-            if (!isAuthenticated) {
-                throw new Error("⚠️ Debes estar autenticado para añadir contactos.");
-            }
+            if (!isAuthenticated) throw new Error("⚠️ Debes estar autenticado para añadir contactos.");
 
             await addContact(trimmedPubkey);
-            setSuccessMessage("✅ Solicitud de contacto enviada con éxito.");
+            setMessage({ type: "success", text: "✅ Solicitud de contacto enviada con éxito." });
             setPubkey(""); // ✅ Reset del input tras el éxito
             onContactAdded();
         } catch (error) {
             console.error("❌ Error enviando la solicitud:", error);
-            setErrorMessage(error.message || "❌ Error al enviar solicitud.");
+            setMessage({ type: "error", text: error.message || "❌ Error al enviar solicitud." });
         } finally {
             setIsLoading(false);
         }
@@ -56,10 +53,11 @@ const AddContactForm = ({ onContactAdded }) => {
             </button>
 
             {/* ✅ Mejora de accesibilidad con `aria-live` */}
-            {errorMessage && <p className="error-message" aria-live="assertive">{errorMessage}</p>}
-            {successMessage && <p className="success-message" aria-live="assertive">{successMessage}</p>}
+            {message.text && (
+                <p className={`message ${message.type}`} aria-live="assertive">{message.text}</p>
+            )}
         </div>
     );
 };
 
-export default AddContactForm;
+export default memo(AddContactForm);

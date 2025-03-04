@@ -8,16 +8,17 @@ const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutos
  * 🔹 **Manejo centralizado de solicitudes a la API**
  */
 export async function apiRequest(endpoint, options = {}, retry = true) {
+    if (!endpoint) throw new Error("❌ API Request sin endpoint definido.");
+
     const cacheKey = `${endpoint}:${JSON.stringify(options)}`;
 
     // ✅ Verificar caché antes de hacer la solicitud
     if (cache.has(cacheKey)) {
         const cachedData = cache.get(cacheKey);
         if (Date.now() - cachedData.timestamp <= CACHE_EXPIRATION) {
-            console.log(`⚡ Usando caché para ${endpoint}`);
             return cachedData.data;
         }
-        cache.delete(cacheKey); // ❌ Expirar caché si ha pasado el tiempo límite
+        cache.delete(cacheKey);
     }
 
     try {
@@ -45,7 +46,7 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
                     throw new Error("Sesión expirada. Reautenticación requerida.");
                 }
 
-                return apiRequest(endpoint, options, false); // 🔄 Reintentar sin loop infinito
+                return apiRequest(endpoint, options, false);
             }
 
             const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
@@ -53,10 +54,10 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
         }
 
         const responseData = await response.json();
-        cache.set(cacheKey, { data: responseData, timestamp: Date.now() }); // ✅ Solo cacheamos respuestas exitosas
+        cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
         return responseData;
     } catch (error) {
-        console.error(`❌ Error en API request (${endpoint}):`, error.message || error);
+        console.error(`❌ API Error (${endpoint}):`, error.message || error);
         throw error;
     }
 }
@@ -72,57 +73,97 @@ export async function authenticateWithServer(pubkey, signature, message) {
 }
 
 export async function checkAuthStatus() {
-    return apiRequest("/api/auth/status", { method: "GET" });
+    try {
+        return await apiRequest("/api/auth/status", { method: "GET" });
+    } catch {
+        return { isAuthenticated: false };
+    }
 }
 
 export async function logout() {
     clearSession();
-    return apiRequest("/api/auth/revoke", { method: "POST" });
+    try {
+        return await apiRequest("/api/auth/revoke", { method: "POST" });
+    } catch {
+        return null;
+    }
 }
 
 /**
  * 🔹 **Funciones de contactos**
  */
 export async function getContacts() {
-    return apiRequest("/api/contacts", { method: "GET" });
+    try {
+        return await apiRequest("/api/contacts", { method: "GET" });
+    } catch {
+        return [];
+    }
 }
 
 export async function addContact(pubkey) {
-    return apiRequest("/api/contacts/send", {
-        method: "POST",
-        body: JSON.stringify({ pubkey }),
-    });
+    try {
+        return await apiRequest("/api/contacts/send", {
+            method: "POST",
+            body: JSON.stringify({ pubkey }),
+        });
+    } catch {
+        return null;
+    }
 }
 
 export async function approveContact(pubkey) {
-    return apiRequest("/api/contacts/accept", {
-        method: "POST",
-        body: JSON.stringify({ pubkey }),
-    });
+    try {
+        return await apiRequest("/api/contacts/accept", {
+            method: "POST",
+            body: JSON.stringify({ pubkey }),
+        });
+    } catch {
+        return null;
+    }
 }
 
 export async function rejectContact(pubkey) {
-    return apiRequest("/api/contacts/remove", {
-        method: "DELETE",
-        body: JSON.stringify({ pubkey }),
-    });
+    try {
+        return await apiRequest("/api/contacts/remove", {
+            method: "DELETE",
+            body: JSON.stringify({ pubkey }),
+        });
+    } catch {
+        return null;
+    }
 }
 
 /**
  * 🔹 **Funciones de Solana (llamadas al backend, no a la blockchain)**
  */
 export async function getSolanaPrice() {
-    return apiRequest("/api/solana/solana-price", { method: "GET" });
+    try {
+        return await apiRequest("/api/solana/solana-price", { method: "GET" });
+    } catch {
+        return null;
+    }
 }
 
 export async function getSolanaTPS() {
-    return apiRequest("/api/solana/solana-tps", { method: "GET" });
+    try {
+        return await apiRequest("/api/solana/solana-tps", { method: "GET" });
+    } catch {
+        return null;
+    }
 }
 
 export async function getSolanaStatus() {
-    return apiRequest("/api/solana/solana-status", { method: "GET" });
+    try {
+        return await apiRequest("/api/solana/solana-status", { method: "GET" });
+    } catch {
+        return null;
+    }
 }
 
 export async function verifyTransaction(signature) {
-    return apiRequest(`/api/solana/verify-transaction/${signature}`, { method: "GET" });
+    try {
+        return await apiRequest(`/api/solana/verify-transaction/${signature}`, { method: "GET" });
+    } catch {
+        return null;
+    }
 }
