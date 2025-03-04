@@ -1,5 +1,6 @@
 import { Connection, PublicKey } from "@solana/web3.js";
 import { apiRequest } from "../services/apiService.js"; // ✅ Importamos apiRequest para usar el backend
+import API_BASE_URL from "../config/apiConfig.js"; // ✅ Asegurar que se usa la URL correcta del backend
 
 const RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
 const connection = new Connection(RPC_URL, "confirmed"); // ✅ Instancia única y reutilizable
@@ -24,34 +25,27 @@ export async function getBalance(walletAddress) {
 }
 
 /**
- * 🔹 **Crear conexión reutilizable a Solana**
- */
-export function getSolanaConnection() {
-    return connection; // ✅ Reutiliza la conexión única
-}
-
-/**
- * 🔹 **Obtener estado actual de Solana**
+ * 🔹 **Obtener estado de Solana desde el backend**
  */
 export async function getSolanaStatus() {
     try {
-        const status = await connection.getHealth();
-        return status === "ok" ? "connected" : "degraded";
+        const response = await apiRequest(`${API_BASE_URL}/api/solana/solana-status`, { method: "GET" });
+        return response?.status || "offline"; // ✅ Devuelve "offline" si hay un error
     } catch (error) {
-        console.error("❌ Error obteniendo estado de la red Solana:", error);
+        console.error("❌ Error obteniendo estado de Solana desde el backend:", error);
         return "offline";
     }
 }
 
 /**
- * 🔹 **Obtener TPS de Solana**
+ * 🔹 **Obtener TPS de Solana desde el backend**
  */
 export async function getSolanaTPS() {
     try {
-        const tps = await connection.getRecentPerformanceSamples(1);
-        return tps?.[0]?.numTransactions / tps?.[0]?.samplePeriodSecs || null;
+        const response = await apiRequest(`${API_BASE_URL}/api/solana/solana-tps`, { method: "GET" });
+        return response?.tps || null;
     } catch (error) {
-        console.error("❌ Error obteniendo TPS de Solana:", error);
+        console.error("❌ Error obteniendo TPS de Solana desde el backend:", error);
         return null;
     }
 }
@@ -61,7 +55,7 @@ export async function getSolanaTPS() {
  */
 export async function getSolanaPrice() {
     try {
-        const response = await apiRequest("/api/solana/solana-price", { method: "GET" });
+        const response = await apiRequest(`${API_BASE_URL}/api/solana/solana-price`, { method: "GET" });
         return response?.price || null;
     } catch (error) {
         console.error("❌ Error obteniendo precio de Solana desde el backend:", error);
