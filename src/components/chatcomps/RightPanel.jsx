@@ -1,7 +1,7 @@
 import React, { useState, memo } from "react";
 import ContactRequests from "../chatcomps/ContactRequests";
 import AddContactForm from "../chatcomps/AddContactForm";
-import { useAuthManager } from "../../services/AuthManager"; // 🔄 Importamos AuthManager
+import { useAuthManager } from "../../services/authManager"; // 🔄 Importamos AuthManager
 import "./RightPanel.css";
 
 const RightPanel = () => {

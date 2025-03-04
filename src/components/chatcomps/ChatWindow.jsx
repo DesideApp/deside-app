@@ -3,7 +3,7 @@ import ChatInput from "./ChatInput";
 import { useWallet } from "../../contexts/WalletContext";
 import useWebRTC from "../../hooks/useWebRTC";
 import { io } from "socket.io-client";
-import { useAuthManager } from "../../services/AuthManager"; // Usamos AuthManager para la lógica centralizada
+import { useAuthManager } from "../../services/authManager"; // Usamos AuthManager para la lógica centralizada
 import "./ChatWindow.css";
 
 function ChatWindow({ selectedContact, openAuthModal }) {
