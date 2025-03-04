@@ -7,14 +7,14 @@ import { getBalance } from "../../utils/solanaHelpers.js";
 import DonationModal from "./DonationModal";
 import "./WalletMenu.css";
 
-const WalletMenu = memo(({ isOpen, onClose }) => {
+const WalletMenu = memo(({ isOpen, onClose, openWalletModal }) => {
   const menuRef = useRef(null);
-  const { walletAddress, isReady } = useWallet();
+  const { walletAddress, isReady, syncWalletStatus } = useWallet();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDonationOpen, setIsDonationOpen] = useState(false);
   const [balance, setBalance] = useState(null);
 
-  // ✅ Verificar autenticación y balance solo si la wallet cambia
+  // ✅ **Sincronizar autenticación y balance al cambiar la wallet**
   useEffect(() => {
     if (!walletAddress) {
       setIsAuthenticated(false);
@@ -22,30 +22,22 @@ const WalletMenu = memo(({ isOpen, onClose }) => {
       return;
     }
 
-    let isMounted = true;
-
     const fetchAuthAndBalance = async () => {
       try {
         const status = await checkAuthStatus();
-        if (isMounted) {
-          setIsAuthenticated(status.isAuthenticated);
-          setBalance(status.isAuthenticated ? await getBalance(walletAddress) : null);
-        }
+        setIsAuthenticated(status.isAuthenticated);
+        setBalance(status.isAuthenticated ? await getBalance(walletAddress) : null);
       } catch (error) {
         console.error("❌ Error verificando autenticación:", error);
-        if (isMounted) {
-          setIsAuthenticated(false);
-          setBalance(null);
-        }
+        setIsAuthenticated(false);
+        setBalance(null);
       }
     };
 
     fetchAuthAndBalance();
-
-    return () => { isMounted = false; };
   }, [walletAddress]);
 
-  // ✅ Cerrar menú al hacer clic fuera
+  // ✅ **Cerrar menú al hacer clic fuera**
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -76,10 +68,9 @@ const WalletMenu = memo(({ isOpen, onClose }) => {
   const handleLogout = useCallback(async () => {
     await disconnectWallet();
     await logout();
-    setIsAuthenticated(false);
-    setBalance(null);
+    syncWalletStatus(); // 🔄 Revalidar estado global tras logout
     onClose();
-  }, [onClose]);
+  }, [onClose, syncWalletStatus]);
 
   const formattedBalance = useMemo(
     () => (balance !== null ? `${balance.toFixed(2)} SOL` : "0 SOL"),
@@ -90,6 +81,19 @@ const WalletMenu = memo(({ isOpen, onClose }) => {
 
   return (
     <>
+      <button
+        className="menu-button"
+        onClick={() => onClose()}
+        aria-label="Menu"
+        disabled={!isReady}
+      >
+        <div className="menu-icon">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </button>
+
       {isOpen && (
         <div className="wallet-menu open" ref={menuRef}>
           <div className="wallet-menu-content">
@@ -118,7 +122,7 @@ const WalletMenu = memo(({ isOpen, onClose }) => {
             ) : (
               <div className="wallet-disconnected">
                 <p className="no-wallet">⚠️ No wallet connected.</p>
-                <button className="connect-button" onClick={onClose}>
+                <button className="connect-button" onClick={openWalletModal}>
                   Connect Wallet
                 </button>
               </div>

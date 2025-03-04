@@ -1,15 +1,12 @@
 import React, { useState, useCallback } from "react";
-import { useWallet } from "../../contexts/WalletContext";
-import { authenticateWallet } from "../../services/walletService.js"; 
 import { getProvider } from "../../services/walletProviders.js";
 import "./WalletModal.css";
 
-const WalletModal = ({ isOpen, onClose }) => {
-  const { isReady, syncWalletStatus } = useWallet();
+const WalletModal = ({ isOpen, onClose, onWalletConnected }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  if (!isOpen || !isReady) return null;
+  if (!isOpen) return null;
 
   const handleWalletSelection = useCallback(async (walletType) => {
     console.log(`🔵 Intentando conectar con ${walletType}...`);
@@ -18,32 +15,24 @@ const WalletModal = ({ isOpen, onClose }) => {
 
     try {
       const provider = getProvider(walletType);
-      if (!provider) {
-        throw new Error("Wallet provider not found.");
-      }
+      if (!provider) throw new Error("Wallet provider not found.");
 
       await provider.connect();
-      if (!provider.publicKey) {
-        throw new Error("No se pudo obtener la clave pública.");
-      }
+      if (!provider.publicKey) throw new Error("No se pudo obtener la clave pública.");
 
-      console.log("🔄 Autenticando wallet en el backend...");
-      const authResult = await authenticateWallet(walletType);
+      console.log("✅ Wallet conectada:", provider.publicKey.toBase58());
+      
+      // ✅ Llamamos a la función que nos pasó el padre (WalletButton)
+      onWalletConnected(provider.publicKey.toBase58());
 
-      if (authResult.status === "authenticated") {
-        console.log("✅ Wallet conectada y autenticada.");
-        syncWalletStatus(); // 🔄 Actualizar estado global tras autenticación
-        onClose();
-      } else {
-        throw new Error("Authentication failed. Please try again.");
-      }
+      onClose(); // 🔴 El modal se cierra
     } catch (error) {
-      console.error("❌ Error en autenticación:", error);
+      console.error("❌ Error conectando la wallet:", error);
       setErrorMessage(error.message || "❌ Connection error. Please retry.");
     } finally {
       setIsLoading(false);
     }
-  }, [onClose, syncWalletStatus]);
+  }, [onWalletConnected, onClose]);
 
   return (
     <div className="wallet-modal-overlay" onClick={isLoading ? null : onClose}>
