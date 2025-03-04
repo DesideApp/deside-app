@@ -1,6 +1,6 @@
 import React, { useEffect, useState, memo, useCallback } from "react";
 import { useWallet } from "../../contexts/WalletContext";
-import { getContacts, approveContact, rejectContact } from "../../services/apiService.js";
+import { getContacts, approveContact, rejectContact } from "../../services/contactService.js";
 import "./ContactRequests.css";
 
 const ContactRequests = ({ openAuthModal }) => {
