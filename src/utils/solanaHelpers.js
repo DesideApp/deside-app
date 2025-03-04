@@ -1,6 +1,7 @@
 import { Connection, PublicKey } from "@solana/web3.js";
+import { apiRequest } from "../services/apiService.js"; // ✅ Importamos apiRequest para usar el backend
 
-const RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com"; 
+const RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
 const connection = new Connection(RPC_URL, "confirmed"); // ✅ Instancia única y reutilizable
 
 /**
@@ -51,6 +52,19 @@ export async function getSolanaTPS() {
         return tps?.[0]?.numTransactions / tps?.[0]?.samplePeriodSecs || null;
     } catch (error) {
         console.error("❌ Error obteniendo TPS de Solana:", error);
+        return null;
+    }
+}
+
+/**
+ * 🔹 **Obtener precio de SOL desde el backend**
+ */
+export async function getSolanaPrice() {
+    try {
+        const response = await apiRequest("/api/solana/solana-price", { method: "GET" });
+        return response?.price || null;
+    } catch (error) {
+        console.error("❌ Error obteniendo precio de Solana desde el backend:", error);
         return null;
     }
 }
