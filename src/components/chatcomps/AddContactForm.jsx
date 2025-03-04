@@ -1,5 +1,7 @@
 import React, { useState, useCallback, memo } from "react";
-import { checkAuthStatus, addContact } from "../../services/apiService.js";
+import { checkAuthStatus } from "../../services/apiService.js";
+import { sendContactRequest } from "../../services/contactService.js"; // ✅ Nuevo import correcto
+
 
 const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState("");
@@ -21,7 +23,7 @@ const AddContactForm = ({ onContactAdded }) => {
             const { isAuthenticated } = await checkAuthStatus();
             if (!isAuthenticated) throw new Error("⚠️ Debes estar autenticado para añadir contactos.");
 
-            await addContact(trimmedPubkey);
+            await sendContactRequest(trimmedPubkey);
             setMessage({ type: "success", text: "✅ Solicitud de contacto enviada con éxito." });
             setPubkey(""); // ✅ Reset del input tras el éxito
             onContactAdded();
