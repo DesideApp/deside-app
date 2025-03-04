@@ -1,6 +1,5 @@
 import React, { useState, useCallback, memo } from "react";
 import { checkAuthStatus, addContact } from "../../services/apiService.js";
-import "./AddContactForm.css";
 
 const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState("");
