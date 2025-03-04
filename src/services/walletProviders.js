@@ -10,21 +10,21 @@ const WALLET_PROVIDERS = {
 /**
  * 🔍 **Obtener el proveedor de la wallet**
  * @param {string} wallet - Nombre del proveedor (phantom, backpack, etc.).
- * @returns {object|null} - Objeto del proveedor o `null` si no está disponible.
+ * @returns {object} - Objeto del proveedor o `null` si no está disponible, con mensaje de error si falla.
  */
 export function getProvider(wallet) {
     if (!wallet || !WALLET_PROVIDERS[wallet]) {
         console.warn(`⚠️ Proveedor de wallet desconocido: ${wallet}`);
-        return null;
+        return { provider: null, error: "Wallet not found" };
     }
 
     const provider = WALLET_PROVIDERS[wallet]();
     if (!provider) {
         console.warn(`⚠️ ${wallet} Wallet no detectada.`);
-        return null;
+        return { provider: null, error: "Wallet not detected" };
     }
 
-    return provider;
+    return { provider, error: null };
 }
 
 /**
@@ -55,11 +55,13 @@ export function listenToWalletEvents(onConnect, onDisconnect) {
         provider.on("connect", () => {
             console.log(`✅ ${wallet} Wallet conectada.`);
             onConnect?.(wallet);
+            window.dispatchEvent(new Event("walletConnected")); // 🔄 Emitir evento global
         });
 
         provider.on("disconnect", () => {
             console.warn(`❌ ${wallet} Wallet desconectada.`);
             onDisconnect?.(wallet);
+            window.dispatchEvent(new Event("walletDisconnected")); // 🔄 Emitir evento global
         });
     });
 }

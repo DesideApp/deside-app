@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { useWallet } from "../../contexts/WalletContext";
 import { getBalance } from "../../utils/solanaHelpers.js";
-import { disconnectWallet } from "../../services/walletService.js";
-import { logout } from "../../services/apiService.js";
+import { handleWalletConnected, handleLogout } from "../../services/walletService.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
 
 const WalletButton = memo(() => {
   const { walletStatus, walletAddress, isReady, syncWalletStatus } = useWallet();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [balance, setBalance] = useState(null);
 
@@ -33,24 +31,27 @@ const WalletButton = memo(() => {
     fetchBalance();
   }, [walletAddress]);
 
-  // ✅ **Abrir el modal cuando se intente conectar**
+  // ✅ **Abrir el modal solo si NO estamos autenticados**
   const handleConnect = useCallback(() => {
-    console.log("🔵 Intentando abrir el modal...");
-    setIsModalOpen(true);
-  }, []);
-
-  // ✅ **Cerrar sesión y resetear el estado**
-  const handleLogout = useCallback(() => {
-    disconnectWallet();
-    logout();
-    syncWalletStatus(); // 🔄 Asegurar revalidación
-  }, [syncWalletStatus]);
+    if (walletStatus === "not_connected" || walletStatus === "connected") {
+      console.log("🔵 Intentando abrir el modal...");
+      setIsModalOpen(true);
+    } else {
+      console.warn("⚠️ Ya estamos autenticados.");
+    }
+  }, [walletStatus]);
 
   // ✅ **Cuando el modal se cierra, verificar estado de la wallet**
-  const handleWalletConnected = useCallback(() => {
-    console.log("✅ Wallet conectada. Revalidando estado...");
-    syncWalletStatus();
-    setIsModalOpen(false);
+  const handleModalWalletConnected = useCallback(async (wallet) => {
+    console.log("✅ Wallet conectada. Autenticando...");
+    const { walletStatus } = await handleWalletConnected(wallet, syncWalletStatus);
+    
+    if (walletStatus === "authenticated") {
+      console.log("✅ Autenticación exitosa.");
+      setIsModalOpen(false);
+    } else {
+      console.warn("⚠️ No se pudo autenticar la wallet.");
+    }
   }, [syncWalletStatus]);
 
   const formattedBalance = useMemo(
@@ -60,24 +61,22 @@ const WalletButton = memo(() => {
 
   return (
     <div className="wallet-container">
-      <button className="wallet-button" onClick={handleConnect} disabled={!isReady}>
-        <span aria-live="polite">
-          {walletStatus === "connected" ? formattedBalance : "Connect Wallet"}
-        </span>
-      </button>
+      {/* ✅ Solo mostramos "Connect Wallet" si NO está autenticada */}
+      {(walletStatus === "not_connected" || walletStatus === "connected") && (
+        <button className="wallet-button" onClick={handleConnect} disabled={!isReady}>
+          <span aria-live="polite">Connect Wallet</span>
+        </button>
+      )}
 
-      <button
-        className="menu-button"
-        onClick={() => setIsMenuOpen((prev) => !prev)}
-        aria-label="Menu"
-        disabled={!isReady}
-      >
-        <span className="menu-icon"></span>
-      </button>
+      {/* ✅ WalletMenu ahora solo invoca handleLogout directamente */}
+      <WalletMenu handleLogout={handleLogout} />
 
-      <WalletMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} handleLogout={handleLogout} />
-
-      <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onWalletConnected={handleWalletConnected} />
+      {/* ✅ Modal de conexión */}
+      <WalletModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onWalletConnected={handleModalWalletConnected} 
+      />
     </div>
   );
 });

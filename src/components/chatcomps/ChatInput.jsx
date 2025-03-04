@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import "./ChatInput.css";
 
-const ChatInput = React.memo(({ onSendMessage, disabled }) => {
+const ChatInput = React.memo(({ onSendMessage, disabled, openAuthModal }) => {
     const [message, setMessage] = useState("");
     const [authWarning, setAuthWarning] = useState(false);
     const inputRef = useRef(null);
@@ -24,12 +24,13 @@ const ChatInput = React.memo(({ onSendMessage, disabled }) => {
                 if (disabled) {
                     setAuthWarning(true);
                     setTimeout(() => setAuthWarning(false), 3000);
+                    openAuthModal(); // 🔄 Emitir evento para abrir el modal de autenticación
                 } else {
                     handleSendMessage();
                 }
             }
         },
-        [disabled, handleSendMessage]
+        [disabled, handleSendMessage, openAuthModal]
     );
 
     // ✅ **Ocultar mensaje de advertencia al habilitar el input**
@@ -62,7 +63,7 @@ const ChatInput = React.memo(({ onSendMessage, disabled }) => {
 
             {/* 🔔 Aviso de autenticación */}
             {authWarning && (
-                <p className="auth-warning">⚠️ Debes estar autenticado para enviar mensajes.</p>
+                <p className="auth-warning">⚠️ Debes iniciar sesión para enviar mensajes.</p>
             )}
         </div>
     );

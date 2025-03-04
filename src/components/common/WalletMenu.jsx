@@ -1,47 +1,61 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo, memo } from "react";
 import { Copy } from "lucide-react";
 import { useWallet } from "../../contexts/WalletContext";
-import { checkAuthStatus, logout } from "../../services/apiService.js";
-import { disconnectWallet } from "../../services/walletService.js";
-import { getBalance } from "../../utils/solanaHelpers.js";
+import { checkAuthStatus } from "../../services/apiService.js";
 import DonationModal from "./DonationModal";
 import "./WalletMenu.css";
 
-const WalletMenu = memo(({ isOpen, onClose, openWalletModal }) => {
+const WalletMenu = memo(({ handleLogout, openWalletModal }) => {
   const menuRef = useRef(null);
-  const { walletAddress, isReady, syncWalletStatus } = useWallet();
+  const { walletAddress, isReady } = useWallet();
+  const [isOpen, setIsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDonationOpen, setIsDonationOpen] = useState(false);
   const [balance, setBalance] = useState(null);
 
-  // ✅ **Sincronizar autenticación y balance al cambiar la wallet**
-  useEffect(() => {
+  // ✅ **Verificar autenticación solo si cambia la wallet**
+  const fetchAuthStatus = useCallback(async () => {
     if (!walletAddress) {
       setIsAuthenticated(false);
       setBalance(null);
       return;
     }
 
-    const fetchAuthAndBalance = async () => {
-      try {
-        const status = await checkAuthStatus();
-        setIsAuthenticated(status.isAuthenticated);
-        setBalance(status.isAuthenticated ? await getBalance(walletAddress) : null);
-      } catch (error) {
-        console.error("❌ Error verificando autenticación:", error);
-        setIsAuthenticated(false);
-        setBalance(null);
-      }
+    try {
+      const status = await checkAuthStatus();
+      setIsAuthenticated(status.isAuthenticated);
+    } catch (error) {
+      console.error("❌ Error verificando autenticación:", error);
+      setIsAuthenticated(false);
+    }
+  }, [walletAddress]);
+
+  useEffect(() => {
+    fetchAuthStatus();
+  }, [fetchAuthStatus]);
+
+  // ✅ **Escuchar eventos globales para sincronización automática**
+  useEffect(() => {
+    const handleWalletConnected = () => fetchAuthStatus();
+    const handleWalletDisconnected = () => {
+      setIsAuthenticated(false);
+      setBalance(null);
     };
 
-    fetchAuthAndBalance();
-  }, [walletAddress]);
+    window.addEventListener("walletConnected", handleWalletConnected);
+    window.addEventListener("walletDisconnected", handleWalletDisconnected);
+
+    return () => {
+      window.removeEventListener("walletConnected", handleWalletConnected);
+      window.removeEventListener("walletDisconnected", handleWalletDisconnected);
+    };
+  }, [fetchAuthStatus]);
 
   // ✅ **Cerrar menú al hacer clic fuera**
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        onClose();
+      if (isOpen && menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsOpen(false);
       }
     };
 
@@ -52,7 +66,7 @@ const WalletMenu = memo(({ isOpen, onClose, openWalletModal }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   const handleCopy = useCallback(async () => {
     if (walletAddress) {
@@ -65,12 +79,11 @@ const WalletMenu = memo(({ isOpen, onClose, openWalletModal }) => {
     }
   }, [walletAddress]);
 
-  const handleLogout = useCallback(async () => {
-    await disconnectWallet();
-    await logout();
-    syncWalletStatus(); // 🔄 Revalidar estado global tras logout
-    onClose();
-  }, [onClose, syncWalletStatus]);
+  // ✅ **Cerrar menú después de logout**
+  const handleLogoutAndCloseMenu = useCallback(() => {
+    handleLogout();
+    setIsOpen(false);
+  }, [handleLogout]);
 
   const formattedBalance = useMemo(
     () => (balance !== null ? `${balance.toFixed(2)} SOL` : "0 SOL"),
@@ -81,9 +94,10 @@ const WalletMenu = memo(({ isOpen, onClose, openWalletModal }) => {
 
   return (
     <>
+      {/* ✅ Botón del menú ahora abre/cierra el menú correctamente */}
       <button
         className="menu-button"
-        onClick={() => onClose()}
+        onClick={() => setIsOpen((prev) => !prev)}
         aria-label="Menu"
         disabled={!isReady}
       >
@@ -97,7 +111,14 @@ const WalletMenu = memo(({ isOpen, onClose, openWalletModal }) => {
       {isOpen && (
         <div className="wallet-menu open" ref={menuRef}>
           <div className="wallet-menu-content">
-            {isAuthenticated ? (
+            {!isAuthenticated ? (
+              <div className="wallet-disconnected">
+                <p className="no-wallet">⚠️ No wallet connected.</p>
+                <button className="connect-button" onClick={openWalletModal}>
+                  Connect Wallet
+                </button>
+              </div>
+            ) : (
               <>
                 <header className="wallet-header">
                   <p className="wallet-network">🔗 Solana</p>
@@ -111,21 +132,15 @@ const WalletMenu = memo(({ isOpen, onClose, openWalletModal }) => {
                   </button>
                 </div>
 
-                <button className="logout-button" onClick={handleLogout}>
+                {/* ✅ Ahora WalletMenu solo invoca handleLogout y cierra el menú */}
+                <button className="logout-button" onClick={handleLogoutAndCloseMenu}>
                   Disconnect
                 </button>
 
                 <button className="donate-button" onClick={() => setIsDonationOpen(true)}>
-                  Support Us 💜
+                  Support Us ❤️
                 </button>
               </>
-            ) : (
-              <div className="wallet-disconnected">
-                <p className="no-wallet">⚠️ No wallet connected.</p>
-                <button className="connect-button" onClick={openWalletModal}>
-                  Connect Wallet
-                </button>
-              </div>
             )}
           </div>
         </div>

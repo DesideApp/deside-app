@@ -3,16 +3,18 @@ import ChatInput from "./ChatInput";
 import { useWallet } from "../../contexts/WalletContext";
 import useWebRTC from "../../hooks/useWebRTC";
 import { io } from "socket.io-client";
-import { checkAuthStatus, getContacts } from "../../services/apiService.js";
+import { useAuthManager } from "../../services/AuthManager"; // Usamos AuthManager para la lógica centralizada
 import "./ChatWindow.css";
 
-function ChatWindow({ selectedContact }) {
+function ChatWindow({ selectedContact, openAuthModal }) {
   const { walletAddress } = useWallet();
   const chatContainerRef = useRef(null);
   const socketRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [confirmedContacts, setConfirmedContacts] = useState([]);
+
+  // ✅ Usamos AuthManager para gestionar el estado de autenticación
+  const { isAuthenticated, isLoading, handleLoginResponse } = useAuthManager(); // Llamamos a AuthManager
 
   // ✅ **Obtener lista de contactos confirmados**
   const fetchContacts = useCallback(async () => {
@@ -25,21 +27,10 @@ function ChatWindow({ selectedContact }) {
     }
   }, [walletAddress]);
 
-  // ✅ **Verificar autenticación con el backend**
-  const verifyAuth = useCallback(async () => {
-    if (!walletAddress) return;
-    try {
-      const status = await checkAuthStatus();
-      setIsAuthenticated(status.isAuthenticated);
-    } catch (error) {
-      console.error("❌ Error verificando autenticación:", error);
-      setIsAuthenticated(false);
-    }
-  }, [walletAddress]);
-
   // ✅ **Inicializar WebSocket solo si el usuario está autenticado y tiene un contacto confirmado**
   const initializeSocket = useCallback(() => {
-    if (!isAuthenticated || !walletAddress || !selectedContact) return;
+    if (!walletAddress || !selectedContact) return;
+
     if (!confirmedContacts.includes(selectedContact)) {
       console.warn("⚠️ Intento de chat con un contacto no confirmado.");
       return;
@@ -68,7 +59,7 @@ function ChatWindow({ selectedContact }) {
     });
 
     socketRef.current = socket;
-  }, [isAuthenticated, walletAddress, selectedContact, confirmedContacts]);
+  }, [walletAddress, selectedContact, confirmedContacts]);
 
   // ✅ **Gestionar WebRTC solo si el usuario está autenticado y tiene un contacto confirmado**
   const { messages, sendMessage } = useWebRTC(selectedContact, walletAddress);
@@ -83,12 +74,13 @@ function ChatWindow({ selectedContact }) {
   // ✅ **Efectos de carga de datos**
   useEffect(() => {
     fetchContacts();
-    verifyAuth();
-  }, [fetchContacts, verifyAuth]);
+  }, [fetchContacts]);
 
   // ✅ **Efecto para inicializar WebSocket**
   useEffect(() => {
-    initializeSocket();
+    if (isAuthenticated) {
+      initializeSocket();
+    }
     return () => {
       if (socketRef.current) {
         console.log("🔴 Desconectando WebSocket...");
@@ -96,12 +88,26 @@ function ChatWindow({ selectedContact }) {
         socketRef.current = null;
       }
     };
-  }, [initializeSocket]);
+  }, [initializeSocket, isAuthenticated]);
+
+  // ✅ **Manejo de la interacción de usuario**
+  const handleSendMessage = () => {
+    handleLoginResponse(() => {
+      sendMessage(selectedContact, walletAddress); // Enviar mensaje solo si está autenticado
+    });
+  };
 
   return (
     <div className="chat-window">
       {!selectedContact ? (
         <p className="chat-placeholder">🔍 Selecciona un contacto para empezar a chatear.</p>
+      ) : isLoading ? (
+        <p>🔄 Cargando...</p>
+      ) : !isAuthenticated ? (
+        <>
+          <p className="chat-placeholder">🔒 Debes autenticarte para enviar mensajes.</p>
+          <button className="auth-button" onClick={openAuthModal}>Iniciar sesión</button>
+        </>
       ) : !confirmedContacts.includes(selectedContact) ? (
         <p className="chat-placeholder">❌ No puedes chatear con este usuario.</p>
       ) : (
@@ -130,7 +136,7 @@ function ChatWindow({ selectedContact }) {
             )}
           </div>
 
-          <ChatInput onSendMessage={sendMessage} disabled={!isAuthenticated || !isConnected} />
+          <ChatInput onSendMessage={handleSendMessage} disabled={!isAuthenticated || !isConnected} />
         </>
       )}
     </div>

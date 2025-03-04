@@ -9,36 +9,34 @@ const WalletModal = ({ isOpen, onClose, onWalletConnected }) => {
   if (!isOpen) return null;
 
   const handleWalletSelection = useCallback(async (walletType) => {
-    console.log(`🔵 Intentando conectar con ${walletType}...`);
     setIsLoading(true);
     setErrorMessage("");
 
     try {
       const provider = getProvider(walletType);
-      if (!provider) throw new Error("Wallet provider not found.");
+      if (!provider) throw new Error("No encontramos tu wallet. Asegúrate de que está instalada y vuelve a intentarlo.");
 
       await provider.connect();
-      if (!provider.publicKey) throw new Error("No se pudo obtener la clave pública.");
+      if (!provider.publicKey) throw new Error("No pudimos conectar con tu wallet. Verifica tu conexión e inténtalo de nuevo.");
 
-      console.log("✅ Wallet conectada:", provider.publicKey.toBase58());
-      
-      // ✅ Llamamos a la función que nos pasó el padre (WalletButton)
-      onWalletConnected(provider.publicKey.toBase58());
+      const publicKey = provider.publicKey.toBase58();
+      console.log("✅ Wallet conectada:", publicKey);
 
-      onClose(); // 🔴 El modal se cierra
+      onWalletConnected(publicKey);
+      onClose(); // 🔴 Cerrar modal tras selección
+
     } catch (error) {
       console.error("❌ Error conectando la wallet:", error);
-      setErrorMessage(error.message || "❌ Connection error. Please retry.");
+      setErrorMessage(error.message);
     } finally {
       setIsLoading(false);
     }
   }, [onWalletConnected, onClose]);
 
   return (
-    <div className="wallet-modal-overlay" onClick={isLoading ? null : onClose}>
+    <div className="wallet-modal-overlay" onClick={!isLoading ? onClose : null}>
       <div className="wallet-modal" onClick={(e) => e.stopPropagation()}>
         <h2>🔗 Connect Your Wallet</h2>
-        <p>Select a wallet to connect:</p>
 
         <div className="wallet-options">
           {["phantom", "backpack", "magiceden"].map((wallet) => (
@@ -52,9 +50,9 @@ const WalletModal = ({ isOpen, onClose, onWalletConnected }) => {
           ))}
         </div>
 
-        {errorMessage && <p className="error-message" aria-live="assertive">{errorMessage}</p>}
+        {errorMessage && <p className="error-message">{errorMessage}</p>}
 
-        <button className="close-modal" onClick={isLoading ? null : onClose} disabled={isLoading}>
+        <button className="close-modal" onClick={!isLoading ? onClose : null} disabled={isLoading}>
           Close
         </button>
       </div>

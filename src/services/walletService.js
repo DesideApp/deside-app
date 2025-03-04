@@ -1,5 +1,5 @@
 import { getProvider } from "./walletProviders";
-import { authenticateWithServer } from "./apiService";
+import { authenticateWithServer, checkAuthStatus, logout as apiLogout } from "./apiService";
 import bs58 from "bs58";
 
 const WALLET_STATUS = {
@@ -14,7 +14,7 @@ const WALLET_STATUS = {
 export async function connectWallet(wallet) {
   try {
     const provider = getProvider(wallet);
-    if (!provider) throw new Error("Wallet provider not found");
+    if (!provider) throw new Error("No encontramos tu wallet. Intenta instalarla y vuelve a intentarlo.");
 
     if (provider.isConnected) {
       return { pubkey: provider.publicKey?.toBase58(), status: WALLET_STATUS.CONNECTED };
@@ -22,11 +22,13 @@ export async function connectWallet(wallet) {
 
     await provider.connect();
     const pubkey = provider.publicKey?.toBase58();
-    if (!pubkey) throw new Error("No public key retrieved after connecting.");
+    if (!pubkey) throw new Error("No se pudo obtener la clave pública.");
+
+    window.dispatchEvent(new Event("walletConnected")); // 🔄 Emitir evento global
 
     return { pubkey, status: WALLET_STATUS.CONNECTED };
   } catch (error) {
-    return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED, error: error.message || "Unknown error" };
+    return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED, error: error.message };
   }
 }
 
@@ -35,10 +37,11 @@ export async function connectWallet(wallet) {
  */
 export async function disconnectWallet() {
   try {
-    const provider = getProvider("phantom"); // Puedes generalizar si hay más wallets
+    const provider = getProvider("phantom");
     if (!provider || !provider.isConnected) return;
 
     await provider.disconnect();
+    window.dispatchEvent(new Event("walletDisconnected")); // 🔄 Emitir evento global
   } catch (error) {
     console.error("❌ Wallet disconnection error:", error);
   }
@@ -57,20 +60,14 @@ export async function getConnectedWallet() {
     const walletAddress = provider.publicKey?.toBase58() || null;
     if (!walletAddress) return { walletAddress: null, walletStatus: WALLET_STATUS.NOT_CONNECTED };
 
-    const authResponse = await fetch("/api/auth/status", {
-      method: "GET",
-      credentials: "include",
-    });
+    const authData = await checkAuthStatus(); // 🔄 Ahora usamos apiService.js
 
-    if (!authResponse.ok) return { walletAddress, walletStatus: WALLET_STATUS.CONNECTED };
-
-    const authData = await authResponse.json();
     return {
       walletAddress,
       walletStatus: authData.isAuthenticated ? WALLET_STATUS.AUTHENTICATED : WALLET_STATUS.CONNECTED,
     };
   } catch (error) {
-    return { walletAddress: null, walletStatus: WALLET_STATUS.NOT_CONNECTED, error: error.message || "Unknown error" };
+    return { walletAddress: null, walletStatus: WALLET_STATUS.NOT_CONNECTED, error: error.message };
   }
 }
 
@@ -80,12 +77,12 @@ export async function getConnectedWallet() {
 async function signMessage(wallet, message) {
   try {
     const provider = getProvider(wallet);
-    if (!provider || !provider.isConnected) throw new Error("Wallet provider not found or not connected");
+    if (!provider || !provider.isConnected) throw new Error("No encontramos tu wallet. Intenta reconectarla.");
 
     const encodedMessage = new TextEncoder().encode(message);
     const signatureResponse = await provider.signMessage(encodedMessage);
 
-    if (!signatureResponse?.signature) throw new Error("Signature failed or rejected.");
+    if (!signatureResponse?.signature) throw new Error("Firma cancelada. Para continuar, necesitas firmar el mensaje de autenticación.");
 
     return {
       signature: bs58.encode(signatureResponse.signature),
@@ -93,7 +90,7 @@ async function signMessage(wallet, message) {
       pubkey: provider.publicKey.toBase58(),
     };
   } catch (error) {
-    return { signature: null, error: error.message || "Unknown error" };
+    return { signature: null, error: error.message };
   }
 }
 
@@ -114,10 +111,46 @@ export async function authenticateWallet(wallet) {
     if (!signedData.signature) return { pubkey: null, status: "signature_failed" };
 
     const response = await authenticateWithServer(signedData.pubkey, signedData.signature, message);
-    if (!response || !response.message) return { pubkey: null, status: "server_error" };
+    if (!response || !response.message) {
+      return { pubkey: null, status: "server_error", error: "No pudimos verificar tu identidad. Intenta reconectar tu wallet." };
+    }
 
+    window.dispatchEvent(new Event("walletAuthenticated")); // 🔄 Emitir evento global
     return { pubkey: walletAddress, status: WALLET_STATUS.AUTHENTICATED };
   } catch (error) {
-    return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED, error: error.message || "Unknown error" };
+    return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED, error: error.message };
   }
+}
+
+/**
+ * 🔹 **Manejar autenticación tras conectar la wallet**
+ */
+export async function handleWalletConnected(wallet, syncWalletStatus) {
+  console.log("✅ Wallet conectada. Autenticando...");
+  const authResult = await authenticateWallet(wallet);
+
+  if (authResult.status === WALLET_STATUS.AUTHENTICATED) {
+    console.log("✅ Autenticación exitosa.");
+    syncWalletStatus();
+  } else {
+    console.warn("⚠️ Autenticación fallida:", authResult.error || authResult.status);
+
+    // ✅ Si el backend rechazó la firma o hubo un error crítico, hacemos logout automático
+    if (authResult.status === "server_error") {
+      console.warn("❌ El backend rechazó la autenticación. Cerrando sesión.");
+      await handleLogout(syncWalletStatus);
+    }
+  }
+}
+
+/**
+ * 🔹 **Cerrar sesión completamente**
+ */
+export async function handleLogout(syncWalletStatus) {
+  console.log("🚪 Cierre de sesión iniciado...");
+  await disconnectWallet();
+  await apiLogout();
+  syncWalletStatus();
+  window.dispatchEvent(new Event("walletDisconnected")); // 🔄 Emitir evento global
+  console.log("✅ Sesión cerrada correctamente.");
 }

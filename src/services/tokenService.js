@@ -12,34 +12,52 @@ export function getCSRFTokenFromCookie() {
 // 🔄 **Renovar Token de Sesión si es necesario**
 export async function refreshToken() {
   try {
+    const currentAccessToken = getCookie("accessToken");
+
+    if (currentAccessToken) {
+      console.log("🔄 Token aún es válido. No es necesario renovarlo.");
+      return true; // ✅ Se devuelve true para evitar que se intente renovar innecesariamente
+    }
+
+    console.log("🔄 Intentando renovar el token...");
+
     const response = await fetch("/api/auth/refresh", {
       method: "POST",
       credentials: "include",
     });
 
     if (!response.ok) {
-      console.warn("⚠️ No se pudo renovar el token.");
-      return null;
+      console.warn("⚠️ No se pudo renovar el token. Cerrando sesión.");
+      clearSession("expired");
+      return false;
     }
 
     const data = await response.json();
     updateSessionTokens(data.accessToken, data.refreshToken);
-    return data;
+    window.dispatchEvent(new Event("sessionRefreshed")); // 🔄 Emitir evento global
+    return true;
   } catch (error) {
     console.error("❌ Error en refreshToken():", error.message || error);
-    return null;
+    clearSession("expired");
+    return false;
   }
 }
 
-// 🔓 **Eliminar credenciales del usuario sin cerrar sesión inmediatamente**
-export function clearSession() {
-  console.warn("⚠️ Eliminando credenciales del usuario...");
+// 🔓 **Eliminar credenciales del usuario y cerrar sesión si es necesario**
+export function clearSession(reason = "manual") {
+  console.warn(`⚠️ Eliminando credenciales del usuario... (Razón: ${reason})`);
 
   ["accessToken", "refreshToken", "csrfToken"].forEach(clearCookie);
   localStorage.clear();
   sessionStorage.clear();
 
-  window.dispatchEvent(new Event("walletDisconnected"));
+  if (reason === "expired") {
+    console.warn("🔴 La sesión ha expirado. Cerrando sesión.");
+    window.dispatchEvent(new Event("sessionExpired"));
+  } else {
+    console.warn("🔵 Logout manual detectado. Desconectando wallet.");
+    window.dispatchEvent(new Event("walletDisconnected"));
+  }
 }
 
 // 🔹 **Actualizar cookies con nuevos tokens**
@@ -50,7 +68,7 @@ function updateSessionTokens(accessToken, refreshToken) {
     console.log("✅ Token renovado correctamente.");
   } else {
     console.warn("⚠️ No se proporcionaron nuevos tokens. La sesión podría haber expirado.");
-    clearSession();
+    clearSession("expired");
   }
 }
 
@@ -65,6 +83,12 @@ function setCookie(name, value) {
 function clearCookie(name) {
   const domain = import.meta.env.VITE_APP_DOMAIN || "deside-app.vercel.app";
   document.cookie = `${name}=; Max-Age=0; path=/; domain=.${domain}; secure; SameSite=None`;
+}
+
+// 🔍 **Obtener un token de sesión actual**
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+  return match ? decodeURIComponent(match[2]) : null;
 }
 
 // 🔍 **Obtener CSRF token actual**

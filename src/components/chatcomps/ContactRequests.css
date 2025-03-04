@@ -4,8 +4,7 @@
     border-radius: 12px;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
     padding: 16px;
-    width: 300px;
-    max-width: 100%;
+    width: 100%;
     font-family: 'Inter', sans-serif;
     display: flex;
     flex-direction: column;
@@ -13,13 +12,28 @@
 }
 
 /* Título */
-.contact-requests-container h2 {
+.contact-requests-container h3 {
     font-size: 1.2rem;
     color: #333;
     margin-bottom: 8px;
+    text-align: center;
 }
 
-/* Contenedor de las solicitudes */
+/* Sección de solicitudes */
+.requests-section {
+    margin-top: 10px;
+}
+
+/* Título de cada sección */
+.requests-section h4 {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Lista de solicitudes */
 .requests-list {
     display: flex;
     flex-direction: column;
@@ -87,6 +101,13 @@
     background-color: #c9302c;
 }
 
+/* Estado de solicitud enviada */
+.pending-request {
+    font-size: 0.9rem;
+    color: #777;
+    font-style: italic;
+}
+
 /* Mensaje de error */
 .error-message {
     font-size: 0.9rem;
@@ -95,4 +116,12 @@
     padding: 5px;
     border-radius: 6px;
     text-align: center;
+}
+
+/* Mensaje cuando no hay solicitudes */
+.no-requests {
+    font-size: 0.9rem;
+    color: #777;
+    text-align: center;
+    padding: 5px;
 }
