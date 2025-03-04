@@ -5,7 +5,7 @@ import { getProvider } from "../../services/walletProviders.js";
 import "./WalletModal.css";
 
 const WalletModal = ({ isOpen, onClose }) => {
-  const { isReady } = useWallet();
+  const { isReady, syncWalletStatus } = useWallet();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -16,19 +16,15 @@ const WalletModal = ({ isOpen, onClose }) => {
     setIsLoading(true);
     setErrorMessage("");
 
-    const provider = getProvider(walletType);
-    if (!provider) {
-      console.error("❌ Provider no encontrado para", walletType);
-      setErrorMessage("❌ Wallet provider not found.");
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      await provider.connect();
+      const provider = getProvider(walletType);
+      if (!provider) {
+        throw new Error("Wallet provider not found.");
+      }
 
+      await provider.connect();
       if (!provider.publicKey) {
-        throw new Error("❌ No se pudo obtener la clave pública de la wallet.");
+        throw new Error("No se pudo obtener la clave pública.");
       }
 
       console.log("🔄 Autenticando wallet en el backend...");
@@ -36,18 +32,18 @@ const WalletModal = ({ isOpen, onClose }) => {
 
       if (authResult.status === "authenticated") {
         console.log("✅ Wallet conectada y autenticada.");
+        syncWalletStatus(); // 🔄 Actualizar estado global tras autenticación
         onClose();
       } else {
-        console.warn("⚠️ No se pudo autenticar la wallet.");
-        setErrorMessage("⚠️ Authentication failed. Please try again.");
+        throw new Error("Authentication failed. Please try again.");
       }
     } catch (error) {
-      console.error("❌ Error al conectar la wallet:", error);
-      setErrorMessage("❌ Connection error. Please retry.");
+      console.error("❌ Error en autenticación:", error);
+      setErrorMessage(error.message || "❌ Connection error. Please retry.");
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
-  }, [onClose]);
+  }, [onClose, syncWalletStatus]);
 
   return (
     <div className="wallet-modal-overlay" onClick={isLoading ? null : onClose}>

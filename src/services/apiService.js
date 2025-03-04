@@ -1,5 +1,5 @@
 import API_BASE_URL from "../config/apiConfig.js";
-import { getCSRFTokenFromCookie, refreshToken, clearSession } from "./tokenService.js";
+import { getCSRFTokenFromCookie, clearSession } from "./tokenService.js";
 
 const cache = new Map();
 const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutos
@@ -7,7 +7,7 @@ const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutos
 /**
  * 🔹 **Manejo centralizado de solicitudes a la API**
  */
-export async function apiRequest(endpoint, options = {}, retry = true) {
+export async function apiRequest(endpoint, options = {}) {
     if (!endpoint) throw new Error("❌ API Request sin endpoint definido.");
 
     const cacheKey = `${endpoint}:${JSON.stringify(options)}`;
@@ -36,17 +36,9 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
         });
 
         if (!response.ok) {
-            if (response.status === 401 && retry) {
-                console.warn("⚠️ Token expirado. Intentando renovar...");
-                const refreshed = await refreshToken();
-
-                if (!refreshed) {
-                    console.warn("❌ No se pudo renovar el token. Cerrando sesión...");
-                    clearSession();
-                    throw new Error("Sesión expirada. Reautenticación requerida.");
-                }
-
-                return apiRequest(endpoint, options, false);
+            if (response.status === 401) {
+                console.warn("⚠️ No autorizado. Es posible que la sesión haya expirado.");
+                throw new Error("Sesión expirada o no autenticado.");
             }
 
             const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
@@ -76,12 +68,12 @@ export async function checkAuthStatus() {
     try {
         return await apiRequest("/api/auth/status", { method: "GET" });
     } catch {
-        return { isAuthenticated: false };
+        return { isAuthenticated: false }; // ✅ No modificar la sesión, solo devolver estado
     }
 }
 
 export async function logout() {
-    clearSession();
+    clearSession(); // ✅ Borra credenciales locales
     try {
         return await apiRequest("/api/auth/revoke", { method: "POST" });
     } catch {

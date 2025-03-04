@@ -1,69 +1,53 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { useWallet } from "../../contexts/WalletContext";
-import { checkAuthStatus } from "../../services/apiService.js";
-import ContactList from "../../components/chatcomps/ContactList.jsx";
-import ChatWindow from "../../components/chatcomps/ChatWindow.jsx";
-import RightPanel from "../../components/chatcomps/RightPanel.jsx";
-import "./Chat.css";
+import React, { Suspense, lazy, useState, useEffect } from "react";
+import { BrowserRouter as Router } from "react-router-dom";
+import { WalletProvider, useWallet } from "./contexts/WalletContext.jsx";
+import { checkAuthStatus } from "./services/apiService.js";
+import WalletModal from "./components/common/WalletModal.jsx";
 
-function Chat() {
-    const navigate = useNavigate();
-    const { walletStatus, isReady } = useWallet();
+const Main = lazy(() => import("./Main.jsx"));
+
+function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const isMounted = useRef(true);
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const { isReady, walletStatus } = useWallet();
 
+    // ✅ Verificar autenticación sin bloquear la UI
     useEffect(() => {
-        isMounted.current = true;
-
-        const verifyAuthentication = async () => {
-            if (!isReady) return; // ✅ Esperar a que la wallet esté lista
-
+        const verifyAuth = async () => {
             try {
                 const status = await checkAuthStatus();
-                if (isMounted.current) {
-                    setIsAuthenticated(status?.isAuthenticated || false);
-                }
-
-                if (!status?.isAuthenticated && isMounted.current) {
-                    console.warn("⚠️ Usuario no autenticado. Redirigiendo a Home...");
-                    navigate("/");
-                }
+                setIsAuthenticated(status.isAuthenticated || false);
             } catch (error) {
                 console.error("❌ Error verificando autenticación:", error);
-                if (isMounted.current) {
-                    setIsAuthenticated(false);
-                }
+                setIsAuthenticated(false);
             } finally {
-                if (isMounted.current) setIsLoading(false);
+                setIsCheckingAuth(false);
             }
         };
 
-        verifyAuthentication();
+        verifyAuth();
+    }, []);
 
-        return () => {
-            isMounted.current = false; // ✅ Limpieza para evitar actualizaciones en componentes desmontados
-        };
-    }, [isReady, navigate]);
-
-    if (isLoading) {
-        return <div className="loading-screen" aria-live="assertive">🔄 Verificando autenticación...</div>;
+    // ✅ Si la wallet no está lista, mostrar pantalla de carga
+    if (!isReady) {
+        return <div className="loading-screen">🔄 Preparando la aplicación...</div>;
     }
 
     return (
-        <div className="chat-page-container">
-            <div className="left-panel">
-                <ContactList />
-            </div>
-            <div className="chat-window-panel">
-                <ChatWindow />
-            </div>
-            <div className="right-panel">
-                <RightPanel />
-            </div>
-        </div>
+        <WalletProvider>
+            <Router>
+                <Suspense fallback={<div className="loading-screen">🔄 Cargando la aplicación...</div>}>
+                    <Main />
+                </Suspense>
+            </Router>
+
+            {/* ✅ Muestra el modal solo si no está autenticado */}
+            {!isAuthenticated && !isCheckingAuth && walletStatus === "connected" && (
+                <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+            )}
+        </WalletProvider>
     );
 }
 
-export default Chat;
+export default App;

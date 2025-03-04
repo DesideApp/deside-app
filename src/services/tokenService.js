@@ -9,7 +9,7 @@ export function getCSRFTokenFromCookie() {
   }
 }
 
-// 🔄 **Renovar Token de Sesión y actualizar cookies**
+// 🔄 **Renovar Token de Sesión si es necesario**
 export async function refreshToken() {
   try {
     const response = await fetch("/api/auth/refresh", {
@@ -18,8 +18,7 @@ export async function refreshToken() {
     });
 
     if (!response.ok) {
-      console.warn("❌ No se pudo renovar el token. Cerrando sesión...");
-      clearSession();
+      console.warn("⚠️ No se pudo renovar el token.");
       return null;
     }
 
@@ -28,28 +27,31 @@ export async function refreshToken() {
     return data;
   } catch (error) {
     console.error("❌ Error en refreshToken():", error.message || error);
-    clearSession();
     return null;
   }
 }
 
-// 🔓 **Eliminar cookies, almacenamiento local y cerrar sesión**
+// 🔓 **Eliminar credenciales del usuario sin cerrar sesión inmediatamente**
 export function clearSession() {
   console.warn("⚠️ Eliminando credenciales del usuario...");
 
   ["accessToken", "refreshToken", "csrfToken"].forEach(clearCookie);
-
   localStorage.clear();
   sessionStorage.clear();
 
-  window.dispatchEvent(new Event("walletDisconnected")); // 🔄 Notificar a la app
+  window.dispatchEvent(new Event("walletDisconnected"));
 }
 
 // 🔹 **Actualizar cookies con nuevos tokens**
 function updateSessionTokens(accessToken, refreshToken) {
-  setCookie("accessToken", accessToken);
-  setCookie("refreshToken", refreshToken);
-  console.log("🔄 Token renovado correctamente.");
+  if (accessToken && refreshToken) {
+    setCookie("accessToken", accessToken);
+    setCookie("refreshToken", refreshToken);
+    console.log("✅ Token renovado correctamente.");
+  } else {
+    console.warn("⚠️ No se proporcionaron nuevos tokens. La sesión podría haber expirado.");
+    clearSession();
+  }
 }
 
 // 📝 **Setear cookies de manera segura**

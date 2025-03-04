@@ -8,27 +8,33 @@ import WalletModal from "./WalletModal";
 import "./WalletButton.css";
 
 const WalletButton = memo(() => {
-  const { walletStatus, walletAddress, isReady } = useWallet();
+  const { walletStatus, walletAddress, isReady, syncWalletStatus } = useWallet();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [balance, setBalance] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
     if (!isReady || !walletAddress) return;
 
-    let isMounted = true;
+    const abortController = new AbortController();
 
     const updateWalletStatus = async () => {
       try {
         const status = await checkAuthStatus();
-        if (isMounted) {
+        if (!abortController.signal.aborted) {
           setIsAuthenticated(status.isAuthenticated);
-          setBalance(status.isAuthenticated ? await getBalance(walletAddress) : null);
+          if (status.isAuthenticated) {
+            const walletBalance = await getBalance(walletAddress);
+            setBalance(walletBalance);
+          } else {
+            setBalance(null);
+          }
         }
       } catch (error) {
         console.error("❌ Error verificando la wallet:", error);
-        if (isMounted) {
+        if (!abortController.signal.aborted) {
           setIsAuthenticated(false);
           setBalance(null);
         }
@@ -36,13 +42,30 @@ const WalletButton = memo(() => {
     };
 
     updateWalletStatus();
-
-    return () => { isMounted = false; };
+    return () => abortController.abort(); // ✅ Evita fugas de memoria si el componente se desmonta
   }, [walletAddress, isReady]);
 
   const handleConnect = useCallback(() => {
-    if (!walletAddress) setIsModalOpen(true);
-  }, [walletAddress]);
+    if (!walletAddress && !isConnecting) {
+      setIsConnecting(true);
+      setIsModalOpen(true);
+    }
+  }, [walletAddress, isConnecting]);
+
+  const handleLogout = useCallback(() => {
+    disconnectWallet();
+    logout();
+    setIsAuthenticated(false);
+    setBalance(null);
+    setIsModalOpen(true);
+  }, []);
+
+  // ✅ Cuando el modal se cierra, revalida el estado de la wallet.
+  const handleModalClose = useCallback(() => {
+    setIsModalOpen(false);
+    setIsConnecting(false);
+    syncWalletStatus(); // 🔄 Revalidar autenticación tras el cierre del modal.
+  }, [syncWalletStatus]);
 
   const formattedBalance = useMemo(
     () => (balance !== null ? `${balance.toFixed(2)} SOL` : "Connect Wallet"),
@@ -51,7 +74,7 @@ const WalletButton = memo(() => {
 
   return (
     <div className="wallet-container">
-      <button className="wallet-button" onClick={handleConnect} disabled={!isReady}>
+      <button className="wallet-button" onClick={handleConnect} disabled={!isReady || isConnecting}>
         <span aria-live="polite">{isAuthenticated ? formattedBalance : "Connect Wallet"}</span>
       </button>
 
@@ -64,18 +87,9 @@ const WalletButton = memo(() => {
         <span className="menu-icon"></span>
       </button>
 
-      <WalletMenu
-        isOpen={isMenuOpen}
-        onClose={() => setIsMenuOpen(false)}
-        walletStatus={walletStatus}
-        handleLogout={() => {
-          disconnectWallet();
-          logout();
-          setIsModalOpen(true);
-        }}
-      />
+      <WalletMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} handleLogout={handleLogout} />
 
-      <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <WalletModal isOpen={isModalOpen} onClose={handleModalClose} />
     </div>
   );
 });

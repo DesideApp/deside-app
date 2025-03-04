@@ -16,13 +16,16 @@ export async function connectWallet(wallet) {
     const provider = getProvider(wallet);
     if (!provider) throw new Error("Wallet provider not found");
 
+    if (provider.isConnected) {
+      return { pubkey: provider.publicKey?.toBase58(), status: WALLET_STATUS.CONNECTED };
+    }
+
     await provider.connect();
     const pubkey = provider.publicKey?.toBase58();
     if (!pubkey) throw new Error("No public key retrieved after connecting.");
 
     return { pubkey, status: WALLET_STATUS.CONNECTED };
   } catch (error) {
-    console.error("❌ Wallet connection error:", error);
     return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED, error: error.message || "Unknown error" };
   }
 }
@@ -32,9 +35,10 @@ export async function connectWallet(wallet) {
  */
 export async function disconnectWallet() {
   try {
-    if (window.solana?.disconnect) {
-      await window.solana.disconnect();
-    }
+    const provider = getProvider("phantom"); // Puedes generalizar si hay más wallets
+    if (!provider || !provider.isConnected) return;
+
+    await provider.disconnect();
   } catch (error) {
     console.error("❌ Wallet disconnection error:", error);
   }
@@ -45,11 +49,12 @@ export async function disconnectWallet() {
  */
 export async function getConnectedWallet() {
   try {
-    if (!window.solana?.isConnected) {
+    const provider = getProvider("phantom");
+    if (!provider || !provider.isConnected) {
       return { walletAddress: null, walletStatus: WALLET_STATUS.NOT_CONNECTED };
     }
 
-    const walletAddress = window.solana.publicKey?.toBase58() || null;
+    const walletAddress = provider.publicKey?.toBase58() || null;
     if (!walletAddress) return { walletAddress: null, walletStatus: WALLET_STATUS.NOT_CONNECTED };
 
     const authResponse = await fetch("/api/auth/status", {
@@ -65,7 +70,6 @@ export async function getConnectedWallet() {
       walletStatus: authData.isAuthenticated ? WALLET_STATUS.AUTHENTICATED : WALLET_STATUS.CONNECTED,
     };
   } catch (error) {
-    console.error("❌ Error fetching wallet status:", error);
     return { walletAddress: null, walletStatus: WALLET_STATUS.NOT_CONNECTED, error: error.message || "Unknown error" };
   }
 }
@@ -76,7 +80,7 @@ export async function getConnectedWallet() {
 async function signMessage(wallet, message) {
   try {
     const provider = getProvider(wallet);
-    if (!provider) throw new Error("Wallet provider not found");
+    if (!provider || !provider.isConnected) throw new Error("Wallet provider not found or not connected");
 
     const encodedMessage = new TextEncoder().encode(message);
     const signatureResponse = await provider.signMessage(encodedMessage);
@@ -89,7 +93,6 @@ async function signMessage(wallet, message) {
       pubkey: provider.publicKey.toBase58(),
     };
   } catch (error) {
-    console.error("❌ Error signing message:", error.message || error);
     return { signature: null, error: error.message || "Unknown error" };
   }
 }
@@ -115,7 +118,6 @@ export async function authenticateWallet(wallet) {
 
     return { pubkey: walletAddress, status: WALLET_STATUS.AUTHENTICATED };
   } catch (error) {
-    console.error("❌ Error in authenticateWallet():", error.message || error);
     return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED, error: error.message || "Unknown error" };
   }
 }
