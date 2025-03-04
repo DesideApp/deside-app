@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import "./BottomBar.css";
 import NetworkStatus from "../status/NetworkStatus.jsx";
-import { getSolanaPrice } from "../../services/apiService.js";
+import { getSolanaPrice } from "../../utils/solanaHelpers.js";
 
 const BottomBar = React.memo(() => {
     const [solPrice, setSolPrice] = useState(null);
