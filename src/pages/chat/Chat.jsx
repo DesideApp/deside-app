@@ -4,7 +4,7 @@ import { WalletProvider, useWallet } from "../../contexts/WalletContext.jsx";
 import { checkAuthStatus } from "../../services/apiService.js";
 import WalletModal from "../../components/common/WalletModal.jsx";
 
-const Main = lazy(() => import("./Main.jsx"));
+const Main = lazy(() => import("../../Main.jsx"));
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
