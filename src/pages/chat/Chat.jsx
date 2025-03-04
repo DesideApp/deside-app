@@ -1,8 +1,8 @@
 import React, { Suspense, lazy, useState, useEffect } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { WalletProvider, useWallet } from "../../contexts/WalletContext.jsx";
-import { checkAuthStatus } from "./services/apiService.js";
-import WalletModal from "./components/common/WalletModal.jsx";
+import { checkAuthStatus } from "../../services/apiService.js";
+import WalletModal from "../../components/common/WalletModal.jsx";
 
 const Main = lazy(() => import("./Main.jsx"));
 
