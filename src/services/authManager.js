@@ -15,29 +15,24 @@ export const useAuthManager = () => {
       try {
         if (!walletAddress) {
           setIsAuthenticated(false);
+          setRequiresLogin(true); // 🔹 Si no hay wallet, forzar login
           return;
         }
 
         const status = await checkAuthStatus();
         setIsAuthenticated(status.isAuthenticated);
+        setRequiresLogin(!status.isAuthenticated); // 🔹 Solo forzar login si no está autenticado
 
-        // 🚨 Si el usuario no está autenticado, marcamos que necesita autenticación
-        if (!status.isAuthenticated) {
-          setRequiresLogin(true);
-        }
       } catch (error) {
         console.error("❌ Error al verificar autenticación:", error);
         setIsAuthenticated(false);
+        setRequiresLogin(true);
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (walletAddress) {
-      checkAuthentication();
-    } else {
-      setIsLoading(false);
-    }
+    checkAuthentication();
   }, [walletAddress]);
 
   // ✅ **Renovar el token de seguridad si está expirado**
@@ -58,27 +53,24 @@ export const useAuthManager = () => {
   const handleLoginResponse = async (action) => {
     if (!walletAddress) {
       console.warn("🚨 Usuario no conectado.");
-      setRequiresLogin(true); // 🔹 Activar el estado para que el frontend muestre el modal
-      return;
-    }
-
-    if (!isAuthenticated) {
-      console.warn("🚨 Usuario no autenticado. Requiere firma.");
       setRequiresLogin(true);
       return;
     }
 
-    // Si el token está expirado, intentamos renovarlo
-    await renewToken();
+    if (!isAuthenticated) {
+      console.warn("🚨 Usuario no autenticado. Se requiere login.");
+      setRequiresLogin(true);
+      return;
+    }
 
-    // ✅ Si ya está autenticado y con token válido, ejecutamos la acción
-    action();
+    await renewToken();
+    action(); // ✅ Si ya está autenticado y con token válido, ejecutamos la acción
   };
 
   return {
     isAuthenticated,
     isLoading,
-    requiresLogin, // 🔹 Nuevo estado que puede ser leído por otros componentes
+    requiresLogin, // 🔹 Permite a los componentes saber si deben mostrar login
     handleLoginResponse,
   };
 };

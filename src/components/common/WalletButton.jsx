@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { useWallet } from "../../contexts/WalletContext";
-import { getBalance } from "../../utils/solanaDirect.js";
-import { handleWalletConnected, handleLogout } from "../../services/walletService.js";
+import { getBalance } from "../../utils/solanaDirect.js"; // ✅ Directo para obtener balance
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
 
 const WalletButton = memo(() => {
-  const { walletStatus, walletAddress, isReady, syncWalletStatus } = useWallet();
+  const { walletAddress, isReady } = useWallet();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [balance, setBalance] = useState(null);
 
-  // ✅ **Actualizar saldo cuando cambia la conexión**
+  // ✅ **Actualizar saldo cuando cambia la wallet**
   useEffect(() => {
     if (!walletAddress) {
       setBalance(null);
@@ -31,52 +30,32 @@ const WalletButton = memo(() => {
     fetchBalance();
   }, [walletAddress]);
 
-  // ✅ **Abrir modal SIEMPRE cuando se hace clic**
+  // ✅ **Abrir modal al hacer clic en el botón**
   const handleConnect = useCallback(() => {
     console.log("🔵 Abriendo modal de conexión...");
     setIsModalOpen(true);
   }, []);
 
-  // ✅ **Cerrar modal de forma segura**
+  // ✅ **Cerrar modal**
   const handleCloseModal = useCallback(() => {
     console.log("🔴 Cerrando modal...");
     setIsModalOpen(false);
   }, []);
 
-  // ✅ **Manejar conexión de wallet**
-  const handleModalWalletConnected = useCallback(async (wallet) => {
-    console.log("✅ Wallet conectada. Autenticando...");
-    const { walletStatus } = await handleWalletConnected(wallet, syncWalletStatus);
-
-    if (walletStatus === "authenticated") {
-      console.log("✅ Autenticación exitosa.");
-      handleCloseModal();
-    } else {
-      console.warn("⚠️ No se pudo autenticar la wallet.");
-    }
-  }, [syncWalletStatus, handleCloseModal]);
-
-  const formattedBalance = useMemo(
-    () => (balance !== null ? `${balance.toFixed(2)} SOL` : "Connect Wallet"),
-    [balance]
-  );
+  const formattedBalance = balance !== null ? `${balance.toFixed(2)} SOL` : "Connect Wallet";
 
   return (
     <div className="wallet-container">
-      {/* ✅ SIEMPRE SE VE - Permite abrir el modal sin importar el estado */}
+      {/* ✅ **SIEMPRE visible y permite abrir el modal sin importar estado** */}
       <button className="wallet-button" onClick={handleConnect} disabled={!isReady}>
         <span>{formattedBalance}</span>
       </button>
 
-      {/* ✅ WalletMenu sigue funcionando de forma independiente */}
-      <WalletMenu handleLogout={handleLogout} />
+      {/* ✅ **WalletMenu sigue funcionando de forma independiente** */}
+      <WalletMenu />
 
-      {/* ✅ Modal de conexión totalmente controlado */}
-      <WalletModal 
-        isOpen={isModalOpen} 
-        onClose={handleCloseModal} 
-        onWalletConnected={handleModalWalletConnected} 
-      />
+      {/* ✅ **Modal de conexión TOTALMENTE CONTROLADO desde aquí** */}
+      <WalletModal isOpen={isModalOpen} onClose={handleCloseModal} />
     </div>
   );
 });
