@@ -1,14 +1,14 @@
-// 🔹 Proveedores de wallets compatibles
+// 🔹 **Definir proveedores de wallets compatibles**
 const WALLET_PROVIDERS = {
-    phantom: () => typeof window !== "undefined" && window.solana?.isPhantom ? window.solana : null,
-    backpack: () => typeof window !== "undefined" && window.xnft?.solana || null,
-    magiceden: () => typeof window !== "undefined" && window.magicEden?.solana || null,
+    phantom: () => (typeof window !== "undefined" && window.solana?.isPhantom) ? window.solana : null,
+    backpack: () => (typeof window !== "undefined" && window.xnft?.solana) ? window.xnft.solana : null,
+    magiceden: () => (typeof window !== "undefined" && window.magicEden?.solana) ? window.magicEden.solana : null,
 };
 
 /**
  * 🔍 **Obtener el proveedor de la wallet**
- * @param {string} wallet - Nombre del proveedor (phantom, backpack, etc.).
- * @returns {object} - Objeto del proveedor o `null` si no está disponible.
+ * @param {string} wallet - Nombre del proveedor (phantom, backpack, magiceden).
+ * @returns {object|null} - Objeto del proveedor si está disponible, `null` si no lo está.
  */
 export function getProvider(wallet) {
     if (!wallet || !WALLET_PROVIDERS[wallet]) {
@@ -19,7 +19,7 @@ export function getProvider(wallet) {
 }
 
 /**
- * 🔄 **Verificar si hay una wallet conectada**
+ * 🔄 **Verificar si alguna wallet está conectada**
  * @returns {boolean} - `true` si hay una wallet conectada, `false` en caso contrario.
  */
 export function isWalletConnected() {
@@ -27,24 +27,6 @@ export function isWalletConnected() {
         const provider = providerFn();
         return provider?.isConnected || false;
     });
-}
-
-/**
- * 💰 **Obtener balance de una wallet conectada**
- * @param {string} walletName - Nombre del proveedor (phantom, backpack, etc.).
- * @returns {Promise<number|null>} - Balance en SOL o `null` en caso de error.
- */
-export async function getWalletBalance(walletName) {
-    try {
-        const provider = getProvider(walletName);
-        if (!provider || !provider.publicKey) throw new Error("No se encontró una wallet conectada.");
-
-        const balance = await provider.connection.getBalance(provider.publicKey);
-        return balance / 1e9; // Convertir de lamports a SOL
-    } catch (error) {
-        console.error(`❌ Error obteniendo balance para ${walletName}:`, error);
-        return null;
-    }
 }
 
 /**

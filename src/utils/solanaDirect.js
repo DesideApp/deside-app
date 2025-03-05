@@ -1,21 +1,21 @@
 import { Connection, PublicKey } from "@solana/web3.js";
 
-const RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
-const connection = new Connection(RPC_URL, "confirmed"); // ✅ Instancia única y reutilizable
+const RPC_URL = "https://api.mainnet-beta.solana.com"; // ✅ RPC por defecto
+const connection = new Connection(RPC_URL, "confirmed"); // ✅ Crear conexión única
 
 /**
- * 🔹 **Obtener balance en SOL directamente desde la blockchain**
+ * 💰 **Obtener balance de una wallet conectada**
+ * @param {string} walletAddress - Dirección pública de la wallet.
+ * @returns {Promise<number|null>} - Balance en SOL o `null` en caso de error.
  */
-export async function getBalance(walletAddress) {
+export async function getWalletBalance(walletAddress) {
     try {
-        if (!walletAddress) {
-            console.warn("⚠️ Dirección de wallet inválida.");
-            return null;
-        }
+        if (!walletAddress) throw new Error("❌ No se encontró una dirección de wallet válida.");
 
-        const publicKey = new PublicKey(walletAddress);
-        const balanceLamports = await connection.getBalance(publicKey);
-        return balanceLamports / 1e9; // Convertir de lamports a SOL
+        const publicKey = new PublicKey(walletAddress); // ✅ Convertir a `PublicKey`
+        const balance = await connection.getBalance(publicKey); // ✅ Obtener balance desde la red
+        
+        return balance / 1e9; // ✅ Convertir de lamports a SOL
     } catch (error) {
         console.error(`❌ Error obteniendo balance para ${walletAddress}:`, error);
         return null;
