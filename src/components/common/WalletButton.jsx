@@ -10,17 +10,18 @@ const WalletButton = memo(() => {
   const { walletAddress, isReady } = useWallet();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [balance, setBalance] = useState(null);
+  const [selectedWallet, setSelectedWallet] = useState(null); // ✅ Guarda la wallet seleccionada
 
   // ✅ **Actualizar saldo cuando cambia la wallet**
   useEffect(() => {
-    if (!walletAddress) {
+    if (!walletAddress || !selectedWallet) {
       setBalance(null);
       return;
     }
 
     const fetchBalance = async () => {
       try {
-        const walletBalance = await getWalletBalance("phantom"); // ✅ Pide el balance del proveedor correcto
+        const walletBalance = await getWalletBalance(selectedWallet); // ✅ Usamos la wallet real
         setBalance(walletBalance);
       } catch (error) {
         console.error("❌ Error obteniendo balance:", error);
@@ -29,7 +30,7 @@ const WalletButton = memo(() => {
     };
 
     fetchBalance();
-  }, [walletAddress]);
+  }, [walletAddress, selectedWallet]);
 
   // ✅ **Abrir modal al hacer clic en el botón**
   const handleConnect = useCallback(() => {
@@ -50,6 +51,7 @@ const WalletButton = memo(() => {
 
     if (result.status === "connected") {
       console.log("✅ Wallet conectada correctamente:", result.pubkey);
+      setSelectedWallet(wallet); // ✅ Guarda la wallet conectada
       handleCloseModal();
     } else {
       console.warn("⚠️ Error conectando wallet:", result.error);
