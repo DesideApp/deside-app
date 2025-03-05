@@ -1,7 +1,7 @@
 import React from "react";
 import "./BottomBar.css";
 import NetworkStatus from "./NetworkStatus.jsx";
-import SolanaPrice from "../SolanaPrice.jsx";
+import SolanaPrice from "./SolanaPrice.jsx";
 
 const BottomBar = React.memo(() => {
     return (
