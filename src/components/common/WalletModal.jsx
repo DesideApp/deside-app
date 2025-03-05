@@ -1,38 +1,26 @@
 import React, { useState } from "react";
-import { getProvider } from "../../services/walletProviders.js";
 import "./WalletModal.css";
 
 const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
 
   // ✅ Si `isOpen` es `false`, no renderizamos nada
   if (!isOpen) return null;
 
-  // ✅ **Función directa sin `useCallback`**
-  const handleWalletSelection = async (walletType) => {
+  // ✅ **Función que solo abre el proveedor de la wallet**
+  const handleWalletSelection = (walletType) => {
     setIsLoading(true);
-    setErrorMessage("");
 
     try {
-      const { provider, error } = getProvider(walletType);
-      if (!provider) throw new Error(error || "❌ No encontramos tu wallet. Asegúrate de que está instalada.");
-
-      await provider.connect();
-      if (!provider.publicKey) throw new Error("❌ No pudimos conectar con tu wallet. Verifica tu conexión.");
-
-      const publicKey = provider.publicKey.toBase58();
-      console.log("✅ Wallet seleccionada:", publicKey);
+      console.log(`🟢 Abriendo proveedor de ${walletType}...`);
 
       if (typeof onWalletSelected === "function") {
-        onWalletSelected(publicKey); // ✅ Solo envía la selección
+        onWalletSelected(walletType); // ✅ Solo envía el tipo de wallet seleccionada
       }
 
-      onClose(); // ✅ Cerrar modal tras seleccionar
-
+      onClose(); // ✅ Cerrar modal inmediatamente después de la selección
     } catch (error) {
-      console.error("❌ Error conectando la wallet:", error);
-      setErrorMessage(error.message);
+      console.error("❌ Error abriendo la wallet:", error);
     } finally {
       setIsLoading(false);
     }
@@ -50,12 +38,10 @@ const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
               onClick={() => handleWalletSelection(wallet)} 
               disabled={isLoading}
             >
-              {isLoading ? "Connecting..." : `${wallet.charAt(0).toUpperCase() + wallet.slice(1)} Wallet`}
+              {isLoading ? "Opening..." : `${wallet.charAt(0).toUpperCase() + wallet.slice(1)} Wallet`}
             </button>
           ))}
         </div>
-
-        {errorMessage && <p className="error-message">{errorMessage}</p>}
 
         <button className="close-modal" onClick={!isLoading ? onClose : null} disabled={isLoading}>
           Close

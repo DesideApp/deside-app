@@ -20,7 +20,7 @@ const WalletButton = memo(() => {
 
     const fetchBalance = async () => {
       try {
-        const walletBalance = await getWalletBalance(walletAddress); // ✅ Usamos `solanaDirect.js`
+        const walletBalance = await getWalletBalance("phantom"); // ✅ Pide el balance del proveedor correcto
         setBalance(walletBalance);
       } catch (error) {
         console.error("❌ Error obteniendo balance:", error);
