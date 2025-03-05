@@ -1,29 +1,28 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import "./NetworkStatus.css";
-import { getSolanaStatus, getSolanaTPS } from "../../utils/solanaHelpers.js"; // ✅ Import correcto
+import { getSolanaStatus, getSolanaTPS } from "../../utils/solanaHelpers.js";
 
 const NetworkStatus = React.memo(({ className = "" }) => {
     const [status, setStatus] = useState("offline");
-    const [tps, setTps] = useState(null);
+    const [tps, setTps] = useState(0);
     const [error, setError] = useState(null);
     const intervalRef = useRef(null);
-    const isMountedRef = useRef(true); // ✅ Para evitar actualizaciones en componentes desmontados
+    const isMountedRef = useRef(true);
 
     const fetchData = useCallback(async () => {
         try {
             const [statusData, tpsData] = await Promise.all([getSolanaStatus(), getSolanaTPS()]);
+            if (!isMountedRef.current) return;
 
-            if (!isMountedRef.current) return; // ✅ Evitar actualizar si el componente se desmontó
-            
-            setStatus(statusData?.status || "offline");
-            setTps(typeof tpsData?.tps === "number" ? tpsData.tps : null);
+            setStatus(statusData || "offline");
+            setTps(typeof tpsData === "number" ? tpsData : 0);
             setError(null);
         } catch (error) {
             console.error("❌ Error obteniendo estado de la red:", error);
             if (isMountedRef.current) {
-                setError("🔴 Error obteniendo datos de la red.");
+                setError("🔴 Error obteniendo datos.");
                 setStatus("offline");
-                setTps(null);
+                setTps(0);
             }
         }
     }, []);
@@ -32,9 +31,8 @@ const NetworkStatus = React.memo(({ className = "" }) => {
         isMountedRef.current = true;
         fetchData();
         intervalRef.current = setInterval(fetchData, 10000);
-
         return () => {
-            isMountedRef.current = false; // ✅ Indica que el componente se desmontó
+            isMountedRef.current = false;
             clearInterval(intervalRef.current);
         };
     }, [fetchData]);
@@ -44,8 +42,7 @@ const NetworkStatus = React.memo(({ className = "" }) => {
     }, [status]);
 
     const tpsBars = useMemo(() => {
-        if (tps === null) return [0, 0, 0, 0];
-
+        if (tps <= 0) return [0, 0, 0, 0];
         if (tps > 3000) return [100, 90, 80, 70];
         if (tps > 2000) return [80, 70, 60, 50];
         if (tps > 1000) return [60, 50, 40, 30];
@@ -55,15 +52,13 @@ const NetworkStatus = React.memo(({ className = "" }) => {
     return (
         <div className={`network-status-container ${className}`}>
             <div className="status-container">
-                <span className="network-status-label" aria-live="polite">Status:</span>
-                <div className={`status-bar ${statusColor}`}></div>
+                <div className={`status-light ${statusColor}`}></div>
             </div>
 
             <div className="tps-container">
-                <span className="network-status-label">TPS:</span>
                 <div className="tps-bars">
                     {tpsBars.map((height, index) => (
-                        <div key={index} className="tps-bar" style={{ height: `${height}%` }}></div>
+                        <div key={index} className={`tps-bar ${tps > 0 ? "active" : "inactive"}`} style={{ height: `${height}%` }}></div>
                     ))}
                 </div>
             </div>

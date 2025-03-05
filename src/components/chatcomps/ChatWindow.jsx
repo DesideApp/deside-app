@@ -14,7 +14,7 @@ function ChatWindow({ selectedContact }) {
   const [confirmedContacts, setConfirmedContacts] = useState([]);
 
   // ✅ **Usamos AuthManager para gestionar el estado de autenticación**
-  const { isAuthenticated, isLoading, handleLoginResponse } = useAuthManager();
+  const { isAuthenticated, handleLoginResponse } = useAuthManager();
 
   // ✅ **Obtener lista de contactos confirmados**
   const fetchContacts = useCallback(async () => {
@@ -27,7 +27,7 @@ function ChatWindow({ selectedContact }) {
     }
   }, [walletAddress]);
 
-  // ✅ **Inicializar WebSocket solo si el usuario está autenticado y tiene un contacto confirmado**
+  // ✅ **Inicializar WebSocket solo si el usuario tiene un contacto confirmado**
   const initializeSocket = useCallback(() => {
     if (!walletAddress || !selectedContact) return;
 
@@ -61,7 +61,7 @@ function ChatWindow({ selectedContact }) {
     socketRef.current = socket;
   }, [walletAddress, selectedContact, confirmedContacts]);
 
-  // ✅ **Gestionar WebRTC solo si el usuario está autenticado y tiene un contacto confirmado**
+  // ✅ **Gestionar WebRTC solo si el usuario tiene un contacto confirmado**
   const { messages, sendMessage } = useWebRTC(selectedContact, walletAddress);
 
   // ✅ **Mantener scroll en el último mensaje recibido**
@@ -76,11 +76,9 @@ function ChatWindow({ selectedContact }) {
     fetchContacts();
   }, [fetchContacts]);
 
-  // ✅ **Inicializar WebSocket si el usuario está autenticado**
+  // ✅ **Inicializar WebSocket**
   useEffect(() => {
-    if (isAuthenticated) {
-      initializeSocket();
-    }
+    initializeSocket();
     return () => {
       if (socketRef.current) {
         console.log("🔴 Desconectando WebSocket...");
@@ -88,21 +86,22 @@ function ChatWindow({ selectedContact }) {
         socketRef.current = null;
       }
     };
-  }, [initializeSocket, isAuthenticated]);
+  }, [initializeSocket]);
 
   // ✅ **Manejo de la interacción de usuario**
   const handleSendMessage = () => {
-    handleLoginResponse(() => {
-      sendMessage(selectedContact, walletAddress); // ✅ Enviar mensaje solo si está autenticado
-    });
+    if (!isAuthenticated) {
+      console.warn("⚠️ Intento de enviar mensaje sin autenticación. Activando login...");
+      handleLoginResponse();
+      return;
+    }
+    sendMessage(selectedContact, walletAddress);
   };
 
   return (
     <div className="chat-window">
       {!selectedContact ? (
         <p className="chat-placeholder">🔍 Selecciona un contacto para empezar a chatear.</p>
-      ) : isLoading ? (
-        <p>🔄 Cargando...</p>
       ) : (
         <>
           <div className="chat-header">
@@ -129,7 +128,7 @@ function ChatWindow({ selectedContact }) {
             )}
           </div>
 
-          <ChatInput onSendMessage={handleSendMessage} disabled={!isAuthenticated || !isConnected} />
+          <ChatInput onSendMessage={handleSendMessage} disabled={!isConnected} />
         </>
       )}
     </div>

@@ -1,0 +1,48 @@
+/* 📌 Contenedor principal */
+.solana-price-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* 📌 Estilos base */
+.solana-price {
+    transition: color 0.5s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* 📌 Precio subiendo (verde, efecto suave) */
+.solana-price.up {
+    color: #4caf50;
+    animation: pulseUp 0.4s ease-in-out;
+}
+
+/* 📌 Precio bajando (rojo, efecto sutil) */
+.solana-price.down {
+    color: #f44336;
+    animation: pulseDown 0.4s ease-in-out;
+}
+
+/* 📌 Sin cambios (color neutro) */
+.solana-price.neutral {
+    color: #ddd;
+}
+
+/* 📌 Efecto sutil cuando sube */
+@keyframes pulseUp {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* 📌 Efecto sutil cuando baja */
+@keyframes pulseDown {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}

@@ -31,28 +31,30 @@ const WalletButton = memo(() => {
     fetchBalance();
   }, [walletAddress]);
 
-  // ✅ **Abrir el modal solo si NO estamos autenticados**
+  // ✅ **Abrir modal SIEMPRE cuando se hace clic**
   const handleConnect = useCallback(() => {
-    if (walletStatus === "not_connected" || walletStatus === "connected") {
-      console.log("🔵 Intentando abrir el modal...");
-      setIsModalOpen(true);
-    } else {
-      console.warn("⚠️ Ya estamos autenticados.");
-    }
-  }, [walletStatus]);
+    console.log("🔵 Abriendo modal de conexión...");
+    setIsModalOpen(true);
+  }, []);
 
-  // ✅ **Cuando el modal se cierra, verificar estado de la wallet**
+  // ✅ **Cerrar modal de forma segura**
+  const handleCloseModal = useCallback(() => {
+    console.log("🔴 Cerrando modal...");
+    setIsModalOpen(false);
+  }, []);
+
+  // ✅ **Manejar conexión de wallet**
   const handleModalWalletConnected = useCallback(async (wallet) => {
     console.log("✅ Wallet conectada. Autenticando...");
     const { walletStatus } = await handleWalletConnected(wallet, syncWalletStatus);
-    
+
     if (walletStatus === "authenticated") {
       console.log("✅ Autenticación exitosa.");
-      setIsModalOpen(false);
+      handleCloseModal();
     } else {
       console.warn("⚠️ No se pudo autenticar la wallet.");
     }
-  }, [syncWalletStatus]);
+  }, [syncWalletStatus, handleCloseModal]);
 
   const formattedBalance = useMemo(
     () => (balance !== null ? `${balance.toFixed(2)} SOL` : "Connect Wallet"),
@@ -61,20 +63,18 @@ const WalletButton = memo(() => {
 
   return (
     <div className="wallet-container">
-      {/* ✅ Solo mostramos "Connect Wallet" si NO está autenticada */}
-      {(walletStatus === "not_connected" || walletStatus === "connected") && (
-        <button className="wallet-button" onClick={handleConnect} disabled={!isReady}>
-          <span aria-live="polite">Connect Wallet</span>
-        </button>
-      )}
+      {/* ✅ SIEMPRE SE VE - Permite abrir el modal sin importar el estado */}
+      <button className="wallet-button" onClick={handleConnect} disabled={!isReady}>
+        <span>{formattedBalance}</span>
+      </button>
 
-      {/* ✅ WalletMenu ahora solo invoca handleLogout directamente */}
+      {/* ✅ WalletMenu sigue funcionando de forma independiente */}
       <WalletMenu handleLogout={handleLogout} />
 
-      {/* ✅ Modal de conexión */}
+      {/* ✅ Modal de conexión totalmente controlado */}
       <WalletModal 
         isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+        onClose={handleCloseModal} 
         onWalletConnected={handleModalWalletConnected} 
       />
     </div>

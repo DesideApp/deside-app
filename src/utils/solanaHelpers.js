@@ -1,42 +1,19 @@
-import { Connection, PublicKey } from "@solana/web3.js";
-import { apiRequest } from "../services/apiService.js"; // ✅ Importamos apiRequest para usar el backend
-import API_BASE_URL from "../config/apiConfig.js"; // ✅ Asegurar que se usa la URL correcta del backend
-
-const RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
-const connection = new Connection(RPC_URL, "confirmed"); // ✅ Instancia única y reutilizable
-
-/**
- * 🔹 **Obtener balance en SOL**
- */
-export async function getBalance(walletAddress) {
-    try {
-        if (!walletAddress) {
-            console.warn("⚠️ Dirección de wallet inválida.");
-            return null;
-        }
-
-        const publicKey = new PublicKey(walletAddress);
-        const balanceLamports = await connection.getBalance(publicKey);
-        return balanceLamports / 1e9;
-    } catch (error) {
-        console.error(`❌ Error obteniendo balance para ${walletAddress}:`, error);
-        return null;
-    }
-}
+import { apiRequest } from "../services/apiService.js"; // ✅ Centralizamos las llamadas API
+import API_BASE_URL from "../config/apiConfig.js"; // ✅ Aseguramos la URL del backend
 
 /**
  * 🔹 **Obtener estado de Solana desde el backend**
  */
 export async function getSolanaStatus() {
     try {
-        const response = await apiRequest("/api/solana/solana-status", { method: "GET" });
+        const response = await apiRequest(`${API_BASE_URL}/api/solana/solana-status`, { method: "GET" });
 
-        if (!response || typeof response !== "object") {
-            console.error("⚠️ Respuesta inesperada en `getSolanaStatus()`:", response);
+        if (!response || typeof response.status !== "string") {
+            console.warn("⚠️ Respuesta inesperada en `getSolanaStatus()`:", response);
             return "offline";
         }
 
-        return response?.status || "offline"; // ✅ Devuelve "offline" si hay un error
+        return response.status;
     } catch (error) {
         console.error("❌ Error obteniendo estado de Solana desde el backend:", error);
         return "offline";
@@ -48,17 +25,17 @@ export async function getSolanaStatus() {
  */
 export async function getSolanaTPS() {
     try {
-        const response = await apiRequest("/api/solana/solana-tps", { method: "GET" });
+        const response = await apiRequest(`${API_BASE_URL}/api/solana/solana-tps`, { method: "GET" });
 
         if (!response || typeof response.tps !== "number") {
-            console.error("⚠️ Respuesta inesperada en `getSolanaTPS()`:", response);
-            return null;
+            console.warn("⚠️ Respuesta inesperada en `getSolanaTPS()`:", response);
+            return 0;
         }
 
         return response.tps;
     } catch (error) {
         console.error("❌ Error obteniendo TPS de Solana desde el backend:", error);
-        return null;
+        return 0;
     }
 }
 
@@ -67,16 +44,16 @@ export async function getSolanaTPS() {
  */
 export async function getSolanaPrice() {
     try {
-        const response = await apiRequest("/api/solana/solana-price", { method: "GET" });
+        const response = await apiRequest(`${API_BASE_URL}/api/solana/solana-price`, { method: "GET" });
 
         if (!response || typeof response.price !== "number") {
-            console.error("⚠️ Respuesta inesperada en `getSolanaPrice()`:", response);
-            return null;
+            console.warn("⚠️ Respuesta inesperada en `getSolanaPrice()`:", response);
+            return 0;
         }
 
         return response.price;
     } catch (error) {
         console.error("❌ Error obteniendo precio de Solana desde el backend:", error);
-        return null;
+        return 0;
     }
 }

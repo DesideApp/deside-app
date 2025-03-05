@@ -8,14 +8,19 @@ const RightPanel = () => {
     const [activeTab, setActiveTab] = useState("requests");
     const { isAuthenticated, isLoading, handleLoginResponse } = useAuthManager(); // ✅ Verificamos autenticación
 
-    // ✅ **Manejo de pestañas con autenticación**
+    // ✅ **Permitir cambio de pestaña sin restricciones**
     const handleTabChange = (tab) => {
+        setActiveTab(tab);
+    };
+
+    // ✅ **Manejo de acciones protegidas**
+    const handleProtectedAction = (action) => {
         if (!isAuthenticated) {
-            console.warn(`⚠️ Intento de acceder a ${tab} sin autenticación.`);
+            console.warn(`⚠️ Intento de ejecutar acción protegida.`);
             handleLoginResponse(); // 🔄 Activa el proceso de autenticación
             return;
         }
-        setActiveTab(tab);
+        action();
     };
 
     return (
@@ -40,8 +45,17 @@ const RightPanel = () => {
                     <p>🔄 Verificando autenticación...</p>
                 ) : (
                     <>
-                        {activeTab === "requests" && <ContactRequests />}
-                        {activeTab === "addContact" && <AddContactForm onContactAdded={() => setActiveTab("requests")} />}
+                        {activeTab === "requests" && (
+                            <ContactRequests 
+                                onProtectedAction={(action) => handleProtectedAction(action)}
+                            />
+                        )}
+                        {activeTab === "addContact" && (
+                            <AddContactForm 
+                                onContactAdded={() => setActiveTab("requests")} 
+                                onProtectedAction={(action) => handleProtectedAction(action)}
+                            />
+                        )}
                     </>
                 )}
             </div>
