@@ -37,10 +37,16 @@ export async function connectWallet(wallet) {
  */
 export async function disconnectWallet() {
   try {
-    const provider = getProvider("phantom");
-    if (!provider || !provider.isConnected) return;
+    const availableWallets = ["phantom", "backpack", "magiceden"];
 
-    await provider.disconnect();
+    for (const wallet of availableWallets) {
+      const provider = getProvider(wallet);
+      if (provider?.isConnected) {
+        await provider.disconnect();
+        console.log(`❌ ${wallet} desconectada.`);
+      }
+    }
+
     window.dispatchEvent(new Event("walletDisconnected")); // 🔄 Emitir evento global
   } catch (error) {
     console.error("❌ Wallet disconnection error:", error);
@@ -48,7 +54,7 @@ export async function disconnectWallet() {
 }
 
 /**
- * 🔹 **Obtener estado de la wallet (ahora revisa todas las wallets)**
+ * 🔹 **Obtener estado de la wallet (ahora revisa todas sin esperar autenticación)**
  */
 export async function getConnectedWallet() {
   try {
@@ -56,16 +62,15 @@ export async function getConnectedWallet() {
 
     for (const wallet of availableWallets) {
       const provider = getProvider(wallet);
-      if (provider?.isConnected) {
+      if (provider?.isConnected) { // ✅ Detecta conexión directa sin abrir modal
         const walletAddress = provider.publicKey?.toBase58();
         if (!walletAddress) continue;
 
         console.log(`✅ Wallet detectada automáticamente: ${wallet} (${walletAddress})`);
 
-        const authData = await checkAuthStatus();
         return {
           walletAddress,
-          walletStatus: authData.isAuthenticated ? WALLET_STATUS.AUTHENTICATED : WALLET_STATUS.CONNECTED,
+          walletStatus: WALLET_STATUS.CONNECTED, // 🔹 No esperamos al backend, es inmediato
           selectedWallet: wallet,
         };
       }

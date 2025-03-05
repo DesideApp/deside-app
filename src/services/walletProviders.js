@@ -2,11 +2,16 @@
 const WALLET_PROVIDERS = {
     phantom: () => {
         if (typeof window === "undefined") return null;
-        if (window.solana?.isPhantom) return window.solana;
-        return window.solana || null; // ✅ Asegura que use `window.solana` incluso si hay más de una wallet
+        return window.solana?.isPhantom ? window.solana : null; // ✅ Detecta Phantom
     },
-    backpack: () => (typeof window !== "undefined" && window.xnft?.solana) ? window.xnft.solana : null,
-    magiceden: () => (typeof window !== "undefined" && window.magicEden?.solana) ? window.magicEden.solana : null,
+    backpack: () => {
+        if (typeof window === "undefined") return null;
+        return window.xnft?.solana ? window.xnft.solana : null; // ✅ Detecta Backpack
+    },
+    magiceden: () => {
+        if (typeof window === "undefined") return null;
+        return window.magicEden?.solana ? window.magicEden.solana : null; // ✅ Detecta MagicEden
+    },
 };
 
 /**
@@ -29,9 +34,13 @@ export function getProvider(wallet) {
  * @returns {boolean} - `true` si hay una wallet conectada, `false` en caso contrario.
  */
 export function isWalletConnected() {
-    return Object.values(WALLET_PROVIDERS).some(providerFn => {
+    return Object.entries(WALLET_PROVIDERS).some(([wallet, providerFn]) => {
         const provider = providerFn();
-        return provider?.isConnected || false;
+        if (provider?.isConnected) {
+            console.log(`✅ Wallet detectada conectada: ${wallet}`);
+            return true;
+        }
+        return false;
     });
 }
 
@@ -44,6 +53,8 @@ export function listenToWalletEvents(onConnect, onDisconnect) {
     Object.entries(WALLET_PROVIDERS).forEach(([wallet, providerFn]) => {
         const provider = providerFn();
         if (!provider || !provider.on) return;
+
+        console.log(`🔍 Escuchando eventos de conexión en: ${wallet}`);
 
         // ✅ Remueve eventos previos para evitar múltiples llamadas innecesarias
         provider.removeAllListeners?.("connect");

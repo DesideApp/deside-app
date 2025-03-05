@@ -12,7 +12,7 @@ const WalletButton = memo(() => {
   const [balance, setBalance] = useState(null);
   const [selectedWallet, setSelectedWallet] = useState(null);
 
-  // ✅ **Detectar conexión automática de wallet**
+  // ✅ **Detectar conexión automática de wallet SIN abrir modal**
   useEffect(() => {
     const detectWallet = async () => {
       console.log("🔄 Revisando conexión automática...");
@@ -70,6 +70,23 @@ const WalletButton = memo(() => {
       console.warn("⚠️ Error conectando wallet:", result.error);
     }
   }, [handleCloseModal]);
+
+  // ✅ **Actualizar UI al detectar evento de conexión de wallet**
+  useEffect(() => {
+    const handleWalletEvent = async () => {
+      console.log("🔄 Evento walletConnected detectado. Verificando estado...");
+      const { walletAddress, selectedWallet } = await getConnectedWallet();
+
+      if (walletAddress) {
+        console.log(`✅ Wallet ahora conectada: ${selectedWallet} (${walletAddress})`);
+        setSelectedWallet(selectedWallet);
+        updateBalance(walletAddress);
+      }
+    };
+
+    window.addEventListener("walletConnected", handleWalletEvent);
+    return () => window.removeEventListener("walletConnected", handleWalletEvent);
+  }, []);
 
   const formattedBalance = balance !== null ? `${balance.toFixed(2)} SOL` : "Connect Wallet";
 
