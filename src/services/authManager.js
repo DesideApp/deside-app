@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import { checkAuthStatus, refreshToken } from "./apiService"; // Funciones ya implementadas
-import { useWallet } from "../contexts/WalletContext"; // Para obtener el estado de la wallet
-import { getProvider } from "./walletProviders"; // Para obtener el proveedor de la wallet
+import { checkAuthStatus, refreshToken } from "./apiService";
+import { useWallet } from "../contexts/WalletContext";
 
 export const useAuthManager = () => {
   const { walletAddress } = useWallet();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [requiresLogin, setRequiresLogin] = useState(false); // 🔹 Estado para indicar si el usuario debe autenticarse
 
-  // ✅ **Comprobar el estado de autenticación cuando cambia la wallet**
+  // ✅ **Comprobar autenticación cuando cambia la wallet**
   useEffect(() => {
     const checkAuthentication = async () => {
       setIsLoading(true);
@@ -20,6 +20,11 @@ export const useAuthManager = () => {
 
         const status = await checkAuthStatus();
         setIsAuthenticated(status.isAuthenticated);
+
+        // 🚨 Si el usuario no está autenticado, marcamos que necesita autenticación
+        if (!status.isAuthenticated) {
+          setRequiresLogin(true);
+        }
       } catch (error) {
         console.error("❌ Error al verificar autenticación:", error);
         setIsAuthenticated(false);
@@ -49,37 +54,31 @@ export const useAuthManager = () => {
     }
   };
 
-  // ✅ **Manejo del login de acuerdo al estado de la wallet y autenticación**
+  // ✅ **Manejo de respuesta al intentar realizar una acción protegida**
   const handleLoginResponse = async (action) => {
     if (!walletAddress) {
-      console.log("🚨 Usuario no conectado. Pidiendo conexión...");
-      // Si no está conectado, mostramos el modal de conexión
-      // Llama a abrir el modal de conexión aquí
+      console.warn("🚨 Usuario no conectado.");
+      setRequiresLogin(true); // 🔹 Activar el estado para que el frontend muestre el modal
       return;
     }
 
     if (!isAuthenticated) {
-      console.log("🚨 Usuario no autenticado. Iniciando autenticación...");
-      // Si no está autenticado, pedimos la firma
-      const provider = getProvider("phantom"); // O el proveedor conectado
-      if (provider) {
-        await provider.signMessage("Please sign this message to authenticate.");
-      }
+      console.warn("🚨 Usuario no autenticado. Requiere firma.");
+      setRequiresLogin(true);
       return;
     }
 
-    // Si el token está expirado, lo renovamos
-    if (isAuthenticated) {
-      await renewToken();
-    }
+    // Si el token está expirado, intentamos renovarlo
+    await renewToken();
 
-    // Si está autenticado y el token es válido, ejecutamos la acción
+    // ✅ Si ya está autenticado y con token válido, ejecutamos la acción
     action();
   };
 
   return {
     isAuthenticated,
     isLoading,
+    requiresLogin, // 🔹 Nuevo estado que puede ser leído por otros componentes
     handleLoginResponse,
   };
 };

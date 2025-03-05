@@ -3,18 +3,18 @@ import ChatInput from "./ChatInput";
 import { useWallet } from "../../contexts/WalletContext";
 import useWebRTC from "../../hooks/useWebRTC";
 import { io } from "socket.io-client";
-import { useAuthManager } from "../../services/authManager"; // Usamos AuthManager para la lógica centralizada
+import { useAuthManager } from "../../services/authManager"; // ✅ Usamos AuthManager
 import "./ChatWindow.css";
 
-function ChatWindow({ selectedContact, openAuthModal }) {
+function ChatWindow({ selectedContact }) {
   const { walletAddress } = useWallet();
   const chatContainerRef = useRef(null);
   const socketRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
   const [confirmedContacts, setConfirmedContacts] = useState([]);
 
-  // ✅ Usamos AuthManager para gestionar el estado de autenticación
-  const { isAuthenticated, isLoading, handleLoginResponse } = useAuthManager(); // Llamamos a AuthManager
+  // ✅ **Usamos AuthManager para gestionar el estado de autenticación**
+  const { isAuthenticated, isLoading, handleLoginResponse } = useAuthManager();
 
   // ✅ **Obtener lista de contactos confirmados**
   const fetchContacts = useCallback(async () => {
@@ -71,12 +71,12 @@ function ChatWindow({ selectedContact, openAuthModal }) {
     }
   }, [messages]);
 
-  // ✅ **Efectos de carga de datos**
+  // ✅ **Cargar contactos al inicio**
   useEffect(() => {
     fetchContacts();
   }, [fetchContacts]);
 
-  // ✅ **Efecto para inicializar WebSocket**
+  // ✅ **Inicializar WebSocket si el usuario está autenticado**
   useEffect(() => {
     if (isAuthenticated) {
       initializeSocket();
@@ -93,7 +93,7 @@ function ChatWindow({ selectedContact, openAuthModal }) {
   // ✅ **Manejo de la interacción de usuario**
   const handleSendMessage = () => {
     handleLoginResponse(() => {
-      sendMessage(selectedContact, walletAddress); // Enviar mensaje solo si está autenticado
+      sendMessage(selectedContact, walletAddress); // ✅ Enviar mensaje solo si está autenticado
     });
   };
 
@@ -103,13 +103,6 @@ function ChatWindow({ selectedContact, openAuthModal }) {
         <p className="chat-placeholder">🔍 Selecciona un contacto para empezar a chatear.</p>
       ) : isLoading ? (
         <p>🔄 Cargando...</p>
-      ) : !isAuthenticated ? (
-        <>
-          <p className="chat-placeholder">🔒 Debes autenticarte para enviar mensajes.</p>
-          <button className="auth-button" onClick={openAuthModal}>Iniciar sesión</button>
-        </>
-      ) : !confirmedContacts.includes(selectedContact) ? (
-        <p className="chat-placeholder">❌ No puedes chatear con este usuario.</p>
       ) : (
         <>
           <div className="chat-header">

@@ -29,7 +29,13 @@ export async function getBalance(walletAddress) {
  */
 export async function getSolanaStatus() {
     try {
-        const response = await apiRequest(`${API_BASE_URL}/api/solana/solana-status`, { method: "GET" });
+        const response = await apiRequest(API_BASE_URL + "/api/solana/solana-status", { method: "GET" });
+
+        if (!response || typeof response !== "object") {
+            console.error("⚠️ Respuesta inesperada en `getSolanaStatus()`:", response);
+            return "offline";
+        }
+
         return response?.status || "offline"; // ✅ Devuelve "offline" si hay un error
     } catch (error) {
         console.error("❌ Error obteniendo estado de Solana desde el backend:", error);
@@ -42,8 +48,14 @@ export async function getSolanaStatus() {
  */
 export async function getSolanaTPS() {
     try {
-        const response = await apiRequest(`${API_BASE_URL}/api/solana/solana-tps`, { method: "GET" });
-        return response?.tps || null;
+        const response = await apiRequest(API_BASE_URL + "/api/solana/solana-tps", { method: "GET" });
+
+        if (!response || typeof response.tps !== "number") {
+            console.error("⚠️ Respuesta inesperada en `getSolanaTPS()`:", response);
+            return null;
+        }
+
+        return response.tps;
     } catch (error) {
         console.error("❌ Error obteniendo TPS de Solana desde el backend:", error);
         return null;
@@ -55,8 +67,14 @@ export async function getSolanaTPS() {
  */
 export async function getSolanaPrice() {
     try {
-        const response = await apiRequest(`${API_BASE_URL}/api/solana/solana-price`, { method: "GET" });
-        return response?.price || null;
+        const response = await apiRequest(API_BASE_URL + "/api/solana/solana-price", { method: "GET" });
+
+        if (!response || typeof response.price !== "number") {
+            console.error("⚠️ Respuesta inesperada en `getSolanaPrice()`:", response);
+            return null;
+        }
+
+        return response.price;
     } catch (error) {
         console.error("❌ Error obteniendo precio de Solana desde el backend:", error);
         return null;

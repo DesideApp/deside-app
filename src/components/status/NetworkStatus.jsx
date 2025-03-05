@@ -1,32 +1,40 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import "./NetworkStatus.css";
-import { getSolanaStatus, getSolanaTPS } from "../../utils/solanaHelpers.js"; // ✅ Nuevo import correcto
+import { getSolanaStatus, getSolanaTPS } from "../../utils/solanaHelpers.js"; // ✅ Import correcto
 
 const NetworkStatus = React.memo(({ className = "" }) => {
     const [status, setStatus] = useState("offline");
     const [tps, setTps] = useState(null);
     const [error, setError] = useState(null);
     const intervalRef = useRef(null);
+    const isMountedRef = useRef(true); // ✅ Para evitar actualizaciones en componentes desmontados
 
     const fetchData = useCallback(async () => {
         try {
             const [statusData, tpsData] = await Promise.all([getSolanaStatus(), getSolanaTPS()]);
+
+            if (!isMountedRef.current) return; // ✅ Evitar actualizar si el componente se desmontó
+            
             setStatus(statusData?.status || "offline");
             setTps(typeof tpsData?.tps === "number" ? tpsData.tps : null);
             setError(null);
         } catch (error) {
             console.error("❌ Error obteniendo estado de la red:", error);
-            setError("🔴 Error obteniendo datos de la red.");
-            setStatus("offline");
-            setTps(null);
+            if (isMountedRef.current) {
+                setError("🔴 Error obteniendo datos de la red.");
+                setStatus("offline");
+                setTps(null);
+            }
         }
     }, []);
 
     useEffect(() => {
+        isMountedRef.current = true;
         fetchData();
         intervalRef.current = setInterval(fetchData, 10000);
 
         return () => {
+            isMountedRef.current = false; // ✅ Indica que el componente se desmontó
             clearInterval(intervalRef.current);
         };
     }, [fetchData]);

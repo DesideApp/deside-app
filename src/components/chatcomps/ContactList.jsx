@@ -1,27 +1,26 @@
 import React, { useEffect, useCallback } from "react";
 import useContactManager from "../../hooks/useContactManager";
 import { useWallet } from "../../contexts/WalletContext";
-import { useAuthManager } from "../../services/authManager";  // Importamos el AuthManager
+import { useAuthManager } from "../../services/authManager";  // ✅ Importamos AuthManager
 import "./ContactList.css";
 
-const ContactList = ({ onSelectContact, openAuthModal }) => {
+const ContactList = ({ onSelectContact }) => {
     const { walletAddress, isReady } = useWallet();
-    const { isAuthenticated, isLoading, handleLoginResponse } = useAuthManager(); // Usamos AuthManager
-
+    const { isAuthenticated, isLoading, handleLoginResponse } = useAuthManager(); // ✅ Usamos AuthManager
     const { confirmedContacts, fetchContacts } = useContactManager();
 
-    // ✅ **Intentar abrir el modal de agregar contacto**
+    // ✅ **Intentar agregar un contacto, autenticando si es necesario**
     const handleAddContact = useCallback(() => {
         if (!isAuthenticated) {
-            console.warn("⚠️ Intento de agregar contacto sin autenticación. Abriendo modal...");
-            openAuthModal(); // 🔄 Activar autenticación
+            console.warn("⚠️ Intento de agregar contacto sin autenticación. Activando login...");
+            handleLoginResponse(); // 🔄 Activa el proceso de autenticación
             return;
         }
         console.warn("⚠️ Agregar contactos ahora está en RightPanel.jsx");
-    }, [isAuthenticated, openAuthModal]);
+    }, [isAuthenticated, handleLoginResponse]);
 
     useEffect(() => {
-        fetchContacts(); // Cargar contactos al inicio
+        fetchContacts(); // ✅ Cargar contactos al inicio
     }, [fetchContacts]);
 
     if (!isReady) {
@@ -46,7 +45,11 @@ const ContactList = ({ onSelectContact, openAuthModal }) => {
                 <p className="no-contacts-message">Aún no tienes contactos.</p>
             )}
 
-            <button className="floating-add-button" onClick={handleAddContact} disabled={!walletAddress || isLoading || !isAuthenticated}>
+            <button 
+                className="floating-add-button" 
+                onClick={handleAddContact} 
+                disabled={!walletAddress || isLoading}
+            >
                 ➕
             </button>
         </div>

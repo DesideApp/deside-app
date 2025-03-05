@@ -11,7 +11,8 @@ const RightPanel = () => {
     // ✅ **Manejo de pestañas con autenticación**
     const handleTabChange = (tab) => {
         if (!isAuthenticated) {
-            handleLoginResponse(); // 🔄 Activa el proceso de autenticación si es necesario
+            console.warn(`⚠️ Intento de acceder a ${tab} sin autenticación.`);
+            handleLoginResponse(); // 🔄 Activa el proceso de autenticación
             return;
         }
         setActiveTab(tab);
@@ -37,13 +38,11 @@ const RightPanel = () => {
             <div className="right-panel-content">
                 {isLoading ? (
                     <p>🔄 Verificando autenticación...</p>
-                ) : isAuthenticated ? (
+                ) : (
                     <>
                         {activeTab === "requests" && <ContactRequests />}
                         {activeTab === "addContact" && <AddContactForm onContactAdded={() => setActiveTab("requests")} />}
                     </>
-                ) : (
-                    <p className="auth-warning">🔒 Debes iniciar sesión para gestionar contactos.</p>
                 )}
             </div>
         </aside>
