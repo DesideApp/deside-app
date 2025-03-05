@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
 import { useWallet } from "../../contexts/WalletContext";
-import { getBalance } from "../../utils/solanaDirect.js"; // ✅ Directo para obtener balance
+import { getBalance } from "../../utils/solanaDirect.js"; // ✅ Obtener balance directamente
+import { connectWallet, handleLogout } from "../../services/walletService.js"; // ✅ Se vuelve a importar correctamente
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -42,6 +43,19 @@ const WalletButton = memo(() => {
     setIsModalOpen(false);
   }, []);
 
+  // ✅ **Conectar wallet desde el modal**
+  const handleWalletSelected = useCallback(async (wallet) => {
+    console.log(`🔹 Intentando conectar con ${wallet}...`);
+    const result = await connectWallet(wallet);
+
+    if (result.status === "connected") {
+      console.log("✅ Wallet conectada correctamente:", result.pubkey);
+      handleCloseModal();
+    } else {
+      console.warn("⚠️ Error conectando wallet:", result.error);
+    }
+  }, [handleCloseModal]);
+
   const formattedBalance = balance !== null ? `${balance.toFixed(2)} SOL` : "Connect Wallet";
 
   return (
@@ -52,10 +66,10 @@ const WalletButton = memo(() => {
       </button>
 
       {/* ✅ **WalletMenu sigue funcionando de forma independiente** */}
-      <WalletMenu />
+      <WalletMenu handleLogout={handleLogout} />
 
       {/* ✅ **Modal de conexión TOTALMENTE CONTROLADO desde aquí** */}
-      <WalletModal isOpen={isModalOpen} onClose={handleCloseModal} />
+      <WalletModal isOpen={isModalOpen} onClose={handleCloseModal} onWalletSelected={handleWalletSelected} />
     </div>
   );
 });
