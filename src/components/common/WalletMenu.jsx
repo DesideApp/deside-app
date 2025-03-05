@@ -94,9 +94,9 @@ const WalletMenu = memo(({ handleLogout, openWalletModal }) => {
 
   return (
     <>
-      {/* ✅ Botón del menú ahora abre/cierra el menú correctamente */}
+      {/* ✅ Botón del menú con animación */}
       <button
-        className="menu-button"
+        className={`menu-button ${isOpen ? "open" : ""}`}
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label="Menu"
         disabled={!isReady}

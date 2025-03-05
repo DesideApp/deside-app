@@ -101,6 +101,7 @@
     border: none;
     cursor: pointer;
     position: relative;
+    transition: transform 0.3s ease-in-out;
 }
 
 .menu-icon {
@@ -109,13 +110,32 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    align-items: center;
 }
 
 .menu-icon span {
     display: block;
-    width: 100%;
+    width: 24px;
     height: 3px;
     background-color: white;
     border-radius: 2px;
     transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* 🔹 Animación de la hamburguesa al abrir */
+.menu-button.open .menu-icon span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.menu-button.open .menu-icon span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-button.open .menu-icon span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+/* 🛠️ Ajustes para mejorar el tamaño y alineación */
+.menu-icon span {
+    transition: all 0.3s ease-in-out;
 }

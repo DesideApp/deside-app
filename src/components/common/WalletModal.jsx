@@ -4,24 +4,26 @@ import "./WalletModal.css";
 const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ Si `isOpen` es `false`, no renderizamos nada
+  // ✅ **Si `isOpen` es `false`, no renderizamos nada**
   if (!isOpen) return null;
 
-  // ✅ **Función que solo abre el proveedor de la wallet**
+  // ✅ **Manejamos la selección sin bloqueos innecesarios**
   const handleWalletSelection = (walletType) => {
+    if (isLoading) return; // ✅ Evita que se seleccione más de una vez mientras carga
+
+    console.log(`🟢 Abriendo proveedor de ${walletType}...`);
     setIsLoading(true);
 
     try {
-      console.log(`🟢 Abriendo proveedor de ${walletType}...`);
-
       if (typeof onWalletSelected === "function") {
         onWalletSelected(walletType); // ✅ Solo envía el tipo de wallet seleccionada
       }
-
-      onClose(); // ✅ Cerrar modal inmediatamente después de la selección
+      setTimeout(() => {
+        setIsLoading(false); // ✅ Evita que quede en "Opening..."
+        onClose(); // ✅ Cerrar modal inmediatamente después de la selección
+      }, 300);
     } catch (error) {
       console.error("❌ Error abriendo la wallet:", error);
-    } finally {
       setIsLoading(false);
     }
   };

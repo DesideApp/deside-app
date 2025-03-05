@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
 import { useWallet } from "../../contexts/WalletContext";
-import { getWalletBalance } from "../../utils/solanaDirect.js"; // ✅ Corregido aquí
+import { getWalletBalance } from "../../utils/solanaDirect.js"; // ✅ Obtiene balance directo
 import { connectWallet, handleLogout } from "../../services/walletService.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
@@ -14,14 +14,15 @@ const WalletButton = memo(() => {
 
   // ✅ **Actualizar saldo cuando cambia la wallet**
   useEffect(() => {
-    if (!walletAddress || !selectedWallet) {
+    if (!walletAddress) {
       setBalance(null);
       return;
     }
 
     const fetchBalance = async () => {
       try {
-        const walletBalance = await getWalletBalance(selectedWallet); // ✅ Usamos la wallet real
+        if (!selectedWallet) return;
+        const walletBalance = await getWalletBalance(selectedWallet);
         setBalance(walletBalance);
       } catch (error) {
         console.error("❌ Error obteniendo balance:", error);
@@ -51,7 +52,7 @@ const WalletButton = memo(() => {
 
     if (result.status === "connected") {
       console.log("✅ Wallet conectada correctamente:", result.pubkey);
-      setSelectedWallet(wallet); // ✅ Guarda la wallet conectada
+      setSelectedWallet(wallet); // ✅ Guarda la wallet seleccionada
       handleCloseModal();
     } else {
       console.warn("⚠️ Error conectando wallet:", result.error);
