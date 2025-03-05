@@ -29,7 +29,7 @@ export async function getBalance(walletAddress) {
  */
 export async function getSolanaStatus() {
     try {
-        const response = await apiRequest(API_BASE_URL + "/api/solana/solana-status", { method: "GET" });
+        const response = await apiRequest("/api/solana/solana-status", { method: "GET" });
 
         if (!response || typeof response !== "object") {
             console.error("⚠️ Respuesta inesperada en `getSolanaStatus()`:", response);
@@ -48,7 +48,7 @@ export async function getSolanaStatus() {
  */
 export async function getSolanaTPS() {
     try {
-        const response = await apiRequest(API_BASE_URL + "/api/solana/solana-tps", { method: "GET" });
+        const response = await apiRequest("/api/solana/solana-tps", { method: "GET" });
 
         if (!response || typeof response.tps !== "number") {
             console.error("⚠️ Respuesta inesperada en `getSolanaTPS()`:", response);
@@ -67,7 +67,7 @@ export async function getSolanaTPS() {
  */
 export async function getSolanaPrice() {
     try {
-        const response = await apiRequest(API_BASE_URL + "/api/solana/solana-price", { method: "GET" });
+        const response = await apiRequest("/api/solana/solana-price", { method: "GET" });
 
         if (!response || typeof response.price !== "number") {
             console.error("⚠️ Respuesta inesperada en `getSolanaPrice()`:", response);
