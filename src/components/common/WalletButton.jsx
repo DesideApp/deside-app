@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { useWallet } from "../../contexts/WalletContext";
-import { getBalance } from "../../utils/solanaHelpers.js";
+import { getBalance } from "../../utils/solanaDirect.js";
 import { handleWalletConnected, handleLogout } from "../../services/walletService.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
