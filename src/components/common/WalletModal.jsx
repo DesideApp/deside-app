@@ -1,68 +1,62 @@
-import React, { useState, useCallback } from "react";
-import { getProvider } from "../../services/walletProviders.js";
-import "./WalletModal.css";
+import React, { useState, useEffect, useCallback, memo } from "react";
+import { useWallet } from "../../contexts/WalletContext";
+import { getBalance } from "../../utils/solanaDirect.js"; // ✅ Directo para obtener balance
+import WalletMenu from "./WalletMenu";
+import WalletModal from "./WalletModal";
+import "./WalletButton.css";
 
-const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+const WalletButton = memo(() => {
+  const { walletAddress, isReady } = useWallet();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [balance, setBalance] = useState(null);
 
-  // ✅ **Evitar que el componente se renderice si no está abierto**
-  if (!isOpen) return null;
-
-  // ✅ **Manejar la selección de wallet sin autenticación**
-  const handleWalletSelection = useCallback(async (walletType) => {
-    setIsLoading(true);
-    setErrorMessage("");
-
-    try {
-      const { provider, error } = getProvider(walletType);
-      if (!provider) throw new Error(error || "❌ No encontramos tu wallet. Asegúrate de que está instalada.");
-
-      await provider.connect();
-      if (!provider.publicKey) throw new Error("❌ No pudimos conectar con tu wallet. Verifica tu conexión.");
-
-      const publicKey = provider.publicKey.toBase58();
-      console.log("✅ Wallet seleccionada:", publicKey);
-
-      if (onWalletSelected) {
-        onWalletSelected(publicKey); // ✅ Enviar clave pública
-      }
-
-      onClose(); // ✅ Cerrar el modal después de seleccionar
-
-    } catch (error) {
-      console.error("❌ Error conectando la wallet:", error);
-      setErrorMessage(error.message);
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    if (!walletAddress) {
+      setBalance(null);
+      return;
     }
-  }, [onWalletSelected, onClose]);
+
+    const fetchBalance = async () => {
+      try {
+        const walletBalance = await getBalance(walletAddress);
+        setBalance(walletBalance);
+      } catch (error) {
+        console.error("❌ Error obteniendo balance:", error);
+        setBalance(null);
+      }
+    };
+
+    fetchBalance();
+  }, [walletAddress]);
+
+  // ✅ **Abrir modal al hacer clic en el botón**
+  const handleConnect = useCallback(() => {
+    console.log("🔵 Abriendo modal de conexión...");
+    setIsModalOpen(true);
+  }, []);
+
+  // ✅ **Cerrar modal de forma segura**
+  const handleCloseModal = useCallback(() => {
+    console.log("🔴 Cerrando modal...");
+    setIsModalOpen(false);
+  }, []);
+
+  const formattedBalance = balance !== null ? `${balance.toFixed(2)} SOL` : "Connect Wallet";
 
   return (
-    <div className="wallet-modal-overlay" onClick={!isLoading ? onClose : null}>
-      <div className="wallet-modal" onClick={(e) => e.stopPropagation()}>
-        <h2>🔗 Select Your Wallet</h2>
+    <div className="wallet-container">
+      {/* ✅ **SIEMPRE visible y permite abrir el modal sin importar estado** */}
+      <button className="wallet-button" onClick={handleConnect} disabled={!isReady}>
+        <span>{formattedBalance}</span>
+      </button>
 
-        <div className="wallet-options">
-          {["phantom", "backpack", "magiceden"].map((wallet) => (
-            <button 
-              key={wallet} 
-              onClick={() => handleWalletSelection(wallet)} 
-              disabled={isLoading}
-            >
-              {isLoading ? "Connecting..." : `${wallet.charAt(0).toUpperCase() + wallet.slice(1)} Wallet`}
-            </button>
-          ))}
-        </div>
+      {/* ✅ **WalletMenu sigue funcionando de forma independiente** */}
+      <WalletMenu />
 
-        {errorMessage && <p className="error-message">{errorMessage}</p>}
-
-        <button className="close-modal" onClick={!isLoading ? onClose : null} disabled={isLoading}>
-          Close
-        </button>
-      </div>
+      {/* ✅ **Modal de conexión TOTALMENTE CONTROLADO desde aquí** */}
+      <WalletModal isOpen={isModalOpen} onClose={handleCloseModal} />
     </div>
   );
-};
+});
 
-export default WalletModal;
+export default WalletButton;
