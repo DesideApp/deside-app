@@ -6,16 +6,17 @@ const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  if (!isOpen) return null; // ✅ No renderiza si no está abierto
+  // ✅ **Evitar que el componente se renderice si no está abierto**
+  if (!isOpen) return null;
 
-  // ✅ **Solo selecciona la wallet, sin manejar autenticación**
+  // ✅ **Manejar la selección de wallet sin autenticación**
   const handleWalletSelection = useCallback(async (walletType) => {
     setIsLoading(true);
     setErrorMessage("");
 
     try {
-      const provider = getProvider(walletType);
-      if (!provider) throw new Error("❌ No encontramos tu wallet. Asegúrate de que está instalada.");
+      const { provider, error } = getProvider(walletType);
+      if (!provider) throw new Error(error || "❌ No encontramos tu wallet. Asegúrate de que está instalada.");
 
       await provider.connect();
       if (!provider.publicKey) throw new Error("❌ No pudimos conectar con tu wallet. Verifica tu conexión.");
@@ -23,8 +24,11 @@ const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
       const publicKey = provider.publicKey.toBase58();
       console.log("✅ Wallet seleccionada:", publicKey);
 
-      onWalletSelected(publicKey); // ✅ Solo envía la selección
-      onClose(); // ✅ Cierra el modal sin autenticación
+      if (onWalletSelected) {
+        onWalletSelected(publicKey); // ✅ Enviar clave pública
+      }
+
+      onClose(); // ✅ Cerrar el modal después de seleccionar
 
     } catch (error) {
       console.error("❌ Error conectando la wallet:", error);
