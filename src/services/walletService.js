@@ -9,52 +9,7 @@ const WALLET_STATUS = {
 };
 
 /**
- * 🔹 **Conectar la wallet**
- */
-export async function connectWallet(wallet) {
-  try {
-    const provider = getProvider(wallet);
-    if (!provider) throw new Error("No encontramos tu wallet. Intenta instalarla y vuelve a intentarlo.");
-
-    if (provider.isConnected) {
-      return { pubkey: provider.publicKey?.toBase58(), status: WALLET_STATUS.CONNECTED };
-    }
-
-    await provider.connect();
-    const pubkey = provider.publicKey?.toBase58();
-    if (!pubkey) throw new Error("No se pudo obtener la clave pública.");
-
-    window.dispatchEvent(new Event("walletConnected")); // 🔄 Emitir evento global
-
-    return { pubkey, status: WALLET_STATUS.CONNECTED };
-  } catch (error) {
-    return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED, error: error.message };
-  }
-}
-
-/**
- * 🔹 **Desconectar la wallet**
- */
-export async function disconnectWallet() {
-  try {
-    const availableWallets = ["phantom", "backpack", "magiceden"];
-
-    for (const wallet of availableWallets) {
-      const provider = getProvider(wallet);
-      if (provider?.isConnected) {
-        await provider.disconnect();
-        console.log(`❌ ${wallet} desconectada.`);
-      }
-    }
-
-    window.dispatchEvent(new Event("walletDisconnected")); // 🔄 Emitir evento global
-  } catch (error) {
-    console.error("❌ Wallet disconnection error:", error);
-  }
-}
-
-/**
- * 🔹 **Obtener estado de la wallet (forzar detección en caso de errores)**
+ * 🔹 **Detectar si hay una wallet conectada a nivel Web3**
  */
 export async function getConnectedWallet() {
   try {
@@ -66,9 +21,9 @@ export async function getConnectedWallet() {
       if (provider?.isConnected) {
         let walletAddress = provider.publicKey?.toBase58();
 
-        // 🔄 **Forzar reintento si `publicKey` no está disponible inmediatamente**
+        // 🔄 **Si `publicKey` no está disponible inmediatamente, reintentamos**
         if (!walletAddress) {
-          console.warn(`⚠️ ${wallet} está conectada pero no tiene publicKey, reintentando...`);
+          console.warn(`⚠️ ${wallet} está conectada pero sin publicKey. Reintentando...`);
           await new Promise(resolve => setTimeout(resolve, 500)); // Espera 500ms
           provider = getProvider(wallet);
           walletAddress = provider?.publicKey?.toBase58();
@@ -92,7 +47,52 @@ export async function getConnectedWallet() {
 }
 
 /**
- * 🔹 **Firmar mensaje con la wallet**
+ * 🔹 **Conectar una wallet manualmente**
+ */
+export async function connectWallet(wallet) {
+  try {
+    const provider = getProvider(wallet);
+    if (!provider) throw new Error("No encontramos tu wallet. Intenta instalarla y vuelve a intentarlo.");
+
+    if (provider.isConnected) {
+      return { pubkey: provider.publicKey?.toBase58(), status: WALLET_STATUS.CONNECTED };
+    }
+
+    await provider.connect();
+    const pubkey = provider.publicKey?.toBase58();
+    if (!pubkey) throw new Error("No se pudo obtener la clave pública.");
+
+    window.dispatchEvent(new Event("walletConnected")); // 🔄 Emitir evento global
+
+    return { pubkey, status: WALLET_STATUS.CONNECTED };
+  } catch (error) {
+    return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED, error: error.message };
+  }
+}
+
+/**
+ * 🔹 **Desconectar una wallet manualmente**
+ */
+export async function disconnectWallet() {
+  try {
+    const availableWallets = ["phantom", "backpack", "magiceden"];
+
+    for (const wallet of availableWallets) {
+      const provider = getProvider(wallet);
+      if (provider?.isConnected) {
+        await provider.disconnect();
+        console.log(`❌ ${wallet} desconectada.`);
+      }
+    }
+
+    window.dispatchEvent(new Event("walletDisconnected")); // 🔄 Emitir evento global
+  } catch (error) {
+    console.error("❌ Wallet disconnection error:", error);
+  }
+}
+
+/**
+ * 🔹 **Firmar un mensaje con la wallet**
  */
 async function signMessage(wallet, message) {
   try {
@@ -115,7 +115,7 @@ async function signMessage(wallet, message) {
 }
 
 /**
- * 🔹 **Autenticar wallet con el backend**
+ * 🔹 **Autenticar la wallet con el backend**
  */
 export async function authenticateWallet(wallet) {
   try {
@@ -143,7 +143,7 @@ export async function authenticateWallet(wallet) {
 }
 
 /**
- * 🔹 **Manejar autenticación tras conectar la wallet**
+ * 🔹 **Manejar la autenticación tras conectar la wallet**
  */
 export async function handleWalletConnected(syncWalletStatus) {
   console.log("🔄 Revisando conexión automática de wallet...");

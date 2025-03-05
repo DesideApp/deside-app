@@ -92,7 +92,7 @@ function ChatWindow({ selectedContact }) {
   const handleSendMessage = () => {
     if (!isAuthenticated) {
       console.warn("⚠️ Intento de enviar mensaje sin autenticación. Activando login...");
-      handleLoginResponse();
+      handleLoginResponse(() => sendMessage(selectedContact, walletAddress)); // 🔄 Se ejecuta solo tras login exitoso
       return;
     }
     sendMessage(selectedContact, walletAddress);

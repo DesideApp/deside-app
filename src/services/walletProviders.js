@@ -31,17 +31,17 @@ export function getProvider(wallet) {
 
 /**
  * 🔄 **Verificar si alguna wallet está conectada**
- * @returns {boolean} - `true` si hay una wallet conectada, `false` en caso contrario.
+ * @returns {string|null} - Nombre de la wallet conectada o `null` si ninguna está conectada.
  */
 export function isWalletConnected() {
-    return Object.entries(WALLET_PROVIDERS).some(([wallet, providerFn]) => {
+    for (const [wallet, providerFn] of Object.entries(WALLET_PROVIDERS)) {
         const provider = providerFn();
         if (provider?.isConnected) {
             console.log(`✅ Wallet detectada conectada: ${wallet}`);
-            return true;
+            return wallet;
         }
-        return false;
-    });
+    }
+    return null;
 }
 
 /**

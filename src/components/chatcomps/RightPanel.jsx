@@ -16,8 +16,11 @@ const RightPanel = () => {
     // ✅ **Manejo de acciones protegidas**
     const handleProtectedAction = (action) => {
         if (!isAuthenticated) {
-            console.warn(`⚠️ Intento de ejecutar acción protegida.`);
-            handleLoginResponse(); // 🔄 Activa el proceso de autenticación
+            console.warn("⚠️ Intento de ejecutar acción protegida.");
+            handleLoginResponse(() => {
+                console.log("✅ Usuario autenticado. Ejecutando acción...");
+                action();
+            }); // 🔄 Activa autenticación y continúa la acción
             return;
         }
         action();

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
 import { useWallet } from "../../contexts/WalletContext";
 import { getWalletBalance } from "../../utils/solanaDirect.js";
-import { connectWallet, getConnectedWallet, handleLogout } from "../../services/walletService.js";
+import { connectWallet, getConnectedWallet, handleLogout, disconnectWallet } from "../../services/walletService.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -24,11 +24,11 @@ const WalletButton = memo(() => {
         console.log(`✅ Wallet detectada automáticamente: ${selectedWallet} (${walletAddress})`);
         setSelectedWallet(selectedWallet);
         setWalletAddress(walletAddress);
-        setIsCheckingWallet(false); // ✅ Finalizar chequeo inicial
+        updateBalance(walletAddress);
       } else {
         console.warn("⚠️ No se detectó ninguna wallet conectada.");
-        setIsCheckingWallet(false); // ✅ Finalizar chequeo inicial aunque no haya wallet
       }
+      setIsCheckingWallet(false); // ✅ Finalizar chequeo inicial
     };
 
     detectWallet();
@@ -83,6 +83,8 @@ const WalletButton = memo(() => {
       console.log("✅ Wallet conectada correctamente:", result.pubkey);
       setSelectedWallet(wallet);
       setWalletAddress(result.pubkey);
+      updateBalance(result.pubkey);
+      handleCloseModal();
     } else {
       console.warn("⚠️ Error conectando wallet:", result.error);
     }
@@ -98,12 +100,32 @@ const WalletButton = memo(() => {
         console.log(`✅ Wallet ahora conectada: ${selectedWallet} (${walletAddress})`);
         setSelectedWallet(selectedWallet);
         setWalletAddress(walletAddress);
+        updateBalance(walletAddress);
       }
     };
 
     window.addEventListener("walletConnected", handleWalletEvent);
-    return () => window.removeEventListener("walletConnected", handleWalletEvent);
+    window.addEventListener("walletDisconnected", async () => {
+      console.warn("❌ Wallet desconectada.");
+      setWalletAddress(null);
+      setSelectedWallet(null);
+      setBalance(null);
+    });
+
+    return () => {
+      window.removeEventListener("walletConnected", handleWalletEvent);
+      window.removeEventListener("walletDisconnected", handleWalletEvent);
+    };
   }, []);
+
+  // ✅ **Logout real**
+  const handleLogoutClick = async () => {
+    console.log("🚪 Cierre de sesión iniciado...");
+    await disconnectWallet(); // 🔄 Llamar al servicio de desconexión
+    setWalletAddress(null);
+    setSelectedWallet(null);
+    setBalance(null);
+  };
 
   const formattedBalance = balance !== null ? `${balance.toFixed(2)} SOL` : "Connect Wallet";
 
@@ -115,7 +137,7 @@ const WalletButton = memo(() => {
       </button>
 
       {/* ✅ **WalletMenu sigue funcionando de forma independiente** */}
-      <WalletMenu handleLogout={handleLogout} />
+      <WalletMenu handleLogout={handleLogoutClick} />
 
       {/* ✅ **Modal de conexión TOTALMENTE CONTROLADO desde aquí** */}
       <WalletModal isOpen={isModalOpen} onClose={handleCloseModal} onWalletSelected={handleWalletSelected} />

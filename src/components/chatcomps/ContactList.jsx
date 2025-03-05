@@ -13,7 +13,7 @@ const ContactList = ({ onSelectContact }) => {
     const handleAddContact = useCallback(() => {
         if (!isAuthenticated) {
             console.warn("⚠️ Intento de agregar contacto sin autenticación. Activando login...");
-            handleLoginResponse(); // 🔄 Activa el proceso de autenticación
+            handleLoginResponse(() => console.log("✅ Ahora puedes agregar un contacto.")); // 🔄 Activa el proceso de autenticación y continúa
             return;
         }
         console.warn("⚠️ Agregar contactos ahora está en RightPanel.jsx");
@@ -22,10 +22,6 @@ const ContactList = ({ onSelectContact }) => {
     useEffect(() => {
         fetchContacts(); // ✅ Cargar contactos al inicio
     }, [fetchContacts]);
-
-    if (!isReady) {
-        return <p className="auth-warning">🔒 Cargando datos de la wallet...</p>;
-    }
 
     return (
         <div className="contact-list-container">

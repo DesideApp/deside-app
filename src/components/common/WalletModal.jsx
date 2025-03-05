@@ -1,26 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./WalletModal.css";
 
 const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
   const [isLoading, setIsLoading] = useState(false);
-
-  // ✅ **Cerrar modal automáticamente si la wallet ya está conectada**
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const checkIfWalletConnected = async () => {
-      console.log("🔄 Verificando si la wallet ya está conectada...");
-      if (typeof onWalletSelected === "function") {
-        const detectedWallet = await onWalletSelected(null, true); // 🔹 Se espera que `onWalletSelected` devuelva la wallet si ya está conectada
-        if (detectedWallet) {
-          console.log(`✅ Wallet ${detectedWallet} ya conectada, cerrando modal.`);
-          onClose();
-        }
-      }
-    };
-
-    checkIfWalletConnected();
-  }, [isOpen, onWalletSelected, onClose]);
 
   // ✅ **Manejamos la selección sin bloqueos innecesarios**
   const handleWalletSelection = async (walletType) => {
@@ -31,7 +13,7 @@ const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
 
     try {
       if (typeof onWalletSelected === "function") {
-        await onWalletSelected(walletType); // ✅ Ahora se espera la respuesta antes de cerrar el modal
+        await onWalletSelected(walletType); // ✅ Solo envía el tipo de wallet seleccionada
       }
 
       setIsLoading(false);
