@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useCallback, memo } from "react";
+import React, { useState, useEffect, memo } from "react";
 import { useWallet } from "../../contexts/WalletContext";
 import { getBalance } from "../../utils/solanaDirect.js"; // ✅ Obtener balance directamente
-import { connectWallet, handleLogout } from "../../services/walletService.js"; // ✅ Se vuelve a importar correctamente
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -32,29 +31,16 @@ const WalletButton = memo(() => {
   }, [walletAddress]);
 
   // ✅ **Abrir modal al hacer clic en el botón**
-  const handleConnect = useCallback(() => {
+  const handleConnect = () => {
     console.log("🔵 Abriendo modal de conexión...");
     setIsModalOpen(true);
-  }, []);
+  };
 
   // ✅ **Cerrar modal**
-  const handleCloseModal = useCallback(() => {
+  const handleCloseModal = () => {
     console.log("🔴 Cerrando modal...");
     setIsModalOpen(false);
-  }, []);
-
-  // ✅ **Conectar wallet desde el modal**
-  const handleWalletSelected = useCallback(async (wallet) => {
-    console.log(`🔹 Intentando conectar con ${wallet}...`);
-    const result = await connectWallet(wallet);
-
-    if (result.status === "connected") {
-      console.log("✅ Wallet conectada correctamente:", result.pubkey);
-      handleCloseModal();
-    } else {
-      console.warn("⚠️ Error conectando wallet:", result.error);
-    }
-  }, [handleCloseModal]);
+  };
 
   const formattedBalance = balance !== null ? `${balance.toFixed(2)} SOL` : "Connect Wallet";
 
@@ -66,10 +52,10 @@ const WalletButton = memo(() => {
       </button>
 
       {/* ✅ **WalletMenu sigue funcionando de forma independiente** */}
-      <WalletMenu handleLogout={handleLogout} />
+      <WalletMenu />
 
       {/* ✅ **Modal de conexión TOTALMENTE CONTROLADO desde aquí** */}
-      <WalletModal isOpen={isModalOpen} onClose={handleCloseModal} onWalletSelected={handleWalletSelected} />
+      <WalletModal isOpen={isModalOpen} onClose={handleCloseModal} />
     </div>
   );
 });
