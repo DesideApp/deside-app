@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
 import { useWallet } from "../../contexts/WalletContext";
-import { getWalletBalance } from "../../utils/solanaDirect.js"; // ✅ Obtiene balance directo
-import { connectWallet, handleLogout } from "../../services/walletService.js";
+import { getWalletBalance } from "../../utils/solanaDirect.js";
+import { connectWallet, getConnectedWallet, handleLogout } from "../../services/walletService.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -10,28 +10,39 @@ const WalletButton = memo(() => {
   const { walletAddress, isReady } = useWallet();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [balance, setBalance] = useState(null);
-  const [selectedWallet, setSelectedWallet] = useState(null); // ✅ Guarda la wallet seleccionada
+  const [selectedWallet, setSelectedWallet] = useState(null);
 
-  // ✅ **Actualizar saldo cuando cambia la wallet**
+  // ✅ **Detectar conexión automática de wallet**
   useEffect(() => {
-    if (!walletAddress) {
-      setBalance(null);
-      return;
-    }
+    const detectWallet = async () => {
+      console.log("🔄 Revisando conexión automática...");
+      const { walletAddress, walletStatus, selectedWallet } = await getConnectedWallet();
 
-    const fetchBalance = async () => {
-      try {
-        if (!selectedWallet) return;
-        const walletBalance = await getWalletBalance(selectedWallet);
-        setBalance(walletBalance);
-      } catch (error) {
-        console.error("❌ Error obteniendo balance:", error);
-        setBalance(null);
+      if (walletAddress) {
+        console.log(`✅ Wallet detectada: ${selectedWallet} (${walletAddress})`);
+        setSelectedWallet(selectedWallet);
+        updateBalance(walletAddress);
       }
     };
 
-    fetchBalance();
-  }, [walletAddress, selectedWallet]);
+    detectWallet();
+  }, []);
+
+  // ✅ **Actualizar saldo cuando cambia la wallet**
+  const updateBalance = async (address) => {
+    try {
+      if (!address) {
+        setBalance(null);
+        return;
+      }
+
+      const walletBalance = await getWalletBalance(address);
+      setBalance(walletBalance);
+    } catch (error) {
+      console.error("❌ Error obteniendo balance:", error);
+      setBalance(null);
+    }
+  };
 
   // ✅ **Abrir modal al hacer clic en el botón**
   const handleConnect = useCallback(() => {
@@ -52,7 +63,8 @@ const WalletButton = memo(() => {
 
     if (result.status === "connected") {
       console.log("✅ Wallet conectada correctamente:", result.pubkey);
-      setSelectedWallet(wallet); // ✅ Guarda la wallet seleccionada
+      setSelectedWallet(wallet);
+      updateBalance(result.pubkey);
       handleCloseModal();
     } else {
       console.warn("⚠️ Error conectando wallet:", result.error);

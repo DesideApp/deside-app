@@ -48,24 +48,30 @@ export async function disconnectWallet() {
 }
 
 /**
- * 🔹 **Obtener estado de la wallet**
+ * 🔹 **Obtener estado de la wallet (ahora revisa todas las wallets)**
  */
 export async function getConnectedWallet() {
   try {
-    const provider = getProvider("phantom");
-    if (!provider || !provider.isConnected) {
-      return { walletAddress: null, walletStatus: WALLET_STATUS.NOT_CONNECTED };
+    const availableWallets = ["phantom", "backpack", "magiceden"];
+
+    for (const wallet of availableWallets) {
+      const provider = getProvider(wallet);
+      if (provider?.isConnected) {
+        const walletAddress = provider.publicKey?.toBase58();
+        if (!walletAddress) continue;
+
+        console.log(`✅ Wallet detectada automáticamente: ${wallet} (${walletAddress})`);
+
+        const authData = await checkAuthStatus();
+        return {
+          walletAddress,
+          walletStatus: authData.isAuthenticated ? WALLET_STATUS.AUTHENTICATED : WALLET_STATUS.CONNECTED,
+          selectedWallet: wallet,
+        };
+      }
     }
 
-    const walletAddress = provider.publicKey?.toBase58() || null;
-    if (!walletAddress) return { walletAddress: null, walletStatus: WALLET_STATUS.NOT_CONNECTED };
-
-    const authData = await checkAuthStatus(); // 🔄 Ahora usamos apiService.js
-
-    return {
-      walletAddress,
-      walletStatus: authData.isAuthenticated ? WALLET_STATUS.AUTHENTICATED : WALLET_STATUS.CONNECTED,
-    };
+    return { walletAddress: null, walletStatus: WALLET_STATUS.NOT_CONNECTED };
   } catch (error) {
     return { walletAddress: null, walletStatus: WALLET_STATUS.NOT_CONNECTED, error: error.message };
   }
@@ -125,22 +131,26 @@ export async function authenticateWallet(wallet) {
 /**
  * 🔹 **Manejar autenticación tras conectar la wallet**
  */
-export async function handleWalletConnected(wallet, syncWalletStatus) {
-  console.log("✅ Wallet conectada. Autenticando...");
-  const authResult = await authenticateWallet(wallet);
+export async function handleWalletConnected(syncWalletStatus) {
+  console.log("🔄 Revisando conexión automática de wallet...");
 
-  if (authResult.status === WALLET_STATUS.AUTHENTICATED) {
-    console.log("✅ Autenticación exitosa.");
-    syncWalletStatus();
-  } else {
-    console.warn("⚠️ Autenticación fallida:", authResult.error || authResult.status);
-
-    // ✅ Si el backend rechazó la firma o hubo un error crítico, hacemos logout automático
-    if (authResult.status === "server_error") {
-      console.warn("❌ El backend rechazó la autenticación. Cerrando sesión.");
-      await handleLogout(syncWalletStatus);
-    }
+  const { walletAddress, walletStatus, selectedWallet } = await getConnectedWallet();
+  if (!walletAddress) {
+    console.warn("⚠️ No hay wallet conectada al iniciar.");
+    return;
   }
+
+  console.log(`✅ Conexión detectada: ${selectedWallet} (${walletAddress})`);
+
+  if (walletStatus === WALLET_STATUS.AUTHENTICATED) {
+    console.log("✅ Usuario ya autenticado.");
+    syncWalletStatus();
+    return;
+  }
+
+  console.log("🔄 Autenticando automáticamente...");
+  await authenticateWallet(selectedWallet);
+  syncWalletStatus();
 }
 
 /**
