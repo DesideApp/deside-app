@@ -54,25 +54,34 @@ export async function disconnectWallet() {
 }
 
 /**
- * 🔹 **Obtener estado de la wallet (ahora revisa todas sin esperar autenticación)**
+ * 🔹 **Obtener estado de la wallet (forzar detección en caso de errores)**
  */
 export async function getConnectedWallet() {
   try {
     const availableWallets = ["phantom", "backpack", "magiceden"];
 
     for (const wallet of availableWallets) {
-      const provider = getProvider(wallet);
-      if (provider?.isConnected) { // ✅ Detecta conexión directa sin abrir modal
-        const walletAddress = provider.publicKey?.toBase58();
-        if (!walletAddress) continue;
+      let provider = getProvider(wallet);
 
-        console.log(`✅ Wallet detectada automáticamente: ${wallet} (${walletAddress})`);
+      if (provider?.isConnected) {
+        let walletAddress = provider.publicKey?.toBase58();
 
-        return {
-          walletAddress,
-          walletStatus: WALLET_STATUS.CONNECTED, // 🔹 No esperamos al backend, es inmediato
-          selectedWallet: wallet,
-        };
+        // 🔄 **Forzar reintento si `publicKey` no está disponible inmediatamente**
+        if (!walletAddress) {
+          console.warn(`⚠️ ${wallet} está conectada pero no tiene publicKey, reintentando...`);
+          await new Promise(resolve => setTimeout(resolve, 500)); // Espera 500ms
+          provider = getProvider(wallet);
+          walletAddress = provider?.publicKey?.toBase58();
+        }
+
+        if (walletAddress) {
+          console.log(`✅ Wallet detectada automáticamente: ${wallet} (${walletAddress})`);
+          return {
+            walletAddress,
+            walletStatus: WALLET_STATUS.CONNECTED,
+            selectedWallet: wallet,
+          };
+        }
       }
     }
 

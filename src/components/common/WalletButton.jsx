@@ -12,6 +12,7 @@ const WalletButton = memo(() => {
   const [balance, setBalance] = useState(null);
   const [selectedWallet, setSelectedWallet] = useState(null);
   const [walletAddress, setWalletAddress] = useState(null);
+  const [isCheckingWallet, setIsCheckingWallet] = useState(true); // 🔄 Nueva bandera para evitar estados incorrectos
 
   // ✅ **Detectar conexión automática de wallet SIN abrir modal**
   useEffect(() => {
@@ -23,7 +24,10 @@ const WalletButton = memo(() => {
         console.log(`✅ Wallet detectada automáticamente: ${selectedWallet} (${walletAddress})`);
         setSelectedWallet(selectedWallet);
         setWalletAddress(walletAddress);
-        updateBalance(walletAddress);
+        setIsCheckingWallet(false); // ✅ Finalizar chequeo inicial
+      } else {
+        console.warn("⚠️ No se detectó ninguna wallet conectada.");
+        setIsCheckingWallet(false); // ✅ Finalizar chequeo inicial aunque no haya wallet
       }
     };
 
@@ -31,6 +35,13 @@ const WalletButton = memo(() => {
   }, []);
 
   // ✅ **Actualizar saldo cuando cambia la wallet**
+  useEffect(() => {
+    if (walletAddress) {
+      console.log(`💰 Obteniendo saldo para ${walletAddress}...`);
+      updateBalance(walletAddress);
+    }
+  }, [walletAddress]);
+
   const updateBalance = async (address) => {
     try {
       if (!address) {
@@ -39,6 +50,7 @@ const WalletButton = memo(() => {
       }
 
       const walletBalance = await getWalletBalance(address);
+      console.log(`✅ Balance actualizado: ${walletBalance} SOL`);
       setBalance(walletBalance);
     } catch (error) {
       console.error("❌ Error obteniendo balance:", error);
@@ -46,15 +58,15 @@ const WalletButton = memo(() => {
     }
   };
 
-  // ✅ **Abrir modal SOLO si NO hay una wallet conectada**
+  // ✅ **Abrir modal SOLO si NO hay una wallet conectada y ya terminó el chequeo inicial**
   const handleConnect = useCallback(() => {
-    if (walletAddress) {
-      console.log("✅ Wallet ya conectada, no se abre el modal.");
+    if (walletAddress || isCheckingWallet) {
+      console.log("✅ Wallet ya conectada o en proceso de verificación, no se abre el modal.");
       return;
     }
     console.log("🔵 Abriendo modal de conexión...");
     setIsModalOpen(true);
-  }, [walletAddress]);
+  }, [walletAddress, isCheckingWallet]);
 
   // ✅ **Cerrar modal**
   const handleCloseModal = useCallback(() => {
@@ -71,8 +83,6 @@ const WalletButton = memo(() => {
       console.log("✅ Wallet conectada correctamente:", result.pubkey);
       setSelectedWallet(wallet);
       setWalletAddress(result.pubkey);
-      updateBalance(result.pubkey);
-      handleCloseModal();
     } else {
       console.warn("⚠️ Error conectando wallet:", result.error);
     }
@@ -88,7 +98,6 @@ const WalletButton = memo(() => {
         console.log(`✅ Wallet ahora conectada: ${selectedWallet} (${walletAddress})`);
         setSelectedWallet(selectedWallet);
         setWalletAddress(walletAddress);
-        updateBalance(walletAddress);
       }
     };
 
@@ -101,7 +110,7 @@ const WalletButton = memo(() => {
   return (
     <div className="wallet-container">
       {/* ✅ **Si ya hay wallet conectada, muestra el balance directamente** */}
-      <button className="wallet-button" onClick={handleConnect} disabled={!isReady}>
+      <button className="wallet-button" onClick={handleConnect} disabled={!isReady || isCheckingWallet}>
         <span>{walletAddress ? formattedBalance : "Connect Wallet"}</span>
       </button>
 

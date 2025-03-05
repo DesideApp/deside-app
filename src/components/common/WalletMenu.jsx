@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo, memo } from "react";
+import React, { useState, useRef, useEffect, useCallback, memo } from "react";
 import { Copy } from "lucide-react";
 import { useWallet } from "../../contexts/WalletContext";
 import { checkAuthStatus } from "../../services/apiService.js";
@@ -85,11 +85,6 @@ const WalletMenu = memo(({ handleLogout, openWalletModal }) => {
     setIsOpen(false);
   }, [handleLogout]);
 
-  const formattedBalance = useMemo(
-    () => (balance !== null ? `${balance.toFixed(2)} SOL` : "0 SOL"),
-    [balance]
-  );
-
   if (!isReady) return null;
 
   return (
@@ -102,9 +97,9 @@ const WalletMenu = memo(({ handleLogout, openWalletModal }) => {
         disabled={!isReady}
       >
         <div className="menu-icon">
-          <span></span>
-          <span></span>
-          <span></span>
+          <div className="bar"></div>
+          <div className="bar"></div>
+          <div className="bar"></div>
         </div>
       </button>
 
@@ -122,7 +117,7 @@ const WalletMenu = memo(({ handleLogout, openWalletModal }) => {
               <>
                 <header className="wallet-header">
                   <p className="wallet-network">🔗 Solana</p>
-                  <p className="wallet-balance">{formattedBalance}</p>
+                  <p className="wallet-balance">{balance !== null ? `${balance.toFixed(2)} SOL` : "0 SOL"}</p>
                 </header>
 
                 <div className="wallet-address-container">
