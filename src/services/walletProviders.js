@@ -1,34 +1,25 @@
-// 🔹 Definir proveedores de wallets compatibles
+// 🔹 Proveedores de wallets compatibles
 const WALLET_PROVIDERS = {
     phantom: () => typeof window !== "undefined" && window.solana?.isPhantom ? window.solana : null,
     backpack: () => typeof window !== "undefined" && window.xnft?.solana || null,
     magiceden: () => typeof window !== "undefined" && window.magicEden?.solana || null,
-    solflare: () => typeof window !== "undefined" && window.solflare?.isSolflare ? window.solflare : null,
-    glow: () => typeof window !== "undefined" && window.glow?.solana || null,
 };
 
 /**
  * 🔍 **Obtener el proveedor de la wallet**
  * @param {string} wallet - Nombre del proveedor (phantom, backpack, etc.).
- * @returns {object} - Objeto del proveedor o `null` si no está disponible, con mensaje de error si falla.
+ * @returns {object} - Objeto del proveedor o `null` si no está disponible.
  */
 export function getProvider(wallet) {
     if (!wallet || !WALLET_PROVIDERS[wallet]) {
         console.warn(`⚠️ Proveedor de wallet desconocido: ${wallet}`);
-        return { provider: null, error: "Wallet not found" };
+        return null;
     }
-
-    const provider = WALLET_PROVIDERS[wallet]();
-    if (!provider) {
-        console.warn(`⚠️ ${wallet} Wallet no detectada.`);
-        return { provider: null, error: "Wallet not detected" };
-    }
-
-    return { provider, error: null };
+    return WALLET_PROVIDERS[wallet]();
 }
 
 /**
- * 🔄 **Verificar si alguna wallet está conectada**
+ * 🔄 **Verificar si hay una wallet conectada**
  * @returns {boolean} - `true` si hay una wallet conectada, `false` en caso contrario.
  */
 export function isWalletConnected() {
@@ -39,29 +30,46 @@ export function isWalletConnected() {
 }
 
 /**
- * 📡 **Detectar conexión y desconexión de cualquier wallet disponible**
+ * 💰 **Obtener balance de una wallet conectada**
+ * @param {string} walletName - Nombre del proveedor (phantom, backpack, etc.).
+ * @returns {Promise<number|null>} - Balance en SOL o `null` en caso de error.
+ */
+export async function getWalletBalance(walletName) {
+    try {
+        const provider = getProvider(walletName);
+        if (!provider || !provider.publicKey) throw new Error("No se encontró una wallet conectada.");
+
+        const balance = await provider.connection.getBalance(provider.publicKey);
+        return balance / 1e9; // Convertir de lamports a SOL
+    } catch (error) {
+        console.error(`❌ Error obteniendo balance para ${walletName}:`, error);
+        return null;
+    }
+}
+
+/**
+ * 📡 **Escuchar eventos de conexión/desconexión de wallets**
  * @param {function} onConnect - Callback cuando la wallet se conecta.
  * @param {function} onDisconnect - Callback cuando la wallet se desconecta.
  */
 export function listenToWalletEvents(onConnect, onDisconnect) {
     Object.entries(WALLET_PROVIDERS).forEach(([wallet, providerFn]) => {
         const provider = providerFn();
-        if (!provider || !provider.on) return; // ✅ Evita registrar eventos en wallets sin soporte
+        if (!provider || !provider.on) return;
 
-        // ✅ Remueve eventos previos para evitar múltiples llamadas
         provider.removeAllListeners?.("connect");
         provider.removeAllListeners?.("disconnect");
 
         provider.on("connect", () => {
             console.log(`✅ ${wallet} Wallet conectada.`);
             onConnect?.(wallet);
-            window.dispatchEvent(new Event("walletConnected")); // 🔄 Emitir evento global
+            window.dispatchEvent(new Event("walletConnected"));
         });
 
         provider.on("disconnect", () => {
             console.warn(`❌ ${wallet} Wallet desconectada.`);
             onDisconnect?.(wallet);
-            window.dispatchEvent(new Event("walletDisconnected")); // 🔄 Emitir evento global
+            window.dispatchEvent(new Event("walletDisconnected"));
         });
     });
 }
