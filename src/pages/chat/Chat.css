@@ -1,30 +1,40 @@
+/* 📌 Contenedor principal de la página de chat */
 .chat-page-container {
-    margin-top: 60px;
+    width: 100vw;
+    height: 100vh;
     display: flex;
-    flex-direction: row;
-    gap: 20px; /* Espacio entre los paneles */
-    padding: 0 20px; /* Espacio horizontal */
-    box-sizing: border-box;
     justify-content: center;
-    align-items: flex-start;
-    position: relative;
+    align-items: center;
+    background-color: #f4f4f4;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
-/* 📌 Panel de Contactos */
+/* 📌 Layout que organiza las tres secciones */
+.chat-layout {
+    width: 90%;
+    height: 85vh;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: stretch;
+}
+
+/* 📌 Panel de Contactos (Izquierda) */
 .left-panel {
     width: 25%;
-    height: 100vh; /* ✅ Ocupa toda la pantalla */
+    height: 100%;
     background-color: #ffffff;
     border-radius: 12px;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
     padding: 10px;
-    overflow-y: auto; /* ✅ Scroll interno */
+    overflow-y: auto;
 }
 
-/* 📌 Ventana de Chat */
+/* 📌 Ventana de Chat (Centro) */
 .chat-window-panel {
-    width: 60%;
-    height: 70vh; /* ✅ Mayor altura */
+    width: 50%;
+    height: 100%;
     background-color: #fff;
     border-radius: 12px;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
@@ -34,62 +44,32 @@
     box-sizing: border-box;
 }
 
-/* 📌 Panel de Información */
+/* 📌 Panel de Información (Derecha) */
 .right-panel {
-    width: 30%;
-    height: 100vh;
+    width: 25%;
+    height: 100%;
     background-color: #ffffff;
     border-radius: 12px;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-    box-sizing: border-box;
-    overflow-y: auto;
     padding: 10px;
+    overflow-y: auto;
 }
 
-/* 🔵 Capa de bloqueo elegante y limpia */
-.overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.85);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(5px);
-    z-index: 50;
-    border-radius: 12px;
-}
+/* 📌 Media query para pantallas más pequeñas */
+@media (max-width: 1024px) {
+    .chat-layout {
+        flex-direction: column;
+        height: auto;
+        align-items: center;
+    }
 
-/* 🔵 Cuadro de mensaje y botón */
-.overlay-content {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 18px 24px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.12);
-    max-width: 320px;
-}
+    .left-panel, .right-panel {
+        width: 90%;
+        height: auto;
+    }
 
-/* 🔵 Botón de conexión */
-.overlay-content button {
-    background: #fc554f;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.3s ease, transform 0.1s ease-in-out;
-    font-weight: 500;
-}
-
-.overlay-content button:hover {
-    background: #e0443f;
-    transform: scale(1.02);
-}
-
-.overlay-content button:active {
-    transform: scale(0.98);
+    .chat-window-panel {
+        width: 100%;
+        height: auto;
+    }
 }
