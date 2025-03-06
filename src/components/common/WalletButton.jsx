@@ -7,10 +7,11 @@ import "./WalletButton.css";
 
 const WalletButton = memo(() => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // 🔹 Nuevo estado para WalletMenu
   const [balance, setBalance] = useState(null);
   const [selectedWallet, setSelectedWallet] = useState(null);
   const [walletAddress, setWalletAddress] = useState(null);
-  const [isCheckingWallet, setIsCheckingWallet] = useState(true); // 🔄 Nueva bandera para evitar estados incorrectos
+  const [isCheckingWallet, setIsCheckingWallet] = useState(true);
 
   // ✅ **Detectar conexión automática SIN abrir modal**
   useEffect(() => {
@@ -25,9 +26,9 @@ const WalletButton = memo(() => {
         updateBalance(walletAddress);
       } else {
         console.warn("⚠️ No se detectó ninguna wallet conectada.");
-        setBalance(0); // 🔹 Si no hay balance, mostramos 0 SOL en gris
+        setBalance(0);
       }
-      setIsCheckingWallet(false); // ✅ Finalizar chequeo inicial
+      setIsCheckingWallet(false);
     };
 
     detectWallet();
@@ -44,7 +45,7 @@ const WalletButton = memo(() => {
   const updateBalance = async (address) => {
     try {
       if (!address) {
-        setBalance(0); // 🔹 Mostrar 0.00 SOL en gris si no hay balance
+        setBalance(0);
         return;
       }
 
@@ -53,24 +54,30 @@ const WalletButton = memo(() => {
       setBalance(walletBalance);
     } catch (error) {
       console.error("❌ Error obteniendo balance:", error);
-      setBalance(0); // 🔹 Si hay error, mostrar 0.00 SOL en gris
+      setBalance(0);
     }
   };
 
-  // ✅ **Abrir modal SOLO si NO hay una wallet conectada y ya terminó el chequeo inicial**
-  const handleConnect = useCallback(() => {
-    if (walletAddress || isCheckingWallet) {
-      console.log("✅ Wallet ya conectada o en proceso de verificación, no se abre el modal.");
-      return;
+  // ✅ **Abrir WalletMenu si ya está conectada, Modal si no lo está**
+  const handleWalletButtonClick = useCallback(() => {
+    if (walletAddress) {
+      console.log("✅ Wallet ya conectada, abriendo WalletMenu...");
+      setIsMenuOpen((prev) => !prev);
+    } else {
+      console.log("🔵 Abriendo modal de conexión...");
+      setIsModalOpen(true);
     }
-    console.log("🔵 Abriendo modal de conexión...");
-    setIsModalOpen(true);
-  }, [walletAddress, isCheckingWallet]);
+  }, [walletAddress]);
 
   // ✅ **Cerrar modal**
   const handleCloseModal = useCallback(() => {
     console.log("🔴 Cerrando modal...");
     setIsModalOpen(false);
+  }, []);
+
+  // ✅ **Cerrar WalletMenu**
+  const handleCloseMenu = useCallback(() => {
+    setIsMenuOpen(false);
   }, []);
 
   // ✅ **Conectar wallet desde el modal**
@@ -107,7 +114,7 @@ const WalletButton = memo(() => {
       console.warn("❌ Wallet desconectada.");
       setWalletAddress(null);
       setSelectedWallet(null);
-      setBalance(0); // 🔹 Resetear balance a 0 SOL
+      setBalance(0);
     };
 
     window.addEventListener("walletConnected", handleWalletConnected);
@@ -122,10 +129,10 @@ const WalletButton = memo(() => {
   // ✅ **Logout real**
   const handleLogoutClick = async () => {
     console.log("🚪 Cierre de sesión iniciado...");
-    await disconnectWallet(); // 🔄 Llamar al servicio de desconexión
+    await disconnectWallet();
     setWalletAddress(null);
     setSelectedWallet(null);
-    setBalance(0); // 🔹 Resetear balance a 0 SOL
+    setBalance(0);
   };
 
   const formattedBalance = balance !== null ? `${balance.toFixed(2)} SOL` : "Connect Wallet";
@@ -133,13 +140,13 @@ const WalletButton = memo(() => {
 
   return (
     <div className="wallet-container">
-      {/* ✅ **Si ya hay wallet conectada, muestra el balance directamente** */}
-      <button className="wallet-button" onClick={handleConnect} disabled={isCheckingWallet}>
+      {/* ✅ **Si ya hay wallet conectada, abrir WalletMenu, si no abrir Modal** */}
+      <button className="wallet-button" onClick={handleWalletButtonClick} disabled={isCheckingWallet}>
         <span style={balanceStyle}>{formattedBalance}</span>
       </button>
 
-      {/* ✅ **WalletMenu sigue funcionando de forma independiente** */}
-      <WalletMenu handleLogout={handleLogoutClick} />
+      {/* ✅ **WalletMenu ahora se abre desde WalletButton** */}
+      {isMenuOpen && <WalletMenu handleLogout={handleLogoutClick} onClose={handleCloseMenu} />}
 
       {/* ✅ **Modal de conexión TOTALMENTE CONTROLADO desde aquí** */}
       <WalletModal isOpen={isModalOpen} onClose={handleCloseModal} onWalletSelected={handleWalletSelected} />
