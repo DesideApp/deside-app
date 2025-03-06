@@ -107,6 +107,7 @@ const WalletButton = memo(() => {
       console.warn("❌ Wallet desconectada.");
       setWalletAddress(null);
       setBalance(null);
+      setIsMenuOpen(false); // 🔄 Cerrar WalletMenu si la wallet se desconecta
     };
 
     window.addEventListener("walletConnected", handleWalletConnected);
@@ -124,7 +125,12 @@ const WalletButton = memo(() => {
     await disconnectWallet();
     setWalletAddress(null);
     setBalance(null);
-    setIsMenuOpen(false); // 🔄 Cerramos el menú después de desconectar
+    setIsMenuOpen(false); // 🔄 Cerrar WalletMenu al desconectar
+  };
+
+  // ✅ **Abrir WalletMenu desde el icono de la hamburguesa**
+  const handleMenuIconClick = () => {
+    setIsMenuOpen((prev) => !prev);
   };
 
   // ✅ **Control de contenido del botón**
@@ -139,6 +145,15 @@ const WalletButton = memo(() => {
       {/* ✅ **Botón principal que maneja conexión y menú** */}
       <button className="wallet-button" onClick={handleWalletButtonClick} disabled={isCheckingWallet}>
         <span>{formattedBalance}</span>
+      </button>
+
+      {/* ✅ **Icono de hamburguesa SIEMPRE visible** */}
+      <button className="menu-button" onClick={handleMenuIconClick} aria-label="Open Wallet Menu">
+        <div className="menu-icon">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </button>
 
       {/* ✅ **WalletMenu siempre montado, pero solo se muestra si `isMenuOpen` es `true`** */}
