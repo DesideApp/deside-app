@@ -92,7 +92,7 @@ const WalletButton = memo(() => {
 
   // ✅ **Actualizar UI al detectar evento de conexión de wallet**
   useEffect(() => {
-    const handleWalletEvent = async () => {
+    const handleWalletConnected = async () => {
       console.log("🔄 Evento walletConnected detectado. Verificando estado...");
       const { walletAddress, selectedWallet } = await getConnectedWallet();
 
@@ -104,17 +104,19 @@ const WalletButton = memo(() => {
       }
     };
 
-    window.addEventListener("walletConnected", handleWalletEvent);
-    window.addEventListener("walletDisconnected", async () => {
+    const handleWalletDisconnected = () => {
       console.warn("❌ Wallet desconectada.");
       setWalletAddress(null);
       setSelectedWallet(null);
       setBalance(null);
-    });
+    };
+
+    window.addEventListener("walletConnected", handleWalletConnected);
+    window.addEventListener("walletDisconnected", handleWalletDisconnected);
 
     return () => {
-      window.removeEventListener("walletConnected", handleWalletEvent);
-      window.removeEventListener("walletDisconnected", handleWalletEvent);
+      window.removeEventListener("walletConnected", handleWalletConnected);
+      window.removeEventListener("walletDisconnected", handleWalletDisconnected);
     };
   }, []);
 

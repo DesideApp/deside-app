@@ -10,7 +10,10 @@ const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutos
 export async function apiRequest(endpoint, options = {}) {
     if (!endpoint) throw new Error("❌ API Request sin endpoint definido.");
 
-    const cacheKey = `${endpoint}:${JSON.stringify(options)}`;
+    // ✅ Asegurar que la URL es válida
+    const requestUrl = `${API_BASE_URL.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
+    
+    const cacheKey = `${requestUrl}:${JSON.stringify(options)}`;
 
     // ✅ Verificar caché antes de hacer la solicitud
     if (cache.has(cacheKey)) {
@@ -18,7 +21,6 @@ export async function apiRequest(endpoint, options = {}) {
         if (Date.now() - cachedData.timestamp <= CACHE_EXPIRATION) {
             return cachedData.data;
         }
-        cache.delete(cacheKey);
     }
 
     try {
@@ -29,7 +31,7 @@ export async function apiRequest(endpoint, options = {}) {
             ...options.headers,
         };
 
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        const response = await fetch(requestUrl, {
             ...options,
             credentials: "include",
             headers,
@@ -38,17 +40,17 @@ export async function apiRequest(endpoint, options = {}) {
         if (!response.ok) {
             if (response.status === 401) {
                 console.warn("⚠️ No autorizado. La sesión ha expirado.");
+                
                 const refreshed = await refreshToken();
-
                 if (!refreshed) {
                     console.warn("❌ No se pudo renovar el token. Cerrando sesión.");
-                    window.dispatchEvent(new Event("sessionExpired")); // 🔄 Emitir evento global
+                    window.dispatchEvent(new Event("sessionExpired"));
                     clearSession();
                     return { isAuthenticated: false };
                 }
 
                 console.log("✅ Token renovado. Reintentando solicitud...");
-                return await apiRequest(endpoint, options); // 🔄 Reintentar con el nuevo token
+                return await apiRequest(endpoint, options);
             }
 
             const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
@@ -59,7 +61,7 @@ export async function apiRequest(endpoint, options = {}) {
         cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
         return responseData;
     } catch (error) {
-        console.error(`❌ API Error (${endpoint}):`, error.message || error);
+        console.error(`❌ API Error (${requestUrl}):`, error.message || error);
         return { error: error.message || "Unknown API error" };
     }
 }
@@ -83,11 +85,11 @@ export async function checkAuthStatus() {
             const refreshed = await refreshToken();
             if (!refreshed) {
                 console.warn("❌ No se pudo refrescar el token. Cerrando sesión.");
-                window.dispatchEvent(new Event("sessionExpired")); // 🔄 Emitir evento global
+                window.dispatchEvent(new Event("sessionExpired"));
                 clearSession();
                 return { isAuthenticated: false };
             }
-            return await apiRequest("/api/auth/status", { method: "GET" }); // ✅ Reintentar después de refrescar
+            return await apiRequest("/api/auth/status", { method: "GET" });
         }
 
         return result;
@@ -106,8 +108,8 @@ export async function logout() {
             return { success: false };
         }
 
-        clearSession(); // ✅ Borra credenciales locales solo si la API responde correctamente
-        window.dispatchEvent(new Event("sessionExpired")); // 🔄 Emitir evento global
+        clearSession();
+        window.dispatchEvent(new Event("sessionExpired"));
         return { success: true };
     } catch (error) {
         console.error("❌ Error en logout:", error);
@@ -118,7 +120,15 @@ export async function logout() {
 /**
  * 🔹 **Refrescar Token de Sesión**
  */
+let isRefreshingToken = false;
+
 export async function refreshToken() {
+    if (isRefreshingToken) {
+        console.warn("⚠️ Ya hay un intento de refresco en curso. Esperando...");
+        return false;
+    }
+
+    isRefreshingToken = true;
     try {
         console.log("🔄 Intentando refrescar token...");
         const response = await apiRequest("/api/auth/refresh", { method: "POST" });
@@ -129,10 +139,12 @@ export async function refreshToken() {
         }
 
         console.log("✅ Token refrescado con éxito.");
-        window.dispatchEvent(new Event("sessionRefreshed")); // 🔄 Emitir evento global
+        window.dispatchEvent(new Event("sessionRefreshed"));
         return true;
     } catch (error) {
         console.error("❌ Error al refrescar token:", error);
         return false;
+    } finally {
+        isRefreshingToken = false; // ✅ Asegurar que siempre se desbloquea
     }
 }

@@ -1,5 +1,6 @@
 import { getProvider } from "./walletProviders";
 import { authenticateWithServer, checkAuthStatus, logout as apiLogout } from "./apiService";
+import { getWalletBalance } from "../utils/solanaDirect"; // ✅ Importamos la función de balance
 import bs58 from "bs58";
 
 const WALLET_STATUS = {
@@ -31,6 +32,8 @@ export async function getConnectedWallet() {
 
         if (walletAddress) {
           console.log(`✅ Wallet detectada automáticamente: ${wallet} (${walletAddress})`);
+          window.dispatchEvent(new Event("walletConnected")); // 🔄 Emitir evento global
+
           return {
             walletAddress,
             walletStatus: WALLET_STATUS.CONNECTED,
@@ -54,14 +57,12 @@ export async function connectWallet(wallet) {
     const provider = getProvider(wallet);
     if (!provider) throw new Error("No encontramos tu wallet. Intenta instalarla y vuelve a intentarlo.");
 
-    if (provider.isConnected) {
-      return { pubkey: provider.publicKey?.toBase58(), status: WALLET_STATUS.CONNECTED };
-    }
-
     await provider.connect();
     const pubkey = provider.publicKey?.toBase58();
     if (!pubkey) throw new Error("No se pudo obtener la clave pública.");
 
+    console.log(`✅ Wallet ${wallet} conectada: ${pubkey}`);
+    
     window.dispatchEvent(new Event("walletConnected")); // 🔄 Emitir evento global
 
     return { pubkey, status: WALLET_STATUS.CONNECTED };

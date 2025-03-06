@@ -9,14 +9,24 @@ export function getCSRFTokenFromCookie() {
   }
 }
 
+// 🔄 **Evitar múltiples intentos simultáneos de refresh**
+let isRefreshing = false;
+
 // 🔄 **Renovar Token de Sesión si es necesario**
 export async function refreshToken() {
+  if (isRefreshing) {
+    console.warn("⚠️ Intento de refresco en curso. Evitando múltiples solicitudes.");
+    return false;
+  }
+  isRefreshing = true;
+
   try {
     const currentAccessToken = getCookie("accessToken");
 
     if (currentAccessToken) {
       console.log("🔄 Token aún es válido. No es necesario renovarlo.");
-      return true; // ✅ Se devuelve true para evitar que se intente renovar innecesariamente
+      isRefreshing = false;
+      return true;
     }
 
     console.log("🔄 Intentando renovar el token...");
@@ -29,16 +39,19 @@ export async function refreshToken() {
     if (!response.ok) {
       console.warn("⚠️ No se pudo renovar el token. Cerrando sesión.");
       clearSession("expired");
+      isRefreshing = false;
       return false;
     }
 
     const data = await response.json();
     updateSessionTokens(data.accessToken, data.refreshToken);
     window.dispatchEvent(new Event("sessionRefreshed")); // 🔄 Emitir evento global
+    isRefreshing = false;
     return true;
   } catch (error) {
     console.error("❌ Error en refreshToken():", error.message || error);
     clearSession("expired");
+    isRefreshing = false;
     return false;
   }
 }
@@ -48,9 +61,6 @@ export function clearSession(reason = "manual") {
   console.warn(`⚠️ Eliminando credenciales del usuario... (Razón: ${reason})`);
 
   ["accessToken", "refreshToken", "csrfToken"].forEach(clearCookie);
-  localStorage.clear();
-  sessionStorage.clear();
-
   if (reason === "expired") {
     console.warn("🔴 La sesión ha expirado. Cerrando sesión.");
     window.dispatchEvent(new Event("sessionExpired"));
@@ -75,14 +85,14 @@ function updateSessionTokens(accessToken, refreshToken) {
 // 📝 **Setear cookies de manera segura**
 function setCookie(name, value) {
   const domain = import.meta.env.VITE_APP_DOMAIN || "deside-app.vercel.app";
-  const secure = import.meta.env.PROD ? "secure; SameSite=None" : "SameSite=Lax";
+  const secure = import.meta.env.PROD ? "Secure; SameSite=None" : "SameSite=Lax";
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/; domain=.${domain}; ${secure}`;
 }
 
 // 📝 **Eliminar cookies de manera segura**
 function clearCookie(name) {
   const domain = import.meta.env.VITE_APP_DOMAIN || "deside-app.vercel.app";
-  document.cookie = `${name}=; Max-Age=0; path=/; domain=.${domain}; secure; SameSite=None`;
+  document.cookie = `${name}=; Max-Age=0; path=/; domain=.${domain}; Secure; SameSite=None`;
 }
 
 // 🔍 **Obtener un token de sesión actual**

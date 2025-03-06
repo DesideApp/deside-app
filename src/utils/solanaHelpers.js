@@ -1,12 +1,17 @@
-import { apiRequest } from "../services/apiService.js"; // ✅ Centralizamos las llamadas API
-import API_BASE_URL from "../config/apiConfig.js"; // ✅ Aseguramos la URL del backend
+import { apiRequest } from "../services/apiService.js";
+import API_BASE_URL from "../config/apiConfig.js";
+
+const SOLANA_API_BASE = `${API_BASE_URL}/api`.replace(/\/$/, ""); // ✅ CORREGIDO
+
+console.log(`✅ SOLANA API Base: ${SOLANA_API_BASE}`);
 
 /**
  * 🔹 **Obtener estado de Solana desde el backend**
  */
 export async function getSolanaStatus() {
     try {
-        const response = await apiRequest(`${API_BASE_URL}/api/solana/solana-status`, { method: "GET" });
+        console.log(`🔄 Fetching Solana Status from: ${SOLANA_API_BASE}/solana-status`);
+        const response = await apiRequest(`${SOLANA_API_BASE}/solana-status`, { method: "GET" });
 
         if (!response || typeof response.status !== "string") {
             console.warn("⚠️ Respuesta inesperada en `getSolanaStatus()`:", response);
@@ -15,7 +20,7 @@ export async function getSolanaStatus() {
 
         return response.status;
     } catch (error) {
-        console.error("❌ Error obteniendo estado de Solana desde el backend:", error);
+        console.error("❌ Error obteniendo estado de Solana:", error);
         return "offline";
     }
 }
@@ -25,7 +30,8 @@ export async function getSolanaStatus() {
  */
 export async function getSolanaTPS() {
     try {
-        const response = await apiRequest(`${API_BASE_URL}/api/solana/solana-tps`, { method: "GET" });
+        console.log(`🔄 Fetching Solana TPS from: ${SOLANA_API_BASE}/solana-tps`);
+        const response = await apiRequest(`${SOLANA_API_BASE}/solana-tps`, { method: "GET" });
 
         if (!response || typeof response.tps !== "number") {
             console.warn("⚠️ Respuesta inesperada en `getSolanaTPS()`:", response);
@@ -34,7 +40,7 @@ export async function getSolanaTPS() {
 
         return response.tps;
     } catch (error) {
-        console.error("❌ Error obteniendo TPS de Solana desde el backend:", error);
+        console.error("❌ Error obteniendo TPS de Solana:", error);
         return 0;
     }
 }
@@ -44,7 +50,8 @@ export async function getSolanaTPS() {
  */
 export async function getSolanaPrice() {
     try {
-        const response = await apiRequest(`${API_BASE_URL}/api/solana/solana-price`, { method: "GET" });
+        console.log(`🔄 Fetching Solana Price from: ${SOLANA_API_BASE}/solana-price`);
+        const response = await apiRequest(`${SOLANA_API_BASE}/solana-price`, { method: "GET" });
 
         if (!response || typeof response.price !== "number") {
             console.warn("⚠️ Respuesta inesperada en `getSolanaPrice()`:", response);
@@ -53,7 +60,7 @@ export async function getSolanaPrice() {
 
         return response.price;
     } catch (error) {
-        console.error("❌ Error obteniendo precio de Solana desde el backend:", error);
+        console.error("❌ Error obteniendo precio de Solana:", error);
         return 0;
     }
 }
