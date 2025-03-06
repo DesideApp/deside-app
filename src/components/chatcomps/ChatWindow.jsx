@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import ChatInput from "./ChatInput";
-import { useWallet } from "../../contexts/WalletContext";
+import { useServerContext } from "../../contexts/ServerContext"; // ✅ Usamos ServerContext
 import useWebRTC from "../../hooks/useWebRTC";
 import { io } from "socket.io-client";
 import { useAuthManager } from "../../services/authManager"; // ✅ Usamos AuthManager
 import "./ChatWindow.css";
 
 function ChatWindow({ selectedContact }) {
-  const { walletAddress } = useWallet();
+  const { walletAddress } = useServerContext(); // ✅ Nuevo contexto
   const chatContainerRef = useRef(null);
   const socketRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -18,18 +18,18 @@ function ChatWindow({ selectedContact }) {
 
   // ✅ **Obtener lista de contactos confirmados**
   const fetchContacts = useCallback(async () => {
-    if (!walletAddress) return;
+    if (!walletAddress || !isAuthenticated) return; // ✅ Solo si el usuario está autenticado
     try {
       const contacts = await getContacts();
       setConfirmedContacts(contacts.confirmed.map((c) => c.wallet));
     } catch (error) {
       console.error("❌ Error obteniendo contactos:", error);
     }
-  }, [walletAddress]);
+  }, [walletAddress, isAuthenticated]);
 
   // ✅ **Inicializar WebSocket solo si el usuario tiene un contacto confirmado**
   const initializeSocket = useCallback(() => {
-    if (!walletAddress || !selectedContact) return;
+    if (!walletAddress || !selectedContact || !isAuthenticated) return;
 
     if (!confirmedContacts.includes(selectedContact)) {
       console.warn("⚠️ Intento de chat con un contacto no confirmado.");
@@ -59,7 +59,7 @@ function ChatWindow({ selectedContact }) {
     });
 
     socketRef.current = socket;
-  }, [walletAddress, selectedContact, confirmedContacts]);
+  }, [walletAddress, selectedContact, confirmedContacts, isAuthenticated]);
 
   // ✅ **Gestionar WebRTC solo si el usuario tiene un contacto confirmado**
   const { messages, sendMessage } = useWebRTC(selectedContact, walletAddress);
@@ -92,7 +92,7 @@ function ChatWindow({ selectedContact }) {
   const handleSendMessage = () => {
     if (!isAuthenticated) {
       console.warn("⚠️ Intento de enviar mensaje sin autenticación. Activando login...");
-      handleLoginResponse(() => sendMessage(selectedContact, walletAddress)); // 🔄 Se ejecuta solo tras login exitoso
+      handleLoginResponse(); // 🔄 Activa autenticación automática
       return;
     }
     sendMessage(selectedContact, walletAddress);

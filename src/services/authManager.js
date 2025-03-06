@@ -1,60 +1,38 @@
 import { useState, useEffect } from "react";
 import { checkAuthStatus, refreshToken } from "./apiService";
-import { useWallet } from "../contexts/WalletContext";
+import { useServerContext } from "../contexts/ServerContext"; // ✅ Nuevo contexto
 import { getConnectedWallet } from "../services/walletService";
 
 export const useAuthManager = () => {
-  const { walletAddress, setWalletAddress } = useWallet();
+  const { walletAddress, setWalletAddress } = useServerContext(); // ✅ ServerContext maneja estado global
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [requiresLogin, setRequiresLogin] = useState(false); // 🔹 Indica si el usuario debe autenticarse
-  const [selectedWallet, setSelectedWallet] = useState(null); // 🔹 Guarda la wallet conectada
+  const [requiresLogin, setRequiresLogin] = useState(false); 
+  const [selectedWallet, setSelectedWallet] = useState(null); 
 
-  // ✅ **Detectar wallet conectada al abrir la web**
+  // ✅ **Detectar wallet y verificar autenticación**
   useEffect(() => {
-    const detectWallet = async () => {
-      console.log("🔄 Revisando conexión automática...");
+    const detectWalletAndAuth = async () => {
+      console.log("🔄 Revisando conexión y autenticación...");
       const { walletAddress, selectedWallet } = await getConnectedWallet();
 
       if (walletAddress) {
-        console.log(`✅ Wallet detectada automáticamente: ${selectedWallet} (${walletAddress})`);
+        console.log(`✅ Wallet detectada: ${selectedWallet} (${walletAddress})`);
         setWalletAddress(walletAddress);
         setSelectedWallet(selectedWallet);
-        setRequiresLogin(false);
-      } else {
-        console.warn("⚠️ Ninguna wallet conectada, se requiere login.");
-        setRequiresLogin(true);
-      }
-    };
-
-    detectWallet();
-  }, []);
-
-  // ✅ **Comprobar autenticación cuando cambia la wallet**
-  useEffect(() => {
-    const checkAuthentication = async () => {
-      setIsLoading(true);
-      try {
-        if (!walletAddress) {
-          setIsAuthenticated(false);
-          setRequiresLogin(true);
-          return;
-        }
 
         const status = await checkAuthStatus();
         setIsAuthenticated(status.isAuthenticated);
         setRequiresLogin(!status.isAuthenticated);
-      } catch (error) {
-        console.error("❌ Error al verificar autenticación:", error);
-        setIsAuthenticated(false);
+      } else {
+        console.warn("⚠️ Ninguna wallet conectada, se requiere login.");
         setRequiresLogin(true);
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
 
-    checkAuthentication();
-  }, [walletAddress]);
+    detectWalletAndAuth();
+  }, []);
 
   // ✅ **Actualizar estado en tiempo real con eventos de conexión**
   useEffect(() => {
@@ -66,7 +44,10 @@ export const useAuthManager = () => {
         console.log(`✅ Wallet conectada: ${selectedWallet} (${walletAddress})`);
         setWalletAddress(walletAddress);
         setSelectedWallet(selectedWallet);
-        setRequiresLogin(false);
+
+        const status = await checkAuthStatus();
+        setIsAuthenticated(status.isAuthenticated);
+        setRequiresLogin(!status.isAuthenticated);
       }
     };
 
@@ -87,7 +68,7 @@ export const useAuthManager = () => {
     };
   }, []);
 
-  // ✅ **Renovar el token de seguridad si está expirado**
+  // ✅ **Renovar token si está expirado**
   const renewToken = async () => {
     try {
       const response = await refreshToken();
@@ -101,8 +82,8 @@ export const useAuthManager = () => {
     }
   };
 
-  // ✅ **Manejo de respuesta al intentar realizar una acción protegida**
-  const handleLoginResponse = async (action) => {
+  // ✅ **Manejo de autenticación automática**
+  const handleLoginResponse = async () => {
     if (!walletAddress) {
       console.warn("🚨 Usuario no conectado. Se requiere login.");
       setRequiresLogin(true);
@@ -116,14 +97,13 @@ export const useAuthManager = () => {
     }
 
     await renewToken();
-    action(); // ✅ Si ya está autenticado y con token válido, ejecutamos la acción
   };
 
   return {
     isAuthenticated,
     isLoading,
     requiresLogin,
-    selectedWallet, // 🔹 Indica qué wallet está conectada
+    selectedWallet,
     handleLoginResponse,
   };
 };

@@ -1,17 +1,20 @@
 import React, { useEffect, useState, memo, useCallback } from "react";
-import { useWallet } from "../../contexts/WalletContext";
+import { useServerContext } from "../../contexts/ServerContext"; // ✅ Nuevo contexto
 import { fetchContacts, approveContact, rejectContact } from "../../services/contactService.js";
+import { useAuthManager } from "../../services/authManager"; // ✅ Manejo de autenticación
 import "./ContactRequests.css";
 
-const ContactRequests = ({ openAuthModal }) => {
-    const { walletAddress, isReady } = useWallet();
+const ContactRequests = () => {
+    const { walletAddress, isReady } = useServerContext(); // ✅ Usamos el nuevo contexto
+    const { isAuthenticated, handleLoginResponse } = useAuthManager(); // ✅ Autenticación con AuthManager
+
     const [receivedRequests, setReceivedRequests] = useState([]);
     const [sentRequests, setSentRequests] = useState([]);
     const [errorMessage, setErrorMessage] = useState("");
 
     // ✅ **Obtener solicitudes de contacto SOLO si el usuario está autenticado**
     useEffect(() => {
-        if (!isReady || !walletAddress) return;
+        if (!isReady || !walletAddress || !isAuthenticated) return;
 
         let isMounted = true;
 
@@ -33,17 +36,17 @@ const ContactRequests = ({ openAuthModal }) => {
         return () => {
             isMounted = false;
         };
-    }, [isReady, walletAddress]);
+    }, [isReady, walletAddress, isAuthenticated]);
 
     // ✅ **Manejo de solicitudes de contacto**
     const handleAction = useCallback(async (pubkey, action) => {
-        try {
-            if (!walletAddress) {
-                console.warn("⚠️ Intento de gestionar solicitudes sin estar autenticado.");
-                openAuthModal(); // 🔄 Abrir modal de autenticación
-                return;
-            }
+        if (!isAuthenticated) {
+            console.warn("⚠️ Intento de gestionar solicitudes sin estar autenticado.");
+            handleLoginResponse(); // 🔄 Activar autenticación automática
+            return;
+        }
 
+        try {
             if (action === "approve") {
                 await approveContact(pubkey);
                 setReceivedRequests((prev) => prev.filter((req) => req.wallet !== pubkey));
@@ -55,7 +58,7 @@ const ContactRequests = ({ openAuthModal }) => {
             console.error(`❌ Error al ${action === "approve" ? "aceptar" : "rechazar"} contacto:`, error);
             setErrorMessage(`❌ No se pudo ${action === "approve" ? "aceptar" : "rechazar"} la solicitud.`);
         }
-    }, [walletAddress, openAuthModal]);
+    }, [isAuthenticated, handleLoginResponse]);
 
     return (
         <div className="contact-requests-container">

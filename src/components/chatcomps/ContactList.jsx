@@ -1,27 +1,27 @@
 import React, { useEffect, useCallback } from "react";
 import useContactManager from "../../hooks/useContactManager";
-import { useWallet } from "../../contexts/WalletContext";
-import { useAuthManager } from "../../services/authManager";  // ✅ Importamos AuthManager
+import { useServerContext } from "../../contexts/ServerContext"; // ✅ Nuevo contexto
+import { useAuthManager } from "../../services/authManager";  // ✅ Manejo de autenticación
 import "./ContactList.css";
 
 const ContactList = ({ onSelectContact }) => {
-    const { walletAddress, isReady } = useWallet();
-    const { isAuthenticated, isLoading, handleLoginResponse } = useAuthManager(); // ✅ Usamos AuthManager
+    const { walletAddress, isReady } = useServerContext(); // ✅ Usamos ServerContext
+    const { isAuthenticated, isLoading, handleLoginResponse } = useAuthManager(); // ✅ Manejo de autenticación
     const { confirmedContacts, fetchContacts } = useContactManager();
 
     // ✅ **Intentar agregar un contacto, autenticando si es necesario**
     const handleAddContact = useCallback(() => {
         if (!isAuthenticated) {
             console.warn("⚠️ Intento de agregar contacto sin autenticación. Activando login...");
-            handleLoginResponse(() => console.log("✅ Ahora puedes agregar un contacto.")); // 🔄 Activa el proceso de autenticación y continúa
+            handleLoginResponse(); // 🔄 Activa autenticación automática
             return;
         }
         console.warn("⚠️ Agregar contactos ahora está en RightPanel.jsx");
     }, [isAuthenticated, handleLoginResponse]);
 
     useEffect(() => {
-        fetchContacts(); // ✅ Cargar contactos al inicio
-    }, [fetchContacts]);
+        if (isAuthenticated) fetchContacts(); // ✅ Solo carga contactos si el usuario está autenticado
+    }, [fetchContacts, isAuthenticated]);
 
     return (
         <div className="contact-list-container">
