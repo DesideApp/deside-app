@@ -2,7 +2,12 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 
-const backendUrl = process.env.VITE_BACKEND_URL || "https://backend-deside.onrender.com";
+// 🔥 Asegurar que `VITE_BACKEND_URL` está definido en `.env`
+if (!process.env.VITE_BACKEND_URL) {
+  throw new Error("❌ VITE_BACKEND_URL no está definido en el entorno.");
+}
+
+const backendUrl = process.env.VITE_BACKEND_URL;
 const isProduction = process.env.NODE_ENV === "production";
 
 export default defineConfig({
@@ -11,23 +16,18 @@ export default defineConfig({
     "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
   },
   build: {
-    target: "modules", // 🔥 Máxima compatibilidad con navegadores modernos
-    minify: isProduction, // 🔥 Minificar solo en producción
+    target: "modules",
     rollupOptions: {
       output: {
-        format: "esm", // 🔥 ESM para evitar problemas con import.meta
+        format: "esm",
         manualChunks: {
           solana: ["@solana/web3.js"],
         },
       },
-      onwarn(warning, warn) {
-        if (warning.code === "DYNAMIC_IMPORT_VARIABLE") return;
-        warn(warning);
-      },
     },
-    chunkSizeWarningLimit: 800, // 🔥 Reducido para avisos más precisos
+    chunkSizeWarningLimit: 800,
   },
-  base: isProduction ? "/" : "/", // 🔥 Definir `base` dinámicamente según el entorno
+  base: "/",
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
@@ -41,13 +41,14 @@ export default defineConfig({
         target: backendUrl,
         changeOrigin: true,
         secure: isProduction,
+        ws: false,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
       "/socket.io": {
         target: backendUrl,
         ws: true,
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/socket.io/, ""),
+        secure: isProduction,
       },
     },
   },

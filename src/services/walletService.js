@@ -15,8 +15,11 @@ const WALLET_STATUS = {
 export async function getConnectedWallet() {
   try {
     const connected = isWalletConnected();
-    return connected ? { walletAddress: connected.pubkey, selectedWallet: connected.wallet } : { walletAddress: null };
-  } catch {
+    return connected
+      ? { walletAddress: connected.pubkey, selectedWallet: connected.wallet }
+      : { walletAddress: null };
+  } catch (error) {
+    console.error("❌ Error detectando wallet conectada:", error);
     return { walletAddress: null };
   }
 }
@@ -31,14 +34,14 @@ export async function getWalletBalance(walletAddress, selectedWallet) {
   try {
     if (!walletAddress || !selectedWallet) throw new Error("❌ Wallet no proporcionada.");
 
-    // ✅ **Obtener el balance desde el proveedor Web3**
     const provider = getProvider(selectedWallet);
     if (provider?.isConnected && provider?.publicKey?.toBase58() === walletAddress) {
       console.log(`🔍 Consultando balance a través del proveedor: ${selectedWallet}`);
 
       try {
-        const balanceLamports = await provider.request({ method: "getBalance", params: [] });
-        return balanceLamports / 1e9; // ✅ Convertir de lamports a SOL
+        const connection = provider.connection;
+        const balanceLamports = await connection.getBalance(provider.publicKey);
+        return balanceLamports / 1e9;
       } catch (providerError) {
         console.error(`❌ Error al obtener balance desde ${selectedWallet}:`, providerError);
         return null;
@@ -80,7 +83,7 @@ export async function connectWallet(wallet) {
 export async function disconnectWallet(selectedWallet) {
   try {
     const wallet = selectedWallet || isWalletConnected()?.wallet;
-    if (!wallet) return; // ✅ Evitamos ejecutar si no hay una wallet conectada
+    if (!wallet) return;
 
     const provider = getProvider(wallet);
     if (provider?.isConnected) {
@@ -98,14 +101,14 @@ export async function disconnectWallet(selectedWallet) {
 async function signMessage(wallet, message) {
   try {
     const provider = getProvider(wallet);
-    if (!provider?.isConnected) throw new Error("Wallet no encontrada. Intenta reconectarla.");
-    if (!provider.signMessage) throw new Error("Este proveedor no soporta firma de mensajes.");
+    if (!provider?.isConnected) throw new Error("❌ Wallet no encontrada. Intenta reconectarla.");
+    if (!provider.signMessage) throw new Error("❌ Este proveedor no soporta firma de mensajes.");
 
     const encodedMessage = new TextEncoder().encode(message);
-    const signature = await provider.signMessage(encodedMessage);
+    const signedMessage = await provider.signMessage(encodedMessage);
 
     return {
-      signature: bs58.encode(signature.signature),
+      signature: bs58.encode(signedMessage),
       message,
       pubkey: provider.publicKey.toBase58(),
     };
@@ -123,7 +126,7 @@ export async function authenticateWallet(wallet) {
     if (!walletAddress) return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED };
 
     const signedData = await signMessage(wallet, "Please sign this message to authenticate.");
-    if (!signedData.signature) return { pubkey: null, status: "signature_failed" }; // ✅ Detenemos aquí si falla la firma
+    if (!signedData.signature) return { pubkey: null, status: "signature_failed" };
 
     const response = await authenticateWithServer(signedData.pubkey, signedData.signature, signedData.message);
     if (!response?.message) return { pubkey: null, status: "server_error" };
@@ -136,14 +139,17 @@ export async function authenticateWallet(wallet) {
 }
 
 /**
- * 🔹 **Cerrar sesión completamente (NO desconecta la wallet)**
+ * 🔹 **Cerrar sesión completamente (Desconecta Web3 y backend)**
  */
 export async function handleLogout(syncWalletStatus) {
   try {
-    await apiLogout();
+    await apiLogout(); // 🔒 Cierra sesión en el backend
   } catch {
     console.warn("⚠️ No se pudo cerrar sesión en el backend.");
   }
+
+  await disconnectWallet(); // 🔌 Desconectar Web3
+
   syncWalletStatus();
   window.dispatchEvent(new Event("walletDisconnected"));
 }

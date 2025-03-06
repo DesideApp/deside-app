@@ -1,5 +1,5 @@
 // 🛡️ **Obtener CSRF token desde la cookie**
-export function getCSRFToken() {
+export function getCSRFTokenFromCookie() {
   try {
     return document.cookie.match(/csrfToken=([^;]+)/)?.[1] || null;
   } catch {
@@ -20,14 +20,14 @@ export async function refreshToken() {
   isRefreshing = true;
   refreshPromise = (async () => {
     try {
-      const response = await fetch("/api/auth/refresh", { method: "POST", credentials: "include" });
-      if (!response.ok) {
+      const response = await apiRequest("/api/auth/refresh", { method: "POST" });
+
+      if (!response || response.error) {
         clearSession("expired");
         return false;
       }
 
-      const data = await response.json();
-      updateSessionTokens(data.accessToken, data.refreshToken);
+      updateSessionTokens(response.accessToken, response.refreshToken, response.csrfToken);
       window.dispatchEvent(new Event("sessionRefreshed"));
       return true;
     } catch {
@@ -46,7 +46,6 @@ export async function refreshToken() {
  * 🔓 **Eliminar credenciales del usuario y cerrar sesión**
  */
 export function clearSession(reason = "manual") {
-  ["accessToken", "refreshToken", "csrfToken"].forEach(clearCookie);
   localStorage.clear();
   sessionStorage.clear();
   window.dispatchEvent(new Event(reason === "expired" ? "sessionExpired" : "walletDisconnected"));
@@ -55,10 +54,11 @@ export function clearSession(reason = "manual") {
 /**
  * 🔹 **Actualizar cookies con nuevos tokens**
  */
-function updateSessionTokens(accessToken, refreshToken) {
-  if (accessToken && refreshToken) {
+function updateSessionTokens(accessToken, refreshToken, csrfToken) {
+  if (accessToken && refreshToken && csrfToken) {
     setCookie("accessToken", accessToken);
     setCookie("refreshToken", refreshToken);
+    setCookie("csrfToken", csrfToken);
   }
 }
 

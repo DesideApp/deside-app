@@ -1,7 +1,7 @@
 import { apiRequest } from "../services/apiService.js";
-import API_BASE_URL from "../config/apiConfig.js";
+import { API_BASE_URL } from "../config/apiConfig.js";
 
-const SOLANA_API_BASE = `${API_BASE_URL}/api`;
+const SOLANA_API_BASE = `${API_BASE_URL}/api/solana`; // 🔥 Corrección: Se mantiene el `/api/solana` según el documento
 
 /**
  * 🔹 **Obtener estado de Solana desde el backend**
@@ -10,7 +10,8 @@ export async function getSolanaStatus() {
     try {
         const response = await apiRequest(`${SOLANA_API_BASE}/solana-status`, { method: "GET" });
         return response?.status || "offline";
-    } catch {
+    } catch (error) {
+        console.warn("⚠️ Error obteniendo estado de Solana:", error.message || error);
         return "offline";
     }
 }
@@ -21,8 +22,9 @@ export async function getSolanaStatus() {
 export async function getSolanaTPS() {
     try {
         const response = await apiRequest(`${SOLANA_API_BASE}/solana-tps`, { method: "GET" });
-        return response?.tps ?? 0;
-    } catch {
+        return typeof response?.tps === "number" ? response.tps : 0;
+    } catch (error) {
+        console.warn("⚠️ Error obteniendo TPS de Solana:", error.message || error);
         return 0;
     }
 }
@@ -33,8 +35,9 @@ export async function getSolanaTPS() {
 export async function getSolanaPrice() {
     try {
         const response = await apiRequest(`${SOLANA_API_BASE}/solana-price`, { method: "GET" });
-        return response?.price ?? 0;
-    } catch {
+        return typeof response?.price === "number" ? response.price : 0;
+    } catch (error) {
+        console.warn("⚠️ Error obteniendo precio de SOL:", error.message || error);
         return 0;
     }
 }
