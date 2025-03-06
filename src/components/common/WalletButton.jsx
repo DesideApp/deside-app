@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
-import { useWallet } from "../../contexts/WalletContext";
 import { getWalletBalance } from "../../utils/solanaDirect.js";
-import { connectWallet, getConnectedWallet, handleLogout, disconnectWallet } from "../../services/walletService.js";
+import { connectWallet, getConnectedWallet, disconnectWallet } from "../../services/walletService.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
 
 const WalletButton = memo(() => {
-  const { isReady } = useWallet();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [balance, setBalance] = useState(null);
   const [selectedWallet, setSelectedWallet] = useState(null);
@@ -92,16 +90,14 @@ const WalletButton = memo(() => {
 
   // ✅ **Actualizar UI al detectar evento de conexión de wallet**
   useEffect(() => {
-    const handleWalletConnected = async () => {
+    const handleWalletConnected = async (event) => {
       console.log("🔄 Evento walletConnected detectado. Verificando estado...");
-      const { walletAddress, selectedWallet } = await getConnectedWallet();
+      const { wallet, pubkey } = event.detail;
 
-      if (walletAddress) {
-        console.log(`✅ Wallet ahora conectada: ${selectedWallet} (${walletAddress})`);
-        setSelectedWallet(selectedWallet);
-        setWalletAddress(walletAddress);
-        updateBalance(walletAddress);
-      }
+      console.log(`✅ Wallet conectada: ${wallet} (${pubkey})`);
+      setSelectedWallet(wallet);
+      setWalletAddress(pubkey);
+      updateBalance(pubkey);
     };
 
     const handleWalletDisconnected = () => {
@@ -134,7 +130,7 @@ const WalletButton = memo(() => {
   return (
     <div className="wallet-container">
       {/* ✅ **Si ya hay wallet conectada, muestra el balance directamente** */}
-      <button className="wallet-button" onClick={handleConnect} disabled={!isReady || isCheckingWallet}>
+      <button className="wallet-button" onClick={handleConnect} disabled={isCheckingWallet}>
         <span>{walletAddress ? formattedBalance : "Connect Wallet"}</span>
       </button>
 
