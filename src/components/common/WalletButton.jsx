@@ -41,11 +41,16 @@ const WalletButton = memo(() => {
   }, [updateBalance]);
 
   /**
-   * 🔹 **Abrir menú o modal según el estado de la wallet**
+   * 🔹 **Manejar clic en el botón de conexión o menú**
    */
   const handleWalletButtonClick = useCallback(() => {
     if (isCheckingWallet) return;
-    walletAddress ? setIsMenuOpen((prev) => !prev) : setIsModalOpen(true);
+    if (walletAddress) {
+      setIsMenuOpen((prev) => !prev);
+      setIsModalOpen(false);
+    } else {
+      setIsModalOpen(true);
+    }
   }, [walletAddress, isCheckingWallet]);
 
   /**

@@ -42,6 +42,12 @@
     justify-content: center;
     align-items: center;
     transition: background-color 0.3s ease, opacity 0.3s ease;
+    position: relative;
+}
+
+/* 🔹 Espaciado cuando está junto al botón */
+.wallet-button + .menu-button {
+    margin-left: -5px; /* 🔄 Ajuste fino para alineación */
 }
 
 .menu-button:hover {
@@ -62,7 +68,7 @@
 .menu-icon span {
     display: block;
     width: 24px;
-    height: 2px;
+    height: 2px; /* 🔹 Líneas más finas para una mejor estética */
     background-color: white;
     border-radius: 2px;
     transition: transform 0.3s ease, opacity 0.3s ease;
