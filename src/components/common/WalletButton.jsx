@@ -60,7 +60,7 @@ const WalletButton = memo(() => {
   // ✅ **Abrir WalletMenu si ya está conectada, Modal si no lo está**
   const handleWalletButtonClick = useCallback(() => {
     if (walletAddress) {
-      console.log("✅ Wallet ya conectada, abriendo WalletMenu...");
+      console.log("✅ Wallet ya conectada, abriendo/cerrando WalletMenu...");
       setIsMenuOpen((prev) => !prev);
     } else {
       console.log("🔵 Abriendo modal de conexión...");
@@ -124,6 +124,7 @@ const WalletButton = memo(() => {
     await disconnectWallet();
     setWalletAddress(null);
     setBalance(null);
+    setIsMenuOpen(false); // 🔄 Cerramos el menú después de desconectar
   };
 
   // ✅ **Control de contenido del botón**
@@ -140,7 +141,7 @@ const WalletButton = memo(() => {
         <span>{formattedBalance}</span>
       </button>
 
-      {/* ✅ **WalletMenu siempre disponible, pero solo se muestra al hacer clic** */}
+      {/* ✅ **WalletMenu siempre montado, pero solo se muestra si `isMenuOpen` es `true`** */}
       <WalletMenu isOpen={isMenuOpen} handleLogout={handleLogoutClick} onClose={handleCloseMenu} />
 
       {/* ✅ **Modal de conexión** */}
