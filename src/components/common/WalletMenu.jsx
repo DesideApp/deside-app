@@ -14,9 +14,7 @@ const WalletMenu = memo(({ isOpen, onClose, handleLogout, walletAddress, balance
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, onClose]);
 
   // ✅ **Copiar dirección de wallet**
@@ -33,7 +31,7 @@ const WalletMenu = memo(({ isOpen, onClose, handleLogout, walletAddress, balance
 
   return (
     <>
-      {/* ✅ Botón del menú SIEMPRE visible y funcional */}
+      {/* ✅ **Hamburguesa SIEMPRE visible** */}
       <button className="menu-button" onClick={onClose} aria-label="Toggle Wallet Menu">
         <div className="menu-icon">
           <span></span>
@@ -42,7 +40,7 @@ const WalletMenu = memo(({ isOpen, onClose, handleLogout, walletAddress, balance
         </div>
       </button>
 
-      {/* ✅ WalletMenu se muestra si `isOpen` es `true` */}
+      {/* ✅ WalletMenu se muestra solo si `isOpen` es `true` */}
       {isOpen && (
         <div className="wallet-menu open" ref={menuRef}>
           <div className="wallet-menu-content">

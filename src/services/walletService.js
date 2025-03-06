@@ -16,18 +16,10 @@ export async function getConnectedWallet() {
     const availableWallets = ["phantom", "backpack", "magiceden"];
 
     for (const wallet of availableWallets) {
-      let provider = getProvider(wallet);
+      const provider = getProvider(wallet);
 
       if (provider?.isConnected) {
-        let walletAddress = provider.publicKey?.toBase58();
-
-        // 🔄 **Si `publicKey` no está disponible inmediatamente, reintentamos**
-        if (!walletAddress) {
-          console.warn(`⚠️ ${wallet} conectada pero sin publicKey. Reintentando...`);
-          await new Promise(resolve => setTimeout(resolve, 500)); // Espera 500ms
-          provider = getProvider(wallet);
-          walletAddress = provider?.publicKey?.toBase58();
-        }
+        const walletAddress = provider.publicKey?.toBase58();
 
         if (walletAddress) {
           console.log(`✅ Wallet detectada automáticamente: ${wallet} (${walletAddress})`);
@@ -42,6 +34,7 @@ export async function getConnectedWallet() {
 
     return { walletAddress: null, walletStatus: WALLET_STATUS.NOT_CONNECTED };
   } catch (error) {
+    console.error("❌ Error detectando wallet conectada:", error);
     return { walletAddress: null, walletStatus: WALLET_STATUS.NOT_CONNECTED, error: error.message };
   }
 }
@@ -64,6 +57,7 @@ export async function connectWallet(wallet) {
 
     return { pubkey, status: WALLET_STATUS.CONNECTED };
   } catch (error) {
+    console.error(`❌ Error conectando wallet ${wallet}:`, error);
     return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED, error: error.message };
   }
 }
@@ -74,16 +68,20 @@ export async function connectWallet(wallet) {
 export async function disconnectWallet() {
   try {
     const availableWallets = ["phantom", "backpack", "magiceden"];
+    let disconnected = false;
 
     for (const wallet of availableWallets) {
       const provider = getProvider(wallet);
       if (provider?.isConnected) {
         await provider.disconnect();
         console.log(`❌ ${wallet} desconectada.`);
+        disconnected = true;
       }
     }
 
-    window.dispatchEvent(new Event("walletDisconnected"));
+    if (disconnected) {
+      window.dispatchEvent(new Event("walletDisconnected"));
+    }
   } catch (error) {
     console.error("❌ Wallet disconnection error:", error);
   }
@@ -100,7 +98,7 @@ async function signMessage(wallet, message) {
     const encodedMessage = new TextEncoder().encode(message);
     const signatureResponse = await provider.signMessage(encodedMessage);
 
-    if (!signatureResponse?.signature) throw new Error("Firma cancelada. Para continuar, necesitas firmar el mensaje de autenticación.");
+    if (!signatureResponse?.signature) throw new Error("Firma cancelada. Intenta nuevamente.");
 
     return {
       signature: bs58.encode(signatureResponse.signature),
@@ -108,6 +106,7 @@ async function signMessage(wallet, message) {
       pubkey: provider.publicKey.toBase58(),
     };
   } catch (error) {
+    console.error("❌ Error al firmar mensaje:", error);
     return { signature: null, error: error.message };
   }
 }
@@ -137,6 +136,7 @@ export async function authenticateWallet(wallet) {
 
     return { pubkey: walletAddress, status: WALLET_STATUS.AUTHENTICATED };
   } catch (error) {
+    console.error("❌ Error en la autenticación:", error);
     return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED, error: error.message };
   }
 }
@@ -171,9 +171,17 @@ export async function handleWalletConnected(syncWalletStatus) {
  */
 export async function handleLogout(syncWalletStatus) {
   console.log("🚪 Cierre de sesión iniciado...");
-  await disconnectWallet();
-  await apiLogout();
-  syncWalletStatus();
-  window.dispatchEvent(new Event("walletDisconnected"));
-  console.log("✅ Sesión cerrada correctamente.");
+  try {
+    const logoutSuccess = await apiLogout();
+    if (logoutSuccess) {
+      await disconnectWallet();
+      syncWalletStatus();
+      window.dispatchEvent(new Event("walletDisconnected"));
+      console.log("✅ Sesión cerrada correctamente.");
+    } else {
+      console.warn("⚠️ No se pudo cerrar sesión en el backend.");
+    }
+  } catch (error) {
+    console.error("❌ Error al cerrar sesión:", error);
+  }
 }

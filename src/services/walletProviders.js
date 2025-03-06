@@ -1,17 +1,8 @@
 // 🔹 **Definir proveedores de wallets compatibles**
 const WALLET_PROVIDERS = {
-    phantom: () => {
-        if (typeof window === "undefined") return null;
-        return window.solana?.isPhantom ? window.solana : null; // ✅ Detecta Phantom
-    },
-    backpack: () => {
-        if (typeof window === "undefined") return null;
-        return window.xnft?.solana ? window.xnft.solana : null; // ✅ Detecta Backpack
-    },
-    magiceden: () => {
-        if (typeof window === "undefined") return null;
-        return window.magicEden?.solana ? window.magicEden.solana : null; // ✅ Detecta MagicEden
-    },
+    phantom: () => (typeof window !== "undefined" && window.solana?.isPhantom ? window.solana : null),
+    backpack: () => (typeof window !== "undefined" && window.xnft?.solana ? window.xnft.solana : null),
+    magiceden: () => (typeof window !== "undefined" && window.magicEden?.solana ? window.magicEden.solana : null),
 };
 
 /**
@@ -56,20 +47,20 @@ export function listenToWalletEvents(onConnect, onDisconnect) {
 
         console.log(`🔍 Escuchando eventos de conexión en: ${wallet}`);
 
-        // ✅ Remueve eventos previos para evitar múltiples llamadas innecesarias
-        provider.removeAllListeners?.("connect");
-        provider.removeAllListeners?.("disconnect");
+        // ✅ Eliminar eventos antiguos ANTES de asignar nuevos
+        provider.off?.("connect");
+        provider.off?.("disconnect");
 
         provider.on("connect", () => {
             console.log(`✅ ${wallet} Wallet conectada.`);
             onConnect?.(wallet);
-            window.dispatchEvent(new Event("walletConnected")); // 🔄 Emitir evento global
+            window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet } }));
         });
 
         provider.on("disconnect", () => {
             console.warn(`❌ ${wallet} Wallet desconectada.`);
             onDisconnect?.(wallet);
-            window.dispatchEvent(new Event("walletDisconnected")); // 🔄 Emitir evento global
+            window.dispatchEvent(new CustomEvent("walletDisconnected", { detail: { wallet } }));
         });
     });
 }

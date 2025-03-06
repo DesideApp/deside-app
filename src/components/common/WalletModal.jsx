@@ -14,12 +14,12 @@ const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
     try {
       if (onWalletSelected) {
         await onWalletSelected(walletType);
+        onClose(); // ✅ Solo cerrar el modal si la conexión es exitosa
       }
     } catch (error) {
       console.error("❌ Error abriendo la wallet:", error);
     } finally {
       setIsLoading(false);
-      onClose();
     }
   };
 
