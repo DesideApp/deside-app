@@ -57,16 +57,22 @@ const WalletButton = memo(() => {
     }
   };
 
-  // ✅ **Abrir WalletMenu si ya está conectada, Modal si no lo está**
+  // ✅ **Manejar clic en el botón de la wallet**
   const handleWalletButtonClick = useCallback(() => {
     if (walletAddress) {
-      console.log("✅ Wallet ya conectada, abriendo/cerrando WalletMenu...");
+      console.log("✅ Wallet ya conectada, abriendo WalletMenu...");
       setIsMenuOpen((prev) => !prev);
     } else {
       console.log("🔵 Abriendo modal de conexión...");
       setIsModalOpen(true);
     }
   }, [walletAddress]);
+
+  // ✅ **Abrir WalletMenu desde la hamburguesa**
+  const handleMenuIconClick = useCallback(() => {
+    console.log("📂 Abriendo WalletMenu desde la hamburguesa...");
+    setIsMenuOpen((prev) => !prev);
+  }, []);
 
   // ✅ **Cerrar modal**
   const handleCloseModal = useCallback(() => {
@@ -128,11 +134,6 @@ const WalletButton = memo(() => {
     setIsMenuOpen(false); // 🔄 Cerrar WalletMenu al desconectar
   };
 
-  // ✅ **Abrir WalletMenu desde el icono de la hamburguesa**
-  const handleMenuIconClick = () => {
-    setIsMenuOpen((prev) => !prev);
-  };
-
   // ✅ **Control de contenido del botón**
   const formattedBalance = walletAddress
     ? balance !== null
@@ -142,10 +143,16 @@ const WalletButton = memo(() => {
 
   return (
     <div className="wallet-container">
-      {/* ✅ **Botón principal que maneja conexión y menú** */}
-      <button className="wallet-button" onClick={handleWalletButtonClick} disabled={isCheckingWallet}>
-        <span>{formattedBalance}</span>
-      </button>
+      {/* ✅ **Botón principal - Si wallet está conectada, abre el menú** */}
+      {walletAddress ? (
+        <button className="wallet-button" onClick={handleWalletButtonClick} disabled={isCheckingWallet}>
+          <span>{formattedBalance}</span>
+        </button>
+      ) : (
+        <button className="wallet-button" onClick={handleWalletButtonClick} disabled={isCheckingWallet}>
+          Connect Wallet
+        </button>
+      )}
 
       {/* ✅ **Icono de hamburguesa SIEMPRE visible** */}
       <button className="menu-button" onClick={handleMenuIconClick} aria-label="Open Wallet Menu">

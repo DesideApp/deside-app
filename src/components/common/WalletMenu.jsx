@@ -5,7 +5,7 @@ import "./WalletMenu.css";
 const WalletMenu = memo(({ isOpen, onClose, handleLogout, walletAddress, balance, openWalletModal }) => {
   const menuRef = useRef(null);
 
-  // ✅ **Cerrar menú al hacer clic fuera**
+  // ✅ **Cerrar menú SOLO al hacer clic fuera (NO en la hamburguesa)**
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isOpen && menuRef.current && !menuRef.current.contains(event.target)) {
@@ -13,15 +13,13 @@ const WalletMenu = memo(({ isOpen, onClose, handleLogout, walletAddress, balance
       }
     };
 
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
 
+  // ✅ **Copiar dirección de wallet**
   const handleCopy = useCallback(async () => {
     if (!walletAddress) return;
 
@@ -35,8 +33,8 @@ const WalletMenu = memo(({ isOpen, onClose, handleLogout, walletAddress, balance
 
   return (
     <>
-      {/* ✅ Botón del menú con las tres líneas bien formateadas */}
-      <button className="menu-button" onClick={onClose} aria-label="Menu">
+      {/* ✅ Botón del menú SIEMPRE visible y funcional */}
+      <button className="menu-button" onClick={onClose} aria-label="Toggle Wallet Menu">
         <div className="menu-icon">
           <span></span>
           <span></span>
@@ -44,6 +42,7 @@ const WalletMenu = memo(({ isOpen, onClose, handleLogout, walletAddress, balance
         </div>
       </button>
 
+      {/* ✅ WalletMenu se muestra si `isOpen` es `true` */}
       {isOpen && (
         <div className="wallet-menu open" ref={menuRef}>
           <div className="wallet-menu-content">
@@ -68,7 +67,7 @@ const WalletMenu = memo(({ isOpen, onClose, handleLogout, walletAddress, balance
                   </button>
                 </div>
 
-                {/* ✅ Ahora WalletMenu solo invoca handleLogout y cierra el menú */}
+                {/* ✅ Botón de Logout correctamente manejado */}
                 <button className="logout-button" onClick={handleLogout}>
                   Disconnect
                 </button>
