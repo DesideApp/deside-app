@@ -1,43 +1,51 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from "react";
 import { Copy } from "lucide-react";
-import { useWallet } from "../../contexts/WalletContext";
 import { checkAuthStatus } from "../../services/apiService.js";
+import { getConnectedWallet } from "../../services/walletService.js"; // ✅ Nuevo método
 import DonationModal from "./DonationModal";
 import "./WalletMenu.css";
 
 const WalletMenu = memo(({ handleLogout, openWalletModal }) => {
   const menuRef = useRef(null);
-  const { walletAddress, isReady } = useWallet();
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDonationOpen, setIsDonationOpen] = useState(false);
+  const [walletAddress, setWalletAddress] = useState(null);
   const [balance, setBalance] = useState(null);
 
-  // ✅ **Verificar autenticación solo si cambia la wallet**
-  const fetchAuthStatus = useCallback(async () => {
-    if (!walletAddress) {
-      setIsAuthenticated(false);
-      setBalance(null);
-      return;
-    }
-
-    try {
-      const status = await checkAuthStatus();
-      setIsAuthenticated(status.isAuthenticated);
-    } catch (error) {
-      console.error("❌ Error verificando autenticación:", error);
-      setIsAuthenticated(false);
-    }
-  }, [walletAddress]);
-
+  // ✅ **Verificar autenticación cuando se detecta una wallet**
   useEffect(() => {
-    fetchAuthStatus();
-  }, [fetchAuthStatus]);
+    const fetchWalletAndAuth = async () => {
+      const { walletAddress } = await getConnectedWallet(); // 🔄 Detecta la wallet conectada en Web3
+      setWalletAddress(walletAddress);
+
+      if (walletAddress) {
+        try {
+          const status = await checkAuthStatus();
+          setIsAuthenticated(status.isAuthenticated);
+        } catch (error) {
+          console.error("❌ Error verificando autenticación:", error);
+          setIsAuthenticated(false);
+        }
+      } else {
+        setIsAuthenticated(false);
+      }
+    };
+
+    fetchWalletAndAuth();
+  }, []);
 
   // ✅ **Escuchar eventos globales para sincronización automática**
   useEffect(() => {
-    const handleWalletConnected = () => fetchAuthStatus();
+    const handleWalletConnected = async () => {
+      console.log("🔄 Evento walletConnected detectado...");
+      const { walletAddress } = await getConnectedWallet();
+      setWalletAddress(walletAddress);
+    };
+
     const handleWalletDisconnected = () => {
+      console.warn("❌ Wallet desconectada.");
+      setWalletAddress(null);
       setIsAuthenticated(false);
       setBalance(null);
     };
@@ -49,7 +57,7 @@ const WalletMenu = memo(({ handleLogout, openWalletModal }) => {
       window.removeEventListener("walletConnected", handleWalletConnected);
       window.removeEventListener("walletDisconnected", handleWalletDisconnected);
     };
-  }, [fetchAuthStatus]);
+  }, []);
 
   // ✅ **Cerrar menú al hacer clic fuera**
   useEffect(() => {
@@ -85,8 +93,6 @@ const WalletMenu = memo(({ handleLogout, openWalletModal }) => {
     setIsOpen(false);
   }, [handleLogout]);
 
-  if (!isReady) return null;
-
   return (
     <>
       {/* ✅ Botón del menú con animación */}
@@ -94,7 +100,6 @@ const WalletMenu = memo(({ handleLogout, openWalletModal }) => {
         className={`menu-button ${isOpen ? "open" : ""}`}
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label="Menu"
-        disabled={!isReady}
       >
         <div className="menu-icon">
           <div className="bar"></div>
@@ -106,7 +111,7 @@ const WalletMenu = memo(({ handleLogout, openWalletModal }) => {
       {isOpen && (
         <div className="wallet-menu open" ref={menuRef}>
           <div className="wallet-menu-content">
-            {!isAuthenticated ? (
+            {!walletAddress ? (
               <div className="wallet-disconnected">
                 <p className="no-wallet">⚠️ No wallet connected.</p>
                 <button className="connect-button" onClick={openWalletModal}>
