@@ -1,15 +1,15 @@
 import React from "react";
 import { BrowserRouter as Router } from "react-router-dom";
-import { WalletProvider } from "./contexts/WalletContext.jsx";
-import Main from "./Main.jsx"; // ✅ Carga normal (no es necesario `lazy` en este caso)
+import { ServerContext } from "./contexts/ServerContext.jsx"; // ✅ Nuevo contexto
+import Main from "./Main.jsx"; 
 
 function App() {
     return (
-        <WalletProvider>
+        <ServerContext>  {/* 🔄 Usamos el contexto correcto */}
             <Router>
                 <Main />
             </Router>
-        </WalletProvider>
+        </ServerContext>
     );
 }
 
