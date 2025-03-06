@@ -1,15 +1,15 @@
 import React from "react";
 import { BrowserRouter as Router } from "react-router-dom";
-import { ServerContext } from "./contexts/ServerContext.jsx"; // ✅ Nuevo contexto
+import { ServerProvider } from "./contexts/ServerContext.jsx"; // ✅ Importamos correctamente el proveedor del contexto
 import Main from "./Main.jsx"; 
 
 function App() {
     return (
-        <ServerContext>  {/* 🔄 Usamos el contexto correcto */}
+        <ServerProvider>  {/* ✅ Usamos el proveedor del contexto */}
             <Router>
                 <Main />
             </Router>
-        </ServerContext>
+        </ServerProvider>
     );
 }
 
