@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
-import { getWalletBalance } from "../../utils/solanaDirect.js";
-import { getConnectedWallet, connectWallet, disconnectWallet } from "../../services/walletService.js";
+import { getWalletBalance, getConnectedWallet, connectWallet, disconnectWallet, handleLogout } from "../../services/walletService.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -13,12 +12,14 @@ const WalletButton = memo(() => {
   const [isCheckingWallet, setIsCheckingWallet] = useState(true);
 
   /**
-   * 🔹 **Actualizar saldo de la wallet**
+   * 🔹 **Actualizar saldo de la wallet** (Usa `getWalletBalance()` desde `walletService.js`)
    */
-  const updateBalance = useCallback(async (address) => {
-    if (!address) return setBalance(null);
+  const updateBalance = useCallback(async () => {
+    const { walletAddress, selectedWallet } = await getConnectedWallet();
+    if (!walletAddress || !selectedWallet) return setBalance(null);
+
     try {
-      const walletBalance = await getWalletBalance(address);
+      const walletBalance = await getWalletBalance(walletAddress, selectedWallet);
       setBalance(walletBalance);
     } catch {
       setBalance(0);
@@ -26,25 +27,26 @@ const WalletButton = memo(() => {
   }, []);
 
   /**
-   * 🔹 **Detectar conexión automática**
+   * 🔹 **Detectar conexión automática al abrir la app**
    */
   useEffect(() => {
     const detectWallet = async () => {
       const { walletAddress } = await getConnectedWallet();
       setWalletAddress(walletAddress || null);
-      if (walletAddress) updateBalance(walletAddress);
-      setIsCheckingWallet(false);
+      if (walletAddress) await updateBalance(); // ✅ `updateBalance()` ya obtiene `walletAddress`
+      setIsCheckingWallet(false); // ✅ Habilitar el botón después de la detección
     };
 
     detectWallet();
   }, [updateBalance]);
 
   /**
-   * 🔹 **Manejar clic en el botón de la wallet**
+   * 🔹 **Manejar clic en el botón (abrir modal o menú)**
    */
   const handleWalletButtonClick = useCallback(() => {
+    if (isCheckingWallet) return; // ✅ No hacer nada si aún se está verificando
     walletAddress ? setIsMenuOpen((prev) => !prev) : setIsModalOpen(true);
-  }, [walletAddress]);
+  }, [walletAddress, isCheckingWallet]);
 
   /**
    * 🔹 **Cerrar modal y menú**
@@ -54,12 +56,13 @@ const WalletButton = memo(() => {
 
   /**
    * 🔹 **Conectar wallet desde el modal**
+   * @param {string} wallet - Nombre del proveedor seleccionado
    */
   const handleWalletSelected = useCallback(async (wallet) => {
     const result = await connectWallet(wallet);
     if (result.pubkey) {
       setWalletAddress(result.pubkey);
-      updateBalance(result.pubkey);
+      await updateBalance();
       handleCloseModal();
     }
   }, [handleCloseModal, updateBalance]);
@@ -68,10 +71,10 @@ const WalletButton = memo(() => {
    * 🔹 **Actualizar UI al detectar eventos de conexión/desconexión**
    */
   useEffect(() => {
-    const handleWalletConnected = (event) => {
+    const handleWalletConnected = async (event) => {
       const { pubkey } = event.detail;
       setWalletAddress(pubkey);
-      updateBalance(pubkey);
+      await updateBalance();
     };
 
     const handleWalletDisconnected = () => {
@@ -90,10 +93,17 @@ const WalletButton = memo(() => {
   }, [updateBalance]);
 
   /**
-   * 🔹 **Logout real**
+   * 🔹 **Logout (desconectar Web3 o cerrar sesión en backend)**
    */
   const handleLogoutClick = async () => {
-    await disconnectWallet();
+    const isAuthenticated = document.cookie.includes("accessToken"); // ✅ Detecta si hay sesión en backend
+
+    if (isAuthenticated) {
+      await handleLogout(() => setWalletAddress(null)); // ✅ Cierra sesión en el backend
+    } else {
+      await disconnectWallet(); // ✅ Solo desconecta Web3 si no hay sesión en backend
+    }
+
     setWalletAddress(null);
     setBalance(null);
     setIsMenuOpen(false);
@@ -110,10 +120,12 @@ const WalletButton = memo(() => {
 
   return (
     <div className="wallet-container">
+      {/* ✅ Botón principal que abre menú o modal */}
       <button className="wallet-button" onClick={handleWalletButtonClick} disabled={isCheckingWallet}>
         <span>{formattedBalance}</span>
       </button>
 
+      {/* ✅ Menú de wallet (si está conectado) */}
       <WalletMenu 
         isOpen={isMenuOpen} 
         handleLogout={handleLogoutClick} 
@@ -122,6 +134,7 @@ const WalletButton = memo(() => {
         balance={balance} 
       />
 
+      {/* ✅ Modal para seleccionar wallet (si no está conectado) */}
       <WalletModal isOpen={isModalOpen} onClose={handleCloseModal} onWalletSelected={handleWalletSelected} />
     </div>
   );

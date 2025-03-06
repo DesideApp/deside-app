@@ -4,8 +4,11 @@ import "./WalletMenu.css";
 
 const WalletMenu = memo(({ isOpen, onClose, handleLogout, walletAddress, balance, openWalletModal }) => {
   const menuRef = useRef(null);
+  const [copySuccess, setCopySuccess] = useState(false);
 
-  // ✅ **Cerrar menú SOLO al hacer clic fuera (NO en la hamburguesa)**
+  /**
+   * 🔹 **Cerrar menú SOLO si se hace clic fuera**
+   */
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isOpen && menuRef.current && !menuRef.current.contains(event.target)) {
@@ -17,64 +20,58 @@ const WalletMenu = memo(({ isOpen, onClose, handleLogout, walletAddress, balance
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, onClose]);
 
-  // ✅ **Copiar dirección de wallet**
+  /**
+   * 🔹 **Copiar dirección de wallet con feedback sin spam**
+   */
   const handleCopy = useCallback(async () => {
-    if (!walletAddress) return;
+    if (!walletAddress || copySuccess) return; // ✅ Evita spam de copias seguidas
 
     try {
       await navigator.clipboard.writeText(walletAddress);
-      alert("✅ Dirección copiada al portapapeles.");
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 3000); // ✅ Feedback por 3 segundos
     } catch (error) {
       console.error("❌ Error copiando la dirección:", error);
     }
-  }, [walletAddress]);
+  }, [walletAddress, copySuccess]);
 
   return (
-    <>
-      {/* ✅ **Hamburguesa SIEMPRE visible** */}
-      <button className="menu-button" onClick={onClose} aria-label="Toggle Wallet Menu">
-        <div className="menu-icon">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-      </button>
+    isOpen && (
+      <div className="wallet-menu open" ref={menuRef} role="dialog" aria-labelledby="wallet-menu-title">
+        <div className="wallet-menu-content">
+          {/* 🔹 Si no hay wallet conectada, mostrar opción de conexión */}
+          {!walletAddress ? (
+            <div className="wallet-disconnected">
+              <p className="no-wallet">⚠️ No wallet connected.</p>
+              <button className="connect-button" onClick={openWalletModal} aria-label="Connect Wallet">
+                Connect Wallet
+              </button>
+            </div>
+          ) : (
+            <>
+              <header className="wallet-header">
+                <p className="wallet-network">🔗 Solana</p>
+                <p className="wallet-balance">{balance !== null ? `${balance.toFixed(2)} SOL` : "0 SOL"}</p>
+              </header>
 
-      {/* ✅ WalletMenu se muestra solo si `isOpen` es `true` */}
-      {isOpen && (
-        <div className="wallet-menu open" ref={menuRef}>
-          <div className="wallet-menu-content">
-            {!walletAddress ? (
-              <div className="wallet-disconnected">
-                <p className="no-wallet">⚠️ No wallet connected.</p>
-                <button className="connect-button" onClick={openWalletModal}>
-                  Connect Wallet
+              <div className="wallet-address-container">
+                <p className="wallet-address">{walletAddress}</p>
+                <button className="copy-button" onClick={handleCopy} aria-label="Copy Wallet Address">
+                  <Copy size={18} />
                 </button>
               </div>
-            ) : (
-              <>
-                <header className="wallet-header">
-                  <p className="wallet-network">🔗 Solana</p>
-                  <p className="wallet-balance">{balance !== null ? `${balance.toFixed(2)} SOL` : "0 SOL"}</p>
-                </header>
 
-                <div className="wallet-address-container">
-                  <p className="wallet-address">{walletAddress}</p>
-                  <button className="copy-button" onClick={handleCopy} aria-label="Copy Address">
-                    <Copy size={18} />
-                  </button>
-                </div>
+              {copySuccess && <p className="copy-success">✅ Copied!</p>}
 
-                {/* ✅ Botón de Logout correctamente manejado */}
-                <button className="logout-button" onClick={handleLogout}>
-                  Disconnect
-                </button>
-              </>
-            )}
-          </div>
+              {/* 🔹 Logout correctamente manejado desde `WalletButton.js` */}
+              <button className="logout-button" onClick={handleLogout} aria-label="Disconnect Wallet">
+                Disconnect
+              </button>
+            </>
+          )}
         </div>
-      )}
-    </>
+      </div>
+    )
   );
 });
 

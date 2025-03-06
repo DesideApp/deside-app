@@ -1,4 +1,4 @@
-import { getProvider } from "./walletProviders";
+import { getProvider, isWalletConnected } from "./walletProviders";
 import { authenticateWithServer, logout as apiLogout } from "./apiService";
 import bs58 from "bs58";
 
@@ -9,24 +9,53 @@ const WALLET_STATUS = {
 };
 
 /**
- * 🔹 **Detectar wallet conectada a nivel Web3 (NO backend)**
+ * 🔍 **Detectar wallet conectada a nivel Web3 (NO backend)**
+ * @returns {{walletAddress: string, selectedWallet: string} | {walletAddress: null}}
  */
 export async function getConnectedWallet() {
   try {
-    for (const wallet of ["phantom", "backpack", "magiceden"]) {
-      const provider = getProvider(wallet);
-      if (provider?.isConnected && provider.publicKey) {
-        return { walletAddress: provider.publicKey.toBase58(), selectedWallet: wallet };
-      }
-    }
-    return { walletAddress: null };
+    const connected = isWalletConnected();
+    return connected ? { walletAddress: connected.pubkey, selectedWallet: connected.wallet } : { walletAddress: null };
   } catch {
     return { walletAddress: null };
   }
 }
 
 /**
+ * 💰 **Obtener balance de una wallet conectada**
+ * @param {string} walletAddress - Dirección pública de la wallet.
+ * @param {string} selectedWallet - Proveedor de la wallet (phantom, backpack, magiceden).
+ * @returns {Promise<number|null>} - Balance en SOL o `null` en caso de error.
+ */
+export async function getWalletBalance(walletAddress, selectedWallet) {
+  try {
+    if (!walletAddress || !selectedWallet) throw new Error("❌ Wallet no proporcionada.");
+
+    // ✅ **Obtener el balance desde el proveedor Web3**
+    const provider = getProvider(selectedWallet);
+    if (provider?.isConnected && provider?.publicKey?.toBase58() === walletAddress) {
+      console.log(`🔍 Consultando balance a través del proveedor: ${selectedWallet}`);
+
+      try {
+        const balanceLamports = await provider.request({ method: "getBalance", params: [] });
+        return balanceLamports / 1e9; // ✅ Convertir de lamports a SOL
+      } catch (providerError) {
+        console.error(`❌ Error al obtener balance desde ${selectedWallet}:`, providerError);
+        return null;
+      }
+    }
+
+    console.warn(`⚠️ No se pudo obtener balance, la wallet no está conectada.`);
+    return null;
+  } catch (error) {
+    console.error(`❌ Error obteniendo balance para ${walletAddress}:`, error);
+    return null;
+  }
+}
+
+/**
  * 🔹 **Conectar wallet manualmente**
+ * @param {string} wallet - Nombre del proveedor de la wallet (phantom, backpack, magiceden).
  */
 export async function connectWallet(wallet) {
   try {
@@ -46,10 +75,14 @@ export async function connectWallet(wallet) {
 
 /**
  * 🔹 **Desconectar la wallet actual**
+ * @param {string} [selectedWallet] - (Opcional) Si no se pasa, se desconecta la wallet activa.
  */
 export async function disconnectWallet(selectedWallet) {
   try {
-    const provider = getProvider(selectedWallet);
+    const wallet = selectedWallet || isWalletConnected()?.wallet;
+    if (!wallet) return; // ✅ Evitamos ejecutar si no hay una wallet conectada
+
+    const provider = getProvider(wallet);
     if (provider?.isConnected) {
       await provider.disconnect();
       window.dispatchEvent(new Event("walletDisconnected"));
@@ -90,7 +123,7 @@ export async function authenticateWallet(wallet) {
     if (!walletAddress) return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED };
 
     const signedData = await signMessage(wallet, "Please sign this message to authenticate.");
-    if (!signedData.signature) return { pubkey: null, status: "signature_failed" };
+    if (!signedData.signature) return { pubkey: null, status: "signature_failed" }; // ✅ Detenemos aquí si falla la firma
 
     const response = await authenticateWithServer(signedData.pubkey, signedData.signature, signedData.message);
     if (!response?.message) return { pubkey: null, status: "server_error" };
@@ -103,7 +136,7 @@ export async function authenticateWallet(wallet) {
 }
 
 /**
- * 🔹 **Cerrar sesión completamente (pero NO cerrar la wallet automáticamente)**
+ * 🔹 **Cerrar sesión completamente (NO desconecta la wallet)**
  */
 export async function handleLogout(syncWalletStatus) {
   try {
