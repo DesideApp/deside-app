@@ -13,17 +13,14 @@ const WALLET_STATUS = {
  */
 export async function getConnectedWallet() {
   try {
-    const availableWallets = ["phantom", "backpack", "magiceden"];
-
-    for (const wallet of availableWallets) {
+    for (const wallet of ["phantom", "backpack", "magiceden"]) {
       const provider = getProvider(wallet);
       if (provider?.isConnected && provider.publicKey) {
         return { walletAddress: provider.publicKey.toBase58(), selectedWallet: wallet };
       }
     }
     return { walletAddress: null };
-  } catch (error) {
-    console.error("❌ Error detectando wallet conectada:", error);
+  } catch {
     return { walletAddress: null };
   }
 }
@@ -43,7 +40,6 @@ export async function connectWallet(wallet) {
     window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet, pubkey } }));
     return { pubkey };
   } catch (error) {
-    console.error(`❌ Error conectando wallet ${wallet}:`, error);
     return { pubkey: null, error: error.message };
   }
 }
@@ -51,18 +47,15 @@ export async function connectWallet(wallet) {
 /**
  * 🔹 **Desconectar la wallet actual**
  */
-export async function disconnectWallet() {
+export async function disconnectWallet(selectedWallet) {
   try {
-    const { selectedWallet } = await getConnectedWallet();
-    if (!selectedWallet) return;
-
     const provider = getProvider(selectedWallet);
     if (provider?.isConnected) {
       await provider.disconnect();
       window.dispatchEvent(new Event("walletDisconnected"));
     }
-  } catch (error) {
-    console.error("❌ Error desconectando wallet:", error);
+  } catch {
+    console.warn("⚠️ No se pudo desconectar la wallet.");
   }
 }
 
@@ -84,7 +77,6 @@ async function signMessage(wallet, message) {
       pubkey: provider.publicKey.toBase58(),
     };
   } catch (error) {
-    console.error("❌ Error al firmar mensaje:", error);
     return { signature: null, error: error.message };
   }
 }
@@ -97,17 +89,15 @@ export async function authenticateWallet(wallet) {
     const { walletAddress } = await getConnectedWallet();
     if (!walletAddress) return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED };
 
-    const message = "Please sign this message to authenticate.";
-    const signedData = await signMessage(wallet, message);
+    const signedData = await signMessage(wallet, "Please sign this message to authenticate.");
     if (!signedData.signature) return { pubkey: null, status: "signature_failed" };
 
-    const response = await authenticateWithServer(signedData.pubkey, signedData.signature, message);
+    const response = await authenticateWithServer(signedData.pubkey, signedData.signature, signedData.message);
     if (!response?.message) return { pubkey: null, status: "server_error" };
 
     window.dispatchEvent(new CustomEvent("walletAuthenticated", { detail: { wallet, pubkey: walletAddress } }));
     return { pubkey: walletAddress, status: WALLET_STATUS.AUTHENTICATED };
   } catch (error) {
-    console.error("❌ Error en la autenticación:", error);
     return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED, error: error.message };
   }
 }
@@ -116,10 +106,9 @@ export async function authenticateWallet(wallet) {
  * 🔹 **Cerrar sesión completamente (pero NO cerrar la wallet automáticamente)**
  */
 export async function handleLogout(syncWalletStatus) {
-  console.log("🚪 Cerrando sesión...");
   try {
     await apiLogout();
-  } catch (error) {
+  } catch {
     console.warn("⚠️ No se pudo cerrar sesión en el backend.");
   }
   syncWalletStatus();

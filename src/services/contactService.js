@@ -5,11 +5,9 @@ import { apiRequest } from "./apiService";
  */
 export async function fetchContacts() {
     try {
-        const response = await apiRequest("/api/contacts", { method: "GET" });
-        return response?.contacts || [];
-    } catch (error) {
-        console.error("❌ Error al obtener contactos:", error.message || error);
-        return [];
+        return (await apiRequest("/api/contacts", { method: "GET" }))?.contacts || [];
+    } catch {
+        return []; // ✅ No mostramos error innecesario
     }
 }
 
@@ -17,43 +15,40 @@ export async function fetchContacts() {
  * 🔹 **Enviar solicitud de contacto**
  */
 export async function sendContactRequest(pubkey) {
-    return handleContactAction("/api/contacts/send", "POST", pubkey, "enviar solicitud de contacto");
+    return handleContactAction("/api/contacts/send", "POST", pubkey);
 }
 
 /**
  * 🔹 **Aceptar solicitud de contacto**
  */
 export async function approveContact(pubkey) {
-    return handleContactAction("/api/contacts/accept", "POST", pubkey, "aceptar solicitud de contacto");
+    return handleContactAction("/api/contacts/accept", "POST", pubkey);
 }
 
 /**
  * 🔹 **Eliminar contacto**
  */
 export async function rejectContact(pubkey) {
-    return handleContactAction("/api/contacts/remove", "DELETE", pubkey, "eliminar contacto");
+    return handleContactAction("/api/contacts/remove", "DELETE", pubkey);
 }
 
 /**
  * 🔹 **Manejo unificado de acciones sobre contactos**
  */
-async function handleContactAction(endpoint, method, pubkey, actionDescription) {
-    try {
-        if (!pubkey) throw new Error("Clave pública no proporcionada.");
+async function handleContactAction(endpoint, method, pubkey) {
+    if (!pubkey) return { success: false, error: "Clave pública no proporcionada." };
 
+    try {
         const response = await apiRequest(endpoint, {
             method,
             body: JSON.stringify({ pubkey }),
         });
 
-        if (!response || response.error) {
-            console.warn(`⚠️ No se pudo ${actionDescription}:`, response?.error || "Respuesta inválida");
-            return { success: false, error: response?.error || "Error desconocido" };
-        }
+        return response?.error 
+            ? { success: false, error: response.error } 
+            : { success: true, message: response.message };
 
-        return { success: true, message: response.message };
-    } catch (error) {
-        console.error(`❌ Error al ${actionDescription}:`, error.message || error);
-        return { success: false, error: error.message || "Error desconocido" };
+    } catch {
+        return { success: false, error: "Error en la solicitud." }; // ✅ Sin logs extra
     }
 }

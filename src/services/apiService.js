@@ -1,24 +1,20 @@
 import { getCSRFTokenFromCookie, clearSession } from "./tokenService.js";
 
-// 🔹 **Definir manualmente la URL base del backend**
 const API_BASE_URL = "https://backend-deside.onrender.com"; // ✅ No depende de `VITE_BACKEND_URL`
 
-// 🔄 **Definir caché para reducir solicitudes innecesarias**
 const cache = new Map();
 const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutos
 
 /**
  * 🔹 **Manejo centralizado de solicitudes a la API**
  */
-export async function apiRequest(endpoint, options = {}) {
+export async function apiRequest(endpoint, options = {}, useCache = false) {
   if (!endpoint) throw new Error("❌ API Request sin endpoint definido.");
-
-  // ✅ Asegurar que la URL es válida y evitar dobles barras (`//`)
   const requestUrl = `${API_BASE_URL.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
 
-  // ✅ Verificar caché antes de hacer la solicitud
+  // ✅ Verificar caché solo si se permite
   const cacheKey = `${requestUrl}:${JSON.stringify(options)}`;
-  if (cache.has(cacheKey)) {
+  if (useCache && cache.has(cacheKey)) {
     const cachedData = cache.get(cacheKey);
     if (Date.now() - cachedData.timestamp <= CACHE_EXPIRATION) {
       return cachedData.data;
@@ -41,29 +37,24 @@ export async function apiRequest(endpoint, options = {}) {
 
     if (!response.ok) {
       if (response.status === 401) {
-        console.warn("⚠️ No autorizado. La sesión ha expirado.");
-
+        console.warn("⚠️ Sesión expirada, intentando renovar token...");
         const refreshed = await refreshToken();
         if (!refreshed) {
-          console.warn("❌ No se pudo renovar el token. Cerrando sesión.");
           clearSession();
           return { isAuthenticated: false };
         }
-
-        console.log("✅ Token renovado. Reintentando solicitud...");
-        return await apiRequest(endpoint, options);
+        return await apiRequest(endpoint, options, useCache);
       }
 
-      const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
-      throw new Error(`❌ Error ${response.status}: ${errorData.message || response.statusText}`);
+      const errorData = await response.json().catch(() => ({ message: "Error desconocido" }));
+      return { error: true, statusCode: response.status, message: errorData.message || response.statusText };
     }
 
     const responseData = await response.json();
-    cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
+    if (useCache) cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
     return responseData;
   } catch (error) {
-    console.error(`❌ API Error (${requestUrl}):`, error.message || error);
-    return { error: error.message || "Unknown API error" };
+    return { error: true, message: error.message || "Error en la API" };
   }
 }
 
@@ -78,42 +69,31 @@ export async function authenticateWithServer(pubkey, signature, message) {
 }
 
 export async function checkAuthStatus() {
-  try {
-    const result = await apiRequest("/api/auth/status", { method: "GET" });
+  const result = await apiRequest("/api/auth/status", { method: "GET" });
 
-    if (!result.isAuthenticated) {
-      console.warn("⚠️ Sesión no autenticada. Intentando refrescar el token...");
-      const refreshed = await refreshToken();
-      if (!refreshed) {
-        console.warn("❌ No se pudo refrescar el token. Cerrando sesión.");
-        clearSession();
-        return { isAuthenticated: false };
-      }
-      return await apiRequest("/api/auth/status", { method: "GET" });
+  if (result?.isAuthenticated === false) {
+    console.warn("⚠️ Sesión no autenticada. Intentando refrescar el token...");
+    const refreshed = await refreshToken();
+    if (!refreshed) {
+      clearSession();
+      return { isAuthenticated: false };
     }
-
-    return result;
-  } catch (error) {
-    console.error("❌ Error en checkAuthStatus:", error);
-    return { isAuthenticated: false };
+    return await apiRequest("/api/auth/status", { method: "GET" });
   }
+
+  return result;
 }
 
 export async function logout() {
-  try {
-    const response = await apiRequest("/api/auth/revoke", { method: "POST" });
+  const response = await apiRequest("/api/auth/revoke", { method: "POST" });
 
-    if (!response || response.error) {
-      console.error("❌ Error al hacer logout en el backend.");
-      return { success: false };
-    }
-
-    clearSession();
-    return { success: true };
-  } catch (error) {
-    console.error("❌ Error en logout:", error);
+  if (!response || response.error) {
+    console.error("❌ Error al hacer logout en el backend.");
     return { success: false };
   }
+
+  clearSession();
+  return { success: true };
 }
 
 /**
@@ -122,14 +102,11 @@ export async function logout() {
 let isRefreshingToken = false;
 
 export async function refreshToken() {
-  if (isRefreshingToken) {
-    console.warn("⚠️ Ya hay un intento de refresco en curso. Esperando...");
-    return false;
-  }
+  if (isRefreshingToken) return false;
 
   isRefreshingToken = true;
   try {
-    console.log("🔄 Intentando refrescar token...");
+    console.debug("🔄 Intentando refrescar token...");
     const response = await apiRequest("/api/auth/refresh", { method: "POST" });
 
     if (response.error) {
@@ -137,13 +114,11 @@ export async function refreshToken() {
       return false;
     }
 
-    console.log("✅ Token refrescado con éxito.");
-    window.dispatchEvent(new Event("sessionRefreshed"));
+    console.debug("✅ Token refrescado con éxito.");
     return true;
-  } catch (error) {
-    console.error("❌ Error al refrescar token:", error);
+  } catch {
     return false;
   } finally {
-    isRefreshingToken = false; // ✅ Asegurar que siempre se desbloquea
+    isRefreshingToken = false;
   }
 }
