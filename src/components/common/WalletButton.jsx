@@ -7,9 +7,8 @@ import "./WalletButton.css";
 
 const WalletButton = memo(() => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // 🔹 Nuevo estado para WalletMenu
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [balance, setBalance] = useState(null);
-  const [selectedWallet, setSelectedWallet] = useState(null);
   const [walletAddress, setWalletAddress] = useState(null);
   const [isCheckingWallet, setIsCheckingWallet] = useState(true);
 
@@ -17,11 +16,10 @@ const WalletButton = memo(() => {
   useEffect(() => {
     const detectWallet = async () => {
       console.log("🔄 Revisando conexión automática...");
-      const { walletAddress, selectedWallet } = await getConnectedWallet();
+      const { walletAddress } = await getConnectedWallet();
 
       if (walletAddress) {
-        console.log(`✅ Wallet detectada automáticamente: ${selectedWallet} (${walletAddress})`);
-        setSelectedWallet(selectedWallet);
+        console.log(`✅ Wallet detectada automáticamente: ${walletAddress}`);
         setWalletAddress(walletAddress);
         updateBalance(walletAddress);
       } else {
@@ -87,7 +85,6 @@ const WalletButton = memo(() => {
 
     if (result.status === "connected") {
       console.log("✅ Wallet conectada correctamente:", result.pubkey);
-      setSelectedWallet(wallet);
       setWalletAddress(result.pubkey);
       updateBalance(result.pubkey);
       handleCloseModal();
@@ -99,21 +96,15 @@ const WalletButton = memo(() => {
   // ✅ **Actualizar UI al detectar evento de conexión de wallet**
   useEffect(() => {
     const handleWalletConnected = async () => {
-      console.log("🔄 Evento walletConnected detectado. Verificando estado...");
-      const { walletAddress, selectedWallet } = await getConnectedWallet();
-
-      if (walletAddress) {
-        console.log(`✅ Wallet ahora conectada: ${selectedWallet} (${walletAddress})`);
-        setSelectedWallet(selectedWallet);
-        setWalletAddress(walletAddress);
-        updateBalance(walletAddress);
-      }
+      console.log("🔄 Evento walletConnected detectado...");
+      const { walletAddress } = await getConnectedWallet();
+      setWalletAddress(walletAddress);
+      updateBalance(walletAddress);
     };
 
     const handleWalletDisconnected = () => {
       console.warn("❌ Wallet desconectada.");
       setWalletAddress(null);
-      setSelectedWallet(null);
       setBalance(0);
     };
 
@@ -131,7 +122,6 @@ const WalletButton = memo(() => {
     console.log("🚪 Cierre de sesión iniciado...");
     await disconnectWallet();
     setWalletAddress(null);
-    setSelectedWallet(null);
     setBalance(0);
   };
 

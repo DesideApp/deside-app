@@ -12,15 +12,14 @@ const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
     setIsLoading(true);
 
     try {
-      if (typeof onWalletSelected === "function") {
-        await onWalletSelected(walletType); // ✅ Solo envía el tipo de wallet seleccionada
+      if (onWalletSelected) {
+        await onWalletSelected(walletType);
       }
-
-      setIsLoading(false);
-      onClose(); // ✅ Cierra el modal inmediatamente
     } catch (error) {
       console.error("❌ Error abriendo la wallet:", error);
+    } finally {
       setIsLoading(false);
+      onClose();
     }
   };
 
@@ -33,12 +32,8 @@ const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
 
         <div className="wallet-options">
           {["phantom", "backpack", "magiceden"].map((wallet) => (
-            <button 
-              key={wallet} 
-              onClick={() => handleWalletSelection(wallet)} 
-              disabled={isLoading}
-            >
-              {isLoading ? "Opening..." : `${wallet.charAt(0).toUpperCase() + wallet.slice(1)} Wallet`}
+            <button key={wallet} onClick={() => handleWalletSelection(wallet)} disabled={isLoading}>
+              {isLoading ? "Opening..." : `${wallet.charAt(0).toUpperCase()}${wallet.slice(1)} Wallet`}
             </button>
           ))}
         </div>

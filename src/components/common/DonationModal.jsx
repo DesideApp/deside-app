@@ -9,7 +9,7 @@ const DonationModal = memo(({ isOpen, onClose }) => {
 
   const handleCopy = useCallback(async () => {
     if (!DONATION_WALLET) return;
-    
+
     try {
       await navigator.clipboard.writeText(DONATION_WALLET);
       setCopySuccess(true);
@@ -24,13 +24,13 @@ const DonationModal = memo(({ isOpen, onClose }) => {
   return (
     <div className="donation-modal-overlay" onClick={onClose}>
       <div className="donation-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby="donation-title">
-        <h2 id="donation-title">💜 Support Our Project</h2>
+        <h2 id="donation-title">❤️ Support Our Project</h2>
         <p className="donation-message">
           We don't run ads or sell data. If you enjoy using DeChat, consider supporting us!
         </p>
 
         <div className="donation-wallet-container">
-          <span>{DONATION_WALLET}</span>
+          <span className="wallet-address">{DONATION_WALLET}</span>
           <button className="copy-button" onClick={handleCopy} aria-label="Copy Wallet Address">
             <Copy size={18} />
           </button>
@@ -38,7 +38,7 @@ const DonationModal = memo(({ isOpen, onClose }) => {
 
         {copySuccess && (
           <p className="copy-success" aria-live="polite">
-            ✅ Wallet address copied! Thank you! 💜
+            ✅ Wallet address copied! Thank you! ❤️
           </p>
         )}
 
