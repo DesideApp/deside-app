@@ -8,15 +8,9 @@ function Chat() {
     return (
         <div className="chat-page-container">
             <div className="chat-layout">
-                <div className="left-panel">
-                    <ContactList />
-                </div>
-                <div className="chat-window-panel">
-                    <ChatWindow />
-                </div>
-                <div className="right-panel">
-                    <RightPanel />
-                </div>
+                <ContactList />
+                <ChatWindow />
+                <RightPanel />
             </div>
         </div>
     );
