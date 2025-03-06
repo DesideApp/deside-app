@@ -4,18 +4,18 @@
     height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     background-color: #f4f4f4;
-    padding: 20px 0;
+    padding: 40px 0; /* 🔹 Mayor separación del Header y BottomBar */
     box-sizing: border-box;
 }
 
-/* 📌 Layout que distribuye los componentes */
+/* 📌 Layout que distribuye las ventanas */
 .chat-layout {
-    width: 90%;
-    height: calc(100vh - 80px); /* Ajuste para dejar espacio al Header y BottomBar */
+    width: 85%;
+    height: 75vh; /* 🔹 Reduce altura general para que no cubra toda la pantalla */
     display: flex;
-    gap: 20px;
+    gap: 25px; /* 🔹 Espacio más amplio entre ventanas */
     justify-content: center;
     align-items: stretch;
 }
@@ -24,6 +24,9 @@
 .chat-layout > * {
     flex: 1;
     height: 100%;
+    max-height: 75vh; /* 🔹 Evita que se extiendan demasiado */
+    border-radius: 12px;
+    box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.08); /* 🔹 Sombra más suave */
 }
 
 /* 📌 Responsive: Se adapta a pantallas más pequeñas */
@@ -37,5 +40,6 @@
     .chat-layout > * {
         width: 90%;
         height: auto;
+        max-height: none; /* 🔹 En móviles, las ventanas crecen si es necesario */
     }
 }
