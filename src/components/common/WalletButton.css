@@ -12,21 +12,22 @@
     background-color: #fc554f;
     color: white;
     height: 40px;
-    min-width: 120px; /* 🔹 Evita que el botón se achique demasiado */
+    min-width: 120px;
+    max-width: 100%;
     font-size: 16px;
     font-family: 'Montserrat', sans-serif;
     padding: 0 18px;
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    text-align: center; /* 🔹 Asegura alineación del texto */
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+    text-align: center;
 }
 
 /* Hover para wallet-button */
 .wallet-button:hover {
-    background-color: #fc564f;
-    opacity: 0.85;
+    background-color: #e04a45; /* 🔹 Más visible en hover */
+    opacity: 0.9;
 }
 
 /* 🔹 Botón del menú */
@@ -40,12 +41,13 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
 }
 
+/* Hover para menu-button */
 .menu-button:hover {
-    background-color: #fc564f;
-    opacity: 0.85;
+    background-color: #e04a45;
+    opacity: 0.9;
 }
 
 /* 🔹 Icono del menú: 3 líneas blancas */
@@ -55,24 +57,15 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    position: relative;
+    align-items: center;
 }
 
-.menu-icon::before,
-.menu-icon,
-.menu-icon::after {
-    content: "";
+/* 🔹 Cada línea dentro del icono */
+.menu-icon span {
+    display: block;
     width: 24px;
-    height: 3px; /* 🔹 Grosor uniforme */
+    height: 3px;
     background-color: white;
     border-radius: 2px;
     transition: all 0.3s ease;
-}
-
-.menu-icon::before {
-    transform: translateY(-8px);
-}
-
-.menu-icon::after {
-    transform: translateY(8px);
 }
