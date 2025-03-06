@@ -1,8 +1,8 @@
 // 🔹 **Definir proveedores de wallets compatibles**
 const WALLET_PROVIDERS = {
-    phantom: () => (typeof window !== "undefined" && window.solana?.isPhantom ? window.solana : null),
-    backpack: () => (typeof window !== "undefined" && window.xnft?.solana ? window.xnft.solana : null),
-    magiceden: () => (typeof window !== "undefined" && window.magicEden?.solana ? window.magicEden.solana : null),
+    phantom: () => window?.solana?.isPhantom ? window.solana : null,
+    backpack: () => window?.xnft?.solana || null,
+    magiceden: () => window?.magicEden?.solana || null,
 };
 
 /**
@@ -11,13 +11,7 @@ const WALLET_PROVIDERS = {
  * @returns {object|null} - Objeto del proveedor si está disponible, `null` si no lo está.
  */
 export function getProvider(wallet) {
-    if (!wallet || !WALLET_PROVIDERS[wallet]) {
-        console.warn(`⚠️ Proveedor de wallet desconocido: ${wallet}`);
-        return null;
-    }
-    const provider = WALLET_PROVIDERS[wallet]();
-    if (!provider) console.warn(`⚠️ ${wallet} Wallet no detectada.`);
-    return provider;
+    return WALLET_PROVIDERS[wallet]?.() || null;
 }
 
 /**
@@ -25,14 +19,7 @@ export function getProvider(wallet) {
  * @returns {string|null} - Nombre de la wallet conectada o `null` si ninguna está conectada.
  */
 export function isWalletConnected() {
-    for (const [wallet, providerFn] of Object.entries(WALLET_PROVIDERS)) {
-        const provider = providerFn();
-        if (provider?.isConnected) {
-            console.log(`✅ Wallet detectada conectada: ${wallet}`);
-            return wallet;
-        }
-    }
-    return null;
+    return Object.keys(WALLET_PROVIDERS).find(wallet => getProvider(wallet)?.isConnected) || null;
 }
 
 /**
@@ -43,22 +30,17 @@ export function isWalletConnected() {
 export function listenToWalletEvents(onConnect, onDisconnect) {
     Object.entries(WALLET_PROVIDERS).forEach(([wallet, providerFn]) => {
         const provider = providerFn();
-        if (!provider || !provider.on) return;
+        if (!provider?.on) return;
 
-        console.log(`🔍 Escuchando eventos de conexión en: ${wallet}`);
-
-        // ✅ Eliminar eventos antiguos ANTES de asignar nuevos
         provider.off?.("connect");
         provider.off?.("disconnect");
 
         provider.on("connect", () => {
-            console.log(`✅ ${wallet} Wallet conectada.`);
             onConnect?.(wallet);
             window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet } }));
         });
 
         provider.on("disconnect", () => {
-            console.warn(`❌ ${wallet} Wallet desconectada.`);
             onDisconnect?.(wallet);
             window.dispatchEvent(new CustomEvent("walletDisconnected", { detail: { wallet } }));
         });

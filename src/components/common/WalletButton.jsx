@@ -12,51 +12,41 @@ const WalletButton = memo(() => {
   const [walletAddress, setWalletAddress] = useState(null);
   const [isCheckingWallet, setIsCheckingWallet] = useState(true);
 
-  // ✅ **Detectar conexión automática SIN abrir modal**
-  useEffect(() => {
-    const detectWallet = async () => {
-      console.log("🔄 Revisando conexión automática...");
-      const { walletAddress } = await getConnectedWallet();
-
-      setWalletAddress(walletAddress || null);
-      if (walletAddress) {
-        console.log(`✅ Wallet detectada automáticamente: ${walletAddress}`);
-        await updateBalance(walletAddress);
-      } else {
-        console.warn("⚠️ No se detectó ninguna wallet conectada.");
-        setBalance(null);
-      }
-      setIsCheckingWallet(false);
-    };
-
-    detectWallet();
-  }, []);
-
-  // ✅ **Actualizar saldo cuando cambia la wallet**
-  useEffect(() => {
-    if (walletAddress) updateBalance(walletAddress);
-  }, [walletAddress]);
-
-  const updateBalance = async (address) => {
+  // ✅ **Actualizar saldo evitando renders innecesarios**
+  const updateBalance = useCallback(async (address) => {
+    if (!address) return setBalance(null);
     try {
-      const walletBalance = address ? await getWalletBalance(address) : null;
+      const walletBalance = await getWalletBalance(address);
       setBalance(walletBalance);
       console.log(`✅ Balance actualizado: ${walletBalance !== null ? walletBalance + " SOL" : "No disponible"}`);
     } catch (error) {
       console.error("❌ Error obteniendo balance:", error);
       setBalance(0);
     }
-  };
+  }, []);
+
+  // ✅ **Detectar conexión automática SIN abrir modal**
+  useEffect(() => {
+    const detectWallet = async () => {
+      console.log("🔄 Revisando conexión automática...");
+      const { walletAddress } = await getConnectedWallet();
+
+      if (walletAddress) {
+        console.log(`✅ Wallet detectada automáticamente: ${walletAddress}`);
+        setWalletAddress(walletAddress);
+        updateBalance(walletAddress);
+      } else {
+        console.warn("⚠️ No se detectó ninguna wallet conectada.");
+      }
+      setIsCheckingWallet(false);
+    };
+
+    detectWallet();
+  }, [updateBalance]);
 
   // ✅ **Abrir WalletMenu si ya está conectada, Modal si no lo está**
   const handleWalletButtonClick = useCallback(() => {
-    if (walletAddress) {
-      console.log("✅ Wallet ya conectada, abriendo WalletMenu...");
-      setIsMenuOpen((prev) => !prev);
-    } else {
-      console.log("🔵 Abriendo modal de conexión...");
-      setIsModalOpen(true);
-    }
+    walletAddress ? setIsMenuOpen((prev) => !prev) : setIsModalOpen(true);
   }, [walletAddress]);
 
   // ✅ **Cerrar modal y menú**
@@ -68,23 +58,23 @@ const WalletButton = memo(() => {
     console.log(`🔹 Intentando conectar con ${wallet}...`);
     const result = await connectWallet(wallet);
 
-    if (result.status === "connected") {
+    if (result.pubkey) {
       console.log("✅ Wallet conectada correctamente:", result.pubkey);
       setWalletAddress(result.pubkey);
-      await updateBalance(result.pubkey);
+      updateBalance(result.pubkey);
       handleCloseModal();
     } else {
       console.warn("⚠️ Error conectando wallet:", result.error);
     }
-  }, [handleCloseModal]);
+  }, [handleCloseModal, updateBalance]);
 
   // ✅ **Actualizar UI al detectar evento de conexión/desconexión**
   useEffect(() => {
-    const handleWalletConnected = async () => {
-      console.log("🔄 Evento walletConnected detectado...");
-      const { walletAddress } = await getConnectedWallet();
-      setWalletAddress(walletAddress);
-      await updateBalance(walletAddress);
+    const handleWalletConnected = (event) => {
+      const { pubkey } = event.detail;
+      console.log("🔄 Evento walletConnected detectado:", pubkey);
+      setWalletAddress(pubkey);
+      updateBalance(pubkey);
     };
 
     const handleWalletDisconnected = () => {
@@ -101,7 +91,7 @@ const WalletButton = memo(() => {
       window.removeEventListener("walletConnected", handleWalletConnected);
       window.removeEventListener("walletDisconnected", handleWalletDisconnected);
     };
-  }, []);
+  }, [updateBalance]);
 
   // ✅ **Logout real**
   const handleLogoutClick = async () => {
@@ -121,12 +111,10 @@ const WalletButton = memo(() => {
 
   return (
     <div className="wallet-container">
-      {/* ✅ **Botón principal - Si wallet está conectada, abre el menú** */}
       <button className="wallet-button" onClick={handleWalletButtonClick} disabled={isCheckingWallet}>
         <span>{formattedBalance}</span>
       </button>
 
-      {/* ✅ **Icono de hamburguesa SIEMPRE visible y manejado desde WalletMenu** */}
       <WalletMenu 
         isOpen={isMenuOpen} 
         handleLogout={handleLogoutClick} 
@@ -135,7 +123,6 @@ const WalletButton = memo(() => {
         balance={balance} 
       />
 
-      {/* ✅ **Modal de conexión** */}
       <WalletModal isOpen={isModalOpen} onClose={handleCloseModal} onWalletSelected={handleWalletSelected} />
     </div>
   );

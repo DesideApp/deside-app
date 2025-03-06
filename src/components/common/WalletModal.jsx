@@ -1,25 +1,29 @@
 import React, { useState } from "react";
+import { getProvider } from "../../services/walletProviders"; // ✅ Acceder directamente al proveedor
 import "./WalletModal.css";
 
-const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
+const WalletModal = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ **Manejamos la selección sin bloqueos innecesarios**
-  const handleWalletSelection = async (walletType) => {
-    if (isLoading) return; // ✅ Evita selección doble mientras carga
-
-    console.log(`🟢 Abriendo proveedor de ${walletType}...`);
+  const handleWalletSelection = async (wallet) => {
+    if (isLoading) return;
     setIsLoading(true);
 
+    const provider = getProvider(wallet);
+    if (!provider) {
+      console.error(`❌ Proveedor de ${wallet} no encontrado.`);
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      if (onWalletSelected) {
-        await onWalletSelected(walletType);
-        onClose(); // ✅ Solo cerrar el modal si la conexión es exitosa
-      }
+      await provider.connect();
+      window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet, pubkey: provider.publicKey?.toBase58() } }));
     } catch (error) {
-      console.error("❌ Error abriendo la wallet:", error);
+      console.error(`❌ Error conectando con ${wallet}:`, error);
     } finally {
       setIsLoading(false);
+      onClose();
     }
   };
 
@@ -29,7 +33,6 @@ const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
     <div className="wallet-modal-overlay" onClick={!isLoading ? onClose : null}>
       <div className="wallet-modal" onClick={(e) => e.stopPropagation()}>
         <h2>🔗 Select Your Wallet</h2>
-
         <div className="wallet-options">
           {["phantom", "backpack", "magiceden"].map((wallet) => (
             <button key={wallet} onClick={() => handleWalletSelection(wallet)} disabled={isLoading}>
@@ -37,7 +40,6 @@ const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
             </button>
           ))}
         </div>
-
         <button className="close-modal" onClick={!isLoading ? onClose : null} disabled={isLoading}>
           Close
         </button>
