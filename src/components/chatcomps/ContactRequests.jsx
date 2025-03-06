@@ -1,20 +1,17 @@
 import React, { useEffect, useState, memo, useCallback } from "react";
-import { useServerContext } from "../../contexts/ServerContext"; // ✅ Nuevo contexto
 import { fetchContacts, approveContact, rejectContact } from "../../services/contactService.js";
-import { useAuthManager } from "../../services/authManager"; // ✅ Manejo de autenticación
+import { useAuthManager } from "../../services/authManager"; // ✅ Usamos AuthManager
 import "./ContactRequests.css";
 
 const ContactRequests = () => {
-    const { walletAddress, isReady } = useServerContext(); // ✅ Usamos el nuevo contexto
-    const { isAuthenticated, handleLoginResponse } = useAuthManager(); // ✅ Autenticación con AuthManager
-
+    const { isAuthenticated, handleLoginResponse } = useAuthManager(); // ✅ Eliminamos ServerContext
     const [receivedRequests, setReceivedRequests] = useState([]);
     const [sentRequests, setSentRequests] = useState([]);
     const [errorMessage, setErrorMessage] = useState("");
 
     // ✅ **Obtener solicitudes de contacto SOLO si el usuario está autenticado**
     useEffect(() => {
-        if (!isReady || !walletAddress || !isAuthenticated) return;
+        if (!isAuthenticated) return; // ✅ Solo cargamos si está autenticado
 
         let isMounted = true;
 
@@ -36,7 +33,7 @@ const ContactRequests = () => {
         return () => {
             isMounted = false;
         };
-    }, [isReady, walletAddress, isAuthenticated]);
+    }, [isAuthenticated]);
 
     // ✅ **Manejo de solicitudes de contacto**
     const handleAction = useCallback(async (pubkey, action) => {

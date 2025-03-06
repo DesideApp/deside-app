@@ -1,35 +1,31 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import ChatInput from "./ChatInput";
-import { useServerContext } from "../../contexts/ServerContext"; // ✅ Usamos ServerContext
 import useWebRTC from "../../hooks/useWebRTC";
 import { io } from "socket.io-client";
 import { useAuthManager } from "../../services/authManager"; // ✅ Usamos AuthManager
 import "./ChatWindow.css";
 
 function ChatWindow({ selectedContact }) {
-  const { walletAddress } = useServerContext(); // ✅ Nuevo contexto
+  const { isAuthenticated, selectedWallet } = useAuthManager(); // ✅ Reemplazamos ServerContext
   const chatContainerRef = useRef(null);
   const socketRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
   const [confirmedContacts, setConfirmedContacts] = useState([]);
 
-  // ✅ **Usamos AuthManager para gestionar el estado de autenticación**
-  const { isAuthenticated, handleLoginResponse } = useAuthManager();
-
   // ✅ **Obtener lista de contactos confirmados**
   const fetchContacts = useCallback(async () => {
-    if (!walletAddress || !isAuthenticated) return; // ✅ Solo si el usuario está autenticado
+    if (!selectedWallet || !isAuthenticated) return;
     try {
       const contacts = await getContacts();
       setConfirmedContacts(contacts.confirmed.map((c) => c.wallet));
     } catch (error) {
       console.error("❌ Error obteniendo contactos:", error);
     }
-  }, [walletAddress, isAuthenticated]);
+  }, [selectedWallet, isAuthenticated]);
 
   // ✅ **Inicializar WebSocket solo si el usuario tiene un contacto confirmado**
   const initializeSocket = useCallback(() => {
-    if (!walletAddress || !selectedContact || !isAuthenticated) return;
+    if (!selectedWallet || !selectedContact || !isAuthenticated) return;
 
     if (!confirmedContacts.includes(selectedContact)) {
       console.warn("⚠️ Intento de chat con un contacto no confirmado.");
@@ -50,7 +46,7 @@ function ChatWindow({ selectedContact }) {
     socket.on("connect", () => {
       console.log("🟢 Conectado al servidor WebSocket");
       setIsConnected(true);
-      socket.emit("register_wallet", walletAddress);
+      socket.emit("register_wallet", selectedWallet);
     });
 
     socket.on("disconnect", () => {
@@ -59,10 +55,10 @@ function ChatWindow({ selectedContact }) {
     });
 
     socketRef.current = socket;
-  }, [walletAddress, selectedContact, confirmedContacts, isAuthenticated]);
+  }, [selectedWallet, selectedContact, confirmedContacts, isAuthenticated]);
 
   // ✅ **Gestionar WebRTC solo si el usuario tiene un contacto confirmado**
-  const { messages, sendMessage } = useWebRTC(selectedContact, walletAddress);
+  const { messages, sendMessage } = useWebRTC(selectedContact, selectedWallet);
 
   // ✅ **Mantener scroll en el último mensaje recibido**
   useEffect(() => {
@@ -92,10 +88,10 @@ function ChatWindow({ selectedContact }) {
   const handleSendMessage = () => {
     if (!isAuthenticated) {
       console.warn("⚠️ Intento de enviar mensaje sin autenticación. Activando login...");
-      handleLoginResponse(); // 🔄 Activa autenticación automática
+      handleLoginResponse(() => sendMessage(selectedContact, selectedWallet)); // 🔄 Se ejecuta solo tras login exitoso
       return;
     }
-    sendMessage(selectedContact, walletAddress);
+    sendMessage(selectedContact, selectedWallet);
   };
 
   return (

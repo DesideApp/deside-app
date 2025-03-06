@@ -1,12 +1,10 @@
 import React, { useEffect, useCallback } from "react";
 import useContactManager from "../../hooks/useContactManager";
-import { useServerContext } from "../../contexts/ServerContext"; // ✅ Nuevo contexto
 import { useAuthManager } from "../../services/authManager";  // ✅ Manejo de autenticación
 import "./ContactList.css";
 
 const ContactList = ({ onSelectContact }) => {
-    const { walletAddress, isReady } = useServerContext(); // ✅ Usamos ServerContext
-    const { isAuthenticated, isLoading, handleLoginResponse } = useAuthManager(); // ✅ Manejo de autenticación
+    const { isAuthenticated, selectedWallet, isLoading, handleLoginResponse } = useAuthManager(); // ✅ Manejo de autenticación
     const { confirmedContacts, fetchContacts } = useContactManager();
 
     // ✅ **Intentar agregar un contacto, autenticando si es necesario**
@@ -27,7 +25,7 @@ const ContactList = ({ onSelectContact }) => {
         <div className="contact-list-container">
             <h3>📞 Contactos</h3>
 
-            {!walletAddress ? (
+            {!selectedWallet ? (
                 <p className="auth-warning">⚠️ Conéctate a una wallet para gestionar contactos.</p>
             ) : confirmedContacts.length > 0 ? (
                 <ul className="contact-list">
@@ -44,7 +42,7 @@ const ContactList = ({ onSelectContact }) => {
             <button 
                 className="floating-add-button" 
                 onClick={handleAddContact} 
-                disabled={!walletAddress || isLoading}
+                disabled={!selectedWallet || isLoading}
             >
                 ➕
             </button>
