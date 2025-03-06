@@ -21,10 +21,11 @@ const WalletButton = memo(() => {
       if (walletAddress) {
         console.log(`✅ Wallet detectada automáticamente: ${walletAddress}`);
         setWalletAddress(walletAddress);
-        updateBalance(walletAddress);
+        await updateBalance(walletAddress);
       } else {
         console.warn("⚠️ No se detectó ninguna wallet conectada.");
-        setBalance(0);
+        setWalletAddress(null);
+        setBalance(null);
       }
       setIsCheckingWallet(false);
     };
@@ -43,7 +44,7 @@ const WalletButton = memo(() => {
   const updateBalance = async (address) => {
     try {
       if (!address) {
-        setBalance(0);
+        setBalance(null);
         return;
       }
 
@@ -86,7 +87,7 @@ const WalletButton = memo(() => {
     if (result.status === "connected") {
       console.log("✅ Wallet conectada correctamente:", result.pubkey);
       setWalletAddress(result.pubkey);
-      updateBalance(result.pubkey);
+      await updateBalance(result.pubkey);
       handleCloseModal();
     } else {
       console.warn("⚠️ Error conectando wallet:", result.error);
@@ -99,13 +100,13 @@ const WalletButton = memo(() => {
       console.log("🔄 Evento walletConnected detectado...");
       const { walletAddress } = await getConnectedWallet();
       setWalletAddress(walletAddress);
-      updateBalance(walletAddress);
+      await updateBalance(walletAddress);
     };
 
     const handleWalletDisconnected = () => {
       console.warn("❌ Wallet desconectada.");
       setWalletAddress(null);
-      setBalance(0);
+      setBalance(null);
     };
 
     window.addEventListener("walletConnected", handleWalletConnected);
@@ -122,23 +123,27 @@ const WalletButton = memo(() => {
     console.log("🚪 Cierre de sesión iniciado...");
     await disconnectWallet();
     setWalletAddress(null);
-    setBalance(0);
+    setBalance(null);
   };
 
-  const formattedBalance = balance !== null ? `${balance.toFixed(2)} SOL` : "Connect Wallet";
-  const balanceStyle = balance === 0 ? { color: "gray" } : {};
+  // ✅ **Control de contenido del botón**
+  const formattedBalance = walletAddress
+    ? balance !== null
+      ? `${balance.toFixed(2)} SOL`
+      : "0.00 SOL"
+    : "Connect Wallet";
 
   return (
     <div className="wallet-container">
-      {/* ✅ **Si ya hay wallet conectada, abrir WalletMenu, si no abrir Modal** */}
+      {/* ✅ **Botón principal que maneja conexión y menú** */}
       <button className="wallet-button" onClick={handleWalletButtonClick} disabled={isCheckingWallet}>
-        <span style={balanceStyle}>{formattedBalance}</span>
+        <span>{formattedBalance}</span>
       </button>
 
-      {/* ✅ **WalletMenu ahora se abre desde WalletButton** */}
-      {isMenuOpen && <WalletMenu handleLogout={handleLogoutClick} onClose={handleCloseMenu} />}
+      {/* ✅ **WalletMenu siempre disponible, pero solo se muestra al hacer clic** */}
+      <WalletMenu isOpen={isMenuOpen} handleLogout={handleLogoutClick} onClose={handleCloseMenu} />
 
-      {/* ✅ **Modal de conexión TOTALMENTE CONTROLADO desde aquí** */}
+      {/* ✅ **Modal de conexión** */}
       <WalletModal isOpen={isModalOpen} onClose={handleCloseModal} onWalletSelected={handleWalletSelected} />
     </div>
   );
