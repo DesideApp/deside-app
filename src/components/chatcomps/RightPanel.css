@@ -4,35 +4,41 @@
     align-items: center;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.05); /* Ligero tono de fondo */
-    border-left: 1px solid rgba(0, 0, 0, 0.1); /* Separador visual */
+    background-color: #ffffff; /* ✅ Consistente con los otros paneles */
+    border-radius: 12px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* ✅ Misma sombra que ContactList */
     padding: 15px;
+    overflow: hidden; /* ✅ Evita que el contenido sobresalga */
 }
 
 /* ✅ Navegación entre pestañas */
 .right-panel-nav {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     width: 100%;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .right-panel-nav button {
     flex: 1;
-    padding: 8px 12px;
+    padding: 10px 14px;
     border: none;
     background: none;
     font-size: 1rem;
     font-weight: bold;
-    color: #666;
+    color: #555;
     cursor: pointer;
-    transition: color 0.3s ease, border-bottom 0.3s ease;
-    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.right-panel-nav button:hover {
+    color: #222;
 }
 
 .right-panel-nav button.active {
     color: #000;
-    border-bottom: 2px solid #000;
+    border-bottom: 3px solid #fc554f; /* ✅ Resalta la pestaña activa */
 }
 
 /* ✅ Contenedor del contenido dinámico */
@@ -41,6 +47,9 @@
     flex-grow: 1;
     overflow-y: auto; /* ✅ Permitir desplazamiento si hay mucho contenido */
     padding: 10px;
+    border-radius: 8px;
+    background-color: #f9f9f9; /* ✅ Un poco de diferencia visual */
+    box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 /* ✅ Contenedor de "Coming Soon" (por si agregamos más secciones) */

@@ -12,7 +12,7 @@ const WalletButton = memo(() => {
   const [isCheckingWallet, setIsCheckingWallet] = useState(true);
 
   /**
-   * 🔹 **Actualizar saldo de la wallet** (Usa `getWalletBalance()` desde `walletService.js`)
+   * 🔹 **Actualizar saldo de la wallet**
    */
   const updateBalance = useCallback(async () => {
     const { walletAddress, selectedWallet } = await getConnectedWallet();
@@ -27,24 +27,24 @@ const WalletButton = memo(() => {
   }, []);
 
   /**
-   * 🔹 **Detectar conexión automática al abrir la app**
+   * 🔹 **Detectar conexión automática**
    */
   useEffect(() => {
     const detectWallet = async () => {
       const { walletAddress } = await getConnectedWallet();
       setWalletAddress(walletAddress || null);
-      if (walletAddress) await updateBalance(); // ✅ `updateBalance()` ya obtiene `walletAddress`
-      setIsCheckingWallet(false); // ✅ Habilitar el botón después de la detección
+      if (walletAddress) await updateBalance();
+      setIsCheckingWallet(false);
     };
 
     detectWallet();
   }, [updateBalance]);
 
   /**
-   * 🔹 **Manejar clic en el botón (abrir modal o menú)**
+   * 🔹 **Abrir menú o modal según el estado de la wallet**
    */
   const handleWalletButtonClick = useCallback(() => {
-    if (isCheckingWallet) return; // ✅ No hacer nada si aún se está verificando
+    if (isCheckingWallet) return;
     walletAddress ? setIsMenuOpen((prev) => !prev) : setIsModalOpen(true);
   }, [walletAddress, isCheckingWallet]);
 
@@ -56,7 +56,6 @@ const WalletButton = memo(() => {
 
   /**
    * 🔹 **Conectar wallet desde el modal**
-   * @param {string} wallet - Nombre del proveedor seleccionado
    */
   const handleWalletSelected = useCallback(async (wallet) => {
     const result = await connectWallet(wallet);
@@ -68,7 +67,7 @@ const WalletButton = memo(() => {
   }, [handleCloseModal, updateBalance]);
 
   /**
-   * 🔹 **Actualizar UI al detectar eventos de conexión/desconexión**
+   * 🔹 **Detectar eventos de conexión/desconexión**
    */
   useEffect(() => {
     const handleWalletConnected = async (event) => {
@@ -93,17 +92,10 @@ const WalletButton = memo(() => {
   }, [updateBalance]);
 
   /**
-   * 🔹 **Logout (desconectar Web3 o cerrar sesión en backend)**
+   * 🔹 **Cerrar sesión completamente**
    */
   const handleLogoutClick = async () => {
-    const isAuthenticated = document.cookie.includes("accessToken"); // ✅ Detecta si hay sesión en backend
-
-    if (isAuthenticated) {
-      await handleLogout(() => setWalletAddress(null)); // ✅ Cierra sesión en el backend
-    } else {
-      await disconnectWallet(); // ✅ Solo desconecta Web3 si no hay sesión en backend
-    }
-
+    await handleLogout(() => setWalletAddress(null));
     setWalletAddress(null);
     setBalance(null);
     setIsMenuOpen(false);
@@ -120,12 +112,23 @@ const WalletButton = memo(() => {
 
   return (
     <div className="wallet-container">
-      {/* ✅ Botón principal que abre menú o modal */}
+      {/* ✅ Botón principal */}
       <button className="wallet-button" onClick={handleWalletButtonClick} disabled={isCheckingWallet}>
         <span>{formattedBalance}</span>
       </button>
 
-      {/* ✅ Menú de wallet (si está conectado) */}
+      {/* ✅ Botón hamburguesa */}
+      {walletAddress && (
+        <button className={`menu-button ${isMenuOpen ? "open" : ""}`} onClick={handleWalletButtonClick} aria-label="Toggle Wallet Menu">
+          <div className="menu-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </button>
+      )}
+
+      {/* ✅ Menú de wallet */}
       <WalletMenu 
         isOpen={isMenuOpen} 
         handleLogout={handleLogoutClick} 
@@ -134,7 +137,7 @@ const WalletButton = memo(() => {
         balance={balance} 
       />
 
-      {/* ✅ Modal para seleccionar wallet (si no está conectado) */}
+      {/* ✅ Modal para seleccionar wallet */}
       <WalletModal isOpen={isModalOpen} onClose={handleCloseModal} onWalletSelected={handleWalletSelected} />
     </div>
   );

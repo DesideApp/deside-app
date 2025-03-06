@@ -1,7 +1,8 @@
 .wallet-container {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    position: relative;
 }
 
 /* 🔹 Botón principal de conexión/cambio de wallet */
@@ -24,19 +25,18 @@
     text-align: center;
 }
 
-/* Hover para wallet-button */
 .wallet-button:hover {
-    background-color: #e04a45; /* 🔹 Más visible en hover */
+    background-color: #e04a45;
     opacity: 0.9;
 }
 
-/* 🔹 Botón del menú */
+/* 🔹 Botón hamburguesa */
 .menu-button {
     width: 40px;
     height: 40px;
     background-color: #fc554f;
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -44,28 +44,39 @@
     transition: background-color 0.3s ease, opacity 0.3s ease;
 }
 
-/* Hover para menu-button */
 .menu-button:hover {
     background-color: #e04a45;
     opacity: 0.9;
 }
 
-/* 🔹 Icono del menú: 3 líneas blancas */
+/* 📌 Icono de hamburguesa */
 .menu-icon {
     width: 24px;
-    height: 16px;
+    height: 18px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
 }
 
-/* 🔹 Cada línea dentro del icono */
 .menu-icon span {
     display: block;
     width: 24px;
-    height: 3px;
+    height: 2px;
     background-color: white;
     border-radius: 2px;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* 📌 Animación de la hamburguesa */
+.menu-button.open .menu-icon span:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+}
+
+.menu-button.open .menu-icon span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-button.open .menu-icon span:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
 }

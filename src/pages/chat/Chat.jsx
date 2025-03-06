@@ -2,7 +2,7 @@ import React from "react";
 import ChatWindow from "../../components/chatcomps/ChatWindow.jsx";
 import RightPanel from "../../components/chatcomps/RightPanel.jsx";
 import ContactList from "../../components/chatcomps/ContactList.jsx";
-import "./Chat.css"; // Asegurar que el CSS se importe correctamente
+import "./Chat.css"; // ✅ Importamos los estilos correctos
 
 function Chat() {
     return (

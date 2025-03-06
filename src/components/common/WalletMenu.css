@@ -2,7 +2,7 @@
     position: fixed;
     top: 0;
     right: -100%;
-    width: 300px;
+    width: 320px;
     height: 100%;
     background: white;
     border-left: 1px solid #ccc;
@@ -18,19 +18,67 @@
     opacity: 1;
 }
 
-.wallet-menu-header {
+/* 📌 Botón hamburguesa */
+.menu-button {
+    position: absolute;
+    top: 15px;
+    left: -50px;
+    width: 40px;
+    height: 40px;
+    background-color: #fc554f;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    padding: 15px;
-    border-bottom: 1px solid #e6dfda;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
 }
 
+.menu-button:hover {
+    background-color: #e04a45;
+    opacity: 0.9;
+}
+
+/* 📌 Icono de hamburguesa */
+.menu-icon {
+    width: 24px;
+    height: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.menu-icon span {
+    display: block;
+    width: 24px;
+    height: 2px; /* 🔹 Líneas más delgadas */
+    background-color: white;
+    border-radius: 2px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* 📌 Animación de la hamburguesa */
+.menu-button.open .menu-icon span:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+}
+
+.menu-button.open .menu-icon span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-button.open .menu-icon span:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+}
+
+/* 📌 Contenido del menú */
 .wallet-menu-content {
     padding: 15px;
     text-align: center;
 }
 
+/* 📌 Contenedor de la dirección */
 .wallet-address-container {
     display: flex;
     align-items: center;
@@ -42,6 +90,7 @@
     margin-bottom: 15px;
 }
 
+/* 📌 Botón de copiar */
 .copy-button {
     background: none;
     border: none;
@@ -53,7 +102,8 @@
     opacity: 0.7;
 }
 
-.connect-button, .logout-button, .donate-button {
+/* 📌 Botones de conexión y logout */
+.connect-button, .logout-button {
     width: 100%;
     padding: 10px 20px;
     background-color: #fc554f;
@@ -68,7 +118,7 @@
     margin-bottom: 10px;
 }
 
-.connect-button:hover, .logout-button:hover, .donate-button:hover {
+.connect-button:hover, .logout-button:hover {
     background-color: #fc564f;
     opacity: 0.8;
 }
@@ -81,61 +131,9 @@
     background-color: #e04343;
 }
 
-.donate-button {
-    background-color: #ffbd4d;
-}
-
-.donate-button:hover {
-    background-color: #e0a43d;
-}
-
-/* 🔹 Botón del menú con 3 líneas blancas alineadas */
-.menu-button {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: none;
-    border: none;
-    cursor: pointer;
-    position: relative;
-    transition: transform 0.3s ease-in-out;
-}
-
-.menu-icon {
-    width: 24px;
-    height: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.menu-icon span {
-    display: block;
-    width: 24px;
-    height: 3px;
-    background-color: white;
-    border-radius: 2px;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-/* 🔹 Animación de la hamburguesa al abrir */
-.menu-button.open .menu-icon span:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
-}
-
-.menu-button.open .menu-icon span:nth-child(2) {
-    opacity: 0;
-}
-
-.menu-button.open .menu-icon span:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
-}
-
-/* 🛠️ Ajustes para mejorar el tamaño y alineación */
-.menu-icon span {
-    transition: all 0.3s ease-in-out;
+/* 📌 Mensaje de copia exitosa */
+.copy-success {
+    font-size: 0.85rem;
+    color: #28a745;
+    margin-top: 5px;
 }

@@ -1,24 +1,27 @@
 .chat-window {
     display: flex;
     flex-direction: column;
-    height: 70vh;
+    height: 100%;
     justify-content: space-between;
     background-color: #ffffff;
     padding: 15px;
-    border-radius: 10px;
+    border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* 📌 Header del chat */
 .chat-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    padding-bottom: 10px;
     font-family: 'Montserrat', sans-serif;
     font-weight: 700;
     color: #333;
+    border-bottom: 1px solid #ddd;
 }
 
+/* 📌 Contenedor de mensajes */
 .chat-messages {
     flex: 1;
     overflow-y: auto;
@@ -27,6 +30,7 @@
     border-radius: 8px;
 }
 
+/* 📌 Estilos de mensajes */
 .chat-message {
     margin-bottom: 10px;
     padding: 10px;
@@ -55,8 +59,20 @@
     background-color: #e0e0e0;
 }
 
+/* 📌 Placeholder cuando no hay mensajes */
 .chat-placeholder {
     text-align: center;
     color: #777;
     font-size: 1rem;
+}
+
+/* 📌 Responsive */
+@media (max-width: 768px) {
+    .chat-window {
+        padding: 10px;
+    }
+
+    .chat-message {
+        font-size: 0.8rem;
+    }
 }

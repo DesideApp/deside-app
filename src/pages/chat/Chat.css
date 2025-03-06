@@ -1,4 +1,4 @@
-/* 📌 Contenedor principal de la página de chat */
+/* 📌 Fondo y estructura general */
 .chat-page-container {
     width: 100vw;
     height: 100vh;
@@ -10,7 +10,7 @@
     box-sizing: border-box;
 }
 
-/* 📌 Layout que organiza las tres secciones */
+/* 📌 Estructura de las 3 secciones */
 .chat-layout {
     width: 90%;
     height: 85vh;
@@ -24,38 +24,24 @@
 .left-panel {
     width: 25%;
     height: 100%;
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    overflow-y: auto;
+    display: flex;
 }
 
 /* 📌 Ventana de Chat (Centro) */
 .chat-window-panel {
     width: 50%;
     height: 100%;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
     display: flex;
-    flex-direction: column;
-    padding: 10px;
-    box-sizing: border-box;
 }
 
 /* 📌 Panel de Información (Derecha) */
 .right-panel {
     width: 25%;
     height: 100%;
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    overflow-y: auto;
+    display: flex;
 }
 
-/* 📌 Media query para pantallas más pequeñas */
+/* 📌 Responsive: Apilar en pantallas más pequeñas */
 @media (max-width: 1024px) {
     .chat-layout {
         flex-direction: column;
