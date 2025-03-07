@@ -3,7 +3,7 @@
     margin: 0;
     padding: 0 20px;
     width: 100%;
-    height: 60px;
+    height: 60px; /* 🔥 Asegura que la altura del header esté bien definida */
     background-color: #ffffff;
     position: fixed;
     top: 0;
@@ -11,9 +11,9 @@
     z-index: 10;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: center; /* 🔥 Alinea todo al centro verticalmente */
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-    transition: opacity 0.3s ease, transform 0.3s ease; /* Añadimos transiciones para el header */
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 /* Contenedor del título del header */
@@ -28,27 +28,42 @@
     margin: 0;
 }
 
-/* Contenedor de los botones del header */
-.header-buttons-container {
+/* Contenedor de navegación */
+.header-nav-container {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-right: 40px; /* Espaciado desde el borde derecho */
 }
 
 /* Estilos para los botones Home y Chat */
 .header-nav-container span {
-    font-family: 'Montserrat', sans-serif; /* Fuente Montserrat */
-    font-size: 16px;                       /* Tamaño de fuente */
-    color: #2b2323;                        /* Color de texto */
-    cursor: default;                       /* Mantener el cursor como flecha */
-    text-decoration: none;                 /* Sin subrayado */
-    margin-right: 15px;                    /* Espacio entre los botones */
-    cursor: pointer; /* Cambiar el cursor a manita */
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    color: #2b2323;
+    cursor: pointer;
+    text-decoration: none;
+    margin-right: 15px;
     font-weight: bold;
 }
 
-/* Sin cambio de color al pasar el ratón */
 .header-nav-container span:hover {
-    color: #2b2323; /* Sin cambio de color */
+    color: #2b2323;
+}
+
+/* 🔹 Contenedor de los botones de la wallet */
+.header-buttons-container {
+    display: flex;
+    align-items: center; /* 🔥 Alineación centrada verticalmente */
+    justify-content: flex-end; /* 🔥 Asegura que todo esté alineado a la derecha */
+    gap: 12px; /* Espaciado natural entre los botones */
+    margin-right: 20px; /* Espaciado normal con el borde derecho */
+    min-width: 180px; /* Asegura que el contenedor tenga espacio suficiente */
+    height: 100%; /* Asegura que el contenedor se extienda completamente a lo largo de la altura */
+}
+
+/* 🔹 Corrección para WalletButton */
+.header-buttons-container .wallet-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%; /* Asegura que ambos botones se distribuyan correctamente */
 }

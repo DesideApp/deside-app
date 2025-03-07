@@ -1,74 +1,79 @@
+/* 🔹 Contenedor principal (AHORA UNA "CRUCETA" PERFECTA) */
 .wallet-container {
     display: flex;
+    min-width: 180px;
     align-items: center;
-    gap: 12px;
-    position: relative;
+    justify-content: space-between;
+    width: auto;
+    gap: 5px;
 }
 
-/* 🔹 Botón principal de conexión/cambio de wallet */
+/* 🔹 Botón "Connect Wallet" */
 .wallet-button {
     display: flex;
     justify-content: center;
     align-items: center;
     background-color: #fc554f;
     color: white;
-    height: 40px;
+    height: 36px;
     min-width: 120px;
-    max-width: 100%;
-    font-size: 16px;
+    font-size: 14px;
     font-family: 'Montserrat', sans-serif;
-    padding: 0 18px;
+    padding: 0 12px;
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s ease, opacity 0.3s ease;
+    transition: all 0.2s ease-in-out;
     text-align: center;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .wallet-button:hover {
     background-color: #e04a45;
-    opacity: 0.9;
+    transform: scale(1.02);
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15);
+    opacity: 1;
 }
 
-/* 🔹 Botón hamburguesa */
+/* 🔹 Botón hamburguesa (AHORA ES 100% CUADRADO) */
 .menu-button {
-    width: 40px;
-    height: 40px;
+    box-sizing: content-box; /* 🔥 Asegura que 36x36 sea real */
+    margin: 0; /* 🔥 Evita sumas de espacio extra */
+    padding: 0; /* 🔥 Evita sumas de espacio extra */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px; 
+    height: 36px; 
     background-color: #fc554f;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.3s ease, opacity 0.3s ease;
-    position: relative;
-}
-
-/* 🔹 Espaciado cuando está junto al botón */
-.wallet-button + .menu-button {
-    margin-left: -5px; /* 🔄 Ajuste fino para alineación */
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .menu-button:hover {
     background-color: #e04a45;
-    opacity: 0.9;
+    transform: scale(1.05);
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15);
 }
 
-/* 📌 Icono de hamburguesa */
+/* 📌 Icono de hamburguesa (AHORA TAMBIÉN CUADRADO) */
 .menu-icon {
-    width: 24px;
-    height: 18px;
+    width: 20px; 
+    height: 20px; 
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: space-evenly;
     align-items: center;
 }
 
+/* 📌 Las tres líneas interiores (AHORA PROPORCIONALES) */
 .menu-icon span {
     display: block;
-    width: 24px;
-    height: 2px; /* 🔹 Líneas más finas para una mejor estética */
+    width: 20px;
+    height: 2px;
     background-color: white;
     border-radius: 2px;
     transition: transform 0.3s ease, opacity 0.3s ease;
@@ -76,13 +81,11 @@
 
 /* 📌 Animación de la hamburguesa */
 .menu-button.open .menu-icon span:nth-child(1) {
-    transform: translateY(6px) rotate(45deg);
+    transform: translateY(5px) rotate(45deg);
 }
-
 .menu-button.open .menu-icon span:nth-child(2) {
     opacity: 0;
 }
-
 .menu-button.open .menu-icon span:nth-child(3) {
-    transform: translateY(-6px) rotate(-45deg);
+    transform: translateY(-5px) rotate(-45deg);
 }

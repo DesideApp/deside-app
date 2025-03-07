@@ -38,15 +38,6 @@ const WalletMenu = memo(({ isOpen, onClose, handleLogout, walletAddress, balance
   return (
     <div className={`wallet-menu ${isOpen ? "open" : ""}`} ref={menuRef} role="dialog" aria-labelledby="wallet-menu-title">
       
-      {/* ✅ Botón hamburguesa dentro del menú para cerrarlo */}
-      <button className="menu-button close-menu" onClick={onClose} aria-label="Close Wallet Menu">
-        <div className="menu-icon">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-      </button>
-
       <div className="wallet-menu-content">
         {!walletAddress ? (
           <div className="wallet-disconnected">

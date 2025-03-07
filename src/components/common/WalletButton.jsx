@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
-import { getWalletBalance, getConnectedWallet, connectWallet, disconnectWallet, handleLogout } from "../../services/walletService.js";
+import { getWalletBalance, getConnectedWallet, connectWallet, handleLogout } from "../../services/walletService.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -11,9 +11,7 @@ const WalletButton = memo(() => {
   const [walletAddress, setWalletAddress] = useState(null);
   const [isCheckingWallet, setIsCheckingWallet] = useState(true);
 
-  /**
-   * 🔹 **Actualizar saldo de la wallet**
-   */
+  /** 🔹 **Actualizar saldo** */
   const updateBalance = useCallback(async () => {
     const { walletAddress, selectedWallet } = await getConnectedWallet();
     if (!walletAddress || !selectedWallet) return setBalance(null);
@@ -26,9 +24,7 @@ const WalletButton = memo(() => {
     }
   }, []);
 
-  /**
-   * 🔹 **Detectar conexión automática**
-   */
+  /** 🔹 **Detectar conexión automática** */
   useEffect(() => {
     const detectWallet = async () => {
       const { walletAddress } = await getConnectedWallet();
@@ -41,27 +37,25 @@ const WalletButton = memo(() => {
   }, [updateBalance]);
 
   /**
-   * 🔹 **Manejar clic en el botón de conexión o menú**
+   * 🔹 **Si no hay wallet, abrir modal. Si sí hay, toggle del menú**
    */
-  const handleWalletButtonClick = useCallback(() => {
-    if (isCheckingWallet) return;
-    if (walletAddress) {
-      setIsMenuOpen((prev) => !prev);
-      setIsModalOpen(false);
-    } else {
+  const handleConnectClick = useCallback(() => {
+    if (!walletAddress) {
       setIsModalOpen(true);
+    } else {
+      setIsMenuOpen((prev) => !prev);
     }
-  }, [walletAddress, isCheckingWallet]);
+  }, [walletAddress]);
 
-  /**
-   * 🔹 **Cerrar modal y menú**
-   */
+  /** 🔹 **Abrir/Cerrar menú con la hamburguesa** */
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen((prev) => !prev);
+  }, []);
+
+  /** 🔹 **Cerrar modal** */
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
-  const handleCloseMenu = useCallback(() => setIsMenuOpen(false), []);
 
-  /**
-   * 🔹 **Conectar wallet desde el modal**
-   */
+  /** 🔹 **Conectar wallet desde el modal** */
   const handleWalletSelected = useCallback(async (wallet) => {
     const result = await connectWallet(wallet);
     if (result.pubkey) {
@@ -71,9 +65,7 @@ const WalletButton = memo(() => {
     }
   }, [handleCloseModal, updateBalance]);
 
-  /**
-   * 🔹 **Detectar eventos de conexión/desconexión**
-   */
+  /** 🔹 **Eventos de walletConnected/walletDisconnected** */
   useEffect(() => {
     const handleWalletConnected = async (event) => {
       const { pubkey } = event.detail;
@@ -96,9 +88,7 @@ const WalletButton = memo(() => {
     };
   }, [updateBalance]);
 
-  /**
-   * 🔹 **Cerrar sesión completamente**
-   */
+  /** 🔹 **Cerrar sesión** */
   const handleLogoutClick = async () => {
     await handleLogout(() => setWalletAddress(null));
     setWalletAddress(null);
@@ -106,9 +96,7 @@ const WalletButton = memo(() => {
     setIsMenuOpen(false);
   };
 
-  /**
-   * 🔹 **Definir contenido del botón**
-   */
+  /** 🔹 **Texto del botón** */
   const formattedBalance = walletAddress
     ? balance !== null && !isNaN(balance)
       ? `${balance.toFixed(2)} SOL`
@@ -117,33 +105,40 @@ const WalletButton = memo(() => {
 
   return (
     <div className="wallet-container">
-      {/* ✅ Botón principal */}
-      <button className="wallet-button" onClick={handleWalletButtonClick} disabled={isCheckingWallet}>
-        <span>{formattedBalance}</span>
-      </button>
+      {/* 🔹 Botón "Connect Wallet" */}
+      <div className="wallet-button-wrapper">
+        <button className="wallet-button" onClick={handleConnectClick} disabled={isCheckingWallet}>
+          <span>{formattedBalance}</span>
+        </button>
+      </div>
 
-      {/* ✅ Botón hamburguesa */}
-      {walletAddress && (
-        <button className={`menu-button ${isMenuOpen ? "open" : ""}`} onClick={handleWalletButtonClick} aria-label="Toggle Wallet Menu">
+      {/* 🔹 Botón hamburguesa */}
+      <div className="menu-button-wrapper">
+        <button className="menu-button" onClick={toggleMenu} aria-label="Toggle Wallet Menu">
           <div className="menu-icon">
             <span></span>
             <span></span>
             <span></span>
           </div>
         </button>
-      )}
+      </div>
 
       {/* ✅ Menú de wallet */}
       <WalletMenu 
-        isOpen={isMenuOpen} 
-        handleLogout={handleLogoutClick} 
-        onClose={handleCloseMenu} 
-        walletAddress={walletAddress} 
-        balance={balance} 
+        isOpen={isMenuOpen}
+        handleLogout={handleLogoutClick}
+        onClose={() => setIsMenuOpen(false)}
+        walletAddress={walletAddress}
+        balance={balance}
+        openWalletModal={() => setIsModalOpen(true)}
       />
 
-      {/* ✅ Modal para seleccionar wallet */}
-      <WalletModal isOpen={isModalOpen} onClose={handleCloseModal} onWalletSelected={handleWalletSelected} />
+      {/* ✅ Modal de selección de wallet */}
+      <WalletModal 
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onWalletSelected={handleWalletSelected}
+      />
     </div>
   );
 });

@@ -1,45 +1,69 @@
-/* 📌 Contenedor de la página */
+/* 📌 Estructura general */
 .chat-page-container {
     width: 100vw;
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f4f4f4;
-    padding: 40px 0; /* 🔹 Mayor separación del Header y BottomBar */
+    padding: 0; /* 🔹 Sin padding extra */
     box-sizing: border-box;
 }
 
-/* 📌 Layout que distribuye las ventanas */
+/* 📌 Organización de las ventanas */
 .chat-layout {
-    width: 85%;
-    height: 75vh; /* 🔹 Reduce altura general para que no cubra toda la pantalla */
+    width: 100%;
+    max-width: 96vw;
+    height: 79vh;
     display: flex;
-    gap: 25px; /* 🔹 Espacio más amplio entre ventanas */
-    justify-content: center;
-    align-items: stretch;
+    justify-content: space-between; /* 🔹 Distribuye los componentes */
+    align-items: stretch; /* 🔹 Alinea todos los componentes con la misma altura */
+    margin-top: auto; /* 🔹 Ajuste para centrar todo hacia abajo */
+    margin-bottom: 55px; /* 🔹 Mantiene el balance sin empujar hacia arriba */
 }
 
-/* 📌 Ajustes generales para los paneles */
-.chat-layout > * {
+/* 📌 ContactList - Solo distribuye, no se aplica ningún estilo visual aquí */
+.left-panel-container {
     flex: 1;
     height: 100%;
-    max-height: 75vh; /* 🔹 Evita que se extiendan demasiado */
-    border-radius: 12px;
-    box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.08); /* 🔹 Sombra más suave */
+    margin-left: 12px; /* 🔹 Márgenes entre los componentes */
+    overflow: hidden;
 }
 
-/* 📌 Responsive: Se adapta a pantallas más pequeñas */
+/* 📌 ChatWindow - Solo distribuye, no se aplica ningún estilo visual aquí */
+.chat-window-container {
+    flex: 2;
+    height: 100%;
+}
+
+/* 📌 RightPanel - Solo distribuye, no se aplica ningún estilo visual aquí */
+.right-panel-container {
+    flex: 1;
+    height: 100%;
+    margin-right: 12px;
+    overflow: hidden;
+}
+
+/* 📌 Eliminamos cualquier margen o padding innecesario */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 📌 Responsive */
 @media (max-width: 1024px) {
     .chat-layout {
         flex-direction: column;
         height: auto;
         align-items: center;
+        width: 90%;
     }
 
-    .chat-layout > * {
-        width: 90%;
+    .contact-list-container,
+    .chat-window-container,
+    .right-panel-container {
+        width: 100%;
         height: auto;
-        max-height: none; /* 🔹 En móviles, las ventanas crecen si es necesario */
+        margin: 0;
     }
 }

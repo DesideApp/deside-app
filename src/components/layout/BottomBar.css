@@ -1,10 +1,10 @@
-/* 📌 Estilo general del bottom bar */
+/* 📌 Estilo general del bottom bar - Más bajo */
 .bottom-bar {
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 50px;
+    height: 30px; /* 🔹 Antes era 50px, ahora es más compacto */
     background: rgba(255, 255, 255, 0.95);
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     display: flex;
@@ -27,17 +27,17 @@
     transform: translateY(0);
 }
 
-/* 📌 Contenedor de información de red */
+/* 📌 Contenedor de información de red - Ajuste de tamaño */
 .network-info {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 15px; /* 🔹 Un poco menos de espacio entre elementos */
 }
 
-/* 📌 Estilo del status y precio de Solana */
+/* 📌 Estilo del status y precio de Solana - Tamaño más acorde */
 .network-status,
 .solana-price {
-    font-size: 0.9rem;
+    font-size: 0.8rem; /* 🔹 Reducimos un poco el texto para que encaje bien */
     color: #333;
     font-family: 'Montserrat', sans-serif;
     font-weight: bold;

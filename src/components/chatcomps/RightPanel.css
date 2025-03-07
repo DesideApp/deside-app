@@ -1,31 +1,32 @@
-.right-panel {
+/* 📌 Contenedor principal del RightPanel */
+.right-panel-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     width: 100%;
     height: 100%;
-    background-color: #ffffff; /* ✅ Consistente con los otros paneles */
+    background-color: #ffffff; /* Fondo blanco para el panel */
     border-radius: 12px;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* ✅ Misma sombra que ContactList */
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Sombra para darle profundidad */
     padding: 15px;
-    overflow: hidden; /* ✅ Evita que el contenido sobresalga */
+    overflow: hidden; /* Evitar desbordes de contenido */
 }
 
-/* ✅ Navegación entre pestañas */
+/* ✅ Navegación entre pestañas - Ajuste de espaciado */
 .right-panel-nav {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     width: 100%;
     margin-bottom: 12px;
 }
 
 .right-panel-nav button {
     flex: 1;
-    padding: 10px 14px;
+    padding: 8px 14px;
     border: none;
     background: none;
     font-size: 1rem;
-    font-weight: bold;
+    font-weight: 600;
     color: #555;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -38,26 +39,78 @@
 
 .right-panel-nav button.active {
     color: #000;
-    border-bottom: 3px solid #fc554f; /* ✅ Resalta la pestaña activa */
+    border-bottom: 3px solid #fc554f; /* Resalta la pestaña activa */
 }
 
-/* ✅ Contenedor del contenido dinámico */
+/* ✅ Contenedor del contenido dinámico - Espaciado y alineación de los elementos */
 .right-panel-content {
     width: 100%;
     flex-grow: 1;
-    overflow-y: auto; /* ✅ Permitir desplazamiento si hay mucho contenido */
-    padding: 10px;
+    overflow-y: auto; /* Permitir desplazamiento si el contenido es grande */
+    padding: 10px 15px; /* Aseguramos que haya suficiente espacio interno */
     border-radius: 8px;
-    background-color: #f9f9f9; /* ✅ Un poco de diferencia visual */
-    box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.05);
+    background-color: #f9f9f9; /* Fondo gris claro */
+    box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.05); /* Sombra interna más suave */
 }
 
-/* ✅ Contenedor de "Coming Soon" (por si agregamos más secciones) */
+/* ✅ Ajustes en los botones de la lista de contactos o solicitudes */
+.accept-btn,
+.reject-btn {
+    margin-left: 5px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.accept-btn {
+    background-color: #27ae60;
+}
+
+.reject-btn {
+    background-color: #e74c3c;
+}
+
+.accept-btn:hover {
+    background-color: #219150;
+}
+
+.reject-btn:hover {
+    background-color: #c0392b;
+}
+
+/* ✅ Mejorar la legibilidad de los textos en la sección de "No contactos" o "Sin solicitudes" */
+.right-panel-content p {
+    font-size: 1rem;
+    color: #777;
+    text-align: center;
+    margin-top: 20px; /* Añadimos margen superior para darle espacio */
+}
+
+/* 📌 Botones de acción (aceptar/rechazar solicitudes) - Mejor distribución y tamaño */
+.accept-btn,
+.reject-btn {
+    width: auto;
+    margin-left: 5px;
+    padding: 8px 15px; /* Un poco más de espacio para mayor comodidad */
+    font-size: 0.9rem;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* ✅ Mejorar visualización de la sección "coming-soon" (por ejemplo si se agregan más secciones en el futuro) */
 .coming-soon-container {
     max-width: 300px;
     font-family: "Montserrat", sans-serif;
     color: #444;
     text-align: center;
+    margin: 0 auto; /* Centramos el contenido */
 }
 
 .coming-soon-container h2 {
@@ -69,4 +122,5 @@
 .coming-soon-container p {
     font-size: 1rem;
     color: #666;
+    padding: 10px;
 }

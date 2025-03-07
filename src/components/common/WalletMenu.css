@@ -18,59 +18,7 @@
     opacity: 1;
 }
 
-/* 📌 Botón hamburguesa */
-.menu-button {
-    position: absolute;
-    top: 15px;
-    left: -50px;
-    width: 40px;
-    height: 40px;
-    background-color: #fc554f;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.3s ease, opacity 0.3s ease;
-}
-
-.menu-button:hover {
-    background-color: #e04a45;
-    opacity: 0.9;
-}
-
-/* 📌 Icono de hamburguesa */
-.menu-icon {
-    width: 24px;
-    height: 18px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.menu-icon span {
-    display: block;
-    width: 24px;
-    height: 2px; /* 🔹 Líneas más delgadas */
-    background-color: white;
-    border-radius: 2px;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-/* 📌 Animación de la hamburguesa */
-.menu-button.open .menu-icon span:nth-child(1) {
-    transform: translateY(6px) rotate(45deg);
-}
-
-.menu-button.open .menu-icon span:nth-child(2) {
-    opacity: 0;
-}
-
-.menu-button.open .menu-icon span:nth-child(3) {
-    transform: translateY(-6px) rotate(-45deg);
-}
+/* ❌ ELIMINADO: Estilos de la hamburguesa dentro del menú ❌ */
 
 /* 📌 Contenido del menú */
 .wallet-menu-content {

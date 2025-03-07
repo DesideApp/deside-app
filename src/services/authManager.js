@@ -4,7 +4,7 @@ import { useServer } from "../contexts/ServerContext"; // ✅ Importamos correct
 import { getConnectedWallet } from "../services/walletService";
 
 export const useAuthManager = () => {
-  const { isAuthenticated, syncAuthStatus } = useServer(); // ✅ Nuevo uso del contexto
+  const { isAuthenticated, syncAuthStatus } = useServer(); // ✅ Estado global de autenticación
   const [isLoading, setIsLoading] = useState(true);
   const [requiresLogin, setRequiresLogin] = useState(false);
   const [selectedWallet, setSelectedWallet] = useState(null); // 🔹 Guarda la wallet conectada
@@ -14,28 +14,16 @@ export const useAuthManager = () => {
     const detectWallet = async () => {
       console.log("🔄 Revisando conexión automática...");
       const { walletAddress, selectedWallet } = await getConnectedWallet();
-
-      if (walletAddress) {
-        console.log(`✅ Wallet detectada automáticamente: ${selectedWallet} (${walletAddress})`);
-        setSelectedWallet(selectedWallet);
-        setRequiresLogin(false);
-      } else {
-        console.warn("⚠️ Ninguna wallet conectada, se requiere login.");
-        setRequiresLogin(true);
-      }
+      setSelectedWallet(walletAddress ? selectedWallet : null);
     };
 
-    detectWallet();
+    detectWallet().finally(() => setIsLoading(false)); // 🔥 No bloquea UI
   }, []);
 
   // ✅ **Verificar autenticación cuando cambia el estado global del servidor**
   useEffect(() => {
     setIsLoading(true);
-    if (!isAuthenticated) {
-      setRequiresLogin(true);
-    } else {
-      setRequiresLogin(false);
-    }
+    setRequiresLogin(!isAuthenticated); // ✅ Solo cambia si el usuario no está autenticado
     setIsLoading(false);
   }, [isAuthenticated]);
 
@@ -45,7 +33,7 @@ export const useAuthManager = () => {
       const response = await refreshToken();
       if (response) {
         console.log("✅ Token renovado correctamente");
-        await syncAuthStatus(); // ✅ Sincroniza con el servidor
+        await syncAuthStatus();
       } else {
         console.warn("⚠️ No se pudo renovar el token");
       }
@@ -58,12 +46,12 @@ export const useAuthManager = () => {
   const handleLoginResponse = async (action) => {
     if (!isAuthenticated) {
       console.warn("🚨 Usuario no autenticado. Se requiere login.");
-      setRequiresLogin(true);
+      setRequiresLogin(true); // ✅ Solo activa el login si realmente es necesario
       return;
     }
 
     await renewToken();
-    action(); // ✅ Si ya está autenticado y con token válido, ejecutamos la acción
+    action(); // ✅ Si está autenticado y con token válido, ejecutamos la acción
   };
 
   return {

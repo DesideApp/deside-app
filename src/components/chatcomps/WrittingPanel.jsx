@@ -1,10 +1,18 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import "./ChatInput.css";
+import "./WrittingPanel.css";
 
-const ChatInput = React.memo(({ onSendMessage, disabled, openAuthModal }) => {
+const WrittingPanel = React.memo(({ onSendMessage, disabled, openAuthModal }) => {
     const [message, setMessage] = useState("");
     const [authWarning, setAuthWarning] = useState(false);
     const inputRef = useRef(null);
+
+    // ✅ **Ajustar altura dinámica**
+    const adjustHeight = () => {
+        if (inputRef.current) {
+            inputRef.current.style.height = "40px"; // 🔹 Reseteamos la altura mínima
+            inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 120)}px`; // 🔹 Ajuste dinámico con límite
+        }
+    };
 
     // ✅ **Enviar mensaje solo si el input no está vacío y no está deshabilitado**
     const handleSendMessage = useCallback(() => {
@@ -13,7 +21,8 @@ const ChatInput = React.memo(({ onSendMessage, disabled, openAuthModal }) => {
 
         onSendMessage(trimmedMessage);
         setMessage(""); // ✅ Limpia el input tras enviar el mensaje
-        inputRef.current?.focus(); // ✅ Mantiene el foco en el input
+        inputRef.current.style.height = "40px"; // 🔹 Reseteamos la altura después de enviar
+        inputRef.current?.focus();
     }, [message, disabled, onSendMessage]);
 
     // ✅ **Manejo de la tecla "Enter"**
@@ -24,7 +33,7 @@ const ChatInput = React.memo(({ onSendMessage, disabled, openAuthModal }) => {
                 if (disabled) {
                     setAuthWarning(true);
                     setTimeout(() => setAuthWarning(false), 3000);
-                    openAuthModal(); // 🔄 Emitir evento para abrir el modal de autenticación
+                    openAuthModal();
                 } else {
                     handleSendMessage();
                 }
@@ -39,18 +48,21 @@ const ChatInput = React.memo(({ onSendMessage, disabled, openAuthModal }) => {
     }, [disabled]);
 
     return (
-        <div className="chat-input-container">
-            <input
+        <>
+            <textarea
                 ref={inputRef}
-                type="text"
                 className="chat-input"
                 placeholder="Escribe un mensaje..."
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={(e) => {
+                    setMessage(e.target.value);
+                    adjustHeight();
+                }}
                 onKeyDown={handleKeyDown}
                 disabled={disabled}
                 aria-disabled={disabled}
                 aria-label="Campo de entrada para escribir mensajes"
+                rows="1"
             />
             <button
                 className="send-button"
@@ -65,8 +77,8 @@ const ChatInput = React.memo(({ onSendMessage, disabled, openAuthModal }) => {
             {authWarning && (
                 <p className="auth-warning">⚠️ Debes iniciar sesión para enviar mensajes.</p>
             )}
-        </div>
+        </>
     );
 });
 
-export default ChatInput;
+export default WrittingPanel;

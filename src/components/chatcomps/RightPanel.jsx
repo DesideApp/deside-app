@@ -1,12 +1,12 @@
 import React, { useState, memo } from "react";
 import ContactRequests from "../chatcomps/ContactRequests";
 import AddContactForm from "../chatcomps/AddContactForm";
-import { useAuthManager } from "../../services/authManager"; // 🔄 Importamos AuthManager
+import { useAuthManager } from "../../services/authManager";
 import "./RightPanel.css";
 
 const RightPanel = () => {
     const [activeTab, setActiveTab] = useState("requests");
-    const { isAuthenticated, isLoading, handleLoginResponse } = useAuthManager(); // ✅ Verificamos autenticación
+    const { isAuthenticated, isLoading, handleLoginResponse } = useAuthManager();
 
     // ✅ **Permitir cambio de pestaña sin restricciones**
     const handleTabChange = (tab) => {
@@ -20,14 +20,14 @@ const RightPanel = () => {
             handleLoginResponse(() => {
                 console.log("✅ Usuario autenticado. Ejecutando acción...");
                 action();
-            }); // 🔄 Activa autenticación y continúa la acción
+            });
             return;
         }
         action();
     };
 
     return (
-        <aside className="right-panel" aria-label="Panel derecho">
+        <>
             <nav className="right-panel-nav">
                 <button 
                     className={activeTab === "requests" ? "active" : ""} 
@@ -62,7 +62,7 @@ const RightPanel = () => {
                     </>
                 )}
             </div>
-        </aside>
+        </>
     );
 };
 

@@ -1,0 +1,66 @@
+/* 📌 Contenedor principal del input */
+.writting-panel-container {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 500px;
+    background-color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: flex-end; /* 🔹 Ajustamos para que el botón se mantenga en la parte baja */
+    gap: 10px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* 📌 Input de chat dinámico */
+.chat-input{
+    flex: 1;
+    padding: 12px 15px;
+    font-size: 1rem;
+    font-family: 'Montserrat', sans-serif;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    border-radius: 15px;
+    transition: border 0.2s ease-in-out;
+    resize: none; /* 🔹 Evitamos que el usuario pueda redimensionarlo manualmente */
+    min-height: 40px; /* 🔹 Altura mínima */
+    max-height: 120px; /* 🔹 Evitamos que crezca demasiado */
+    overflow-y: auto; /* 🔹 Permite scroll cuando alcanza el límite */
+}
+
+/* 🔥 Efecto cuando el usuario está escribiendo */
+.chat-input:focus {
+    border-bottom: 2px solid #fc554f;
+}
+
+/* 📌 Botón de envío fijo abajo a la derecha */
+.send-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    width: 35px;
+    height: 35px;
+    background-color: #fc554f;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+}
+
+/* 🔥 Efecto hover y clic en el botón */
+.send-button:hover {
+    background-color: #e0443f;
+    transform: scale(1.1);
+}
+
+.send-button:active {
+    transform: scale(0.9);
+}

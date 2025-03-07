@@ -1,0 +1,67 @@
+/* 📌 Contenedor de ContactList que se ajusta al espacio disponible en Chat */
+.left-panel-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Asegura que ocupe todo el espacio disponible */
+    padding: 0; /* Elimina cualquier padding innecesario */
+    background-color: #ffffff; /* Fondo blanco para el contenedor de la lista */
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.1); /* Sombra aplicada al contenedor */
+    border-radius: 12px; /* Bordes redondeados */
+    overflow-y: auto; /* Solo scroll vertical */
+}
+
+/* 📌 Header de ContactList */
+.contact-list-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    color: #333;
+    border-bottom: 1px solid #ddd; /* Separador entre el header y la lista */
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+/* 📌 Lista de contactos */
+.contact-list {
+    list-style: none;
+    padding: 0; /* Eliminamos padding de la lista para evitar el desbordamiento */
+    margin: 0; /* Eliminamos cualquier margen adicional */
+}
+
+/* 📌 Estilo de cada contacto */
+.contact-item {
+    padding: 12px;
+    background-color: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 8px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.contact-item:hover {
+    background-color: #f2f2f2;
+}
+
+/* 📌 Mensaje cuando no hay contactos */
+.no-contacts-message {
+    text-align: center;
+    color: #777;
+    font-size: 1rem;
+    padding: 10px;
+}
+
+/* 📌 Responsive */
+@media (max-width: 768px) {
+    .contact-list-wrapper {
+        padding: 10px;
+    }
+
+    .contact-item {
+        font-size: 0.9rem;
+    }
+}
