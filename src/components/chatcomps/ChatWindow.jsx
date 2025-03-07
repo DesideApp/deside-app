@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import ChatInput from "./WrittingPanel";
+import WrittingPanel from "./WrittingPanel";
 import useWebRTC from "../../hooks/useWebRTC";
 import { io } from "socket.io-client";
 import { useAuthManager } from "../../services/authManager";
@@ -122,7 +122,7 @@ function ChatWindow({ selectedContact }) {
 
             {/* ✅ ChatInput correctamente ubicado pero sin estilos en `ChatWindow.css` */}
             <div className="writting-panel-container">
-              <ChatInput onSendMessage={sendMessage} disabled={!isConnected} />
+              <WrittingPanel onSendMessage={sendMessage} disabled={!isConnected} />
             </div>
         </div>
     );

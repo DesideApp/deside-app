@@ -1,15 +1,3 @@
-/* 📌 Contenedor de ContactList que se ajusta al espacio disponible en Chat */
-.left-panel-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%; /* Asegura que ocupe todo el espacio disponible */
-    padding: 0; /* Elimina cualquier padding innecesario */
-    background-color: #ffffff; /* Fondo blanco para el contenedor de la lista */
-    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.1); /* Sombra aplicada al contenedor */
-    border-radius: 12px; /* Bordes redondeados */
-    overflow-y: auto; /* Solo scroll vertical */
-}
-
 /* 📌 Header de ContactList */
 .contact-list-header {
     display: flex;
