@@ -7,16 +7,17 @@ const NetworkStatus = React.memo(({ className = "" }) => {
     const [tps, setTps] = useState(0);
     const [error, setError] = useState(null);
     const intervalRef = useRef(null);
-    const isMountedRef = useRef(true);
+    const isMountedRef = useRef(false);
 
     const fetchData = useCallback(async () => {
+        if (!isMountedRef.current) return;
         try {
             const [statusData, tpsData] = await Promise.all([getSolanaStatus(), getSolanaTPS()]);
-            if (!isMountedRef.current) return;
-
-            setStatus(statusData || "offline");
-            setTps(typeof tpsData === "number" ? tpsData : 0);
-            setError(null);
+            if (isMountedRef.current) {
+                setStatus(statusData || "offline");
+                setTps(typeof tpsData === "number" ? tpsData : 0);
+                setError(null);
+            }
         } catch (error) {
             console.error("❌ Error obteniendo estado de la red:", error);
             if (isMountedRef.current) {
@@ -29,11 +30,18 @@ const NetworkStatus = React.memo(({ className = "" }) => {
 
     useEffect(() => {
         isMountedRef.current = true;
-        fetchData();
-        intervalRef.current = setInterval(fetchData, 10000);
+        fetchData(); // 🔹 Llamada inicial
+
+        if (!intervalRef.current) { // ✅ Solo un intervalo activo
+            intervalRef.current = setInterval(fetchData, 30000);
+        }
+
         return () => {
             isMountedRef.current = false;
-            clearInterval(intervalRef.current);
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
         };
     }, [fetchData]);
 

@@ -21,23 +21,19 @@
     margin-bottom: 55px; /* 🔹 Mantiene el balance sin empujar hacia arriba */
 }
 
-/* 📌 ContactList - Solo distribuye, no se aplica ningún estilo visual aquí */
+/* 📌 LeftPanel - Manejo de la ubicación y estructura */
 .left-panel-container {
     flex: 1;
     height: 100%;
-    margin-left: 12px; /* 🔹 Márgenes entre los componentes */
+    margin-left: 12px; /* 🔹 Espacio entre componentes */
     overflow: hidden;
-    /* 📌 Contenedor de ContactList que se ajusta al espacio disponible en Chat */
-.left-panel-container {
     display: flex;
     flex-direction: column;
-    height: 100%; /* Asegura que ocupe todo el espacio disponible */
-    padding: 0; /* Elimina cualquier padding innecesario */
-    background-color: #ffffff; /* Fondo blanco para el contenedor de la lista */
-    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.1); /* Sombra aplicada al contenedor */
-    border-radius: 12px; /* Bordes redondeados */
-    overflow-y: auto; /* Solo scroll vertical */
-}
+    background-color: #ffffff; /* 🔹 Fondo blanco */
+    padding: 0;
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.1); /* 🔹 Sombra */
+    border-radius: 12px; /* 🔹 Bordes redondeados */
+    overflow-y: auto; /* 🔹 Scroll si es necesario */
 }
 
 /* 📌 ChatWindow - Solo distribuye, no se aplica ningún estilo visual aquí */
@@ -46,13 +42,21 @@
     height: 100%;
 }
 
-/* 📌 RightPanel - Solo distribuye, no se aplica ningún estilo visual aquí */
+/* 📌 RightPanel - Solo distribución */
 .right-panel-container {
     flex: 1;
     height: 100%;
-    margin-right: 12px;
+    margin-right: 12px; /* 🔹 Mantiene el margen */
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff; /* 🔹 Fondo blanco */
+    padding: 0;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* 🔹 Sombra */
+    border-radius: 12px; /* 🔹 Bordes redondeados */
+    overflow-y: auto; /* 🔹 Scroll si es necesario */
 }
+
 
 /* 📌 Eliminamos cualquier margen o padding innecesario */
 * {

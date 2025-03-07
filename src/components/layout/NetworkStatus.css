@@ -2,12 +2,13 @@
 .network-status-container {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 8px; /* 🔥 Compactado aún más */
     font-family: 'Montserrat', sans-serif;
     color: #fff;
-    padding: 6px 10px;
+    padding: 4px 8px;
     background: rgba(255, 255, 255, 0.08);
     border-radius: 6px;
+    height: 22px; /* 🔥 Igual a settings-bubble */
 }
 
 /* 📌 Indicador del estado de la red */
@@ -16,72 +17,73 @@
     align-items: center;
 }
 
-/* 📌 Luces de estado */
+/* 📌 Luces de estado (más pequeñas y refinadas) */
 .status-light {
-    width: 12px;
-    height: 12px;
+    width: 7px; /* 🔥 Un poco más pequeño */
+    height: 7px;
     border-radius: 50%;
     transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 .status-light.green {
     background-color: #4caf50;
-    box-shadow: 0 0 6px #4caf50;
+    box-shadow: 0 0 3px #4caf50;
 }
 
 .status-light.yellow {
     background-color: #ff9800;
-    box-shadow: 0 0 6px #ff9800;
+    box-shadow: 0 0 3px #ff9800;
 }
 
 .status-light.red {
     background-color: #f44336;
-    box-shadow: 0 0 6px #f44336;
+    box-shadow: 0 0 3px #f44336;
 }
 
 /* 📌 Contenedor de TPS */
 .tps-container {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 3px; /* 🔥 Espaciado mínimo */
 }
 
-/* 📌 Barras de actividad TPS */
+/* 📌 Barras de actividad TPS (ahora siempre visibles, pero apagadas si inactivas) */
 .tps-bars {
     display: flex;
-    gap: 3px;
-    height: 20px;
+    gap: 1.5px; /* 🔥 Aún más compacto */
+    height: 14px; /* 🔥 Pequeño ajuste */
     align-items: flex-end;
 }
 
+/* 📌 Barras individuales de TPS */
 .tps-bar {
-    width: 6px;
-    border-radius: 3px;
-    transition: height 0.4s ease-in-out, background-color 0.3s ease-in-out;
+    width: 3px; /* 🔥 Más fino */
+    border-radius: 2px;
+    transition: height 0.4s ease-in-out, background-color 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }
 
-/* 📌 Animación fluida de TPS */
+/* 📌 Animación más sutil de TPS */
 @keyframes pulseTPS {
     0%, 100% {
-        height: 8px;
+        height: 5px; /* 🔥 Cambio muy sutil */
     }
     50% {
-        height: 18px;
+        height: 12px;
     }
 }
 
-/* 📌 Aplicar animación a cada barra con retraso */
+/* 📌 Aplicar animación a cada barra con un retraso progresivo */
 .tps-bar.active:nth-child(1) {
-    animation: pulseTPS 1.2s infinite ease-in-out 0s;
+    animation: pulseTPS 1.5s infinite ease-in-out 0s;
 }
 .tps-bar.active:nth-child(2) {
-    animation: pulseTPS 1.2s infinite ease-in-out 0.2s;
+    animation: pulseTPS 1.5s infinite ease-in-out 0.2s;
 }
 .tps-bar.active:nth-child(3) {
-    animation: pulseTPS 1.2s infinite ease-in-out 0.4s;
+    animation: pulseTPS 1.5s infinite ease-in-out 0.4s;
 }
 .tps-bar.active:nth-child(4) {
-    animation: pulseTPS 1.2s infinite ease-in-out 0.6s;
+    animation: pulseTPS 1.5s infinite ease-in-out 0.6s;
 }
 
 /* 📌 Colores dinámicos para las barras TPS */
@@ -91,12 +93,12 @@
 
 .tps-bar.inactive {
     background-color: #f44336;
-    opacity: 0.6;
+    opacity: 0.3; /* 🔥 Ahora aún más tenue */
 }
 
 /* 📌 Mensaje de error */
 .error {
     color: #f44336;
-    font-size: 0.85rem;
-    margin-left: 8px;
+    font-size: 0.7rem; /* 🔥 Un poco más pequeño */
+    margin-left: 5px;
 }

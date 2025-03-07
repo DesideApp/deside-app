@@ -3,37 +3,45 @@ import "./SolanaPrice.css";
 import { getSolanaPrice } from "../../utils/solanaHelpers.js";
 
 const SolanaPrice = React.memo(() => {
-    const [price, setPrice] = useState(0);
-    const [prevPrice, setPrevPrice] = useState(0);
-    const priceRef = useRef(0);
-    
+    const [price, setPrice] = useState(null);
+    const [prevPrice, setPrevPrice] = useState(null);
+    const priceRef = useRef(null);
+    const intervalRef = useRef(null);
+
     useEffect(() => {
         const fetchPrice = async () => {
             const newPrice = await getSolanaPrice();
-            if (typeof newPrice === "number") {
-                setPrevPrice(priceRef.current); // Guardar el precio anterior
-                priceRef.current = newPrice; // Actualizar referencia
+            if (typeof newPrice === "number" && newPrice > 0) {
+                if (priceRef.current !== null) setPrevPrice(priceRef.current);
+                priceRef.current = newPrice;
                 setPrice(newPrice);
             }
         };
 
-        fetchPrice();
-        const interval = setInterval(fetchPrice, 10000); // 🔄 Consultar cada 10s
+        fetchPrice(); // 🔹 Llamada inicial
 
-        return () => clearInterval(interval);
+        if (!intervalRef.current) { // ✅ Asegura que solo haya un intervalo activo
+            intervalRef.current = setInterval(fetchPrice, 30000);
+        }
+
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
     }, []);
 
-    // ✅ Definir color basado en la comparación con el precio anterior
+    // ✅ Cambio de color cuando el precio sube/baja
     const priceChange = useMemo(() => {
-        if (price > prevPrice) return "up"; // Subió (verde)
-        if (price < prevPrice) return "down"; // Bajó (rojo)
-        return "neutral"; // Sin cambios
+        if (prevPrice === null || price === null) return "neutral";
+        return price > prevPrice ? "up" : price < prevPrice ? "down" : "neutral";
     }, [price, prevPrice]);
 
     return (
         <div className="solana-price-container">
             <span className={`solana-price ${priceChange}`}>
-                ${price.toFixed(2)}
+                {price !== null ? `$${price.toFixed(2)}` : "Loading..."}
             </span>
         </div>
     );

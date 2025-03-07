@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import useContactManager from "../../hooks/useContactManager";
 import { useAuthManager } from "../../services/authManager"; 
 import "./LeftPanel.css";
@@ -7,10 +7,18 @@ const LeftPanel = ({ onSelectContact }) => {
     const { isAuthenticated, selectedWallet, isLoading, handleLoginResponse } = useAuthManager();
     const { confirmedContacts, fetchContacts } = useContactManager();
 
-    // ✅ **Carga de contactos solo si el usuario está autenticado**
+    // ✅ **Carga de contactos cuando el usuario está autenticado y tiene una wallet conectada**
     useEffect(() => {
-        if (isAuthenticated) fetchContacts();
-    }, [fetchContacts, isAuthenticated]);
+        if (isAuthenticated && selectedWallet) fetchContacts();
+    }, [fetchContacts, isAuthenticated, selectedWallet]);
+
+    // ✅ **Manejo de clics para forzar autenticación si es necesario**
+    const handleClick = useCallback(() => {
+        if (!isAuthenticated) {
+            console.warn("⚠️ Intento de interactuar sin login. Activando login...");
+            handleLoginResponse(() => fetchContacts());
+        }
+    }, [isAuthenticated, handleLoginResponse, fetchContacts]);
 
     return (
         <>

@@ -1,16 +1,13 @@
-/* 📌 Estilo general del bottom bar - Más bajo */
+/* 📌 Contenedor principal */
 .bottom-bar {
     position: fixed;
-    bottom: 0;
+    bottom: 2px; /* 🔥 Separa 2px del borde inferior */
     left: 0;
     width: 100%;
-    height: 30px; /* 🔹 Antes era 50px, ahora es más compacto */
-    background: rgba(255, 255, 255, 0.95);
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    height: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.15);
     z-index: 1000;
     transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
 }
@@ -27,18 +24,78 @@
     transform: translateY(0);
 }
 
-/* 📌 Contenedor de información de red - Ajuste de tamaño */
-.network-info {
+/* 📌 Contenedor de los elementos del bottom bar */
+.bottom-bar-content {
     display: flex;
     align-items: center;
-    gap: 15px; /* 🔹 Un poco menos de espacio entre elementos */
+    gap: 10px; /* 🔥 Ajustado para evitar expansión innecesaria */
 }
 
-/* 📌 Estilo del status y precio de Solana - Tamaño más acorde */
-.network-status,
-.solana-price {
-    font-size: 0.8rem; /* 🔹 Reducimos un poco el texto para que encaje bien */
-    color: #333;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: bold;
+/* 📌 Estilos de burbujas flotantes */
+.bubble {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px; /* 🔥 Se mantiene compacto */
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    bottom: 2px; /* 🔥 Ahora todas las burbujas flotan 2px */
+    width: fit-content; /* 🔥 Esto evita la expansión */
+}
+
+/* 📌 Burbujas individuales */
+.network-bubble,
+.settings-bubble {
+    min-width: auto; /* 🔥 Ahora NO SE EXPANDE */
+}
+
+/* 📌 Interruptor Claro/Oscuro */
+.switch {
+    position: relative;
+    width: 34px;
+    height: 18px;
+}
+
+/* 📌 Ocultamos el checkbox por defecto */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* 📌 Estilo del slider deslizante */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.3s;
+    border-radius: 18px;
+}
+
+/* 📌 Círculo deslizante dentro del interruptor */
+.slider:before {
+    content: "";
+    position: absolute;
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+/* 📌 Cuando está activado (modo oscuro) */
+input:checked + .slider {
+    background-color: #4caf50;
+}
+
+input:checked + .slider:before {
+    transform: translateX(16px);
 }
