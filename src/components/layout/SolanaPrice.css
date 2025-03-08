@@ -4,46 +4,47 @@
     align-items: center;
     justify-content: center;
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.85rem; /* 🔥 Un poco más compacto */
+    font-size: 0.85rem;
     font-weight: 600;
-    padding: 3px 8px; /* 🔥 Más ajustado */
+    padding: 3px 8px;
     border-radius: 6px;
-    background: rgba(255, 255, 255, 0.08);
-    height: 22px; /* 🔥 Igual que las burbujas de network-status */
+    height: 22px;
 }
 
 /* 📌 Estilos base */
 .solana-price {
-    transition: color 0.4s ease-in-out, transform 0.3s ease-in-out;
+    transition: color 0.4s ease-in-out, text-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
 }
 
-/* 📌 Precio subiendo (verde, con efecto más sutil) */
+/* 📌 Precio subiendo (verde, efecto rápido y fluido) */
 .solana-price.up {
     color: #4caf50;
-    animation: glowUp 0.4s ease-in-out;
+    text-shadow: 0 0 5px rgba(76, 175, 80, 0.7);
+    animation: fadeUp 0.5s ease-in-out;
 }
 
-/* 📌 Precio bajando (rojo, con efecto más sutil) */
+/* 📌 Precio bajando (rojo, efecto rápido y fluido) */
 .solana-price.down {
     color: #f44336;
-    animation: glowDown 0.4s ease-in-out;
+    text-shadow: 0 0 5px rgba(244, 67, 54, 0.7);
+    animation: fadeDown 0.5s ease-in-out;
 }
 
 /* 📌 Sin cambios (color neutro) */
 .solana-price.neutral {
-    color: #ddd;
+    color: var(--text-color);
 }
 
-/* 📌 Efecto de destello cuando sube */
-@keyframes glowUp {
-    0% { text-shadow: 0 0 3px rgba(76, 175, 80, 0.7); transform: scale(1); }
-    50% { text-shadow: 0 0 6px rgba(76, 175, 80, 0.9); transform: scale(1.03); }
-    100% { text-shadow: 0 0 3px rgba(76, 175, 80, 0.7); transform: scale(1); }
+/* 📌 Efecto más rápido al subir */
+@keyframes fadeUp {
+    0% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.03); }
+    100% { opacity: 0.8; transform: scale(1); }
 }
 
-/* 📌 Efecto de destello cuando baja */
-@keyframes glowDown {
-    0% { text-shadow: 0 0 3px rgba(244, 67, 54, 0.7); transform: scale(1); }
-    50% { text-shadow: 0 0 6px rgba(244, 67, 54, 0.9); transform: scale(0.97); }
-    100% { text-shadow: 0 0 3px rgba(244, 67, 54, 0.7); transform: scale(1); }
+/* 📌 Efecto más rápido al bajar */
+@keyframes fadeDown {
+    0% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(0.97); }
+    100% { opacity: 0.8; transform: scale(1); }
 }

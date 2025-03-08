@@ -31,14 +31,14 @@ const RightPanel = () => {
                     onClick={() => handleTabChange("requests")}
                     aria-label="Solicitudes de contacto"
                 >
-                    <FaInbox size={20} />
+                    <FaInbox size={16} />
                 </button>
                 <button 
                     className={activeTab === "addContact" ? "active" : ""} 
                     onClick={() => handleTabChange("addContact")}
                     aria-label="Agregar contacto"
                 >
-                    <FaUserPlus size={20} />
+                    <FaUserPlus size={16} />
                 </button>
             </nav>
 

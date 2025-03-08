@@ -10,12 +10,12 @@ const THEMES = {
       "--bubble-background": "rgba(255, 255, 255, 0.15)", // 🔹 Fondo de burbujas
     },
     dark: {
-      "--background-color": "#352f2f", // 🔹 Fondo principal (más oscuro)
-      "--window-background": "#262020", // 🔹 Fondo de ventanas (más claro que el fondo general)
-      "--text-color": "#e6dfda", // 🔹 Color del texto principal
-      "--highlight-color": "#d1c5bf", // 🔹 Color de resaltados (ligeramente más claro para contraste)
-      "--secondary-text": "#e6dfda", // 🔹 Color de texto secundario
-      "--bubble-background": "rgba(0, 0, 0, 0.3)", // 🔹 Fondo de burbujas
+        "--background-color": "#262424", // 🔹 Fondo principal (menos rojo, más equilibrado)
+        "--window-background": "#1a1815", // 🔹 Fondo de ventanas (más oscuro y sin exceso de rojo)
+        "--text-color": "#f0eae6", // 🔹 Color del texto principal
+        "--highlight-color": "#d1c5bf", // 🔹 Color de resaltados
+        "--secondary-text": "#e6dfda", // 🔹 Color de texto secundario
+        "--bubble-background": "rgba(0, 0, 0, 0.3)", // 🔹 Fondo de burbujas
     },
   };
   
