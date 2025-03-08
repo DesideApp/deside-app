@@ -4,7 +4,7 @@
     padding: 0 20px;
     width: 100%;
     height: 60px; /* 🔥 Asegura que la altura del header esté bien definida */
-    background-color: #ffffff;
+    background-color: var(--window-background); /* 🔥 Fondo dinámico */
     position: fixed;
     top: 0;
     left: 0;
@@ -24,7 +24,7 @@
 .header-title {
     font-family: 'Montserrat', sans-serif;
     font-size: 1.5rem;
-    color: #333;
+    color: var(--text-color); /* 🔥 Se adapta a claro/oscuro */
     margin: 0;
 }
 
@@ -38,7 +38,7 @@
 .header-nav-container span {
     font-family: 'Montserrat', sans-serif;
     font-size: 16px;
-    color: #2b2323;
+    color: var(--text-color); /* 🔥 Se adapta a claro/oscuro */
     cursor: pointer;
     text-decoration: none;
     margin-right: 15px;

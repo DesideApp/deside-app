@@ -29,10 +29,10 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background-color: #ffffff; /* 🔹 Fondo blanco */
+    background-color: var(--window-background); 
     padding: 0;
     box-shadow: 0 3px 7px rgba(0, 0, 0, 0.1); /* 🔹 Sombra */
-    border-radius: 12px; /* 🔹 Bordes redondeados */
+    border-radius: 20px; /* 🔹 Bordes redondeados */
     overflow-y: auto; /* 🔹 Scroll si es necesario */
 }
 
@@ -50,10 +50,10 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background-color: #ffffff; /* 🔹 Fondo blanco */
+    background-color: var(--window-background);
     padding: 0;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* 🔹 Sombra */
-    border-radius: 12px; /* 🔹 Bordes redondeados */
+    border-radius: 20px; /* 🔹 Bordes redondeados */
     overflow-y: auto; /* 🔹 Scroll si es necesario */
 }
 

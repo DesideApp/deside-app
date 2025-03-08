@@ -6,7 +6,7 @@
     align-items: center;         /* Centra horizontalmente */
     min-height: calc(100vh - 50px); /* Resta la altura del header */
     padding-top: 50px; /* Deja espacio para el header */
-    background-color: #ffffff;   /* Fondo opcional */
+    background-color: var(--background-color); /* 🔹 Usa el color de fondo del tema */
     text-align: center;          /* Centra el texto */
 }
 

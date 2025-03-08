@@ -1,27 +1,73 @@
-/* 📌 Header de ContactList */
-.contact-list-header {
+/* 📌 Contenido interno del panel */
+.left-panel-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(250, 250, 250, 0.85);
+    box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s ease-in-out;
+}
+
+/* 📌 Pestañas inferiores */
+.left-panel-nav {
     display: flex;
     justify-content: center;
-    align-items: center;
-    padding-bottom: 10px;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
-    color: #333;
-    border-bottom: 1px solid #ddd; /* Separador entre el header y la lista */
-    text-align: center;
-    font-size: 1.2rem;
+    gap: 8px;
+    padding: 6px;
+    border-radius: 10px;
+    transition: background 0.3s ease-in-out;
 }
 
-/* 📌 Lista de contactos */
+/* 📌 Botones de pestañas */
+.left-panel-nav button {
+    width: 35px; /* 🔥 Tamaño fijo */
+    height: 35px;
+    border: none;
+    background: none;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 📌 Efectos visuales */
+.left-panel-nav button:hover {
+    background: rgba(240, 240, 240, 0.8);
+    color: #222;
+}
+
+/* 📌 Pestaña activa */
+.left-panel-nav button.active {
+    color: #fc554f;
+    background: rgba(255, 85, 79, 0.1);
+    border-radius: 8px;
+    transform: scale(1.1);
+}
+
+/* 📌 Tamaño de los iconos */
+.left-panel-nav button svg {
+    transition: transform 0.3s ease-in-out;
+    width: 18px;
+    height: 18px;
+}
+
+.left-panel-nav button.active svg {
+    transform: scale(1.2);
+}
+
+/* 📌 Estilo de la lista de contactos */
 .contact-list {
     list-style: none;
-    padding: 0; /* Eliminamos padding de la lista para evitar el desbordamiento */
-    margin: 0; /* Eliminamos cualquier margen adicional */
+    padding: 0;
+    margin: 0;
 }
 
-/* 📌 Estilo de cada contacto */
 .contact-item {
-    padding: 12px;
+    padding: 10px;
     background-color: #ffffff;
     border: 1px solid #dcdcdc;
     border-radius: 8px;
@@ -36,7 +82,8 @@
 }
 
 /* 📌 Mensaje cuando no hay contactos */
-.no-contacts-message {
+.no-contacts-message,
+.add-contact-placeholder {
     text-align: center;
     color: #777;
     font-size: 1rem;
@@ -45,7 +92,7 @@
 
 /* 📌 Responsive */
 @media (max-width: 768px) {
-    .contact-list-wrapper {
+    .left-panel-content {
         padding: 10px;
     }
 

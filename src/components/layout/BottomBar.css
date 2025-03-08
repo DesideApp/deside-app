@@ -28,7 +28,7 @@
 .bottom-bar-content {
     display: flex;
     align-items: center;
-    gap: 10px; /* 🔥 Ajustado para evitar expansión innecesaria */
+    gap: 10px;
 }
 
 /* 📌 Estilos de burbujas flotantes */
@@ -36,19 +36,13 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 8px; /* 🔥 Se mantiene compacto */
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 10px;
+    padding: 4px 8px;
+    background: var(--bubble-background); /* 🔥 Ahora usa el color dinámico */
+    border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     position: relative;
     bottom: 2px; /* 🔥 Ahora todas las burbujas flotan 2px */
-    width: fit-content; /* 🔥 Esto evita la expansión */
-}
-
-/* 📌 Burbujas individuales */
-.network-bubble,
-.settings-bubble {
-    min-width: auto; /* 🔥 Ahora NO SE EXPANDE */
+    width: fit-content;
 }
 
 /* 📌 Interruptor Claro/Oscuro */
@@ -73,7 +67,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: var(--highlight-color); /* 🔥 Color del tema */
     transition: 0.3s;
     border-radius: 18px;
 }
@@ -86,16 +80,12 @@
     width: 14px;
     left: 2px;
     bottom: 2px;
-    background-color: white;
+    background-color: var(--window-background); /* 🔥 Fondo dinámico */
     transition: 0.3s;
     border-radius: 50%;
 }
 
-/* 📌 Cuando está activado (modo oscuro) */
-input:checked + .slider {
-    background-color: #4caf50;
-}
-
+/* 📌 Movimiento al cambiar de estado */
 input:checked + .slider:before {
     transform: translateX(16px);
 }

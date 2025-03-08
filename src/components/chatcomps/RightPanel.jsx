@@ -1,13 +1,23 @@
-import React, { useState, memo } from "react";
+import React, { useState, memo, useCallback } from "react";
 import ContactRequests from "../chatcomps/ContactRequests";
 import AddContactForm from "../chatcomps/AddContactForm";
-import { FaUserPlus, FaInbox } from "react-icons/fa"; // ✅ Iconos representativos
+import { FaUserPlus, FaInbox } from "react-icons/fa";
+import { useAuthManager } from "../../services/authManager";
 import "./RightPanel.css";
 
 const RightPanel = () => {
-    const [activeTab, setActiveTab] = useState("requests"); // ✅ Control de pestañas principales
+    const [activeTab, setActiveTab] = useState("requests");
+    const { isAuthenticated, handleLoginResponse } = useAuthManager();
 
-    // ✅ Función para cambiar entre pestañas principales
+    // ✅ **Manejo de activación de autenticación**
+    const handlePanelClick = useCallback(() => {
+        if (!isAuthenticated) {
+            console.warn("⚠️ Usuario no autenticado. Iniciando login...");
+            handleLoginResponse(() => console.log("🔵 Login completado, listo para interactuar."));
+        }
+    }, [isAuthenticated, handleLoginResponse]);
+
+    // ✅ **Cambio de pestaña sin restricciones**
     const handleTabChange = (tab) => {
         setActiveTab(tab);
     };
@@ -21,18 +31,18 @@ const RightPanel = () => {
                     onClick={() => handleTabChange("requests")}
                     aria-label="Solicitudes de contacto"
                 >
-                    <FaInbox size={18} /> {/* 📩 Icono de bandeja de entrada */}
+                    <FaInbox size={20} />
                 </button>
                 <button 
                     className={activeTab === "addContact" ? "active" : ""} 
                     onClick={() => handleTabChange("addContact")}
                     aria-label="Agregar contacto"
                 >
-                    <FaUserPlus size={18} /> {/* ➕ Icono de agregar usuario */}
+                    <FaUserPlus size={20} />
                 </button>
             </nav>
 
-            {/* 📌 Solo una pestaña activa a la vez */}
+            {/* 📌 Contenido dinámico de pestañas */}
             <div className="right-panel-content">
                 {activeTab === "requests" && <ContactRequests />}
                 {activeTab === "addContact" && <AddContactForm />}

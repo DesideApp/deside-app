@@ -2,17 +2,17 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import WrittingPanel from "./WrittingPanel";
 import useWebRTC from "../../hooks/useWebRTC";
 import { io } from "socket.io-client";
-import { useAuthManager } from "../../services/authManager";
+import { useAuthManager } from "../../services/authManager"; 
 import "./ChatWindow.css";
 
 function ChatWindow({ selectedContact }) {
-    const { isAuthenticated, selectedWallet } = useAuthManager();
+    const { isAuthenticated, selectedWallet, handleLoginResponse } = useAuthManager();
     const chatContainerRef = useRef(null);
     const socketRef = useRef(null);
     const [isConnected, setIsConnected] = useState(false);
     const [confirmedContacts, setConfirmedContacts] = useState([]);
 
-    // ✅ **Obtener lista de contactos confirmados**
+    // ✅ **Obtener lista de contactos confirmados SOLO si estamos autenticados**
     const fetchContacts = useCallback(async () => {
         if (!selectedWallet || !isAuthenticated) return;
         try {
@@ -23,7 +23,7 @@ function ChatWindow({ selectedContact }) {
         }
     }, [selectedWallet, isAuthenticated]);
 
-    // ✅ **Inicializar WebSocket solo si el usuario tiene un contacto confirmado**
+    // ✅ **Inicializar WebSocket solo si el usuario está autenticado y tiene contacto seleccionado**
     const initializeSocket = useCallback(() => {
         if (!selectedWallet || !selectedContact || !isAuthenticated) return;
 
@@ -67,14 +67,18 @@ function ChatWindow({ selectedContact }) {
         }
     }, [messages]);
 
-    // ✅ **Cargar contactos al inicio**
+    // ✅ **Cargar contactos al inicio SOLO si el usuario está autenticado**
     useEffect(() => {
-        fetchContacts();
-    }, [fetchContacts]);
+        if (isAuthenticated) {
+            fetchContacts();
+        }
+    }, [fetchContacts, isAuthenticated]);
 
     // ✅ **Inicializar WebSocket cuando cambie `selectedContact`**
     useEffect(() => {
-        initializeSocket();
+        if (isAuthenticated && selectedContact) {
+            initializeSocket();
+        }
         return () => {
             if (socketRef.current) {
                 console.log("🔴 Desconectando WebSocket...");
@@ -82,10 +86,23 @@ function ChatWindow({ selectedContact }) {
                 socketRef.current = null;
             }
         };
-    }, [initializeSocket, selectedContact]);
+    }, [initializeSocket, selectedContact, isAuthenticated]);
+
+    // ✅ **Manejo de la interacción de usuario (login automático si es necesario)**
+    const handleUserInteraction = (action) => {
+        if (!isAuthenticated) {
+            console.warn("🚨 Intento de interactuar sin autenticación. Activando login...");
+            handleLoginResponse(() => {
+                console.log("✅ Autenticado, ejecutando acción...");
+                action();
+            });
+            return;
+        }
+        action();
+    };
 
     return (
-        <div className="chat-window">
+        <div className="chat-window" onClick={() => handleUserInteraction(() => {})}>
             {/* ✅ Header flotante */}
             <header className="chat-header">
                 {selectedContact ? (
@@ -120,9 +137,9 @@ function ChatWindow({ selectedContact }) {
                 )}
             </main>
 
-            {/* ✅ ChatInput correctamente ubicado pero sin estilos en `ChatWindow.css` */}
+            {/* ✅ ChatInput correctamente ubicado */}
             <div className="writting-panel-container">
-              <WrittingPanel onSendMessage={sendMessage} disabled={!isConnected} />
+                <WrittingPanel onSendMessage={(message) => handleUserInteraction(() => sendMessage(message))} disabled={!isConnected} />
             </div>
         </div>
     );

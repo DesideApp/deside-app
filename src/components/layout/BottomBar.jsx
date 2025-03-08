@@ -2,14 +2,15 @@ import React, { useState } from "react";
 import "./BottomBar.css";
 import NetworkStatus from "./NetworkStatus.jsx";
 import SolanaPrice from "./SolanaPrice.jsx";
+import { toggleTheme, getPreferredTheme } from "../../config/theme.js"; // ✅ Conectar con el sistema de temas
 
 const BottomBar = React.memo(() => {
-    const [isDarkMode, setIsDarkMode] = useState(false); // ✅ Estado para el tema
+    const [isDarkMode, setIsDarkMode] = useState(getPreferredTheme() === "dark");
 
-    /** 🔹 **Alternar el modo de tema (aún sin aplicar lógica real)** */
-    const toggleTheme = () => {
+    /** 🔹 **Alternar entre Claro/Oscuro sin cambiar color del botón** */
+    const handleThemeToggle = () => {
+        toggleTheme();
         setIsDarkMode((prev) => !prev);
-        console.log(`🌗 Modo cambiado a: ${isDarkMode ? "Claro" : "Oscuro"}`);
     };
 
     return (
@@ -24,7 +25,7 @@ const BottomBar = React.memo(() => {
                 {/* 🔹 Interruptor Claro/Oscuro */}
                 <div className="bubble settings-bubble">
                     <label className="switch">
-                        <input type="checkbox" checked={isDarkMode} onChange={toggleTheme} />
+                        <input type="checkbox" checked={isDarkMode} onChange={handleThemeToggle} />
                         <span className="slider"></span>
                     </label>
                 </div>

@@ -5,7 +5,7 @@
     width: 320px;
     height: 100%;
     background: white;
-    border-left: 1px solid #ccc;
+    border-left: 0.5px solid #ccc;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
     transition: right 0.4s ease-in-out, opacity 0.3s ease-in-out;
     z-index: 1000;
@@ -17,8 +17,6 @@
     right: 0;
     opacity: 1;
 }
-
-/* ❌ ELIMINADO: Estilos de la hamburguesa dentro del menú ❌ */
 
 /* 📌 Contenido del menú */
 .wallet-menu-content {
@@ -33,7 +31,7 @@
     justify-content: space-between;
     background: #f2f2f2;
     padding: 10px;
-    border-radius: 10px;
+    border-radius: 15px;
     word-wrap: break-word;
     margin-bottom: 15px;
 }
@@ -59,7 +57,7 @@
     font-family: 'Montserrat', sans-serif;
     font-weight: normal;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     color: white;
     cursor: pointer;
     transition: background-color 0.3s ease;

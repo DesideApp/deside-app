@@ -80,6 +80,25 @@ export async function checkAuthStatus() {
 }
 
 /**
+ * 🔹 **Consultar si una wallet está registrada**
+ */
+export async function checkWalletRegistration(pubkey) {
+  if (!pubkey) {
+    console.warn("⚠️ No se proporcionó clave pública para verificar registro.");
+    return { registered: false, error: "No public key provided." };
+  }
+
+  const response = await apiRequest(`/api/auth/registered/${pubkey}`, { method: "GET" });
+
+  if (response.error) {
+    console.error("❌ Error consultando estado de wallet registrada:", response.message);
+    return { registered: false, error: response.message };
+  }
+
+  return { registered: response.registered };
+}
+
+/**
  * 🔹 **Logout manual**
  */
 export async function logout() {
