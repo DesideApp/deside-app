@@ -1,55 +1,54 @@
 /* 📌 Contenedor principal */
 .bottom-bar {
     position: fixed;
-    bottom: 2px; /* 🔥 Separa 2px del borde inferior */
+    bottom: 2px;
     left: 0;
     width: 100%;
     height: 30px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-end; /* 🔥 Mantiene los elementos alineados a la derecha */
     align-items: center;
+    padding: 0 20px;
     z-index: 1000;
     transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
-}
-
-/* 📌 Cuando está oculto */
-.bottom-bar.hidden {
-    opacity: 0;
-    transform: translateY(100%);
-}
-
-/* 📌 Cuando es visible */
-.bottom-bar.visible {
-    opacity: 1;
-    transform: translateY(0);
 }
 
 /* 📌 Contenedor de los elementos del bottom bar */
 .bottom-bar-content {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px; /* 🔥 Menos espacio entre burbujas para que se vean juntas */
+    margin-right: 20px;
 }
 
 /* 📌 Estilos de burbujas flotantes */
 .bubble {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 8px;
-    background: var(--bubble-background); /* 🔥 Ahora usa el color dinámico */
+    justify-content: center;
+    padding: 4px 10px;
+    background: var(--bubble-background);
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
-    bottom: 2px; /* 🔥 Ahora todas las burbujas flotan 2px */
     width: fit-content;
+}
+
+/* 📌 Tipo A - Más alto (NetworkStatus, SolanaPrice) */
+.bubble.type-a {
+    height: 26px;
+}
+
+/* 📌 Tipo B - Más bajo (Interruptor de tema, ahora pegado a la izquierda) */
+.bubble.type-b {
+    height: 20px;
+    margin-right: -4px; /* 🔥 Ajuste fino para que se pegue visualmente */
 }
 
 /* 📌 Interruptor Claro/Oscuro */
 .switch {
     position: relative;
-    width: 34px;
-    height: 18px;
+    width: 30px;
+    height: 16px;
 }
 
 /* 📌 Ocultamos el checkbox por defecto */
@@ -67,7 +66,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--highlight-color); /* 🔥 Color del tema */
+    background-color: var(--highlight-color);
     transition: 0.3s;
     border-radius: 18px;
 }
@@ -76,16 +75,16 @@
 .slider:before {
     content: "";
     position: absolute;
-    height: 14px;
-    width: 14px;
+    height: 12px;
+    width: 12px;
     left: 2px;
     bottom: 2px;
-    background-color: var(--window-background); /* 🔥 Fondo dinámico */
+    background-color: var(--window-background);
     transition: 0.3s;
     border-radius: 50%;
 }
 
 /* 📌 Movimiento al cambiar de estado */
 input:checked + .slider:before {
-    transform: translateX(16px);
+    transform: translateX(14px);
 }

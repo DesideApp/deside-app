@@ -3,8 +3,9 @@ import "./SolanaPrice.css";
 import { getSolanaPrice } from "../../utils/solanaHelpers.js";
 
 const SolanaPrice = React.memo(() => {
-    const [price, setPrice] = useState(null); // 🔥 Inicia en null para mostrar "Loading..."
+    const [price, setPrice] = useState(null);
     const [prevPrice, setPrevPrice] = useState(null);
+    const [currentClass, setCurrentClass] = useState("neutral"); // 🔥 Manejo del color temporal
     const priceRef = useRef(null);
     const intervalRef = useRef(null);
 
@@ -19,14 +20,13 @@ const SolanaPrice = React.memo(() => {
                 }
             } catch (error) {
                 console.warn("⚠️ Error obteniendo precio de Solana:", error);
-                // ❌ NO actualizamos a 0 si falla la petición
             }
         };
 
-        fetchPrice(); // 🔹 Llamada inicial
+        fetchPrice();
 
         if (!intervalRef.current) {
-            intervalRef.current = setInterval(fetchPrice, 30000); // 🔥 Ahora cada 30s
+            intervalRef.current = setInterval(fetchPrice, 30000);
         }
 
         return () => {
@@ -37,15 +37,22 @@ const SolanaPrice = React.memo(() => {
         };
     }, []);
 
-    // ✅ Definir el color de la animación basado en el precio anterior
-    const priceChange = useMemo(() => {
-        if (prevPrice === null || price === null) return "neutral";
-        return price > prevPrice ? "up" : price < prevPrice ? "down" : "neutral";
+    useEffect(() => {
+        if (prevPrice === null || price === null) {
+            setCurrentClass("neutral");
+            return;
+        }
+
+        const newClass = price > prevPrice ? "up" : price < prevPrice ? "down" : "neutral";
+        setCurrentClass(newClass);
+
+        // 🔥 Vuelve a neutral inmediatamente después de la animación
+        setTimeout(() => setCurrentClass("neutral"), 500);
     }, [price, prevPrice]);
 
     return (
         <div className="solana-price-container">
-            <span className={`solana-price ${priceChange}`}>
+            <span className={`solana-price ${currentClass}`}>
                 {price !== null ? `$${price.toFixed(2)}` : "Loading..."}
             </span>
         </div>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./BottomBar.css";
 import NetworkStatus from "./NetworkStatus.jsx";
 import SolanaPrice from "./SolanaPrice.jsx";
-import { toggleTheme, getPreferredTheme } from "../../config/theme.js"; // ✅ Conectar con el sistema de temas
+import { toggleTheme, getPreferredTheme } from "../../config/theme.js"; 
 
 const BottomBar = React.memo(() => {
     const [isDarkMode, setIsDarkMode] = useState(getPreferredTheme() === "dark");
@@ -15,19 +15,19 @@ const BottomBar = React.memo(() => {
 
     return (
         <footer className="bottom-bar">
-            {/* 🔹 Contenedor que agrupa estado y precio de SOL */}
             <div className="bottom-bar-content">
-                <div className="bubble network-bubble">
-                    <NetworkStatus />
-                    <SolanaPrice />
-                </div>
-
-                {/* 🔹 Interruptor Claro/Oscuro */}
-                <div className="bubble settings-bubble">
+                {/* 🔹 Interruptor Claro/Oscuro (🔥 Pegado a la izquierda del estado & precio) */}
+                <div className="bubble type-b">
                     <label className="switch">
                         <input type="checkbox" checked={isDarkMode} onChange={handleThemeToggle} />
                         <span className="slider"></span>
                     </label>
+                </div>
+
+                {/* 🔹 Estado y precio de SOL (Mantiene su posición) */}
+                <div className="bubble type-a">
+                    <NetworkStatus />
+                    <SolanaPrice />
                 </div>
             </div>
         </footer>

@@ -24,29 +24,32 @@ const RightPanel = () => {
 
     return (
         <aside className="right-panel">
-            {/* 📌 Menú de pestañas principales con iconos */}
+            {/* ✅ Header vacío estructural */}
+            <header className="right-panel-header"></header>
+
+            {/* 📌 Contenedor del contenido */}
+            <div className="right-panel-content">
+                {activeTab === "requests" && <ContactRequests />}
+                {activeTab === "addContact" && <AddContactForm />}
+            </div>
+
+            {/* 📌 Menú de pestañas en la parte inferior */}
             <nav className="right-panel-nav">
                 <button 
                     className={activeTab === "requests" ? "active" : ""} 
                     onClick={() => handleTabChange("requests")}
                     aria-label="Solicitudes de contacto"
                 >
-                    <FaInbox size={16} />
+                    <FaInbox size={18} />
                 </button>
                 <button 
                     className={activeTab === "addContact" ? "active" : ""} 
                     onClick={() => handleTabChange("addContact")}
                     aria-label="Agregar contacto"
                 >
-                    <FaUserPlus size={16} />
+                    <FaUserPlus size={18} />
                 </button>
             </nav>
-
-            {/* 📌 Contenido dinámico de pestañas */}
-            <div className="right-panel-content">
-                {activeTab === "requests" && <ContactRequests />}
-                {activeTab === "addContact" && <AddContactForm />}
-            </div>
         </aside>
     );
 };
