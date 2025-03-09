@@ -1,5 +1,5 @@
 import { getProvider, isWalletConnected } from "./walletProviders";
-import { authenticateWithServer, logout as apiLogout, isWalletRegistered } from "./apiService";
+import { authenticateWithServer, logout as apiLogout } from "./apiService";
 import bs58 from "bs58";
 
 const WALLET_STATUS = {
@@ -10,6 +10,7 @@ const WALLET_STATUS = {
 
 /**
  * 🔍 **Detectar wallet conectada a nivel Web3 (NO backend)**
+ * @returns {{walletAddress: string, selectedWallet: string} | {walletAddress: null}}
  */
 export async function getConnectedWallet() {
   try {
@@ -25,6 +26,9 @@ export async function getConnectedWallet() {
 
 /**
  * 💰 **Obtener balance de una wallet conectada**
+ * @param {string} walletAddress - Dirección pública de la wallet.
+ * @param {string} selectedWallet - Proveedor de la wallet (phantom, backpack, magiceden).
+ * @returns {Promise<number|null>} - Balance en SOL o `null` en caso de error.
  */
 export async function getWalletBalance(walletAddress, selectedWallet) {
   try {
@@ -54,6 +58,7 @@ export async function getWalletBalance(walletAddress, selectedWallet) {
 
 /**
  * 🔹 **Conectar wallet manualmente**
+ * @param {string} wallet - Nombre del proveedor de la wallet (phantom, backpack, magiceden).
  */
 export async function connectWallet(wallet) {
   try {
@@ -73,6 +78,7 @@ export async function connectWallet(wallet) {
 
 /**
  * 🔹 **Desconectar la wallet actual**
+ * @param {string} [selectedWallet] - (Opcional) Si no se pasa, se desconecta la wallet activa.
  */
 export async function disconnectWallet(selectedWallet) {
   try {
@@ -119,21 +125,6 @@ export async function authenticateWallet(wallet) {
     const { walletAddress } = await getConnectedWallet();
     if (!walletAddress) return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED };
 
-    // 🔍 **Verificar si la wallet ya está registrada**
-    let registered = await isWalletRegistered(walletAddress);
-
-    if (!registered) {
-        console.warn("⚠️ Wallet no registrada. Esperando 2s para permitir el registro en backend...");
-        await new Promise((resolve) => setTimeout(resolve, 2000)); // ⏳ Delay de 2s
-        
-        registered = await isWalletRegistered(walletAddress); // 🔄 Volvemos a consultar
-
-        if (!registered) {
-            console.error("❌ Wallet sigue sin registrarse tras el delay. Abandonando proceso.");
-            return { pubkey: null, status: "registration_failed" };
-        }
-    }
-
     const signedData = await signMessage(wallet, "Please sign this message to authenticate.");
     if (!signedData.signature) return { pubkey: null, status: "signature_failed" };
 
@@ -152,12 +143,12 @@ export async function authenticateWallet(wallet) {
  */
 export async function handleLogout(syncWalletStatus) {
   try {
-    await apiLogout();
+    await apiLogout(); // 🔒 Cierra sesión en el backend
   } catch {
     console.warn("⚠️ No se pudo cerrar sesión en el backend.");
   }
 
-  await disconnectWallet();
+  await disconnectWallet(); // 🔌 Desconectar Web3
 
   syncWalletStatus();
   window.dispatchEvent(new Event("walletDisconnected"));
