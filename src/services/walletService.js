@@ -62,6 +62,12 @@ export async function getWalletBalance(walletAddress, selectedWallet) {
  */
 export async function connectWallet(wallet) {
   try {
+    // 🚨 **Forzar reinicio del proveedor antes de conectar (para Phantom y Backpack)**
+    if (wallet === "phantom" || wallet === "backpack") {
+      window.solana = null;
+      await new Promise((resolve) => setTimeout(resolve, 500)); // Pequeño delay para resetear
+    }
+
     const provider = getProvider(wallet);
     if (!provider) throw new Error("No encontramos tu wallet. Instálala e intenta de nuevo.");
 
@@ -88,10 +94,16 @@ export async function disconnectWallet(selectedWallet) {
     const provider = getProvider(wallet);
     if (provider?.isConnected) {
       await provider.disconnect();
+
+      // 🚨 **Forzar recarga del proveedor para borrar sesión en Phantom y Backpack**
+      if (wallet === "phantom" || wallet === "backpack") {
+        window.solana = null;
+      }
+
       window.dispatchEvent(new Event("walletDisconnected"));
     }
-  } catch {
-    console.warn("⚠️ No se pudo desconectar la wallet.");
+  } catch (error) {
+    console.warn("⚠️ No se pudo desconectar la wallet:", error);
   }
 }
 

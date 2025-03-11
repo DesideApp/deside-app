@@ -1,5 +1,5 @@
 import React, { useState, memo, useCallback } from "react";
-import { MdPersonOutline, MdPerson, MdAddCircleOutline, MdAddCircle } from "react-icons/md"; // 📌 Iconos con versión contorno y relleno
+import { MdPersonOutline, MdPerson, MdAddCircleOutline, MdAddCircle } from "react-icons/md"; 
 import ContactRequests from "../chatcomps/ContactRequests";
 import AddContactForm from "../chatcomps/AddContactForm";
 import { useAuthManager } from "../../services/authManager";
