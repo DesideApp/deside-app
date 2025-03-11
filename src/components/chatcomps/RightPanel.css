@@ -1,7 +1,7 @@
 /* ✅ Header estructural (espacio reservado pero sin estilos adicionales) */
 .right-panel-header {
-    height: 70px; /* 🔥 Espacio fijo, sin modificaciones extra */
-    flex-shrink: 0; /* 🔥 Asegura que no se reduzca en scroll */
+    height: 70px; /* 🔥 Espacio definido sin modificar el diseño */
+    flex-shrink: 0; /* 🔥 EVITA QUE SE COMPORTE COMO SCROLL */
 }
 
 /* ✅ Contenedor del contenido con efecto hundido */
@@ -9,16 +9,16 @@
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    padding: 8px 10px; /* 🔥 Espaciado uniforme */
+    padding: 8px 10px; /* 🔥 Ajuste uniforme */
     border-radius: 15px;
     background: var(--background-overlay); /* 🔹 Fondo translúcido */
-    box-shadow: inset 0px 2px 5px var(--shadow-content); /* 🔥 Sombra sutil */
+    box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.08); /* 🔥 Sombra sutil */
     transition: background 0.3s ease-in-out;
     margin: 10px; /* 🔥 Espaciado uniforme */
-    overflow: hidden; /* 🔥 Previene cualquier scroll innecesario */
+    overflow: hidden; /* 🔥 ELIMINA EL SCROLL */
 }
 
-/* ✅ Menú de pestañas pegado al contenido */
+/* ✅ Menú de pestañas pegadas al contenido */
 .right-panel-nav {
     display: flex;
     justify-content: center;
@@ -26,16 +26,17 @@
     padding: 0;
     border-radius: 8px;
     transition: background 0.3s ease-in-out;
+    overflow: hidden; /* 🔥 PREVIENE SCROLL EN LAS PESTAÑAS */
 }
 
-/* ✅ Botones de pestañas – SOLO ICONOS */
+/* ✅ Botones de pestañas – SOLO ICONOS, sin fondo visible */
 .right-panel-nav button {
     width: 35px;
     height: 35px;
     border: none;
-    background: none;
+    background: none; /* 🔥 Sin fondo visible */
     font-size: 0.9rem;
-    color: var(--secondary-text); /* 🔥 Se adapta al tema */
+    color: inherit;
     cursor: pointer;
     transition: transform 0.3s ease-in-out, color 0.3s ease-in-out;
     display: flex;
@@ -43,14 +44,15 @@
     justify-content: center;
 }
 
-/* ✅ Sin cambios al pasar el ratón */
+/* ✅ Efecto hover en pestañas */
 .right-panel-nav button:hover {
-    color: var(--highlight-color); /* 🔥 Ligero cambio de color */
+    background: rgba(240, 240, 240, 0.3);
 }
 
-/* ✅ Pestaña activa – Se rellena */
+/* ✅ Pestaña activa – Se funde con el contenido */
 .right-panel-nav button.active {
-    color: var(--text-color); /* 🔥 Color fuerte al estar activo */
+    background: var(--window-background); /* 🔥 Se fusiona con la ventana */
+    box-shadow: inset 0px -2px 5px rgba(0, 0, 0, 0.1); /* 🔹 Sombras suaves */
 }
 
 /* ✅ Iconos dentro de los botones */
@@ -60,7 +62,7 @@
     height: 18px;
 }
 
-/* ✅ Pestaña activa – Icono se rellena */
+/* ✅ Pestaña activa – Icono con ligera animación */
 .right-panel-nav button.active svg {
     transform: scale(1.05);
 }
