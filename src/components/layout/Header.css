@@ -12,7 +12,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center; /* 🔥 Alinea todo al centro verticalmente */
-    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--window-shadow); /* 🔹 Aplica la sombra exterior */
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 

@@ -1,0 +1,142 @@
+/* 📌 Contenedor principal del formulario */
+.add-contact-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+    padding: 10px;
+    border-radius: 15px;
+}
+
+/* 📌 Título */
+.add-contact-container h2 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 14px;
+    text-align: center;
+}
+
+/* 📌 Contenedor del input */
+.input-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* 📌 Input para clave pública */
+.add-contact-container textarea {
+    width: 100%;
+    min-height: 50px;
+    max-height: 150px;
+    padding: 14px;
+    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
+    color: var(--text-color);
+    background: var(--window-background);
+    border: 2px solid rgba(128, 128, 128, 0.25);
+    padding-right: 60px; /* 🔥 Más espacio lateral para evitar que el texto choque con los iconos */
+    border-radius: 15px;
+    outline: none;
+    transition: border 0.2s ease-in-out, box-shadow 0.2s ease-in-out, height 0.2s ease-in-out;
+    overflow-y: hidden;
+    resize: none;
+    text-align: center;
+}
+
+/* 📌 Nuevo contenedor para los iconos dentro del input */
+.input-icons {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column; /* 🔥 Alinea los iconos verticalmente */
+    gap: 6px; /* 🔥 Espacio entre el icono de validación y el de borrar */
+}
+
+/* 📌 Input cuando está en foco */
+.add-contact-container textarea:focus {
+    border: 2px solid rgba(128, 128, 128, 0.5);
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 📌 Iconos dentro del input */
+.validation-icon {
+    font-size: 1.2rem;
+    transition: color 0.2s ease-in-out, opacity 0.3s ease-in-out;
+    opacity: 0.85;
+    cursor: pointer;
+}
+
+/* 📌 Icono de borrar ahora está dentro del contenedor de iconos */
+.clear-icon {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+}
+
+.clear-icon:hover {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* 📌 Estado válido */
+.valid .validation-icon {
+    color: rgba(46, 125, 50, 0.85);
+}
+
+/* 📌 Estado inválido */
+.invalid .validation-icon {
+    color: rgba(211, 47, 47, 0.85);
+}
+
+/* 📌 Icono de borrar */
+.clear-icon {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+}
+
+.clear-icon:hover {
+    color: rgba(255, 255, 255, 1);
+}
+
+/* 📌 Botón de envío */
+.add-contact-container button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fc554f;
+    color: white;
+    height: 38px;
+    min-width: 150px;
+    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
+    padding: 0 16px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    text-align: center;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 18px;
+}
+
+/* 📌 Hover y efecto al hacer click */
+.add-contact-container button:hover {
+    background-color: #e04a45;
+    transform: scale(1.02);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 📌 Ajuste para que el botón siempre tenga el color correcto, pero sin hover cuando está deshabilitado */
+.add-contact-container button:disabled {
+    background-color: #fc554f;
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+    pointer-events: none;
+}

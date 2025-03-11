@@ -28,7 +28,10 @@ const WalletModal = ({ isOpen, onClose }) => {
   return (
     <div className="wallet-modal-overlay" onClick={!isLoading ? onClose : null} aria-hidden="true">
       <div className="wallet-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby="wallet-modal-title">
-        <h2 id="wallet-modal-title">🔗 Select Your Wallet</h2>
+        {/* Contenedor del título */}
+        <div className="wallet-modal-container">
+          <h2 id="wallet-modal-title">Select Your Wallet</h2>
+        </div>
 
         <div className="wallet-options">
           {["phantom", "backpack", "magiceden"].map((wallet) => (
@@ -37,7 +40,7 @@ const WalletModal = ({ isOpen, onClose }) => {
               onClick={() => handleWalletSelection(wallet)} 
               disabled={isLoading} 
               aria-label={`Connect to ${wallet}`}>
-              {isLoading ? "Connecting..." : `${wallet.charAt(0).toUpperCase()}${wallet.slice(1)} Wallet`}
+              {isLoading ? "Connecting..." : `${wallet.charAt(0).toUpperCase()}${wallet.slice(1)}`}
             </button>
           ))}
         </div>

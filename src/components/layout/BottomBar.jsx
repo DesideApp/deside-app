@@ -16,18 +16,18 @@ const BottomBar = React.memo(() => {
     return (
         <footer className="bottom-bar">
             <div className="bottom-bar-content">
-                {/* 🔹 Interruptor Claro/Oscuro (🔥 Pegado a la izquierda del estado & precio) */}
+                {/* 🔹 Estado y precio de SOL (🔥 Posicionado correctamente a la derecha) */}
+                <div className="bubble type-a">
+                    <NetworkStatus />
+                    <SolanaPrice />
+                </div>
+
+                {/* 🔹 Interruptor Claro/Oscuro (🔥 Pegado a la izquierda de la otra burbuja) */}
                 <div className="bubble type-b">
                     <label className="switch">
                         <input type="checkbox" checked={isDarkMode} onChange={handleThemeToggle} />
                         <span className="slider"></span>
                     </label>
-                </div>
-
-                {/* 🔹 Estado y precio de SOL (Mantiene su posición) */}
-                <div className="bubble type-a">
-                    <NetworkStatus />
-                    <SolanaPrice />
                 </div>
             </div>
         </footer>

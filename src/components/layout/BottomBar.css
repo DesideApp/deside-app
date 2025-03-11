@@ -27,9 +27,9 @@
     align-items: center;
     justify-content: center;
     padding: 4px 10px;
-    background: var(--bubble-background);
+    background-color: var(--window-background);
     border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--window-shadow); /* 🔹 Aplica la sombra exterior */
     width: fit-content;
 }
 

@@ -1,59 +1,94 @@
 import React, { useState, useCallback, memo } from "react";
-import { checkAuthStatus } from "../../services/apiService.js";
-import { sendContactRequest } from "../../services/contactService.js"; // ✅ Nuevo import correcto
-
+import { checkAuthStatus, checkWalletRegistered } from "../../services/apiService.js";
+import { sendContactRequest } from "../../services/contactService.js";
+import { FaCheckCircle, FaTimesCircle, FaTimes } from "react-icons/fa"; // ✅ Nuevo icono para borrar campo
+import "./AddContactForm.css";
 
 const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState("");
     const [message, setMessage] = useState({ type: "", text: "" });
     const [isLoading, setIsLoading] = useState(false);
 
-    // ✅ **Manejo de solicitudes de contacto**
+    /** 🔹 **Expresión regular para validar pubkey de Solana** */
+    const isValidPubkey = pubkey.length === 44 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(pubkey.trim());
+
+    /** 🔹 **Limpiar campo de entrada** */
+    const clearInput = () => setPubkey("");
+
+    /** 🔹 **Manejo de solicitudes de contacto** */
     const handleAddContact = useCallback(async () => {
-        const trimmedPubkey = pubkey.trim();
-        if (!trimmedPubkey) {
-            setMessage({ type: "error", text: "⚠️ Introduce una clave pública válida." });
-            return;
-        }
+        if (!isValidPubkey) return;
 
         setIsLoading(true);
         setMessage({ type: "", text: "" });
 
         try {
             const { isAuthenticated } = await checkAuthStatus();
-            if (!isAuthenticated) throw new Error("⚠️ Debes estar autenticado para añadir contactos.");
+            if (!isAuthenticated) throw new Error("⚠️ You must be logged in to add contacts.");
 
-            await sendContactRequest(trimmedPubkey);
-            setMessage({ type: "success", text: "✅ Solicitud de contacto enviada con éxito." });
-            setPubkey(""); // ✅ Reset del input tras el éxito
+            const { registered } = await checkWalletRegistered(pubkey);
+            if (!registered) throw new Error("⚠️ This wallet is not registered on Deside.");
+
+            await sendContactRequest(pubkey);
+            setMessage({ type: "success", text: "✅ Request sent successfully." });
+            setPubkey("");
             onContactAdded();
         } catch (error) {
-            console.error("❌ Error enviando la solicitud:", error);
-            setMessage({ type: "error", text: error.message || "❌ Error al enviar solicitud." });
+            console.error("❌ Error sending request:", error);
+            let errorMsg = "❌ Error sending request.";
+
+            if (error.message.includes("logged in")) errorMsg = "⚠️ You must be logged in to add contacts.";
+            if (error.message.includes("registered")) errorMsg = "⚠️ This wallet is not registered on Deside.";
+            
+            setMessage({ type: "error", text: errorMsg });
         } finally {
             setIsLoading(false);
         }
-    }, [pubkey, onContactAdded]);
+    }, [pubkey, onContactAdded, isValidPubkey]);
 
     return (
         <div className="add-contact-container">
-            <h2>📇 Añadir Contacto</h2>
+            <h2>Add contact</h2>
 
-            <input
-                type="text"
-                value={pubkey}
-                onChange={(e) => setPubkey(e.target.value)}
-                placeholder="Introduce la clave pública"
-                disabled={isLoading}
-                aria-disabled={isLoading}
-                aria-label="Clave pública del contacto"
-            />
+            {/* 🔹 Contenedor del input con validación y espacio para iconos */}
+            <div className="input-wrapper">
+                <div className="input-content">
+                    <textarea
+                        value={pubkey}
+                        onChange={(e) => setPubkey(e.target.value.slice(0, 88))} // 🔥 Máximo 88 caracteres
+                        placeholder="Friend's public key"
+                        disabled={isLoading}
+                        aria-disabled={isLoading}
+                        aria-label="Contact's public key"
+                        rows={1}
+                    />
+                    <div className="input-icons">
+                        {/* 🔹 Icono de validación (Arriba a la derecha) */}
+                        {pubkey && (
+                            <span className={`validation-icon ${isValidPubkey ? "valid" : "invalid"}`}>
+                                {isValidPubkey ? <FaCheckCircle /> : <FaTimesCircle />}
+                            </span>
+                        )}
+                        {/* 🔹 Icono de borrar (Abajo a la derecha) */}
+                        {pubkey && (
+                            <span className="clear-icon" onClick={clearInput}>
+                                <FaTimes />
+                            </span>
+                        )}
+                    </div>
+                </div>
+            </div>
 
-            <button onClick={handleAddContact} disabled={isLoading} aria-disabled={isLoading}>
-                {isLoading ? "Enviando..." : "➕ Enviar Solicitud"}
+            {/* 🔹 Botón de agregar */}
+            <button
+                className={`wallet-button ${!isValidPubkey ? "disabled" : ""}`}
+                onClick={handleAddContact}
+                disabled={isLoading || !isValidPubkey}
+            >
+                {isLoading ? "Sending..." : "Send request"}
             </button>
 
-            {/* ✅ Mejora de accesibilidad con `aria-live` */}
+            {/* ✅ Mensajes de estado */}
             {message.text && (
                 <p className={`message ${message.type}`} aria-live="assertive">{message.text}</p>
             )}

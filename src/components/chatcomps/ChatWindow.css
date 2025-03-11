@@ -19,7 +19,7 @@
     background-color: var(--window-background); /* 🔥 Fondo dinámico */
     padding: 15px;
     border-radius: 20px;
-    box-shadow: 0px 3px 7px rgba(0, 0, 0, 0.1); /* 🔹 Sombra flotante */
+    box-shadow: var(--window-shadow); /* 🔹 Aplica la sombra exterior */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -60,7 +60,7 @@
     background-color: var(--window-background); /* 🔥 Fondo dinámico */
     padding: 8px 12px;
     border-radius: 20px;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--window-shadow); /* 🔹 Aplica la sombra exterior */
     display: flex;
     align-items: flex-end; /* 🔹 Ajustamos para que el botón se mantenga en la parte baja */
     gap: 10px;

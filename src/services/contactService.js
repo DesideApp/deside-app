@@ -1,4 +1,4 @@
-import { apiRequest } from "./apiService";
+import { apiRequest, checkWalletRegistered } from "./apiService";
 
 /**
  * 🔹 **Gestión centralizada de contactos**
@@ -12,9 +12,16 @@ export async function fetchContacts() {
 }
 
 /**
- * 🔹 **Enviar solicitud de contacto**
+ * 🔹 **Enviar solicitud de contacto con verificación previa**
  */
 export async function sendContactRequest(pubkey) {
+    if (!pubkey) return { success: false, error: "Clave pública no proporcionada." };
+
+    // 🔍 **Verificamos si la wallet está registrada antes de enviar la solicitud**
+    const { registered, error } = await checkWalletRegistered(pubkey);
+    if (error) return { success: false, error: "Error verificando wallet." };
+    if (!registered) return { success: false, error: "Wallet no registrada." };
+
     return handleContactAction("/api/contacts/send", "POST", pubkey);
 }
 

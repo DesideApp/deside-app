@@ -1,7 +1,7 @@
 import React, { useState, memo, useCallback } from "react";
+import { MdPersonOutline, MdPerson, MdAddCircleOutline, MdAddCircle } from "react-icons/md"; // 📌 Iconos con versión contorno y relleno
 import ContactRequests from "../chatcomps/ContactRequests";
 import AddContactForm from "../chatcomps/AddContactForm";
-import { FaUserPlus, FaInbox } from "react-icons/fa";
 import { useAuthManager } from "../../services/authManager";
 import "./RightPanel.css";
 
@@ -24,10 +24,10 @@ const RightPanel = () => {
 
     return (
         <aside className="right-panel">
-            {/* ✅ Header vacío estructural */}
+            {/* ✅ Header estructural vacío pero con espacio fijo */}
             <header className="right-panel-header"></header>
 
-            {/* 📌 Contenedor del contenido */}
+            {/* 📌 Contenedor del contenido con efecto hundido */}
             <div className="right-panel-content">
                 {activeTab === "requests" && <ContactRequests />}
                 {activeTab === "addContact" && <AddContactForm />}
@@ -35,19 +35,19 @@ const RightPanel = () => {
 
             {/* 📌 Menú de pestañas en la parte inferior */}
             <nav className="right-panel-nav">
-                <button 
-                    className={activeTab === "requests" ? "active" : ""} 
+                <button
+                    className={activeTab === "requests" ? "active" : ""}
                     onClick={() => handleTabChange("requests")}
                     aria-label="Solicitudes de contacto"
                 >
-                    <FaInbox size={18} />
+                    {activeTab === "requests" ? <MdPerson size={22} /> : <MdPersonOutline size={22} />}
                 </button>
-                <button 
-                    className={activeTab === "addContact" ? "active" : ""} 
+                <button
+                    className={activeTab === "addContact" ? "active" : ""}
                     onClick={() => handleTabChange("addContact")}
                     aria-label="Agregar contacto"
                 >
-                    <FaUserPlus size={18} />
+                    {activeTab === "addContact" ? <MdAddCircle size={22} /> : <MdAddCircleOutline size={22} />}
                 </button>
             </nav>
         </aside>

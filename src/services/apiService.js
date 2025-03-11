@@ -6,7 +6,6 @@ const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutos
 
 /**
  * 🔹 **Manejo centralizado de solicitudes a la API**
- * 🚀 Ahora no hace nada automático, solo devuelve respuestas
  */
 export async function apiRequest(endpoint, options = {}, useCache = false) {
   if (!endpoint) throw new Error("❌ API Request sin endpoint definido.");
@@ -38,7 +37,7 @@ export async function apiRequest(endpoint, options = {}, useCache = false) {
     if (!response.ok) {
       if (response.status === 401) {
         console.warn("⚠️ Sesión expirada. Se requiere login manual.");
-        clearSession(); // ❌ No se intenta refrescar, solo limpia la sesión.
+        clearSession();
         return { isAuthenticated: false };
       }
 
@@ -55,7 +54,7 @@ export async function apiRequest(endpoint, options = {}, useCache = false) {
 }
 
 /**
- * 🔹 **Funciones de autenticación (manuales, sin auto-refresh)**
+ * 🔹 **Autenticación con el servidor**
  */
 export async function authenticateWithServer(pubkey, signature, message) {
   return apiRequest("/api/auth/auth", {
@@ -80,15 +79,15 @@ export async function checkAuthStatus() {
 }
 
 /**
- * 🔹 **Consultar si una wallet está registrada**
+ * 🔹 **Verificar si una wallet externa está registrada antes de agregarla como contacto**
  */
-export async function checkWalletRegistration(pubkey) {
+export async function checkWalletRegistered(pubkey) {
   if (!pubkey) {
     console.warn("⚠️ No se proporcionó clave pública para verificar registro.");
     return { registered: false, error: "No public key provided." };
   }
 
-  const response = await apiRequest(`/api/auth/registered/${pubkey}`, { method: "GET" });
+  const response = await apiRequest(`/api/contacts/check/${pubkey}`, { method: "GET" });
 
   if (response.error) {
     console.error("❌ Error consultando estado de wallet registrada:", response.message);

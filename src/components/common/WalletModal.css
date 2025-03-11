@@ -12,7 +12,8 @@
 }
 
 .wallet-modal {
-    background: white;
+    background-color: var(--window-background);
+    color: var(--text-color); /* 🔥 Se adapta a claro/oscuro */
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
@@ -30,6 +31,7 @@
 .wallet-options button {
     padding: 10px 20px;
     background-color: #fc554f;
+    font-family: 'Montserrat', sans-serif;
     color: white;
     border: none;
     border-radius: 12px;
