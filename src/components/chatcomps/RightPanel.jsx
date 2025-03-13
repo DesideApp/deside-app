@@ -1,5 +1,4 @@
 import React, { useState, memo, useCallback } from "react";
-import * as MdIcons from "react-icons/md";
 import { MdOutlineMail, MdMail, MdPersonOutline, MdPerson } from "react-icons/md";
 import ContactRequests from "../chatcomps/ContactRequests";
 import AddContactForm from "../chatcomps/AddContactForm";

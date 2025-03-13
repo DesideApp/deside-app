@@ -1,25 +1,15 @@
-/* 📌 Contenedor general */
-.chat-window {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: visible; /* 🔹 Permitimos que el contenido sobresalga (como la sombra del input) */
-    background-color: transparent;
-    position: relative;
-}
-
-/* 📌 Header pegado arriba dentro del ChatWindow */
+/* 📌 Header correctamente centrado dentro de chat-window */
 .chat-header {
     position: absolute;
-    top: 0; /* 🔹 Pegado a la parte superior del ChatWindow */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
+    top: 0;
+    left: 50%; /* 🔥 Lo centramos dentro de chat-window */
+    transform: translateX(-50%); /* 🔥 Asegura que esté realmente centrado */
+    width: 90%; /* 🔹 Hace que sea flexible sin depender de cálculos manuales */
     max-width: 600px;
-    background-color: var(--window-background); /* 🔥 Fondo dinámico */
+    background-color: var(--window-background);
     padding: 15px;
     border-radius: 20px;
-    box-shadow: var(--window-shadow); /* 🔹 Aplica la sombra exterior */
+    box-shadow: var(--window-shadow);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -47,22 +37,20 @@
 /* 📌 Contenedor principal del input */
 .writting-panel-container {
     position: absolute;
-    bottom: 0; /* 🔹 Pegado al borde inferior del contenedor */
-    left: 50%;
+    bottom: 0;
+    left: 50%; /* 🔥 Ahora centrado dentro de chat-window */
     transform: translateX(-50%);
-    width: 90%;
+    width: 90%; /* 🔹 Ajuste dinámico en lugar de restar píxeles fijos */
     max-width: 600px;
     display: flex;
     justify-content: center;
-    z-index: 5; /* 🔹 Aseguramos que el input esté por encima de otros elementos si es necesario */
-    transform: translateX(-50%);
-    width: 90%;
-    background-color: var(--window-background); /* 🔥 Fondo dinámico */
+    z-index: 5;
+    background-color: var(--window-background);
     padding: 8px 12px;
     border-radius: 20px;
-    box-shadow: var(--window-shadow); /* 🔹 Aplica la sombra exterior */
+    box-shadow: var(--window-shadow);
     display: flex;
-    align-items: flex-end; /* 🔹 Ajustamos para que el botón se mantenga en la parte baja */
+    align-items: flex-end;
     gap: 10px;
     transition: all 0.2s ease-in-out;
 }

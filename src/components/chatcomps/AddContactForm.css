@@ -18,14 +18,22 @@
     text-align: center;
 }
 
-/* 📌 Contenedor del input (ahora se expande junto con el textarea) */
+/* 📌 Contenedor del input (ahora crece correctamente con el textarea) */
 .input-wrapper {
     position: relative;
     width: 100%;
     display: flex;
-    align-items: center;
-    transition: min-height 0.2s ease-in-out; /* 🔥 El contenedor también se expande */
-    min-height: 50px;
+    align-items: flex-start; /* 🔥 Cambio clave: permite que el contenido crezca */
+    transition: min-height 0.2s ease-in-out;
+}
+
+/* 📌 Contenedor adicional que envuelve el textarea */
+.input-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: min-height 0.2s ease-in-out;
+    min-height: 50px; /* 🔥 Permitir que crezca */
 }
 
 /* 📌 Input para clave pública (se expande automáticamente) */
@@ -48,31 +56,30 @@
     line-height: 1.4;
 }
 
-/* 📌 Permite que el textarea y el contenedor se expandan dinámicamente */
+/* 📌 Expansión dinámica del textarea */
 .add-contact-container textarea:focus,
 .add-contact-container textarea:not(:placeholder-shown) {
     height: auto;
     min-height: 50px;
-    max-height: 150px;
+    max-height: none;
+}
+
+/* 📌 Expansión de los contenedores */
+.input-wrapper:has(textarea:focus),
+.input-wrapper:has(textarea:not(:placeholder-shown)),
+.input-content:has(textarea:focus),
+.input-content:has(textarea:not(:placeholder-shown)) {
+    min-height: auto;
 }
 
 /* 📌 Contenedor para los iconos dentro del input */
 .input-icons {
     position: absolute;
     right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 14px; /* 🔥 Cambio clave: Mantiene los iconos alineados */
     display: flex;
     align-items: center;
     gap: 6px;
-}
-
-/* 📌 Asegurar que los iconos siempre queden centrados cuando el input crece */
-.input-wrapper {
-    display: flex;
-    align-items: center;
-    position: relative;
-    min-height: 50px;
 }
 
 /* 📌 Iconos dentro del input */
@@ -94,7 +101,7 @@
 
 /* 📌 Icono de borrar (ahora más pequeño y en la misma línea que el `✅`) */
 .clear-icon {
-    font-size: 1rem; /* 🔹 Tamaño más pequeño */
+    font-size: 1rem;
     color: rgba(150, 150, 150, 0.7);
     cursor: pointer;
     transition: color 0.2s ease-in-out;

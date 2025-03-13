@@ -36,10 +36,15 @@
     overflow-y: auto; /* 🔹 Scroll si es necesario */
 }
 
-/* 📌 ChatWindow - Solo distribuye, no se aplica ningún estilo visual aquí */
+/* 📌 Contenedor general del chat */
 .chat-window-container {
-    flex: 2;
+    flex: 2; /* 🔹 Ocupa el espacio central del layout */
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: visible; /* 🔹 Permitimos que el contenido sobresalga */
+    background-color: transparent;
+    position: relative;
 }
 
 /* 📌 RightPanel */

@@ -24,18 +24,8 @@ export function isWalletConnected() {
         
         if (!provider) continue;
 
-        // ✅ Phantom: Si recuerda la sesión pero `isConnected` es falso, aún se puede considerar conectada.
-        if (wallet === "phantom" && provider.publicKey) {
-            return { wallet, pubkey: provider.publicKey.toBase58() };
-        }
-
-        // ✅ Backpack: Verificación segura de `isConnected`
-        if (wallet === "backpack" && provider.publicKey) {
-            return { wallet, pubkey: provider.publicKey.toBase58() };
-        }
-
-        // ✅ Cualquier otra wallet estándar
-        if (provider?.isConnected && provider.publicKey) {
+        // ✅ Ahora solo consideramos conectada si `isConnected === true`
+        if (provider.isConnected && provider.publicKey) {
             return { wallet, pubkey: provider.publicKey.toBase58() };
         }
     }

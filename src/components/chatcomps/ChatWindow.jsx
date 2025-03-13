@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import WrittingPanel from "./WrittingPanel";
 import useWebRTC from "../../hooks/useWebRTC";
 import { io } from "socket.io-client";
-import { useAuthManager } from "../../services/authManager"; 
+import { useAuthManager } from "../../services/authManager";
 import "./ChatWindow.css";
 
 function ChatWindow({ selectedContact }) {
@@ -102,7 +102,7 @@ function ChatWindow({ selectedContact }) {
     };
 
     return (
-        <div className="chat-window" onClick={() => handleUserInteraction(() => {})}>
+        <>
             {/* ✅ Header flotante */}
             <header className="chat-header">
                 {selectedContact ? (
@@ -141,7 +141,7 @@ function ChatWindow({ selectedContact }) {
             <div className="writting-panel-container">
                 <WrittingPanel onSendMessage={(message) => handleUserInteraction(() => sendMessage(message))} disabled={!isConnected} />
             </div>
-        </div>
+        </>
     );
 }
 

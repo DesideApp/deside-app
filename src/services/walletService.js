@@ -35,7 +35,7 @@ export async function getWalletBalance(walletAddress, selectedWallet) {
     if (!walletAddress || !selectedWallet) throw new Error("❌ Wallet no proporcionada.");
 
     const provider = getProvider(selectedWallet);
-    if (provider?.publicKey?.toBase58() === walletAddress) {
+    if (provider?.isConnected && provider?.publicKey?.toBase58() === walletAddress) {
       console.log(`🔍 Consultando balance a través del proveedor: ${selectedWallet}`);
 
       try {
@@ -65,12 +65,12 @@ export async function connectWallet(wallet) {
     const provider = getProvider(wallet);
     if (!provider) throw new Error("No encontramos tu wallet. Instálala e intenta de nuevo.");
 
-    // 🚀 **Si ya estaba conectada, primero desconectar**
+    // 🚀 **Si la wallet está conectada, desconectar antes de reconectar**
     if (provider.isConnected) {
       await provider.disconnect();
     }
 
-    // 🚀 **Forzar popup en Phantom y Backpack tras un logout**
+    // 🚀 **Si `isConnected === false`, forzar `connect()` para mostrar el popup**
     await provider.connect();
 
     const pubkey = provider.publicKey?.toBase58();

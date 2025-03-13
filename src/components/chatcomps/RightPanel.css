@@ -20,17 +20,21 @@
 
 /* ✅ Menú de pestañas pegadas al contenido */
 .right-panel-nav {
+    position: relative;
+    z-index: 10; /* 🔥 Asegura que esté por encima de otros elementos */
     display: flex;
     justify-content: center;
     gap: 6px;
     padding: 0;
     border-radius: 8px;
+    padding-bottom: 10px;
     transition: background 0.3s ease-in-out;
     overflow: hidden; /* 🔥 PREVIENE SCROLL EN LAS PESTAÑAS */
 }
 
 /* ✅ Botones de pestañas – SOLO ICONOS, sin fondo visible */
 .right-panel-nav button {
+    z-index: 15; /* 🔥 Asegura que los botones no estén tapados */
     width: 35px;
     height: 35px;
     border: none;
@@ -49,52 +53,24 @@
     background: rgba(240, 240, 240, 0.3);
 }
 
-/* ✅ Pestaña activa – Se funde con el contenido */
-.right-panel-nav button.active {
-    background: var(--window-background); /* 🔥 Se fusiona con la ventana */
-    box-shadow: inset 0px -2px 5px rgba(0, 0, 0, 0.1); /* 🔹 Sombras suaves */
-}
-
 /* ✅ Iconos dentro de los botones */
 .right-panel-nav button svg {
+    z-index: 20; /* 🔥 Asegura que los iconos siempre sean visibles */
     transition: transform 0.3s ease-in-out;
-    width: 18px;
-    height: 18px;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    display: block !important;
+    opacity: 1 !important;
+    color: #fd6a66 !important;
 }
 
 /* ✅ Pestaña activa – Icono con ligera animación */
 .right-panel-nav button.active svg {
     transform: scale(1.05);
-}
-
-/* ✅ Botones de acción */
-.accept-btn,
-.reject-btn {
-    padding: 6px 12px;
-    font-size: 0.85rem;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s ease-in-out, transform 0.2s ease;
-}
-
-.accept-btn {
-    background-color: #27ae60;
-}
-
-.reject-btn {
-    background-color: #e74c3c;
-}
-
-.accept-btn:hover {
-    background-color: #219150;
-    transform: scale(1.05);
-}
-
-.reject-btn:hover {
-    background-color: #c0392b;
-    transform: scale(1.05);
+    color: #fc554f !important; /* 🔥 Color real sin atenuación */
+    fill: #fc554f; /* 🔥 Se rellena completamente */
 }
 
 /* ✅ Mejorar la legibilidad de los textos */
@@ -103,23 +79,4 @@
     color: inherit;
     text-align: center;
     margin-top: 12px;
-}
-
-/* ✅ Mejora visual para la sección "coming-soon" */
-.coming-soon-container {
-    max-width: 280px;
-    font-family: "Montserrat", sans-serif;
-    text-align: center;
-    margin: 0 auto;
-}
-
-.coming-soon-container h2 {
-    font-size: 1.4rem;
-    font-weight: bold;
-    margin-bottom: 8px;
-}
-
-.coming-soon-container p {
-    font-size: 0.95rem;
-    padding: 8px;
 }

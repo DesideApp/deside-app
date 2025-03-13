@@ -5,7 +5,7 @@ import { resolve } from "path";
 const backendUrl =
   process.env.VITE_BACKEND_URL || (process.env.NODE_ENV === "production"
     ? "https://backend-deside.onrender.com"
-    : "http://localhost:10000");
+    : "http://localhost:3000");
 
 const isProduction = process.env.NODE_ENV === "production";
 
