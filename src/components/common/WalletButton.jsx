@@ -10,6 +10,7 @@ const WalletButton = memo(() => {
   const [balance, setBalance] = useState(null);
   const [walletAddress, setWalletAddress] = useState(null);
   const [isCheckingWallet, setIsCheckingWallet] = useState(true);
+  const [wasLoggedOut, setWasLoggedOut] = useState(false); // 🆕 Detectar si hubo logout previo
 
   /** 🔹 **Actualizar saldo** */
   const updateBalance = useCallback(async () => {
@@ -37,15 +38,16 @@ const WalletButton = memo(() => {
   }, [updateBalance]);
 
   /**
-   * 🔹 **Si no hay wallet, abrir modal. Si sí hay, toggle del menú**
+   * 🔹 **Si no hay wallet o hubo un logout, abrir modal. Si sí hay, toggle del menú**
    */
   const handleConnectClick = useCallback(() => {
-    if (!walletAddress) {
+    if (!walletAddress || wasLoggedOut) {
       setIsModalOpen(true);
+      setWasLoggedOut(false); // 🆕 Resetear flag tras abrir modal
     } else {
       setIsMenuOpen((prev) => !prev);
     }
-  }, [walletAddress]);
+  }, [walletAddress, wasLoggedOut]);
 
   /** 🔹 **Abrir/Cerrar menú con la hamburguesa** */
   const toggleMenu = useCallback(() => {
@@ -57,11 +59,12 @@ const WalletButton = memo(() => {
 
   /** 🔹 **Conectar wallet desde el modal** */
   const handleWalletSelected = useCallback(async (wallet) => {
+    handleCloseModal(); // 🔥 Se cierra el modal INMEDIATAMENTE tras seleccionar proveedor.
+
     const result = await connectWallet(wallet);
     if (result.pubkey) {
       setWalletAddress(result.pubkey);
       await updateBalance();
-      handleCloseModal();
     }
   }, [handleCloseModal, updateBalance]);
 
@@ -88,12 +91,13 @@ const WalletButton = memo(() => {
     };
   }, [updateBalance]);
 
-  /** 🔹 **Cerrar sesión** */
+  /** 🔹 **Cerrar sesión correctamente** */
   const handleLogoutClick = async () => {
     await handleLogout(() => setWalletAddress(null));
     setWalletAddress(null);
     setBalance(null);
     setIsMenuOpen(false);
+    setWasLoggedOut(true); // 🆕 Indicar que hubo un logout previo
   };
 
   /** 🔹 **Texto del botón** */

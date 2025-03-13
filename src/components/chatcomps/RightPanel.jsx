@@ -1,8 +1,8 @@
 import React, { useState, memo, useCallback } from "react";
-import { MdPersonOutline, MdPerson } from "react-icons/md";
+import * as MdIcons from "react-icons/md";
+import { MdOutlineMail, MdMail, MdPersonOutline, MdPerson } from "react-icons/md";
 import ContactRequests from "../chatcomps/ContactRequests";
 import AddContactForm from "../chatcomps/AddContactForm";
-import { FaUserPlus, FaInbox } from "react-icons/fa";
 import { useAuthManager } from "../../services/authManager";
 import "./RightPanel.css";
 
@@ -34,21 +34,21 @@ const RightPanel = () => {
                 {activeTab === "addContact" && <AddContactForm />}
             </div>
 
-            {/* 📌 Menú de pestañas en la parte inferior */}
+            {/* 📌 Menú de pestañas con iconos */}
             <nav className="right-panel-nav">
-                <button 
-                    className={activeTab === "requests" ? "active" : ""} 
+                <button
+                    className={activeTab === "requests" ? "active" : ""}
                     onClick={() => handleTabChange("requests")}
                     aria-label="Solicitudes de contacto"
                 >
-                    <FaInbox size={18} />
+                    {activeTab === "requests" ? <MdMail size={24} /> : <MdOutlineMail size={24} />}
                 </button>
-                <button 
-                    className={activeTab === "addContact" ? "active" : ""} 
+                <button
+                    className={activeTab === "addContact" ? "active" : ""}
                     onClick={() => handleTabChange("addContact")}
                     aria-label="Agregar contacto"
                 >
-                    <FaUserPlus size={18} />
+                    {activeTab === "addContact" ? <MdPerson size={24} /> : <MdPersonOutline size={24} />}
                 </button>
             </nav>
         </>

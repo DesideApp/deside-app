@@ -10,7 +10,7 @@
 }
 
 /* 📌 Título */
-.add-contact-container h2 {
+.contact-title {
     font-size: 1.2rem;
     font-weight: bold;
     color: var(--text-color);
@@ -18,93 +18,94 @@
     text-align: center;
 }
 
-/* 📌 Contenedor del input */
+/* 📌 Contenedor del input (ahora se expande junto con el textarea) */
 .input-wrapper {
     position: relative;
     width: 100%;
     display: flex;
     align-items: center;
+    transition: min-height 0.2s ease-in-out; /* 🔥 El contenedor también se expande */
+    min-height: 50px;
 }
 
-/* 📌 Input para clave pública */
+/* 📌 Input para clave pública (se expande automáticamente) */
 .add-contact-container textarea {
     width: 100%;
     min-height: 50px;
-    max-height: 150px;
     padding: 14px;
     font-size: 14px;
     font-family: 'Montserrat', sans-serif;
     color: var(--text-color);
     background: var(--window-background);
     border: 2px solid rgba(128, 128, 128, 0.25);
-    padding-right: 60px; /* 🔥 Más espacio lateral para evitar que el texto choque con los iconos */
+    padding-right: 60px;
     border-radius: 15px;
     outline: none;
-    transition: border 0.2s ease-in-out, box-shadow 0.2s ease-in-out, height 0.2s ease-in-out;
+    transition: height 0.2s ease-in-out, border 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     overflow-y: hidden;
     resize: none;
     text-align: center;
+    line-height: 1.4;
 }
 
-/* 📌 Nuevo contenedor para los iconos dentro del input */
+/* 📌 Permite que el textarea y el contenedor se expandan dinámicamente */
+.add-contact-container textarea:focus,
+.add-contact-container textarea:not(:placeholder-shown) {
+    height: auto;
+    min-height: 50px;
+    max-height: 150px;
+}
+
+/* 📌 Contenedor para los iconos dentro del input */
 .input-icons {
     position: absolute;
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
     display: flex;
-    flex-direction: column; /* 🔥 Alinea los iconos verticalmente */
-    gap: 6px; /* 🔥 Espacio entre el icono de validación y el de borrar */
+    align-items: center;
+    gap: 6px;
 }
 
-/* 📌 Input cuando está en foco */
-.add-contact-container textarea:focus {
-    border: 2px solid rgba(128, 128, 128, 0.5);
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+/* 📌 Asegurar que los iconos siempre queden centrados cuando el input crece */
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+    min-height: 50px;
 }
 
 /* 📌 Iconos dentro del input */
 .validation-icon {
-    font-size: 1.2rem;
+    font-size: 1rem; /* 🔹 Tamaño más pequeño */
     transition: color 0.2s ease-in-out, opacity 0.3s ease-in-out;
     opacity: 0.85;
-    cursor: pointer;
 }
 
-/* 📌 Icono de borrar ahora está dentro del contenedor de iconos */
+/* 📌 Estado válido (tick y borde completamente verdes) */
+.validation-icon.valid {
+    color: #00C853; /* ✅ Verde trading */
+}
+
+/* 📌 Estado inactivo (cuando la pubkey no es válida) */
+.validation-icon.inactive {
+    color: rgba(128, 128, 128, 0.85);
+}
+
+/* 📌 Icono de borrar (ahora más pequeño y en la misma línea que el `✅`) */
 .clear-icon {
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.6);
+    font-size: 1rem; /* 🔹 Tamaño más pequeño */
+    color: rgba(150, 150, 150, 0.7);
     cursor: pointer;
+    transition: color 0.2s ease-in-out;
 }
 
 .clear-icon:hover {
-    color: rgba(255, 255, 255, 0.9);
-}
-
-/* 📌 Estado válido */
-.valid .validation-icon {
-    color: rgba(46, 125, 50, 0.85);
-}
-
-/* 📌 Estado inválido */
-.invalid .validation-icon {
-    color: rgba(211, 47, 47, 0.85);
-}
-
-/* 📌 Icono de borrar */
-.clear-icon {
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.7);
-    cursor: pointer;
-}
-
-.clear-icon:hover {
-    color: rgba(255, 255, 255, 1);
+    color: rgba(150, 150, 150, 1);
 }
 
 /* 📌 Botón de envío */
-.add-contact-container button {
+.send-request-button {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -124,19 +125,17 @@
     margin-top: 18px;
 }
 
-/* 📌 Hover y efecto al hacer click */
-.add-contact-container button:hover {
+/* 📌 Hover y efecto al hacer click (cuando el botón está activo) */
+.send-request-button.active:hover {
     background-color: #e04a45;
     transform: scale(1.02);
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* 📌 Ajuste para que el botón siempre tenga el color correcto, pero sin hover cuando está deshabilitado */
-.add-contact-container button:disabled {
-    background-color: #fc554f;
-    opacity: 0.6;
-    cursor: not-allowed;
-    box-shadow: none;
+/* 📌 Desactivado visualmente */
+.send-request-button.inactive {
+    opacity: 1;
+    cursor: default;
     transform: none;
     pointer-events: none;
 }

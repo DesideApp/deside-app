@@ -21,6 +21,20 @@ export function getProvider(wallet) {
 export function isWalletConnected() {
     for (const wallet of Object.keys(WALLET_PROVIDERS)) {
         const provider = getProvider(wallet);
+        
+        if (!provider) continue;
+
+        // ✅ Phantom: Si recuerda la sesión pero `isConnected` es falso, aún se puede considerar conectada.
+        if (wallet === "phantom" && provider.publicKey) {
+            return { wallet, pubkey: provider.publicKey.toBase58() };
+        }
+
+        // ✅ Backpack: Verificación segura de `isConnected`
+        if (wallet === "backpack" && provider.publicKey) {
+            return { wallet, pubkey: provider.publicKey.toBase58() };
+        }
+
+        // ✅ Cualquier otra wallet estándar
         if (provider?.isConnected && provider.publicKey) {
             return { wallet, pubkey: provider.publicKey.toBase58() };
         }
@@ -43,13 +57,11 @@ export function listenToWalletEvents(onConnect, onDisconnect) {
         provider.off?.("disconnect");
 
         provider.on("connect", () => {
-            console.log(`✅ ${wallet} Wallet conectada.`);
             onConnect?.(wallet);
             window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet, pubkey: provider.publicKey?.toBase58() } }));
         });
 
         provider.on("disconnect", () => {
-            console.warn(`❌ ${wallet} Wallet desconectada.`);
             onDisconnect?.(wallet);
             window.dispatchEvent(new CustomEvent("walletDisconnected", { detail: { wallet } }));
         });

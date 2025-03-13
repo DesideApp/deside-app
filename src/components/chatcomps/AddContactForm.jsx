@@ -1,7 +1,7 @@
 import React, { useState, useCallback, memo } from "react";
 import { checkAuthStatus, checkWalletRegistered } from "../../services/apiService.js";
 import { sendContactRequest } from "../../services/contactService.js";
-import { FaCheckCircle, FaTimesCircle, FaTimes } from "react-icons/fa"; // ✅ Nuevo icono para borrar campo
+import { FaCheckCircle, FaTimes } from "react-icons/fa"; // ✅ Se mantiene la cruz para borrar, validación mejorada
 import "./AddContactForm.css";
 
 const AddContactForm = ({ onContactAdded }) => {
@@ -39,7 +39,7 @@ const AddContactForm = ({ onContactAdded }) => {
 
             if (error.message.includes("logged in")) errorMsg = "⚠️ You must be logged in to add contacts.";
             if (error.message.includes("registered")) errorMsg = "⚠️ This wallet is not registered on Deside.";
-            
+
             setMessage({ type: "error", text: errorMsg });
         } finally {
             setIsLoading(false);
@@ -48,28 +48,24 @@ const AddContactForm = ({ onContactAdded }) => {
 
     return (
         <div className="add-contact-container">
-            <h2>Add contact</h2>
+            <h2 className="contact-title">Add Contact</h2>
 
             {/* 🔹 Contenedor del input con validación y espacio para iconos */}
             <div className="input-wrapper">
                 <div className="input-content">
                     <textarea
                         value={pubkey}
-                        onChange={(e) => setPubkey(e.target.value.slice(0, 88))} // 🔥 Máximo 88 caracteres
+                        onChange={(e) => setPubkey(e.target.value.slice(0, 88))}
                         placeholder="Friend's public key"
                         disabled={isLoading}
-                        aria-disabled={isLoading}
-                        aria-label="Contact's public key"
                         rows={1}
                     />
                     <div className="input-icons">
-                        {/* 🔹 Icono de validación (Arriba a la derecha) */}
-                        {pubkey && (
-                            <span className={`validation-icon ${isValidPubkey ? "valid" : "invalid"}`}>
-                                {isValidPubkey ? <FaCheckCircle /> : <FaTimesCircle />}
-                            </span>
-                        )}
-                        {/* 🔹 Icono de borrar (Abajo a la derecha) */}
+                        {/* 🔹 Icono de validación (siempre presente, pero gris cuando no es válido) */}
+                        <span className={`validation-icon ${isValidPubkey ? "valid" : "inactive"}`}>
+                            <FaCheckCircle />
+                        </span>
+                        {/* 🔹 Icono para borrar */}
                         {pubkey && (
                             <span className="clear-icon" onClick={clearInput}>
                                 <FaTimes />
@@ -81,7 +77,7 @@ const AddContactForm = ({ onContactAdded }) => {
 
             {/* 🔹 Botón de agregar */}
             <button
-                className={`wallet-button ${!isValidPubkey ? "disabled" : ""}`}
+                className={`send-request-button ${isValidPubkey ? "active" : "inactive"}`}
                 onClick={handleAddContact}
                 disabled={isLoading || !isValidPubkey}
             >
