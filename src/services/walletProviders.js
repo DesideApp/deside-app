@@ -7,8 +7,6 @@ const WALLET_PROVIDERS = {
 
 /**
  * 🔍 **Obtener el proveedor de la wallet**
- * @param {string} wallet - Nombre del proveedor (phantom, backpack, magiceden).
- * @returns {object|null} - Objeto del proveedor si está disponible, null si no lo está.
  */
 export function getProvider(wallet) {
     return WALLET_PROVIDERS[wallet]?.() || null;
@@ -16,7 +14,6 @@ export function getProvider(wallet) {
 
 /**
  * 🔄 **Verificar si alguna wallet está conectada**
- * @returns {{wallet: string, pubkey: string} | null} - Nombre de la wallet y su pubkey si está conectada.
  */
 export function isWalletConnected() {
     for (const wallet of Object.keys(WALLET_PROVIDERS)) {
@@ -34,8 +31,6 @@ export function isWalletConnected() {
 
 /**
  * 📡 **Escuchar eventos de conexión/desconexión de wallets**
- * @param {function} onConnect - Callback cuando la wallet se conecta.
- * @param {function} onDisconnect - Callback cuando la wallet se desconecta.
  */
 export function listenToWalletEvents(onConnect, onDisconnect) {
     Object.entries(WALLET_PROVIDERS).forEach(([wallet, providerFn]) => {
@@ -47,8 +42,10 @@ export function listenToWalletEvents(onConnect, onDisconnect) {
         provider.off?.("disconnect");
 
         provider.on("connect", () => {
-            onConnect?.(wallet);
-            window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet, pubkey: provider.publicKey?.toBase58() } }));
+            if (provider.publicKey) {
+                onConnect?.(wallet);
+                window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet, pubkey: provider.publicKey.toBase58() } }));
+            }
         });
 
         provider.on("disconnect", () => {

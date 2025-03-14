@@ -18,28 +18,22 @@
     text-align: center;
 }
 
-/* 📌 Contenedor del input (ahora crece correctamente con el textarea) */
+/* 📌 Contenedor del input (se expande con el textarea) */
 .input-wrapper {
     position: relative;
     width: 100%;
     display: flex;
-    align-items: flex-start; /* 🔥 Cambio clave: permite que el contenido crezca */
-    transition: min-height 0.2s ease-in-out;
-}
-
-/* 📌 Contenedor adicional que envuelve el textarea */
-.input-content {
-    width: 100%;
-    display: flex;
     flex-direction: column;
-    transition: min-height 0.2s ease-in-out;
-    min-height: 50px; /* 🔥 Permitir que crezca */
+    transition: height 0.2s ease-in-out;
 }
 
-/* 📌 Input para clave pública (se expande automáticamente) */
+/* 📌 Input para clave pública (se expande automáticamente sin scroll interno) */
 .add-contact-container textarea {
+    min-height: 30px;
+    max-height: 150px; /* 🔥 Permitir expansión controlada */
+    overflow-y: hidden; /* 🔥 Evita que haya scroll interno */
     width: 100%;
-    min-height: 50px;
+    height: auto; /* 🔥 Permitir crecimiento dinámico */
     padding: 14px;
     font-size: 14px;
     font-family: 'Montserrat', sans-serif;
@@ -49,34 +43,40 @@
     padding-right: 60px;
     border-radius: 15px;
     outline: none;
-    transition: height 0.2s ease-in-out, border 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    overflow-y: hidden;
+    transition: height 0.2s ease-in-out, border 0.2s ease-in-out;
+    overflow: hidden; /* 🔥 Evita scroll interno */
     resize: none;
     text-align: center;
     line-height: 1.4;
 }
 
-/* 📌 Expansión dinámica del textarea */
+/* 📌 Expansión del textarea sin límite de altura */
 .add-contact-container textarea:focus,
 .add-contact-container textarea:not(:placeholder-shown) {
     height: auto;
-    min-height: 50px;
-    max-height: none;
+    line-height: 50px; /* 🔥 Igual a la altura mínima del textarea */
 }
 
-/* 📌 Expansión de los contenedores */
-.input-wrapper:has(textarea:focus),
-.input-wrapper:has(textarea:not(:placeholder-shown)),
-.input-content:has(textarea:focus),
-.input-content:has(textarea:not(:placeholder-shown)) {
-    min-height: auto;
+/* 📌 Centrar placeholder dentro del textarea */
+.add-contact-container textarea::placeholder {
+    text-align: center;  /* 🔥 Centra horizontalmente */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 50px; /* 🔥 Mantiene el texto centrado verticalmente */
 }
 
-/* 📌 Contenedor para los iconos dentro del input */
+/* 📌 Asegurar que input-wrapper crezca con el textarea */
+.input-wrapper {
+    height: fit-content;
+}
+
+/* 📌 Contenedor de iconos */
 .input-icons {
     position: absolute;
     right: 10px;
-    top: 14px; /* 🔥 Cambio clave: Mantiene los iconos alineados */
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -84,14 +84,14 @@
 
 /* 📌 Iconos dentro del input */
 .validation-icon {
-    font-size: 1rem; /* 🔹 Tamaño más pequeño */
+    font-size: 1rem;
     transition: color 0.2s ease-in-out, opacity 0.3s ease-in-out;
     opacity: 0.85;
 }
 
-/* 📌 Estado válido (tick y borde completamente verdes) */
+/* 📌 Estado válido (tick verde) */
 .validation-icon.valid {
-    color: #00C853; /* ✅ Verde trading */
+    color: #00C853;
 }
 
 /* 📌 Estado inactivo (cuando la pubkey no es válida) */
@@ -99,7 +99,7 @@
     color: rgba(128, 128, 128, 0.85);
 }
 
-/* 📌 Icono de borrar (ahora más pequeño y en la misma línea que el `✅`) */
+/* 📌 Icono de borrar */
 .clear-icon {
     font-size: 1rem;
     color: rgba(150, 150, 150, 0.7);

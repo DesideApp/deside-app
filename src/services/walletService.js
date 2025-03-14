@@ -10,25 +10,17 @@ const WALLET_STATUS = {
 
 /**
  * 🔍 **Detectar wallet conectada a nivel Web3 (NO backend)**
- * @returns {{walletAddress: string, selectedWallet: string} | {walletAddress: null}}
  */
 export async function getConnectedWallet() {
   try {
-    const connected = isWalletConnected();
-    return connected
-      ? { walletAddress: connected.pubkey, selectedWallet: connected.wallet }
-      : { walletAddress: null };
-  } catch (error) {
-    console.error("❌ Error detectando wallet conectada:", error);
+    return isWalletConnected() || { walletAddress: null };
+  } catch {
     return { walletAddress: null };
   }
 }
 
 /**
  * 💰 **Obtener balance de una wallet conectada**
- * @param {string} walletAddress - Dirección pública de la wallet.
- * @param {string} selectedWallet - Proveedor de la wallet (phantom, backpack, magiceden).
- * @returns {Promise<number|null>} - Balance en SOL o `null` en caso de error.
  */
 export async function getWalletBalance(walletAddress, selectedWallet) {
   try {
@@ -36,48 +28,36 @@ export async function getWalletBalance(walletAddress, selectedWallet) {
 
     const provider = getProvider(selectedWallet);
     if (provider?.isConnected && provider?.publicKey?.toBase58() === walletAddress) {
-      console.log(`🔍 Consultando balance a través del proveedor: ${selectedWallet}`);
-
-      try {
-        const connection = provider.connection;
-        const balanceLamports = await connection.getBalance(provider.publicKey);
-        return balanceLamports / 1e9;
-      } catch (providerError) {
-        console.error(`❌ Error al obtener balance desde ${selectedWallet}:`, providerError);
-        return null;
-      }
+      const connection = provider.connection;
+      const balanceLamports = await connection.getBalance(provider.publicKey);
+      return balanceLamports / 1e9;
     }
-
-    console.warn(`⚠️ No se pudo obtener balance, la wallet no está conectada.`);
     return null;
-  } catch (error) {
-    console.error(`❌ Error obteniendo balance para ${walletAddress}:`, error);
+  } catch {
     return null;
   }
 }
 
 /**
  * 🔹 **Conectar wallet manualmente**
- * @param {string} wallet - Nombre del proveedor de la wallet (phantom, backpack, magiceden).
  */
 export async function connectWallet(wallet) {
   try {
     const provider = getProvider(wallet);
     if (!provider) throw new Error("No encontramos tu wallet. Instálala e intenta de nuevo.");
 
-    // 🚀 **Si la wallet está conectada, desconectar antes de reconectar**
+    // 🚀 **Si está conectada, desconectar antes de reconectar**
     if (provider.isConnected) {
       await provider.disconnect();
     }
 
-    // 🚀 **Si `isConnected === false`, forzar `connect()` para mostrar el popup**
+    // 🚀 **Forzar `connect()` para que siempre muestre el popup**
     await provider.connect();
 
-    const pubkey = provider.publicKey?.toBase58();
-    if (!pubkey) throw new Error("No se pudo obtener la clave pública.");
+    if (!provider.publicKey) throw new Error("No se pudo obtener la clave pública.");
 
-    window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet, pubkey } }));
-    return { pubkey };
+    window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet, pubkey: provider.publicKey.toBase58() } }));
+    return { pubkey: provider.publicKey.toBase58() };
   } catch (error) {
     return { pubkey: null, error: error.message };
   }
@@ -85,7 +65,6 @@ export async function connectWallet(wallet) {
 
 /**
  * 🔹 **Desconectar la wallet actual**
- * @param {string} [selectedWallet] - (Opcional) Si no se pasa, se desconecta la wallet activa.
  */
 export async function disconnectWallet(selectedWallet) {
   try {
@@ -108,17 +87,10 @@ export async function disconnectWallet(selectedWallet) {
 async function signMessage(wallet, message) {
   try {
     const provider = getProvider(wallet);
-    if (!provider?.isConnected) throw new Error("❌ Wallet no encontrada. Intenta reconectarla.");
-    if (!provider.signMessage) throw new Error("❌ Este proveedor no soporta firma de mensajes.");
+    if (!provider?.isConnected || !provider.signMessage) throw new Error("❌ Wallet no encontrada o no soporta firma.");
 
-    const encodedMessage = new TextEncoder().encode(message);
-    const signedMessage = await provider.signMessage(encodedMessage);
-
-    return {
-      signature: bs58.encode(signedMessage),
-      message,
-      pubkey: provider.publicKey.toBase58(),
-    };
+    const signedMessage = await provider.signMessage(new TextEncoder().encode(message));
+    return { signature: bs58.encode(signedMessage), message, pubkey: provider.publicKey.toBase58() };
   } catch (error) {
     return { signature: null, error: error.message };
   }
@@ -140,8 +112,8 @@ export async function authenticateWallet(wallet) {
 
     window.dispatchEvent(new CustomEvent("walletAuthenticated", { detail: { wallet, pubkey: walletAddress } }));
     return { pubkey: walletAddress, status: WALLET_STATUS.AUTHENTICATED };
-  } catch (error) {
-    return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED, error: error.message };
+  } catch {
+    return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED };
   }
 }
 
@@ -150,13 +122,11 @@ export async function authenticateWallet(wallet) {
  */
 export async function handleLogout(syncWalletStatus) {
   try {
-    await apiLogout(); // 🔒 Cierra sesión en el backend
+    await apiLogout();
   } catch {
     console.warn("⚠️ No se pudo cerrar sesión en el backend.");
   }
-
-  await disconnectWallet(); // 🔌 Desconectar Web3
-
+  await disconnectWallet();
   syncWalletStatus();
   window.dispatchEvent(new Event("walletDisconnected"));
 }

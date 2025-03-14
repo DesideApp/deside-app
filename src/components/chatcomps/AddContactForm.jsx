@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo } from "react";
+import React, { useState, useCallback, useRef, useEffect, memo } from "react";
 import { checkAuthStatus, checkWalletRegistered } from "../../services/apiService.js";
 import { sendContactRequest } from "../../services/contactService.js";
 import { FaCheckCircle, FaTimes } from "react-icons/fa"; // ✅ Se mantiene la cruz para borrar, validación mejorada
@@ -8,9 +8,18 @@ const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState("");
     const [message, setMessage] = useState({ type: "", text: "" });
     const [isLoading, setIsLoading] = useState(false);
+    const textareaRef = useRef(null);
 
     /** 🔹 **Expresión regular para validar pubkey de Solana** */
     const isValidPubkey = pubkey.length === 44 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(pubkey.trim());
+
+    /** 🔹 **Ajustar altura dinámica del textarea** */
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+        }
+    }, [pubkey]);
 
     /** 🔹 **Limpiar campo de entrada** */
     const clearInput = () => setPubkey("");
@@ -52,26 +61,24 @@ const AddContactForm = ({ onContactAdded }) => {
 
             {/* 🔹 Contenedor del input con validación y espacio para iconos */}
             <div className="input-wrapper">
-                <div className="input-content">
-                    <textarea
-                        value={pubkey}
-                        onChange={(e) => setPubkey(e.target.value.slice(0, 88))}
-                        placeholder="Friend's public key"
-                        disabled={isLoading}
-                        rows={1}
-                    />
-                    <div className="input-icons">
-                        {/* 🔹 Icono de validación (siempre presente, pero gris cuando no es válido) */}
-                        <span className={`validation-icon ${isValidPubkey ? "valid" : "inactive"}`}>
-                            <FaCheckCircle />
+                <textarea
+                    ref={textareaRef}
+                    value={pubkey}
+                    onChange={(e) => setPubkey(e.target.value.slice(0, 88))}
+                    placeholder="Friend's Wallet"
+                    disabled={isLoading}
+                />
+                <div className="input-icons">
+                    {/* 🔹 Icono de validación (siempre presente, pero gris cuando no es válido) */}
+                    <span className={`validation-icon ${isValidPubkey ? "valid" : "inactive"}`}>
+                        <FaCheckCircle />
+                    </span>
+                    {/* 🔹 Icono para borrar */}
+                    {pubkey && (
+                        <span className="clear-icon" onClick={clearInput}>
+                            <FaTimes />
                         </span>
-                        {/* 🔹 Icono para borrar */}
-                        {pubkey && (
-                            <span className="clear-icon" onClick={clearInput}>
-                                <FaTimes />
-                            </span>
-                        )}
-                    </div>
+                    )}
                 </div>
             </div>
 

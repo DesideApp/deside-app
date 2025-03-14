@@ -10,7 +10,6 @@ const WalletButton = memo(() => {
   const [balance, setBalance] = useState(null);
   const [walletAddress, setWalletAddress] = useState(null);
   const [isCheckingWallet, setIsCheckingWallet] = useState(true);
-  const [wasLoggedOut, setWasLoggedOut] = useState(false); // 🆕 Detectar si hubo logout previo
 
   /** 🔹 **Actualizar saldo** */
   const updateBalance = useCallback(async () => {
@@ -38,33 +37,27 @@ const WalletButton = memo(() => {
   }, [updateBalance]);
 
   /**
-   * 🔹 **Si no hay wallet o hubo un logout, abrir modal. Si sí hay, toggle del menú**
+   * 🔹 **Si no hay wallet, abrir modal. Si sí hay, toggle del menú**
    */
   const handleConnectClick = useCallback(() => {
-    if (!walletAddress || wasLoggedOut) {
+    if (!walletAddress) {
       setIsModalOpen(true);
-      setWasLoggedOut(false); // 🆕 Resetear flag tras abrir modal
     } else {
       setIsMenuOpen((prev) => !prev);
     }
-  }, [walletAddress, wasLoggedOut]);
-
-  /** 🔹 **Abrir/Cerrar menú con la hamburguesa** */
-  const toggleMenu = useCallback(() => {
-    setIsMenuOpen((prev) => !prev);
-  }, []);
+  }, [walletAddress]);
 
   /** 🔹 **Cerrar modal** */
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
 
   /** 🔹 **Conectar wallet desde el modal** */
   const handleWalletSelected = useCallback(async (wallet) => {
-    handleCloseModal(); // 🔥 Se cierra el modal INMEDIATAMENTE tras seleccionar proveedor.
-
     const result = await connectWallet(wallet);
+
     if (result.pubkey) {
       setWalletAddress(result.pubkey);
       await updateBalance();
+      handleCloseModal(); // ✅ Ahora el modal se cierra DESPUÉS de confirmar conexión.
     }
   }, [handleCloseModal, updateBalance]);
 
@@ -97,7 +90,6 @@ const WalletButton = memo(() => {
     setWalletAddress(null);
     setBalance(null);
     setIsMenuOpen(false);
-    setWasLoggedOut(true); // 🆕 Indicar que hubo un logout previo
   };
 
   /** 🔹 **Texto del botón** */
@@ -118,7 +110,7 @@ const WalletButton = memo(() => {
 
       {/* 🔹 Botón hamburguesa */}
       <div className="menu-button-wrapper">
-        <button className="menu-button" onClick={toggleMenu} aria-label="Toggle Wallet Menu">
+        <button className="menu-button" onClick={() => setIsMenuOpen((prev) => !prev)} aria-label="Toggle Wallet Menu">
           <div className="menu-icon">
             <span></span>
             <span></span>
