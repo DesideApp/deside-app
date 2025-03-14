@@ -13,11 +13,16 @@ const AddContactForm = ({ onContactAdded }) => {
     /** 🔹 **Expresión regular para validar pubkey de Solana** */
     const isValidPubkey = pubkey.length === 44 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(pubkey.trim());
 
-    /** 🔹 **Ajustar altura dinámica del textarea** */
+    /** 🔹 **Ajustar altura dinámica del textarea SOLO cuando se complete una línea** */
     useEffect(() => {
         if (textareaRef.current) {
-            textareaRef.current.style.height = "auto";
-            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+            const textarea = textareaRef.current;
+            textarea.style.height = "50px"; // 🔥 Establecer altura inicial mínima
+
+            // 🔥 Detectar si el contenido excede una línea
+            if (textarea.scrollHeight > textarea.clientHeight) {
+                textarea.style.height = `${textarea.scrollHeight}px`;
+            }
         }
     }, [pubkey]);
 

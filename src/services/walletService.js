@@ -12,11 +12,7 @@ const WALLET_STATUS = {
  * 🔍 **Detectar wallet conectada a nivel Web3 (NO backend)**
  */
 export async function getConnectedWallet() {
-  try {
-    return isWalletConnected() || { walletAddress: null };
-  } catch {
-    return { walletAddress: null };
-  }
+  return isWalletConnected() || { walletAddress: null };
 }
 
 /**
@@ -46,17 +42,11 @@ export async function connectWallet(wallet) {
     const provider = getProvider(wallet);
     if (!provider) throw new Error("No encontramos tu wallet. Instálala e intenta de nuevo.");
 
-    // 🚀 **Si está conectada, desconectar antes de reconectar**
-    if (provider.isConnected) {
-      await provider.disconnect();
-    }
-
     // 🚀 **Forzar `connect()` para que siempre muestre el popup**
     await provider.connect();
 
     if (!provider.publicKey) throw new Error("No se pudo obtener la clave pública.");
 
-    window.dispatchEvent(new CustomEvent("walletConnected", { detail: { wallet, pubkey: provider.publicKey.toBase58() } }));
     return { pubkey: provider.publicKey.toBase58() };
   } catch (error) {
     return { pubkey: null, error: error.message };
@@ -72,10 +62,9 @@ export async function disconnectWallet(selectedWallet) {
     if (!wallet) return;
 
     const provider = getProvider(wallet);
-    if (provider?.isConnected) {
-      await provider.disconnect();
-      window.dispatchEvent(new Event("walletDisconnected"));
-    }
+    if (!provider?.isConnected) return;
+
+    await provider.disconnect();
   } catch {
     console.warn("⚠️ No se pudo desconectar la wallet.");
   }
@@ -110,7 +99,6 @@ export async function authenticateWallet(wallet) {
     const response = await authenticateWithServer(signedData.pubkey, signedData.signature, signedData.message);
     if (!response?.message) return { pubkey: null, status: "server_error" };
 
-    window.dispatchEvent(new CustomEvent("walletAuthenticated", { detail: { wallet, pubkey: walletAddress } }));
     return { pubkey: walletAddress, status: WALLET_STATUS.AUTHENTICATED };
   } catch {
     return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED };
@@ -128,5 +116,4 @@ export async function handleLogout(syncWalletStatus) {
   }
   await disconnectWallet();
   syncWalletStatus();
-  window.dispatchEvent(new Event("walletDisconnected"));
 }

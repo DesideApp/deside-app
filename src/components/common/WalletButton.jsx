@@ -57,8 +57,9 @@ const WalletButton = memo(() => {
     if (result.pubkey) {
       setWalletAddress(result.pubkey);
       await updateBalance();
-      handleCloseModal(); // ✅ Ahora el modal se cierra DESPUÉS de confirmar conexión.
     }
+
+    handleCloseModal(); // ✅ Ahora el modal se cierra DESPUÉS de confirmar conexión.
   }, [handleCloseModal, updateBalance]);
 
   /** 🔹 **Eventos de walletConnected/walletDisconnected** */
@@ -73,6 +74,7 @@ const WalletButton = memo(() => {
       setWalletAddress(null);
       setBalance(null);
       setIsMenuOpen(false);
+      setIsModalOpen(true); // ✅ Si la wallet se desconecta, reabrir automáticamente el modal.
     };
 
     window.addEventListener("walletConnected", handleWalletConnected);
@@ -90,6 +92,7 @@ const WalletButton = memo(() => {
     setWalletAddress(null);
     setBalance(null);
     setIsMenuOpen(false);
+    setIsModalOpen(true); // ✅ Tras logout, abrir modal automáticamente.
   };
 
   /** 🔹 **Texto del botón** */
