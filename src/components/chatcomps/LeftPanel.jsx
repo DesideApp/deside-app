@@ -1,7 +1,10 @@
 import React, { useEffect, useCallback, useState, memo } from "react";
-import { FaUserFriends, FaUserPlus } from "react-icons/fa"; // 📌 Iconos para pestañas
+import { FaUserFriends, FaUserPlus } from "react-icons/fa"; // 📌 Iconos de contactos
+import { MdOutlineMail, MdMail, MdPersonOutline, MdPerson } from "react-icons/md"; // 📌 Iconos de solicitudes y agregar
 import useContactManager from "../../hooks/useContactManager";
 import { useAuthManager } from "../../services/authManager";
+import ContactRequests from "../chatcomps/ContactRequests";
+import AddContactForm from "../chatcomps/AddContactForm";
 import "./LeftPanel.css";
 
 const LeftPanel = ({ onSelectContact }) => {
@@ -47,12 +50,16 @@ const LeftPanel = ({ onSelectContact }) => {
                     ) : (
                         <p className="no-contacts-message">No contacts yet.</p>
                     )
+                ) : activeTab === "requests" ? (
+                    <ContactRequests />
+                ) : activeTab === "addContact" ? (
+                    <AddContactForm />
                 ) : (
                     <p className="add-contact-placeholder">➕ Add Contact (Functionality Soon)</p>
                 )}
             </div>
 
-            {/* 📌 Menú de pestañas con iconos */}
+            {/* 📌 Menú de pestañas con 4 iconos */}
             <nav className="left-panel-nav">
                 <button
                     className={activeTab === "contacts" ? "active" : ""}
@@ -62,9 +69,23 @@ const LeftPanel = ({ onSelectContact }) => {
                     <FaUserFriends size={18} />
                 </button>
                 <button
+                    className={activeTab === "requests" ? "active" : ""}
+                    onClick={() => setActiveTab("requests")}
+                    aria-label="Solicitudes de contacto"
+                >
+                    {activeTab === "requests" ? <MdMail size={18} /> : <MdOutlineMail size={18} />}
+                </button>
+                <button
+                    className={activeTab === "addContact" ? "active" : ""}
+                    onClick={() => setActiveTab("addContact")}
+                    aria-label="Agregar contacto"
+                >
+                    {activeTab === "addContact" ? <MdPerson size={18} /> : <MdPersonOutline size={18} />}
+                </button>
+                <button
                     className={activeTab === "add" ? "active" : ""}
                     onClick={() => setActiveTab("add")}
-                    aria-label="Agregar contacto"
+                    aria-label="Añadir manualmente"
                 >
                     <FaUserPlus size={18} />
                 </button>

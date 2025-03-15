@@ -11,8 +11,8 @@ const WALLET_STATUS = {
 /**
  * 🔍 **Detectar wallet conectada a nivel Web3 (NO backend)**
  */
-export async function getConnectedWallet() {
-  return isWalletConnected() || { walletAddress: null };
+export function getConnectedWallet() {
+  return isWalletConnected(); // ✅ Retorna directamente lo que devuelve `isWalletConnected()`
 }
 
 /**
@@ -20,7 +20,7 @@ export async function getConnectedWallet() {
  */
 export async function getWalletBalance(walletAddress, selectedWallet) {
   try {
-    if (!walletAddress || !selectedWallet) throw new Error("❌ Wallet no proporcionada.");
+    if (!walletAddress || !selectedWallet) return null;
 
     const provider = getProvider(selectedWallet);
     if (provider?.isConnected && provider?.publicKey?.toBase58() === walletAddress) {
@@ -42,6 +42,11 @@ export async function connectWallet(wallet) {
     const provider = getProvider(wallet);
     if (!provider) throw new Error("No encontramos tu wallet. Instálala e intenta de nuevo.");
 
+    // 🚀 **Si ya está conectada, desconectar antes de reconectar**
+    if (provider.isConnected) {
+      await provider.disconnect();
+    }
+
     // 🚀 **Forzar `connect()` para que siempre muestre el popup**
     await provider.connect();
 
@@ -58,13 +63,10 @@ export async function connectWallet(wallet) {
  */
 export async function disconnectWallet(selectedWallet) {
   try {
-    const wallet = selectedWallet || isWalletConnected()?.wallet;
-    if (!wallet) return;
-
-    const provider = getProvider(wallet);
-    if (!provider?.isConnected) return;
-
-    await provider.disconnect();
+    const provider = getProvider(selectedWallet);
+    if (provider?.isConnected) {
+      await provider.disconnect();
+    }
   } catch {
     console.warn("⚠️ No se pudo desconectar la wallet.");
   }
@@ -90,7 +92,7 @@ async function signMessage(wallet, message) {
  */
 export async function authenticateWallet(wallet) {
   try {
-    const { walletAddress } = await getConnectedWallet();
+    const { walletAddress } = getConnectedWallet();
     if (!walletAddress) return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED };
 
     const signedData = await signMessage(wallet, "Please sign this message to authenticate.");
@@ -115,5 +117,5 @@ export async function handleLogout(syncWalletStatus) {
     console.warn("⚠️ No se pudo cerrar sesión en el backend.");
   }
   await disconnectWallet();
-  syncWalletStatus();
+  if (syncWalletStatus) syncWalletStatus();
 }
