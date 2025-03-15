@@ -7,7 +7,7 @@
     color: #fff;
     padding: 4px 8px;
     border-radius: 6px;
-    height: 22px; /* 🔥 Igual a settings-bubble */
+    height: 30px; /* 🔥 Igual a settings-bubble */
 }
 
 /* 📌 Indicador del estado de la red */
@@ -18,8 +18,8 @@
 
 /* 📌 Luces de estado (más pequeñas y refinadas) */
 .status-light {
-    width: 7px; /* 🔥 Un poco más pequeño */
-    height: 7px;
+    width: 8px; /* 🔥 Un poco más pequeño */
+    height: 8px;
     border-radius: 50%;
     transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }

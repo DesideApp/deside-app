@@ -1,6 +1,5 @@
 import React, { useEffect, useCallback, useState, memo } from "react";
-import { FaUserFriends, FaUserPlus } from "react-icons/fa"; // 📌 Iconos de contactos
-import { MdOutlineMail, MdMail, MdPersonOutline, MdPerson } from "react-icons/md"; // 📌 Iconos de solicitudes y agregar
+import { Users, MessageCircle, UserPlus, Inbox } from "lucide-react"; // 📌 Iconos unificados
 import useContactManager from "../../hooks/useContactManager";
 import { useAuthManager } from "../../services/authManager";
 import ContactRequests from "../chatcomps/ContactRequests";
@@ -59,35 +58,35 @@ const LeftPanel = ({ onSelectContact }) => {
                 )}
             </div>
 
-            {/* 📌 Menú de pestañas con 4 iconos */}
+            {/* 📌 Menú de pestañas con iconos correctos */}
             <nav className="left-panel-nav">
                 <button
                     className={activeTab === "contacts" ? "active" : ""}
                     onClick={() => setActiveTab("contacts")}
                     aria-label="Lista de contactos"
                 >
-                    <FaUserFriends size={18} />
+                    <Users size={20} />
                 </button>
                 <button
                     className={activeTab === "requests" ? "active" : ""}
                     onClick={() => setActiveTab("requests")}
                     aria-label="Solicitudes de contacto"
                 >
-                    {activeTab === "requests" ? <MdMail size={18} /> : <MdOutlineMail size={18} />}
+                    <Inbox size={20} />
                 </button>
                 <button
                     className={activeTab === "addContact" ? "active" : ""}
                     onClick={() => setActiveTab("addContact")}
                     aria-label="Agregar contacto"
                 >
-                    {activeTab === "addContact" ? <MdPerson size={18} /> : <MdPersonOutline size={18} />}
+                    <UserPlus size={20} />
                 </button>
                 <button
-                    className={activeTab === "add" ? "active" : ""}
-                    onClick={() => setActiveTab("add")}
-                    aria-label="Añadir manualmente"
+                    className={activeTab === "chats" ? "active" : ""}
+                    onClick={() => setActiveTab("chats")}
+                    aria-label="Conversaciones"
                 >
-                    <FaUserPlus size={18} />
+                    <MessageCircle size={20} />
                 </button>
             </nav>
         </>
