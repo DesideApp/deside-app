@@ -1,5 +1,5 @@
-import React, { useState, useCallback, memo } from "react";
-import { connectWallet, handleLogout } from "../../services/walletService.js";
+import React, { useState, useEffect, useCallback, memo } from "react";
+import { connectWallet, handleLogout, getWalletBalance } from "../../services/walletService.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -9,6 +9,15 @@ const WalletButton = memo(() => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [walletAddress, setWalletAddress] = useState(null);
   const [balance, setBalance] = useState(null);
+
+  /**
+   * 🔹 **Actualizar balance al conectar wallet**
+   */
+  const updateBalance = useCallback(async (wallet) => {
+    if (!wallet) return setBalance(null);
+    const walletBalance = await getWalletBalance(wallet);
+    setBalance(walletBalance);
+  }, []);
 
   /**
    * 🔹 **Abrir modal si no hay wallet conectada, sino abrir el menú**
@@ -27,13 +36,12 @@ const WalletButton = memo(() => {
   /** 🔹 **Conectar wallet desde el modal** */
   const handleWalletSelected = useCallback(async (wallet) => {
     const result = await connectWallet(wallet);
-
     if (result.pubkey) {
       setWalletAddress(result.pubkey);
+      await updateBalance(result.pubkey);
     }
-
     handleCloseModal();
-  }, [handleCloseModal]);
+  }, [updateBalance, handleCloseModal]);
 
   /** 🔹 **Cerrar sesión correctamente** */
   const handleLogoutClick = async () => {

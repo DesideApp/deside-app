@@ -28,3 +28,19 @@ export function isWalletConnected() {
     }
     return null;
 }
+
+/**
+ * 💰 **Obtener balance de una wallet conectada directamente desde el proveedor**
+ */
+export async function getProviderBalance(wallet) {
+    try {
+        const provider = getProvider(wallet);
+        if (!provider?.isConnected || !provider.publicKey) return null;
+
+        const connection = provider.connection;
+        const balanceLamports = await connection.getBalance(provider.publicKey);
+        return balanceLamports / 1e9; // Convertir lamports a SOL
+    } catch {
+        return null;
+    }
+}

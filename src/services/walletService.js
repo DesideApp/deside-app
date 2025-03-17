@@ -1,4 +1,4 @@
-import { getProvider, isWalletConnected } from "./walletProviders";
+import { getProvider, isWalletConnected, getProviderBalance } from "./walletProviders";
 import { authenticateWithServer, logout as apiLogout } from "./apiService";
 import bs58 from "bs58";
 
@@ -9,22 +9,10 @@ const WALLET_STATUS = {
 };
 
 /**
- * 💰 **Obtener balance de una wallet conectada**
+ * 💰 **Obtener balance de una wallet conectada (Usando `walletProviders`)**
  */
-export async function getWalletBalance(walletAddress, selectedWallet) {
-  try {
-    if (!walletAddress || !selectedWallet) return null;
-
-    const provider = getProvider(selectedWallet);
-    if (provider?.isConnected && provider?.publicKey?.toBase58() === walletAddress) {
-      const connection = provider.connection;
-      const balanceLamports = await connection.getBalance(provider.publicKey);
-      return balanceLamports / 1e9;
-    }
-    return null;
-  } catch {
-    return null;
-  }
+export async function getWalletBalance(wallet) {
+  return await getProviderBalance(wallet);
 }
 
 /**
@@ -35,12 +23,12 @@ export async function connectWallet(wallet) {
     const provider = getProvider(wallet);
     if (!provider) throw new Error("No encontramos tu wallet. Instálala e intenta de nuevo.");
 
-    // 🚀 **Si ya está conectada, desconectar antes de reconectar**
-    if (provider.isConnected) {
-      await provider.disconnect();
+    // 🚀 **Verificar si la wallet ya está conectada**
+    if (provider.isConnected && provider.publicKey) {
+      return { pubkey: provider.publicKey.toBase58() };
     }
 
-    // 🚀 **Forzar `connect()` para que siempre muestre el popup**
+    // 🚀 **Si no está conectada, intentar conectar**
     await provider.connect();
 
     if (!provider.publicKey) throw new Error("No se pudo obtener la clave pública.");
@@ -56,10 +44,12 @@ export async function connectWallet(wallet) {
  */
 export async function disconnectWallet(selectedWallet) {
   try {
+    if (!selectedWallet) return;
+
     const provider = getProvider(selectedWallet);
-    if (provider?.isConnected) {
-      await provider.disconnect();
-    }
+    if (!provider?.isConnected) return;
+
+    await provider.disconnect();
   } catch {
     console.warn("⚠️ No se pudo desconectar la wallet.");
   }
@@ -85,11 +75,16 @@ async function signMessage(wallet, message) {
  */
 export async function authenticateWallet(wallet) {
   try {
-    const connectedWallet = isWalletConnected(); // ✅ Ahora usamos directamente `isWalletConnected()`
+    const connectedWallet = isWalletConnected();
     if (!connectedWallet) return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED };
 
     const signedData = await signMessage(wallet, "Please sign this message to authenticate.");
     if (!signedData.signature) return { pubkey: null, status: "signature_failed" };
+
+    // 🚀 **Asegurar que la autenticación es con la wallet correcta**
+    if (connectedWallet.pubkey !== signedData.pubkey) {
+      return { pubkey: null, status: "wallet_mismatch" };
+    }
 
     const response = await authenticateWithServer(signedData.pubkey, signedData.signature, signedData.message);
     if (!response?.message) return { pubkey: null, status: "server_error" };
