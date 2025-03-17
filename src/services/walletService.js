@@ -9,13 +9,6 @@ const WALLET_STATUS = {
 };
 
 /**
- * 🔍 **Detectar wallet conectada a nivel Web3 (NO backend)**
- */
-export function getConnectedWallet() {
-  return isWalletConnected(); // ✅ Retorna directamente lo que devuelve `isWalletConnected()`
-}
-
-/**
  * 💰 **Obtener balance de una wallet conectada**
  */
 export async function getWalletBalance(walletAddress, selectedWallet) {
@@ -92,8 +85,8 @@ async function signMessage(wallet, message) {
  */
 export async function authenticateWallet(wallet) {
   try {
-    const { walletAddress } = getConnectedWallet();
-    if (!walletAddress) return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED };
+    const connectedWallet = isWalletConnected(); // ✅ Ahora usamos directamente `isWalletConnected()`
+    if (!connectedWallet) return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED };
 
     const signedData = await signMessage(wallet, "Please sign this message to authenticate.");
     if (!signedData.signature) return { pubkey: null, status: "signature_failed" };
@@ -101,7 +94,7 @@ export async function authenticateWallet(wallet) {
     const response = await authenticateWithServer(signedData.pubkey, signedData.signature, signedData.message);
     if (!response?.message) return { pubkey: null, status: "server_error" };
 
-    return { pubkey: walletAddress, status: WALLET_STATUS.AUTHENTICATED };
+    return { pubkey: connectedWallet.pubkey, status: WALLET_STATUS.AUTHENTICATED };
   } catch {
     return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED };
   }
