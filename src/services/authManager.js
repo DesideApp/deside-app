@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { refreshToken } from "./apiService";
 import { useServer } from "../contexts/ServerContext"; // ✅ Estado global de autenticación
-import { getConnectedWallet } from "../services/walletService";
+import { isWalletConnected } from "../services/walletProviders"; // ✅ Cambiado de `getConnectedWallet()`
 
 export const useAuthManager = () => {
   const { isAuthenticated, syncAuthStatus } = useServer();
@@ -13,8 +13,8 @@ export const useAuthManager = () => {
   useEffect(() => {
     const detectWallet = async () => {
       console.log("🔄 Revisando conexión automática...");
-      const { walletAddress, selectedWallet } = await getConnectedWallet();
-      setSelectedWallet(walletAddress || null);
+      const walletData = isWalletConnected();
+      setSelectedWallet(walletData ? walletData.pubkey : null);
     };
 
     detectWallet().finally(() => setIsLoading(false)); // 🔥 No bloquea UI
@@ -23,8 +23,8 @@ export const useAuthManager = () => {
   // ✅ **Escuchar cambios en la wallet conectada**
   useEffect(() => {
     const updateWallet = async () => {
-      const { walletAddress, selectedWallet } = await getConnectedWallet();
-      setSelectedWallet(walletAddress || null);
+      const walletData = isWalletConnected();
+      setSelectedWallet(walletData ? walletData.pubkey : null);
     };
 
     window.addEventListener("walletChanged", updateWallet);
@@ -33,11 +33,7 @@ export const useAuthManager = () => {
 
   // ✅ **Verificar autenticación cuando cambia el estado global del servidor**
   useEffect(() => {
-    if (!isAuthenticated) {
-      setRequiresLogin(true);
-    } else {
-      setRequiresLogin(false);
-    }
+    setRequiresLogin(!isAuthenticated);
   }, [isAuthenticated]);
 
   // ✅ **Renovar el token de seguridad si está expirado**
@@ -67,8 +63,8 @@ export const useAuthManager = () => {
     }
 
     // 🔹 **Verificar y actualizar la wallet antes de continuar**
-    const { walletAddress, selectedWallet } = await getConnectedWallet();
-    setSelectedWallet(walletAddress || null);
+    const walletData = isWalletConnected();
+    setSelectedWallet(walletData ? walletData.pubkey : null);
 
     await renewToken();
     action();
