@@ -12,14 +12,9 @@ const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
         </div>
 
         <div className="wallet-options">
-          {["phantom", "backpack", "magiceden"].map((wallet) => (
-            <button 
-              key={wallet} 
-              onClick={() => onWalletSelected(wallet)} 
-              aria-label={`Connect to ${wallet}`}>
-              {wallet.charAt(0).toUpperCase() + wallet.slice(1)}
-            </button>
-          ))}
+          <button onClick={onWalletSelected} aria-label="Connect Wallet">
+            Connect Wallet
+          </button>
         </div>
 
         <button className="close-modal" onClick={onClose} aria-label="Close Wallet Modal">

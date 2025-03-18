@@ -1,45 +1,45 @@
 import { useState, useEffect } from "react";
-import { refreshToken } from "./apiService";
-import { useServer } from "../contexts/ServerContext"; // ✅ Estado global de autenticación
-import { getConnectedWallet } from "../services/walletProviders"; // 🔥 Se usa la función correcta
+import { useServer } from "../contexts/ServerContext"; // Estado global de autenticación
+import { detectWallet, handleWalletSelected } from "../services/walletStateService"; // Detección y actualización de wallet
+import { refreshToken as callRefreshToken } from "../services/tokenService"; // Llamada a refreshToken desde tokenService.js
 
 export const useAuthManager = () => {
   const { isAuthenticated, syncAuthStatus } = useServer();
   const [isLoading, setIsLoading] = useState(true);
   const [requiresLogin, setRequiresLogin] = useState(false);
-  const [selectedWallet, setSelectedWallet] = useState(null); // 🔹 Wallet conectada en tiempo real
+  const [selectedWallet, setSelectedWallet] = useState(null); // Wallet conectada en tiempo real
 
-  // ✅ **Detectar wallet conectada al abrir la web**
+  // Detectar wallet conectada al abrir la web y al hacer clic
+  const updateWalletState = async () => {
+    const { pubkey } = await detectWallet();
+    setSelectedWallet(pubkey);
+  };
+
   useEffect(() => {
-    const detectWallet = async () => {
-      console.log("🔄 Revisando conexión automática...");
-      const walletData = getConnectedWallet(); // ✅ Llamamos la función corregida
-      setSelectedWallet(walletData ? walletData.pubkey : null);
-    };
-
-    detectWallet().finally(() => setIsLoading(false)); // 🔥 No bloquea UI
+    // Detectar wallet al iniciar
+    updateWalletState().finally(() => setIsLoading(false));
   }, []);
 
-  // ✅ **Escuchar cambios en la wallet conectada**
+  // Escuchar cambios en la wallet conectada
   useEffect(() => {
     const updateWallet = async () => {
-      const walletData = getConnectedWallet(); // ✅ Función correcta
-      setSelectedWallet(walletData ? walletData.pubkey : null);
+      const { pubkey } = await detectWallet();
+      setSelectedWallet(pubkey);
     };
 
     window.addEventListener("walletChanged", updateWallet);
     return () => window.removeEventListener("walletChanged", updateWallet);
   }, []);
 
-  // ✅ **Verificar autenticación cuando cambia el estado global del servidor**
+  // Verificar autenticación cuando cambia el estado global del servidor
   useEffect(() => {
     setRequiresLogin(!isAuthenticated);
   }, [isAuthenticated]);
 
-  // ✅ **Renovar el token de seguridad si está expirado**
+  // Renovar el token de seguridad si está expirado
   const renewToken = async () => {
     try {
-      const response = await refreshToken();
+      const response = await callRefreshToken(); // Llamada a refreshToken desde tokenService.js
       if (response) {
         console.log("✅ Token renovado correctamente");
         await syncAuthStatus();
@@ -51,30 +51,32 @@ export const useAuthManager = () => {
     }
   };
 
-  // ✅ **Manejo de respuesta al intentar realizar una acción protegida**
+  // Manejo de respuesta al intentar realizar una acción protegida
   const handleLoginResponse = async (action) => {
     if (!isAuthenticated) {
       console.warn("🚨 Usuario no autenticado. Se requiere login.");
       setRequiresLogin(true);
 
-      // ⏳ **Evitar múltiples intentos en pocos segundos**
+      // Evitar múltiples intentos en pocos segundos
       setTimeout(() => setRequiresLogin(false), 5000);
       return;
     }
 
-    // 🔹 **Verificar y actualizar la wallet antes de continuar**
-    const walletData = getConnectedWallet(); // ✅ Función corregida
-    setSelectedWallet(walletData ? walletData.pubkey : null);
+    // Verificar si la wallet está conectada antes de proceder
+    if (!selectedWallet) {
+      console.warn("🚨 No hay wallet conectada.");
+      return;
+    }
 
-    await renewToken();
-    action();
+    await renewToken(); // Renovamos el token si estamos autenticados
+    action(); // Ejecutamos la acción protegida
   };
 
   return {
     isAuthenticated,
     isLoading,
     requiresLogin,
-    selectedWallet, // 🔹 Ahora detecta cambios en tiempo real
+    selectedWallet, // Ahora detecta cambios en tiempo real
     handleLoginResponse,
   };
 };

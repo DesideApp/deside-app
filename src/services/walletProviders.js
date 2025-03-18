@@ -1,33 +1,27 @@
-// 🔹 **Detectar y obtener el proveedor Phantom**
-export function getPhantomProvider() {
-    return typeof window !== "undefined" && window.phantom?.solana?.isPhantom
-        ? window.phantom.solana
-        : null;
-}
+/**
+ * 📂 providers.js - Detecta wallets compatibles con Solana
+ * Siguiendo el estándar de Solana sin adaptadores externos.
+ */
 
 /**
- * 🔄 **Verificar si Phantom está conectado**
+ * 🔎 Obtiene el proveedor de Solana (si existe en el navegador).
+ * @returns {Object|null} El proveedor de Solana o null si no hay wallets instaladas.
  */
-export function isPhantomConnected() {
-    const provider = getPhantomProvider();
-    return provider?.isConnected && provider.publicKey
-        ? { wallet: "phantom", pubkey: provider.publicKey.toBase58() }
-        : null;
-}
+export const getSolanaProvider = () => window.solana || null;
 
 /**
- * 💰 **Obtener balance de la wallet conectada directamente desde el proveedor**
+ * 🧐 Comprueba si hay una wallet instalada en el navegador.
+ * @returns {boolean} True si hay una wallet compatible, false si no.
  */
-export async function getPhantomBalance() {
-    try {
-        const provider = getPhantomProvider();
-        if (!provider?.isConnected || !provider.publicKey) return null;
+export const isWalletInstalled = () => !!window.solana;
 
-        const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'));
-        const balanceLamports = await connection.getBalance(provider.publicKey);
-        return balanceLamports / solanaWeb3.LAMPORTS_PER_SOL; // Convertir lamports a SOL
-    } catch (error) {
-        console.error("❌ Error obteniendo balance de Phantom:", error);
-        return null;
-    }
-}
+/**
+ * 🏷️ Devuelve qué wallet está siendo utilizada actualmente.
+ * @returns {string} El nombre de la wallet ("Phantom", "Backpack", "Magic Eden Wallet", "Desconocida").
+ */
+export const getWalletType = () => {
+  if (window.solana?.isPhantom) return "Phantom";
+  if (window.solana?.isBackpack) return "Backpack";
+  if (window.solana?.isMagicEden) return "Magic Eden Wallet";
+  return "Desconocida";
+};

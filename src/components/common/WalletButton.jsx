@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
-import { connectWallet, handleLogout, getWalletBalance } from "../../services/walletService.js";
-import { isPhantomConnected } from "../../services/walletProviders.js";
+import { detectWallet, handleWalletSelected, handleLogoutClick } from "../../services/walletStateService.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -14,20 +13,15 @@ const WalletButton = memo(() => {
   /**
    * 🔹 **Detectar conexión y actualizar balance automáticamente**
    */
-  const detectWallet = useCallback(async () => {
-    const connectedWallet = isPhantomConnected();
-    if (connectedWallet) {
-      setWalletAddress(connectedWallet.pubkey);
-      setBalance(await getWalletBalance());
-    } else {
-      setWalletAddress(null);
-      setBalance(null);
-    }
+  const updateWalletState = useCallback(async () => {
+    const { pubkey, balance } = await detectWallet();
+    setWalletAddress(pubkey);
+    setBalance(balance);
   }, []);
 
   useEffect(() => {
-    detectWallet();
-  }, [detectWallet]);
+    updateWalletState();
+  }, [updateWalletState]);
 
   /**
    * 🔹 **Abrir modal si no hay wallet conectada, sino abrir el menú**
@@ -44,21 +38,15 @@ const WalletButton = memo(() => {
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
 
   /** 🔹 **Conectar wallet desde el modal** */
-  const handleWalletSelected = useCallback(async () => {
-    try {
-      const result = await connectWallet();
-      if (result.pubkey) {
-        await detectWallet();
-      }
-      handleCloseModal();
-    } catch (error) {
-      console.error("❌ Error al conectar Phantom:", error.message);
-    }
-  }, [detectWallet, handleCloseModal]);
+  const handleWalletSelection = useCallback(async () => {
+    await handleWalletSelected();
+    updateWalletState();
+    handleCloseModal();
+  }, [updateWalletState, handleCloseModal]);
 
   /** 🔹 **Cerrar sesión correctamente** */
-  const handleLogoutClick = async () => {
-    await handleLogout();
+  const logout = async () => {
+    await handleLogoutClick();
     setWalletAddress(null);
     setBalance(null);
     setIsMenuOpen(false);
@@ -94,7 +82,7 @@ const WalletButton = memo(() => {
       {/* ✅ Menú de wallet */}
       <WalletMenu 
         isOpen={isMenuOpen}
-        handleLogout={handleLogoutClick}
+        handleLogout={logout}
         onClose={() => setIsMenuOpen(false)}
         walletAddress={walletAddress}
         balance={balance}
@@ -105,7 +93,7 @@ const WalletButton = memo(() => {
       <WalletModal 
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onWalletSelected={handleWalletSelected}
+        onWalletSelected={handleWalletSelection}
       />
     </div>
   );
