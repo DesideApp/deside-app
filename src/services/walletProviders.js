@@ -1,46 +1,33 @@
-// 🔹 **Definir proveedores de wallets compatibles**
-const WALLET_PROVIDERS = {
-    phantom: () => (typeof window !== "undefined" && window.solana?.isPhantom ? window.solana : null),
-    backpack: () => (typeof window !== "undefined" && window.xnft?.solana ? window.xnft.solana : null),
-    magiceden: () => (typeof window !== "undefined" && window.magicEden?.solana ? window.magicEden.solana : null),
-};
-
-/**
- * 🔍 **Obtener el proveedor de la wallet**
- */
-export function getProvider(wallet) {
-    return WALLET_PROVIDERS[wallet]?.() || null;
+// 🔹 **Detectar y obtener el proveedor Phantom**
+export function getPhantomProvider() {
+    return typeof window !== "undefined" && window.phantom?.solana?.isPhantom
+        ? window.phantom.solana
+        : null;
 }
 
 /**
- * 🔄 **Verificar si alguna wallet está conectada**
+ * 🔄 **Verificar si Phantom está conectado**
  */
-export function isWalletConnected() {
-    for (const wallet of Object.keys(WALLET_PROVIDERS)) {
-        const provider = getProvider(wallet);
-        
-        if (!provider) continue;
-
-        // ✅ Solo consideramos conectada si `isConnected === true`
-        if (provider.isConnected && provider.publicKey) {
-            return { wallet, pubkey: provider.publicKey.toBase58() };
-        }
-    }
-    return null;
+export function isPhantomConnected() {
+    const provider = getPhantomProvider();
+    return provider?.isConnected && provider.publicKey
+        ? { wallet: "phantom", pubkey: provider.publicKey.toBase58() }
+        : null;
 }
 
 /**
- * 💰 **Obtener balance de una wallet conectada directamente desde el proveedor**
+ * 💰 **Obtener balance de la wallet conectada directamente desde el proveedor**
  */
-export async function getProviderBalance(wallet) {
+export async function getPhantomBalance() {
     try {
-        const provider = getProvider(wallet);
+        const provider = getPhantomProvider();
         if (!provider?.isConnected || !provider.publicKey) return null;
 
-        const connection = provider.connection;
+        const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'));
         const balanceLamports = await connection.getBalance(provider.publicKey);
-        return balanceLamports / 1e9; // Convertir lamports a SOL
-    } catch {
+        return balanceLamports / solanaWeb3.LAMPORTS_PER_SOL; // Convertir lamports a SOL
+    } catch (error) {
+        console.error("❌ Error obteniendo balance de Phantom:", error);
         return null;
     }
 }

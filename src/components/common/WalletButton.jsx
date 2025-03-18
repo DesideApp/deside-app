@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
 import { connectWallet, handleLogout, getWalletBalance } from "../../services/walletService.js";
-import { isWalletConnected } from "../../services/walletProviders.js";
+import { isPhantomConnected } from "../../services/walletProviders.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -15,11 +15,10 @@ const WalletButton = memo(() => {
    * 🔹 **Detectar conexión y actualizar balance automáticamente**
    */
   const detectWallet = useCallback(async () => {
-    const connectedWallet = isWalletConnected();
+    const connectedWallet = isPhantomConnected();
     if (connectedWallet) {
       setWalletAddress(connectedWallet.pubkey);
-      const walletBalance = await getWalletBalance(connectedWallet.pubkey);
-      setBalance(walletBalance);
+      setBalance(await getWalletBalance());
     } else {
       setWalletAddress(null);
       setBalance(null);
@@ -45,15 +44,15 @@ const WalletButton = memo(() => {
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
 
   /** 🔹 **Conectar wallet desde el modal** */
-  const handleWalletSelected = useCallback(async (wallet) => {
+  const handleWalletSelected = useCallback(async () => {
     try {
-      const result = await connectWallet(wallet);
+      const result = await connectWallet();
       if (result.pubkey) {
         await detectWallet();
       }
       handleCloseModal();
     } catch (error) {
-      console.error("❌ Error al conectar wallet:", error.message);
+      console.error("❌ Error al conectar Phantom:", error.message);
     }
   }, [detectWallet, handleCloseModal]);
 

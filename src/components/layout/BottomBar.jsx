@@ -43,7 +43,7 @@ const BottomBar = React.memo(() => {
                 {/* 🔹 Swap de Jupiter */}
                 <div className="bubble type-a swap-bubble" onClick={() => window.Jupiter?.open()}>
                     <img src="https://jup.ag/svg/jupiter-logo.svg" alt="Jupiter" className="swap-icon" />
-                    <span>Swap</span>
+                    <span>Jupiter Swap</span>
                 </div>
             </div>
         </footer>

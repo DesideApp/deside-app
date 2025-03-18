@@ -1,4 +1,4 @@
-import { getProvider, isWalletConnected, getProviderBalance } from "./walletProviders";
+import { getPhantomProvider, isPhantomConnected, getPhantomBalance } from "./walletProviders";
 import { authenticateWithServer, logout as apiLogout } from "./apiService";
 import bs58 from "bs58";
 
@@ -11,26 +11,25 @@ const WALLET_STATUS = {
 /**
  * 💰 **Obtener balance de una wallet conectada (Usando `walletProviders`)**
  */
-export async function getWalletBalance(wallet) {
-  return await getProviderBalance(wallet);
+export async function getWalletBalance() {
+  return await getPhantomBalance();
 }
 
 /**
  * 🔹 **Conectar wallet manualmente**
  */
-export async function connectWallet(wallet) {
+export async function connectWallet() {
   try {
-    const provider = getProvider(wallet);
-    if (!provider) throw new Error("No encontramos tu wallet. Instálala e intenta de nuevo.");
+    const provider = getPhantomProvider();
+    if (!provider) throw new Error("Phantom no está disponible. Instálalo e intenta de nuevo.");
 
-    // 🚀 **Verificar si la wallet ya está conectada**
+    // 🚀 **Si ya está conectada, devolver la clave pública**
     if (provider.isConnected && provider.publicKey) {
       return { pubkey: provider.publicKey.toBase58() };
     }
 
-    // 🚀 **Si no está conectada, intentar conectar**
+    // 🚀 **Intentar conectar la wallet**
     await provider.connect();
-
     if (!provider.publicKey) throw new Error("No se pudo obtener la clave pública.");
 
     return { pubkey: provider.publicKey.toBase58() };
@@ -42,29 +41,33 @@ export async function connectWallet(wallet) {
 /**
  * 🔹 **Desconectar la wallet actual**
  */
-export async function disconnectWallet(selectedWallet) {
+export async function disconnectWallet() {
   try {
-    if (!selectedWallet) return;
-
-    const provider = getProvider(selectedWallet);
-    if (!provider?.isConnected) return;
-
-    await provider.disconnect();
+    const provider = getPhantomProvider();
+    if (provider?.isConnected) {
+      await provider.disconnect();
+    }
   } catch {
-    console.warn("⚠️ No se pudo desconectar la wallet.");
+    console.warn("⚠️ No se pudo desconectar Phantom.");
   }
 }
 
 /**
- * 🔹 **Firmar mensaje con la wallet**
+ * 🔹 **Firmar mensaje con Phantom**
  */
-async function signMessage(wallet, message) {
+export async function signMessage(message) {
   try {
-    const provider = getProvider(wallet);
-    if (!provider?.isConnected || !provider.signMessage) throw new Error("❌ Wallet no encontrada o no soporta firma.");
+    const provider = getPhantomProvider();
+    if (!provider?.isConnected || !provider.signMessage) throw new Error("Phantom no está disponible o no soporta firma.");
 
-    const signedMessage = await provider.signMessage(new TextEncoder().encode(message));
-    return { signature: bs58.encode(signedMessage), message, pubkey: provider.publicKey.toBase58() };
+    const encodedMessage = new TextEncoder().encode(message);
+    const signedMessage = await provider.signMessage(encodedMessage);
+
+    return {
+      signature: bs58.encode(signedMessage),
+      message,
+      pubkey: provider.publicKey.toBase58(),
+    };
   } catch (error) {
     return { signature: null, error: error.message };
   }
@@ -73,12 +76,12 @@ async function signMessage(wallet, message) {
 /**
  * 🔹 **Autenticar la wallet con el backend**
  */
-export async function authenticateWallet(wallet) {
+export async function authenticateWallet() {
   try {
-    const connectedWallet = isWalletConnected();
+    const connectedWallet = isPhantomConnected();
     if (!connectedWallet) return { pubkey: null, status: WALLET_STATUS.NOT_CONNECTED };
 
-    const signedData = await signMessage(wallet, "Please sign this message to authenticate.");
+    const signedData = await signMessage("Please sign this message to authenticate.");
     if (!signedData.signature) return { pubkey: null, status: "signature_failed" };
 
     // 🚀 **Asegurar que la autenticación es con la wallet correcta**
