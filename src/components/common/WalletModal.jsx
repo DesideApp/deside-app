@@ -12,8 +12,15 @@ const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
         </div>
 
         <div className="wallet-options">
-          <button onClick={onWalletSelected} aria-label="Connect Wallet">
-            Connect Wallet
+          {/* Ahora mostramos las tres opciones de wallet */}
+          <button onClick={() => onWalletSelected("phantom")} aria-label="Phantom">
+            Phantom
+          </button>
+          <button onClick={() => onWalletSelected("backpack")} aria-label="Backpack">
+            Backpack
+          </button>
+          <button onClick={() => onWalletSelected("magiceden")} aria-label="Magic Eden">
+            Magic Eden
           </button>
         </div>
 

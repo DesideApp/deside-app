@@ -2,13 +2,13 @@
  * 📂 walletStateService.js - Maneja el estado de la wallet conectada, firma mensajes y autentica con el backend.
  */
 
-import { isConnected, connectWallet, disconnectWallet, getPublicKey } from "./walletService";
+import { isConnected, connectWallet, disconnectWallet, getPublicKey } from "./walletService"; // Ahora gestiona conexión automática
 import { getWalletBalance } from "./walletBalanceService";
 import { signMessage, authenticateWallet } from "./authService";
 
 /**
  * 🔍 Detecta si hay una wallet conectada y obtiene su balance.
- * @returns {Promise<{ pubkey: string | null, balance: number | null, status: string }>}
+ * @returns {Promise<{ pubkey: string | null, balance: number | null, status: string }>}.
  */
 export const detectWallet = async () => {
   if (!isConnected()) return { pubkey: null, balance: null, status: "not_connected" };
@@ -20,11 +20,11 @@ export const detectWallet = async () => {
 
 /**
  * 🔌 Conectar una wallet, firmar un mensaje y autenticar con el backend.
- * @returns {Promise<{ pubkey: string | null, balance: number | null, status: string }>}
+ * @returns {Promise<{ pubkey: string | null, balance: number | null, status: string }>}.
  */
 export const handleWalletSelected = async () => {
   try {
-    await connectWallet();
+    await connectWallet({ onlyIfTrusted: true }); // Intentamos conexión automática
     const { pubkey, balance } = await detectWallet();
 
     // ✍️ Firmar mensaje para autenticación

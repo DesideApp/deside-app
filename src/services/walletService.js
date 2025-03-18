@@ -6,15 +6,23 @@ import { getSolanaProvider } from "./walletProviders";
 
 /**
  * 🔌 Conecta con la wallet y obtiene la `publicKey`.
+ * @param {Object} options - Opciones de conexión.
+ * @param {boolean} options.onlyIfTrusted - Si solo debe conectar si es una wallet confiable.
  * @returns {Promise<string>} La `publicKey` en formato string.
  * @throws {Error} Si la conexión falla o el usuario la rechaza.
  */
-export const connectWallet = async () => {
+export const connectWallet = async ({ onlyIfTrusted = false } = {}) => {
   const provider = getSolanaProvider();
   if (!provider) throw new Error("No se detectó una wallet compatible.");
 
   try {
-    await provider.connect();
+    // Intentar conectar automáticamente si la wallet es confiable
+    if (onlyIfTrusted) {
+      await provider.connect({ onlyIfTrusted: true });
+    } else {
+      await provider.connect();
+    }
+
     return provider.publicKey.toString();
   } catch (error) {
     throw new Error(`Error al conectar la wallet: ${error.message}`);
