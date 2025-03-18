@@ -15,16 +15,21 @@ export const connectWallet = async ({ onlyIfTrusted = false } = {}) => {
   const provider = getSolanaProvider();
   if (!provider) throw new Error("No se detectó una wallet compatible.");
 
+  const walletType = getWalletType(); // Obtenemos el tipo de wallet (Phantom, Backpack, Magic Eden)
+
   try {
     // Intentar conectar automáticamente si la wallet es confiable
     if (onlyIfTrusted) {
-      await provider.connect({ onlyIfTrusted: true });
+      await provider.connect({ onlyIfTrusted: true }); // Conexión automática para wallets confiables (Phantom y Backpack)
     } else {
-      await provider.connect();
+      await provider.connect(); // Conexión normal si no es confiable (con popup)
     }
 
-    return provider.publicKey.toString();
+    console.log(`Conectado a ${walletType}`); // Información sobre qué wallet se conectó
+
+    return provider.publicKey.toString(); // Retorna la publicKey
   } catch (error) {
+    console.error(`Error al conectar con ${walletType}: ${error.message}`);
     throw new Error(`Error al conectar la wallet: ${error.message}`);
   }
 };
@@ -55,4 +60,16 @@ export const isConnected = () => {
 export const getPublicKey = () => {
   const provider = getSolanaProvider();
   return provider?.publicKey?.toString() || null;
+};
+
+/**
+ * 🏷️ Devuelve el tipo de wallet actual.
+ * @returns {string} El nombre de la wallet ("Phantom", "Backpack", "Magic Eden Wallet", "Desconocida").
+ */
+export const getWalletType = () => {
+  const provider = getSolanaProvider();
+  if (provider?.isPhantom) return "Phantom";
+  if (provider?.isBackpack) return "Backpack";
+  if (provider?.isMagicEden) return "Magic Eden Wallet";
+  return "Desconocida";
 };
