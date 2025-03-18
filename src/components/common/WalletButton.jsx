@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
 import { connectWallet, handleLogout, getWalletBalance } from "../../services/walletService.js";
+import { isWalletConnected } from "../../services/walletProviders.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -11,13 +12,23 @@ const WalletButton = memo(() => {
   const [balance, setBalance] = useState(null);
 
   /**
-   * 🔹 **Actualizar balance al conectar wallet**
+   * 🔹 **Detectar conexión y actualizar balance automáticamente**
    */
-  const updateBalance = useCallback(async (wallet) => {
-    if (!wallet) return setBalance(null);
-    const walletBalance = await getWalletBalance(wallet);
-    setBalance(walletBalance);
+  const detectWallet = useCallback(async () => {
+    const connectedWallet = isWalletConnected();
+    if (connectedWallet) {
+      setWalletAddress(connectedWallet.pubkey);
+      const walletBalance = await getWalletBalance(connectedWallet.pubkey);
+      setBalance(walletBalance);
+    } else {
+      setWalletAddress(null);
+      setBalance(null);
+    }
   }, []);
+
+  useEffect(() => {
+    detectWallet();
+  }, [detectWallet]);
 
   /**
    * 🔹 **Abrir modal si no hay wallet conectada, sino abrir el menú**
@@ -35,17 +46,20 @@ const WalletButton = memo(() => {
 
   /** 🔹 **Conectar wallet desde el modal** */
   const handleWalletSelected = useCallback(async (wallet) => {
-    const result = await connectWallet(wallet);
-    if (result.pubkey) {
-      setWalletAddress(result.pubkey);
-      await updateBalance(result.pubkey);
+    try {
+      const result = await connectWallet(wallet);
+      if (result.pubkey) {
+        await detectWallet();
+      }
+      handleCloseModal();
+    } catch (error) {
+      console.error("❌ Error al conectar wallet:", error.message);
     }
-    handleCloseModal();
-  }, [updateBalance, handleCloseModal]);
+  }, [detectWallet, handleCloseModal]);
 
   /** 🔹 **Cerrar sesión correctamente** */
   const handleLogoutClick = async () => {
-    await handleLogout(() => setWalletAddress(null));
+    await handleLogout();
     setWalletAddress(null);
     setBalance(null);
     setIsMenuOpen(false);
@@ -55,7 +69,7 @@ const WalletButton = memo(() => {
   const formattedBalance = walletAddress
     ? balance !== null && !isNaN(balance)
       ? `${balance.toFixed(2)} SOL`
-      : "0.00 SOL"
+      : "-- SOL"
     : "Connect Wallet";
 
   return (

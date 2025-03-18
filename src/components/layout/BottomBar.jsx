@@ -13,6 +13,8 @@ const BottomBar = React.memo(() => {
             mode: "modal",
             endpoint: "https://api.mainnet-beta.solana.com",
             enableWalletPassthrough: true,
+            feeBps: 20, // 🔹 Fee en basis points (0.20%)
+            feeAccount: "Gwrn3UyMvrdSP8VsQZyTfAYp9qwrcu5ivBujKHufZJFZ", // 🔹 Wallet que recibirá las fees
             onSuccess: ({ txid }) => console.log("✅ Swap exitoso:", txid),
             onSwapError: ({ error }) => console.error("❌ Error en swap:", error),
         });
@@ -40,7 +42,7 @@ const BottomBar = React.memo(() => {
 
                 {/* 🔹 Swap de Jupiter */}
                 <div className="bubble type-a swap-bubble" onClick={() => window.Jupiter?.open()}>
-                    <img src="https://raw.githubusercontent.com/jup-ag/jupiter-terminal/main/docs/logo.png" alt="Jupiter" className="swap-icon" />
+                    <img src="https://jup.ag/svg/jupiter-logo.svg" alt="Jupiter" className="swap-icon" />
                     <span>Swap</span>
                 </div>
             </div>

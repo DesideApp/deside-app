@@ -88,3 +88,30 @@
 input:checked + .slider:before {
     transform: translateX(14px);
 }
+
+/* 📌 Swap Bubble - Misma altura que type-a */
+.bubble.type-a.swap-bubble {
+    display: flex;
+    align-items: center;
+    gap: 6px; /* 🔥 Espaciado entre el logo y el texto */
+    padding: 4px 10px; /* Igual que las otras burbujas */
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+/* 📌 Swap Bubble Hover */
+.bubble.type-a.swap-bubble:hover {
+    transform: scale(1.05);
+}
+
+/* 📌 Swap Icono */
+.swap-icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* 📌 Swap Texto */
+.swap-bubble span {
+    font-size: 14px;
+    font-weight: 500;
+}
