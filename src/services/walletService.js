@@ -2,7 +2,7 @@
  * 📂 walletService.js - Maneja conexión y desconexión de wallets en Solana.
  */
 
-import { getSolanaProvider } from "./providers";
+import { getSolanaProvider } from "./walletProviders";
 
 /**
  * 🔌 Conecta con la wallet y obtiene la `publicKey`.
