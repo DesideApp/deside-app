@@ -2,7 +2,7 @@
  * 📂 authService.js - Maneja autenticación y firma de mensajes en Solana.
  */
 
-import { getSolanaProvider } from "./providers";
+import { getSolanaProvider } from "./walletProviders";
 import bs58 from "bs58"; // Solo necesario si el backend lo requiere
 
 /**
