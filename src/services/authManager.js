@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { refreshToken } from "./apiService";
 import { useServer } from "../contexts/ServerContext"; // ✅ Estado global de autenticación
-import { isWalletConnected } from "../services/walletProviders"; // ✅ Cambiado de `getConnectedWallet()`
+import { getConnectedWallet } from "../services/walletProviders"; // 🔥 Se usa la función correcta
 
 export const useAuthManager = () => {
   const { isAuthenticated, syncAuthStatus } = useServer();
@@ -13,7 +13,7 @@ export const useAuthManager = () => {
   useEffect(() => {
     const detectWallet = async () => {
       console.log("🔄 Revisando conexión automática...");
-      const walletData = isWalletConnected();
+      const walletData = getConnectedWallet(); // ✅ Llamamos la función corregida
       setSelectedWallet(walletData ? walletData.pubkey : null);
     };
 
@@ -23,7 +23,7 @@ export const useAuthManager = () => {
   // ✅ **Escuchar cambios en la wallet conectada**
   useEffect(() => {
     const updateWallet = async () => {
-      const walletData = isWalletConnected();
+      const walletData = getConnectedWallet(); // ✅ Función correcta
       setSelectedWallet(walletData ? walletData.pubkey : null);
     };
 
@@ -63,7 +63,7 @@ export const useAuthManager = () => {
     }
 
     // 🔹 **Verificar y actualizar la wallet antes de continuar**
-    const walletData = isWalletConnected();
+    const walletData = getConnectedWallet(); // ✅ Función corregida
     setSelectedWallet(walletData ? walletData.pubkey : null);
 
     await renewToken();
