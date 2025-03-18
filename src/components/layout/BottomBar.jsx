@@ -18,15 +18,7 @@ const BottomBar = React.memo(() => {
                 script.src = "https://terminal.jup.ag/main-v2.js";
                 script.async = true;
                 script.onload = () => {
-                    window.Jupiter.init({
-                        mode: "modal",
-                        endpoint: "https://api.mainnet-beta.solana.com",
-                        enableWalletPassthrough: true,
-                        feeBps: 20,
-                        feeAccount: "Gwrn3UyMvrdSP8VsQZyTfAYp9qwrcu5ivBujKHufZJFZ",
-                        onSuccess: ({ txid }) => console.log("✅ Swap exitoso:", txid),
-                        onSwapError: ({ error }) => console.error("❌ Error en swap:", error),
-                    });
+                    console.log("✅ Jupiter Terminal cargado. NO se abrirá automáticamente.");
                     setIsJupiterLoaded(true);
                 };
                 document.body.appendChild(script);
@@ -40,6 +32,27 @@ const BottomBar = React.memo(() => {
 
         return () => observer.disconnect();
     }, [isJupiterLoaded]);
+
+    // Función para abrir el modal SOLO cuando el usuario haga click
+    const openJupiterSwap = () => {
+        if (!window.Jupiter) {
+            console.warn("⚠️ Jupiter Terminal aún no ha cargado.");
+            return;
+        }
+        if (!window.Jupiter.isInitialized) {
+            console.log("🔄 Inicializando Jupiter antes de abrir...");
+            window.Jupiter.init({
+                mode: "modal",
+                endpoint: "https://api.mainnet-beta.solana.com",
+                enableWalletPassthrough: true,
+                feeBps: 20,
+                feeAccount: "Gwrn3UyMvrdSP8VsQZyTfAYp9qwrcu5ivBujKHufZJFZ",
+                onSuccess: ({ txid }) => console.log("✅ Swap exitoso:", txid),
+                onSwapError: ({ error }) => console.error("❌ Error en swap:", error),
+            });
+        }
+        window.Jupiter.open(); // 🔥 SOLO se abre cuando el usuario hace click
+    };
 
     return (
         <footer className="bottom-bar">
@@ -61,8 +74,8 @@ const BottomBar = React.memo(() => {
                     </label>
                 </div>
 
-                {/* 🔹 Swap de Jupiter con Lazy Load */}
-                <div ref={swapButtonRef} className="bubble type-a swap-bubble" onClick={() => window.Jupiter?.open()}>
+                {/* 🔹 Swap de Jupiter con Lazy Load (NO se abre solo) */}
+                <div ref={swapButtonRef} className="bubble type-a swap-bubble" onClick={openJupiterSwap}>
                     <img src="https://jup.ag/svg/jupiter-logo.svg" alt="Jupiter" className="swap-icon" />
                     <span>Jupiter Swap</span>
                 </div>
