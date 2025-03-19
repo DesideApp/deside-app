@@ -31,14 +31,14 @@ export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) 
   }
 
   try {
-    // Desconectar si ya hay una conexión activa
-    if (provider.isConnected) {
-      await provider.disconnect();
+    // Si la wallet ya está conectada, evitamos reconectar innecesariamente
+    if (provider.isConnected && provider.publicKey) {
+      console.log(`[WalletService] ✅ Ya conectado a ${getWalletType(provider)} (${provider.publicKey.toString()})`);
+      return provider.publicKey.toString();
     }
 
-    // Establecer conexión
-    const connectionOptions = onlyIfTrusted ? { onlyIfTrusted: true } : {};
-    await provider.connect(connectionOptions);
+    // Establecer conexión con o sin popup
+    await provider.connect(onlyIfTrusted ? { onlyIfTrusted: true } : {});
 
     console.log(`[WalletService] ✅ Conectado a ${getWalletType(provider)}`);
     return provider.publicKey.toString();
@@ -63,6 +63,8 @@ export const disconnectWallet = async () => {
       console.error(`[WalletService] ❌ Error al desconectar: ${error.message}`);
       throw new Error(`${ERROR_MESSAGES.DISCONNECTION_FAILED} ${error.message}`);
     }
+  } else {
+    console.log("[WalletService] ⚠️ No había una wallet conectada.");
   }
 };
 
