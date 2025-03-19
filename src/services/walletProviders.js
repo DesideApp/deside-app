@@ -75,3 +75,7 @@ const WALLET_TYPES = {
   export const isWalletAvailable = (walletType) => {
     return !!getProvider(walletType);
   };
+  
+  // ✅ EXPORTAMOS TODO LO NECESARIO PARA EVITAR ERRORES EN OTROS ARCHIVOS
+  export { WALLET_TYPES, WALLET_NAMES };
+  
