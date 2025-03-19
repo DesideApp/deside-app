@@ -47,6 +47,11 @@ export const detectWallet = async () => {
  * @returns {Promise<{pubkey: string|null, balance: number|null, status: string}>}
  */
 export const handleWalletSelected = async (walletType) => {
+  console.log(`[WalletStateService] 🔍 Intentando conectar con wallet: ${walletType}`);
+  if (!walletType || !['phantom', 'backpack', 'magiceden'].includes(walletType)) {
+    console.error('[WalletStateService] ❌ Tipo de wallet no válido:', walletType);
+    throw new Error('Tipo de wallet no válido.');
+  }
   try {
     if (!walletType) {
       console.error('[WalletStateService] ❌ Tipo de wallet no definido.');

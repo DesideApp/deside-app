@@ -39,7 +39,12 @@ const WalletButton = memo(() => {
 
   /** 🔹 **Conectar wallet desde el modal** */
   const handleWalletSelection = useCallback(async (walletType) => {
-    await handleWalletSelected(walletType); // Pasamos el tipo de wallet
+    console.log(`[WalletButton] 🔍 Wallet seleccionada: ${walletType}`);
+    if (!walletType) {
+      console.error('[WalletButton] ❌ Tipo de wallet no definido.');
+      return;
+    }
+    await handleWalletSelected(walletType);
     updateWalletState();
     handleCloseModal();
   }, [updateWalletState, handleCloseModal]);

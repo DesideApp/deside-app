@@ -33,8 +33,10 @@ const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
           {WALLETS.map((wallet) => (
             <button
               key={wallet.id}
-              onClick={() => onWalletSelected(wallet.id)} // Pasamos el tipo de wallet
-              aria-label={`Connect to ${wallet.name}`}
+              onClick={() => {
+                console.log(`[WalletModal] 🔍 Wallet seleccionada: ${wallet.id}`);
+                onWalletSelected(wallet.id);
+              }}
               className="wallet-option"
             >
               {wallet.name}

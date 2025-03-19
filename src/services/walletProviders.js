@@ -32,12 +32,10 @@ const WALLET_DOWNLOAD_URLS = {
  */
 export const getProvider = (walletType) => {
   console.log(`[WalletProviders] 🔍 Intentando obtener proveedor para: ${walletType}`);
-
   if (!walletType || !Object.values(WALLET_TYPES).includes(walletType)) {
     console.warn(`[WalletProviders] ⚠️ Tipo de wallet desconocido o no válido: ${walletType}`);
     return null;
   }
-
   if (walletType === WALLET_TYPES.PHANTOM) {
     if ('phantom' in window) {
       const provider = window.phantom?.solana;
