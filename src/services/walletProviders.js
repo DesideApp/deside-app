@@ -38,7 +38,7 @@ export const getProvider = (walletType) => {
       const provider = window.phantom?.solana;
       if (provider?.isPhantom) return provider;
     }
-    redirectToWalletDownload(WALLET_TYPES.PHANTOM);
+    console.warn(`[WalletProviders] ❌ Phantom no detectado. Por favor, instala la extensión.`);
     return null;
   }
 
@@ -47,7 +47,7 @@ export const getProvider = (walletType) => {
       const provider = window.backpack;
       if (provider?.isBackpack) return provider;
     }
-    redirectToWalletDownload(WALLET_TYPES.BACKPACK);
+    console.warn(`[WalletProviders] ❌ Backpack no detectado. Por favor, instala la extensión.`);
     return null;
   }
 
@@ -56,7 +56,7 @@ export const getProvider = (walletType) => {
       const provider = window.magicEden?.solana;
       if (provider?.isMagicEdenWallet) return provider;
     }
-    redirectToWalletDownload(WALLET_TYPES.MAGIC_EDEN);
+    console.warn(`[WalletProviders] ❌ Magic Eden Wallet no detectado. Por favor, instala la extensión.`);
     return null;
   }
 
@@ -80,14 +80,13 @@ export const getWalletType = (provider = getProvider()) => {
 };
 
 /**
- * 🌐 Redirige al usuario a la página de descarga de la wallet si no está instalada.
+ * 🌐 Muestra un mensaje para descargar la wallet si no está instalada.
  * @param {string} walletType - Tipo de wallet ("phantom", "backpack", "magiceden").
  */
 export const redirectToWalletDownload = (walletType) => {
   const url = WALLET_DOWNLOAD_URLS[walletType];
   if (url) {
-    console.warn(`[WalletProviders] 🌐 Redirigiendo a la página de descarga de ${walletType}: ${url}`);
-    window.location.href = url;
+    alert(`Por favor, instala la extensión de ${WALLET_NAMES[walletType]} desde: ${url}`);
   } else {
     console.warn(`[WalletProviders] ⚠️ No se encontró URL de descarga para ${walletType}`);
   }

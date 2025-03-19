@@ -2,7 +2,13 @@
  * 📂 walletStateService.js - Maneja estado, autenticación y multi-wallet
  */
 
-import { isConnected, connectWallet, disconnectWallet, getPublicKey, getWalletBalance } from './walletService';
+import {
+  connectWallet,
+  disconnectWallet,
+  getPublicKey,
+  getWalletBalance,
+  detectWallet as detectWalletService,
+} from './walletService';
 import { signMessage, authenticateWallet } from './authService';
 
 // Mensajes de error comunes
@@ -14,22 +20,23 @@ const ERROR_MESSAGES = {
 };
 
 /**
- * 🔍 Detecta wallet conectada y balance
+ * 🔍 Detecta wallet conectada y balance (incluye conexión automática)
  * @returns {Promise<{pubkey: string|null, balance: number|null, status: string}>}
  */
 export const detectWallet = async () => {
-  if (!isConnected()) {
-    console.log('[WalletStateService] ❌', ERROR_MESSAGES.NOT_CONNECTED);
-    return { pubkey: null, balance: null, status: 'not_connected' };
-  }
-
   try {
-    const pubkey = getPublicKey();
-    const balance = await getWalletBalance();
-    console.log('[WalletStateService] ✅ Wallet detectada:', { pubkey, balance });
-    return { pubkey, balance, status: 'connected' };
+    // Intentar detectar wallet automáticamente
+    const { pubkey, balance } = await detectWalletService();
+
+    if (pubkey) {
+      console.log('[WalletStateService] ✅ Wallet detectada automáticamente:', { pubkey, balance });
+      return { pubkey, balance, status: 'connected' };
+    }
+
+    console.log('[WalletStateService] ❌ No se detectó ninguna wallet automáticamente.');
+    return { pubkey: null, balance: null, status: 'not_connected' };
   } catch (error) {
-    console.error('[WalletStateService] ❌ Error detectando wallet:', error.message);
+    console.error('[WalletStateService] ❌ Error detectando wallet automáticamente:', error.message);
     return { pubkey: null, balance: null, status: 'error' };
   }
 };

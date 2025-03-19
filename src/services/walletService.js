@@ -14,6 +14,35 @@ const ERROR_MESSAGES = {
 };
 
 /**
+ * 🔌 Conecta a una wallet específica seleccionada manualmente
+ * @param {Object} [options] - Opciones de conexión
+ * @param {string} [options.walletType] - Tipo de wallet ("phantom", "backpack", "magiceden")
+ * @returns {Promise<string>} PublicKey en formato string
+ */
+export const connectWallet = async ({ walletType } = {}) => {
+  const provider = getProvider(walletType); // Obtenemos el proveedor según el tipo
+
+  if (!provider) {
+    console.error(`[WalletService] ❌ No se detectó el proveedor para ${walletType}.`);
+    throw new Error(ERROR_MESSAGES.NOT_INSTALLED(walletType));
+  }
+
+  if (typeof provider.connect !== 'function') {
+    throw new Error(`[WalletService] ❌ El proveedor no soporta el método "connect".`);
+  }
+
+  try {
+    await provider.connect(); // Conexión manual
+    const pubkey = provider.publicKey?.toString();
+    console.log(`[WalletService] ✅ Conectado manualmente a ${getWalletType(provider)} (${pubkey})`);
+    return pubkey;
+  } catch (error) {
+    console.error(`[WalletService] ❌ Error al conectar manualmente: ${error.message}`);
+    throw new Error(`${ERROR_MESSAGES.CONNECTION_FAILED} ${error.message}`);
+  }
+};
+
+/**
  * 🔍 Detecta si hay una wallet conectada automáticamente (sesión recordada)
  * @returns {Promise<{pubkey: string|null, balance: number|null}>} Clave pública y balance
  */
@@ -26,51 +55,14 @@ export const detectWallet = async () => {
   }
 
   try {
-    // Intentar conexión automática sin popup
-    await provider.connect({ onlyIfTrusted: true });
-
+    await provider.connect({ onlyIfTrusted: true }); // Conexión automática sin popup
     const pubkey = provider.publicKey?.toString() || null;
     const balance = pubkey ? await getWalletBalance() : null;
-
     console.log(`[WalletService] ✅ Wallet detectada: ${pubkey}, Balance: ${balance} SOL`);
     return { pubkey, balance };
   } catch (error) {
     console.warn("[WalletService] ⚠️ No se pudo recuperar la sesión automáticamente.");
     return { pubkey: null, balance: null };
-  }
-};
-
-/**
- * 🔌 Conecta a una wallet específica seleccionada manualmente
- * @param {Object} [options] - Opciones de conexión
- * @param {string} [options.walletType] - Tipo de wallet ("phantom", "backpack", "magiceden")
- * @returns {Promise<string>} PublicKey en formato string
- */
-export const connectWallet = async ({ walletType } = {}) => {
-  const provider = walletType ? getProvider(walletType) : getProvider();
-
-  if (!provider) {
-    throw new Error(
-      walletType
-        ? ERROR_MESSAGES.NOT_INSTALLED(walletType)
-        : ERROR_MESSAGES.NO_PROVIDER
-    );
-  }
-
-  if (typeof provider.connect !== 'function') {
-    throw new Error(`[WalletService] ❌ El proveedor no soporta el método "connect".`);
-  }
-
-  try {
-    // Establecer conexión manual
-    await provider.connect();
-
-    const pubkey = provider.publicKey?.toString();
-    console.log(`[WalletService] ✅ Conectado manualmente a ${getWalletType(provider)} (${pubkey})`);
-    return pubkey;
-  } catch (error) {
-    console.error(`[WalletService] ❌ Error al conectar manualmente: ${error.message}`);
-    throw new Error(`${ERROR_MESSAGES.CONNECTION_FAILED} ${error.message}`);
   }
 };
 
