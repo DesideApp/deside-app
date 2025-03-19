@@ -20,6 +20,7 @@ const ERROR_MESSAGES = {
  * @returns {Promise<string>} PublicKey en formato string
  */
 export const connectWallet = async ({ walletType } = {}) => {
+  console.log(`[WalletService] 🔍 Intentando conectar con wallet: ${walletType}`);
   const provider = getProvider(walletType); // Obtenemos el proveedor según el tipo
 
   if (!provider) {
@@ -47,6 +48,7 @@ export const connectWallet = async ({ walletType } = {}) => {
  * @returns {Promise<{pubkey: string|null, balance: number|null}>} Clave pública y balance
  */
 export const detectWallet = async () => {
+  console.log('[WalletService] 🔍 Intentando detectar wallet automáticamente...');
   const provider = getProvider();
 
   if (!provider) {
@@ -71,6 +73,7 @@ export const detectWallet = async () => {
  * @returns {Promise<void>}
  */
 export const disconnectWallet = async () => {
+  console.log('[WalletService] 🔍 Intentando desconectar wallet...');
   const provider = getProvider();
 
   if (!provider) {
@@ -118,6 +121,7 @@ export const getPublicKey = () => {
  * @returns {Promise<number>} Balance en SOL (0 si falla)
  */
 export const getWalletBalance = async () => {
+  console.log('[WalletService] 🔍 Intentando obtener balance...');
   const provider = getProvider();
 
   if (!provider) {

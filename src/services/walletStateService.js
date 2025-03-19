@@ -25,7 +25,7 @@ const ERROR_MESSAGES = {
  */
 export const detectWallet = async () => {
   try {
-    // Intentar detectar wallet automáticamente
+    console.log('[WalletStateService] 🔍 Intentando detectar wallet automáticamente...');
     const { pubkey, balance } = await detectWalletService();
 
     if (pubkey) {
@@ -48,6 +48,13 @@ export const detectWallet = async () => {
  */
 export const handleWalletSelected = async (walletType) => {
   try {
+    if (!walletType) {
+      console.error('[WalletStateService] ❌ Tipo de wallet no definido.');
+      throw new Error('Tipo de wallet no definido.');
+    }
+
+    console.log(`[WalletStateService] 🔍 Intentando conectar con wallet: ${walletType}`);
+
     // 1. Verificar si la wallet seleccionada es diferente de la actual
     const currentPubkey = getPublicKey();
     if (currentPubkey) {
@@ -95,6 +102,7 @@ export const handleWalletSelected = async (walletType) => {
  */
 export const handleLogoutClick = async () => {
   try {
+    console.log('[WalletStateService] 🔍 Intentando cerrar sesión...');
     await disconnectWallet();
     console.log('[WalletStateService] 🔒 Sesión cerrada correctamente');
   } catch (error) {

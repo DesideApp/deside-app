@@ -31,12 +31,20 @@ const WALLET_DOWNLOAD_URLS = {
  * @returns {Object|null} Proveedor o null.
  */
 export const getProvider = (walletType) => {
-  if (typeof window === 'undefined') return null; // Verificar entorno
+  console.log(`[WalletProviders] 🔍 Intentando obtener proveedor para: ${walletType}`);
+
+  if (!walletType || !Object.values(WALLET_TYPES).includes(walletType)) {
+    console.warn(`[WalletProviders] ⚠️ Tipo de wallet desconocido o no válido: ${walletType}`);
+    return null;
+  }
 
   if (walletType === WALLET_TYPES.PHANTOM) {
     if ('phantom' in window) {
       const provider = window.phantom?.solana;
-      if (provider?.isPhantom) return provider;
+      if (provider?.isPhantom) {
+        console.log('[WalletProviders] ✅ Phantom detectado.');
+        return provider;
+      }
     }
     console.warn(`[WalletProviders] ❌ Phantom no detectado. Por favor, instala la extensión.`);
     return null;
@@ -45,7 +53,10 @@ export const getProvider = (walletType) => {
   if (walletType === WALLET_TYPES.BACKPACK) {
     if ('backpack' in window) {
       const provider = window.backpack;
-      if (provider?.isBackpack) return provider;
+      if (provider?.isBackpack) {
+        console.log('[WalletProviders] ✅ Backpack detectado.');
+        return provider;
+      }
     }
     console.warn(`[WalletProviders] ❌ Backpack no detectado. Por favor, instala la extensión.`);
     return null;
@@ -54,7 +65,10 @@ export const getProvider = (walletType) => {
   if (walletType === WALLET_TYPES.MAGIC_EDEN) {
     if ('magicEden' in window) {
       const provider = window.magicEden?.solana;
-      if (provider?.isMagicEdenWallet) return provider;
+      if (provider?.isMagicEdenWallet) {
+        console.log('[WalletProviders] ✅ Magic Eden Wallet detectado.');
+        return provider;
+      }
     }
     console.warn(`[WalletProviders] ❌ Magic Eden Wallet no detectado. Por favor, instala la extensión.`);
     return null;
