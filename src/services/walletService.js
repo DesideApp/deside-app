@@ -2,7 +2,7 @@
  * 📂 walletService.js - Maneja conexión, desconexión y balance de wallets
  */
 
-import { getProvider, getWalletType, WALLET_TYPES, WALLET_NAMES } from './walletProviders';
+import { getProvider, getWalletType, WALLET_NAMES } from './walletProviders';
 
 // Mensajes de error comunes
 const ERROR_MESSAGES = {
@@ -14,13 +14,39 @@ const ERROR_MESSAGES = {
 };
 
 /**
- * 🔌 Conecta a una wallet específica o detecta automáticamente
+ * 🔍 Detecta si hay una wallet conectada automáticamente (sesión recordada)
+ * @returns {Promise<{pubkey: string|null, balance: number|null}>} Clave pública y balance
+ */
+export const detectWallet = async () => {
+  const provider = getProvider();
+
+  if (!provider) {
+    console.log("[WalletService] ⚠️ No se detectó ningún proveedor.");
+    return { pubkey: null, balance: null };
+  }
+
+  try {
+    // Intentar conexión automática sin popup
+    await provider.connect({ onlyIfTrusted: true });
+
+    const pubkey = provider.publicKey?.toString() || null;
+    const balance = pubkey ? await getWalletBalance() : null;
+
+    console.log(`[WalletService] ✅ Wallet detectada: ${pubkey}, Balance: ${balance} SOL`);
+    return { pubkey, balance };
+  } catch (error) {
+    console.warn("[WalletService] ⚠️ No se pudo recuperar la sesión automáticamente.");
+    return { pubkey: null, balance: null };
+  }
+};
+
+/**
+ * 🔌 Conecta a una wallet específica seleccionada manualmente
  * @param {Object} [options] - Opciones de conexión
  * @param {string} [options.walletType] - Tipo de wallet ("phantom", "backpack", "magiceden")
- * @param {boolean} [options.onlyIfTrusted] - Conexión automática sin popup
  * @returns {Promise<string>} PublicKey en formato string
  */
-export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) => {
+export const connectWallet = async ({ walletType } = {}) => {
   const provider = walletType ? getProvider(walletType) : getProvider();
 
   if (!provider) {
@@ -36,19 +62,14 @@ export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) 
   }
 
   try {
-    // Si la wallet ya está conectada, evitamos reconectar innecesariamente
-    if (provider.isConnected && provider.publicKey) {
-      console.log(`[WalletService] ✅ Ya conectado a ${getWalletType(provider)} (${provider.publicKey.toString()})`);
-      return provider.publicKey.toString();
-    }
+    // Establecer conexión manual
+    await provider.connect();
 
-    // Establecer conexión con o sin popup
-    await provider.connect(onlyIfTrusted ? { onlyIfTrusted: true } : {});
-
-    console.log(`[WalletService] ✅ Conectado a ${getWalletType(provider)}`);
-    return provider.publicKey.toString();
+    const pubkey = provider.publicKey?.toString();
+    console.log(`[WalletService] ✅ Conectado manualmente a ${getWalletType(provider)} (${pubkey})`);
+    return pubkey;
   } catch (error) {
-    console.error(`[WalletService] ❌ Error en ${getWalletType(provider)}: ${error.message}`);
+    console.error(`[WalletService] ❌ Error al conectar manualmente: ${error.message}`);
     throw new Error(`${ERROR_MESSAGES.CONNECTION_FAILED} ${error.message}`);
   }
 };

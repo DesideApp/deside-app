@@ -18,38 +18,50 @@ const WALLET_NAMES = {
   [WALLET_TYPES.UNKNOWN]: 'Desconocida',
 };
 
-// Propiedades específicas de cada proveedor
-const PROVIDER_PROPERTIES = {
-  [WALLET_TYPES.PHANTOM]: 'isPhantom',
-  [WALLET_TYPES.BACKPACK]: 'isBackpack',
-  [WALLET_TYPES.MAGIC_EDEN]: 'isMagicEdenWallet',
+// URLs de descarga para cada wallet
+const WALLET_DOWNLOAD_URLS = {
+  [WALLET_TYPES.PHANTOM]: 'https://phantom.app/',
+  [WALLET_TYPES.BACKPACK]: 'https://www.backpack.app/',
+  [WALLET_TYPES.MAGIC_EDEN]: 'https://wallet.magiceden.io/',
 };
 
 /**
  * 🔎 Obtiene el proveedor de Solana según el tipo especificado.
- * @param {string} [walletType] - Tipo de wallet ("phantom", "backpack", "magiceden").
+ * @param {string} walletType - Tipo de wallet ("phantom", "backpack", "magiceden").
  * @returns {Object|null} Proveedor o null.
  */
 export const getProvider = (walletType) => {
   if (typeof window === 'undefined') return null; // Verificar entorno
 
-  switch (walletType?.toLowerCase()) {
-    case WALLET_TYPES.PHANTOM:
-      return window.phantom?.solana || null;
-    case WALLET_TYPES.BACKPACK:
-      return window.backpack || null;
-    case WALLET_TYPES.MAGIC_EDEN:
-      return window.magiceden?.solana || null;
-    default:
-      // Detección automática: Phantom → Backpack → Magic Eden → window.solana
-      return (
-        window.phantom?.solana ||
-        window.backpack ||
-        window.magiceden?.solana ||
-        window.solana ||
-        null
-      );
+  if (walletType === WALLET_TYPES.PHANTOM) {
+    if ('phantom' in window) {
+      const provider = window.phantom?.solana;
+      if (provider?.isPhantom) return provider;
+    }
+    redirectToWalletDownload(WALLET_TYPES.PHANTOM);
+    return null;
   }
+
+  if (walletType === WALLET_TYPES.BACKPACK) {
+    if ('backpack' in window) {
+      const provider = window.backpack;
+      if (provider?.isBackpack) return provider;
+    }
+    redirectToWalletDownload(WALLET_TYPES.BACKPACK);
+    return null;
+  }
+
+  if (walletType === WALLET_TYPES.MAGIC_EDEN) {
+    if ('magicEden' in window) {
+      const provider = window.magicEden?.solana;
+      if (provider?.isMagicEdenWallet) return provider;
+    }
+    redirectToWalletDownload(WALLET_TYPES.MAGIC_EDEN);
+    return null;
+  }
+
+  console.warn(`[WalletProviders] ⚠️ Tipo de wallet desconocido: ${walletType}`);
+  return null;
 };
 
 /**
@@ -60,20 +72,25 @@ export const getProvider = (walletType) => {
 export const getWalletType = (provider = getProvider()) => {
   if (!provider) return WALLET_NAMES[WALLET_TYPES.UNKNOWN];
 
-  for (const [type, property] of Object.entries(PROVIDER_PROPERTIES)) {
-    if (provider[property]) return WALLET_NAMES[type];
-  }
+  if (provider.isPhantom) return WALLET_NAMES[WALLET_TYPES.PHANTOM];
+  if (provider.isBackpack) return WALLET_NAMES[WALLET_TYPES.BACKPACK];
+  if (provider.isMagicEdenWallet) return WALLET_NAMES[WALLET_TYPES.MAGIC_EDEN];
 
   return WALLET_NAMES[WALLET_TYPES.UNKNOWN];
 };
 
 /**
- * 🧐 Verifica si una wallet específica está disponible en el navegador.
- * @param {string} walletType - Tipo de wallet a verificar.
- * @returns {boolean} True si está disponible.
+ * 🌐 Redirige al usuario a la página de descarga de la wallet si no está instalada.
+ * @param {string} walletType - Tipo de wallet ("phantom", "backpack", "magiceden").
  */
-export const isWalletAvailable = (walletType) => {
-  return !!getProvider(walletType);
+export const redirectToWalletDownload = (walletType) => {
+  const url = WALLET_DOWNLOAD_URLS[walletType];
+  if (url) {
+    console.warn(`[WalletProviders] 🌐 Redirigiendo a la página de descarga de ${walletType}: ${url}`);
+    window.location.href = url;
+  } else {
+    console.warn(`[WalletProviders] ⚠️ No se encontró URL de descarga para ${walletType}`);
+  }
 };
 
 // ✅ EXPORTAMOS TODO LO NECESARIO PARA EVITAR ERRORES EN OTROS ARCHIVOS
