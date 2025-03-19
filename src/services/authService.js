@@ -2,7 +2,7 @@
  * 📂 authService.js - Maneja autenticación y firma de mensajes en Solana.
  */
 
-import { getSolanaProvider } from "./walletProviders";
+import { getProvider } from "./walletProviders";
 import bs58 from "bs58"; // Solo necesario si el backend lo requiere
 
 /**
@@ -12,7 +12,7 @@ import bs58 from "bs58"; // Solo necesario si el backend lo requiere
  * @throws {Error} Si la firma falla o el usuario la rechaza.
  */
 export const signMessage = async (message) => {
-  const provider = getSolanaProvider();
+  const provider = getProvider();
   if (!provider) throw new Error("No hay wallet conectada.");
 
   try {
@@ -34,7 +34,7 @@ export const signMessage = async (message) => {
  */
 export const authenticateWallet = async () => {
   try {
-    const provider = getSolanaProvider();
+    const provider = getProvider();
     if (!provider || !provider.isConnected) {
       return { pubkey: null, status: "not_connected" };
     }
