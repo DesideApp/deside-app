@@ -1,28 +1,45 @@
 /**
- * 📂 walletBalanceService.js - Maneja la obtención del balance de la wallet en Solana.
+ * 📂 walletBalanceService.js - Maneja balance y conversión a SOL
  */
 
 import { Connection, PublicKey } from "@solana/web3.js";
 import { getPublicKey } from "./walletService";
 
-// URL del RPC de Solana (puedes cambiarla si tienes un RPC privado)
-const SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com";
+// Configuración flexible de RPC
+const SOLANA_RPC_URL = process.env.RPC_URL || "https://api.mainnet-beta.solana.com";
 const connection = new Connection(SOLANA_RPC_URL, "confirmed");
 
 /**
- * 💰 Obtiene el balance de la wallet conectada en SOL.
- * @returns {Promise<number>} Balance en SOL o `0` si hay error.
+ * 💰 Obtiene balance actualizado con manejo robusto de errores
+ * @param {string} [customRpc] - URL opcional de RPC personalizado
+ * @returns {Promise<number>} Balance en SOL (0 si falla)
  */
-export const getWalletBalance = async () => {
+export const getWalletBalance = async (customRpc) => {
   try {
     const publicKeyString = getPublicKey();
-    if (!publicKeyString) throw new Error("No hay wallet conectada.");
+    
+    // Validación reforzada
+    if (!publicKeyString || !PublicKey.isOnCurve(publicKeyString)) {
+      throw new Error("Clave pública inválida o no conectada");
+    }
+
+    // Usar RPC personalizado si se provee
+    const activeConnection = customRpc 
+      ? new Connection(customRpc, "confirmed")
+      : connection;
 
     const publicKey = new PublicKey(publicKeyString);
-    const balanceLamports = await connection.getBalance(publicKey);
-    return balanceLamports / 1e9; // Convertimos de lamports a SOL
+    const balanceLamports = await activeConnection.getBalance(publicKey, "confirmed");
+    
+    // Validar respuesta numérica
+    if (typeof balanceLamports !== "number") {
+      throw new Error("Respuesta de balance inválida");
+    }
+
+    return parseFloat((balanceLamports / 1e9).toFixed(4)); // 4 decimales
+
   } catch (error) {
-    console.error(`❌ Error al obtener balance: ${error.message}`);
+    console.error(`❌ Balance Error: ${error.message}`);
     return 0;
   }
 };

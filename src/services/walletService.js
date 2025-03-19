@@ -1,75 +1,85 @@
 /**
- * 📂 walletService.js - Maneja conexión y desconexión de wallets en Solana.
+ * 📂 walletService.js - Maneja conexión y desconexión de wallets
  */
 
-import { getSolanaProvider } from "./walletProviders";
+import { getProvider, getWalletType, WALLET_TYPES, WALLET_NAMES } from './walletProviders';
+
+// Mensajes de error comunes
+const ERROR_MESSAGES = {
+  NO_PROVIDER: 'No se detectó ninguna wallet compatible.',
+  NOT_INSTALLED: (walletType) => `${WALLET_NAMES[walletType]} no detectada. ¡Instálala primero!`,
+  CONNECTION_FAILED: 'Error al conectar la wallet.',
+  DISCONNECTION_FAILED: 'Error al desconectar la wallet.',
+};
 
 /**
- * 🔌 Conecta con la wallet y obtiene la `publicKey`.
- * @param {Object} options - Opciones de conexión.
- * @param {boolean} options.onlyIfTrusted - Si solo debe conectar si es una wallet confiable.
- * @returns {Promise<string>} La `publicKey` en formato string.
- * @throws {Error} Si la conexión falla o el usuario la rechaza.
+ * 🔌 Conecta a una wallet específica o detecta automáticamente
+ * @param {Object} [options] - Opciones de conexión
+ * @param {string} [options.walletType] - Tipo de wallet ("phantom", "backpack", "magiceden")
+ * @param {boolean} [options.onlyIfTrusted] - Conexión automática sin popup
+ * @returns {Promise<string>} PublicKey en formato string
  */
-export const connectWallet = async ({ onlyIfTrusted = false } = {}) => {
-  const provider = getSolanaProvider();
-  if (!provider) throw new Error("No se detectó una wallet compatible.");
+export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) => {
+  const provider = walletType ? getProvider(walletType) : getProvider();
 
-  const walletType = getWalletType(); // Obtenemos el tipo de wallet (Phantom, Backpack, Magic Eden)
+  if (!provider) {
+    throw new Error(
+      walletType
+        ? ERROR_MESSAGES.NOT_INSTALLED(walletType)
+        : ERROR_MESSAGES.NO_PROVIDER
+    );
+  }
 
   try {
-    // Intentar conectar automáticamente si la wallet es confiable
-    if (onlyIfTrusted) {
-      await provider.connect({ onlyIfTrusted: true }); // Conexión automática para wallets confiables (Phantom y Backpack)
-    } else {
-      await provider.connect(); // Conexión normal si no es confiable (con popup)
+    // Desconectar si ya hay una conexión activa
+    if (provider.isConnected) {
+      await provider.disconnect();
     }
 
-    console.log(`Conectado a ${walletType}`); // Información sobre qué wallet se conectó
+    // Establecer conexión
+    const connectionOptions = onlyIfTrusted ? { onlyIfTrusted: true } : {};
+    await provider.connect(connectionOptions);
 
-    return provider.publicKey.toString(); // Retorna la publicKey
+    console.log(`[WalletService] ✅ Conectado a ${getWalletType(provider)}`);
+    return provider.publicKey.toString();
   } catch (error) {
-    console.error(`Error al conectar con ${walletType}: ${error.message}`);
-    throw new Error(`Error al conectar la wallet: ${error.message}`);
+    console.error(`[WalletService] ❌ Error en ${getWalletType(provider)}: ${error.message}`);
+    throw new Error(`${ERROR_MESSAGES.CONNECTION_FAILED} ${error.message}`);
   }
 };
 
 /**
- * ❌ Desconecta la wallet y limpia el estado.
+ * ❌ Desconecta la wallet activa
+ * @returns {Promise<void>}
  */
 export const disconnectWallet = async () => {
-  const provider = getSolanaProvider();
-  if (provider) {
-    await provider.disconnect();
+  const provider = getProvider();
+
+  if (provider?.isConnected) {
+    try {
+      await provider.disconnect();
+      console.log('[WalletService] 🔒 Sesión desconectada');
+    } catch (error) {
+      console.error(`[WalletService] ❌ Error al desconectar: ${error.message}`);
+      throw new Error(`${ERROR_MESSAGES.DISCONNECTION_FAILED} ${error.message}`);
+    }
   }
 };
 
 /**
- * ✅ Verifica si hay una wallet conectada.
- * @returns {boolean} `true` si la wallet está conectada, `false` si no.
+ * ✅ Verifica si hay una wallet conectada
+ * @returns {boolean} True si la wallet está conectada
  */
 export const isConnected = () => {
-  const provider = getSolanaProvider();
+  const provider = getProvider();
   return provider?.isConnected || false;
 };
 
 /**
- * 🔎 Obtiene la `publicKey` de la wallet conectada.
- * @returns {string|null} La `publicKey` en formato string o `null` si no hay conexión.
+ * 🔍 Obtiene la clave pública de la wallet conectada
+ * @returns {string|null} PublicKey en formato string o null si no hay conexión
  */
 export const getPublicKey = () => {
-  const provider = getSolanaProvider();
+  const provider = getProvider();
   return provider?.publicKey?.toString() || null;
-};
-
-/**
- * 🏷️ Devuelve el tipo de wallet actual.
- * @returns {string} El nombre de la wallet ("Phantom", "Backpack", "Magic Eden Wallet", "Desconocida").
- */
-export const getWalletType = () => {
-  const provider = getSolanaProvider();
-  if (provider?.isPhantom) return "Phantom";
-  if (provider?.isBackpack) return "Backpack";
-  if (provider?.isMagicEden) return "Magic Eden Wallet";
-  return "Desconocida";
 };

@@ -1,99 +1,77 @@
-import React, { useState, useEffect, useCallback, memo } from "react";
-import { detectWallet, handleWalletSelected, handleLogoutClick } from "../../services/walletStateService.js";
-import WalletMenu from "./WalletMenu";
-import WalletModal from "./WalletModal";
-import "./WalletButton.css";
+import React, { useState, useCallback, memo } from 'react';
+import { detectWallet, handleWalletSelected, handleLogoutClick } from '../../services/walletStateService.js';
+import WalletMenu from './WalletMenu';
+import WalletModal from './WalletModal';
+import './WalletButton.css';
 
 const WalletButton = memo(() => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [walletAddress, setWalletAddress] = useState(null);
-  const [balance, setBalance] = useState(null);
+  const [walletState, setWalletState] = useState({
+    pubkey: null,
+    balance: null,
+    status: 'disconnected', // Estados: disconnected, connecting, connected, error
+  });
 
-  /**
-   * 🔹 **Detectar conexión y actualizar balance automáticamente**
-   */
+  // Actualiza el estado de la wallet
   const updateWalletState = useCallback(async () => {
-    const { pubkey, balance } = await detectWallet();
-    setWalletAddress(pubkey);
-    setBalance(balance);
+    const { pubkey, balance, status } = await detectWallet();
+    setWalletState({ pubkey, balance, status });
   }, []);
 
-  useEffect(() => {
-    updateWalletState();
-  }, [updateWalletState]);
+  // Maneja el clic en el botón principal
+  const handleMainButtonClick = useCallback(() => {
+    walletState.status === 'connected' ? setIsMenuOpen((prev) => !prev) : setIsModalOpen(true);
+  }, [walletState.status]);
 
-  /**
-   * 🔹 **Abrir modal si no hay wallet conectada, sino abrir el menú**
-   */
-  const handleConnectClick = useCallback(() => {
-    if (!walletAddress) {
-      setIsModalOpen(true);
-    } else {
-      setIsMenuOpen((prev) => !prev);
-    }
-  }, [walletAddress]);
+  // Conecta una wallet específica
+  const connectWalletHandler = useCallback(
+    async (walletType) => {
+      setWalletState((prev) => ({ ...prev, status: 'connecting' }));
+      const result = await handleWalletSelected(walletType);
+      if (result.status === 'authenticated') {
+        await updateWalletState();
+        setIsModalOpen(false);
+      }
+    },
+    [updateWalletState]
+  );
 
-  /** 🔹 **Cerrar modal** */
-  const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
-
-  /** 🔹 **Conectar wallet desde el modal** */
-  const handleWalletSelection = useCallback(async () => {
-    await handleWalletSelected();
-    updateWalletState();
-    handleCloseModal();
-  }, [updateWalletState, handleCloseModal]);
-
-  /** 🔹 **Cerrar sesión correctamente** */
-  const logout = async () => {
+  // Cierra la sesión de la wallet
+  const logoutHandler = useCallback(async () => {
     await handleLogoutClick();
-    setWalletAddress(null);
-    setBalance(null);
+    setWalletState({ pubkey: null, balance: null, status: 'disconnected' });
     setIsMenuOpen(false);
-  };
+  }, []);
 
-  /** 🔹 **Texto del botón** */
-  const formattedBalance = walletAddress
-    ? balance !== null && !isNaN(balance)
-      ? `${balance.toFixed(2)} SOL`
-      : "-- SOL"
-    : "Connect Wallet";
+  // Formatea el balance para mostrarlo en la UI
+  const formattedBalance = walletState.status === 'connected'
+    ? walletState.balance !== null
+      ? `${walletState.balance.toFixed(2)} SOL`
+      : '-- SOL'
+    : 'Conectar Wallet';
 
   return (
     <div className="wallet-container">
-      {/* 🔹 Botón "Connect Wallet" */}
-      <div className="wallet-button-wrapper">
-        <button className="wallet-button" onClick={handleConnectClick}>
-          <span>{formattedBalance}</span>
-        </button>
-      </div>
+      <button
+        className={`wallet-button ${walletState.status}`}
+        onClick={handleMainButtonClick}
+        aria-label={walletState.status === 'connected' ? 'Ver menú de wallet' : 'Conectar wallet'}
+      >
+        {formattedBalance}
+      </button>
 
-      {/* 🔹 Botón hamburguesa */}
-      <div className="menu-button-wrapper">
-        <button className="menu-button" onClick={() => setIsMenuOpen((prev) => !prev)} aria-label="Toggle Wallet Menu">
-          <div className="menu-icon">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </button>
-      </div>
-
-      {/* ✅ Menú de wallet */}
-      <WalletMenu 
+      <WalletMenu
         isOpen={isMenuOpen}
-        handleLogout={logout}
+        handleLogout={logoutHandler}
         onClose={() => setIsMenuOpen(false)}
-        walletAddress={walletAddress}
-        balance={balance}
-        openWalletModal={() => setIsModalOpen(true)}
+        {...walletState}
       />
 
-      {/* ✅ Modal de selección de wallet */}
-      <WalletModal 
+      <WalletModal
         isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onWalletSelected={handleWalletSelection}
+        onClose={() => setIsModalOpen(false)}
+        onWalletSelected={connectWalletHandler}
       />
     </div>
   );

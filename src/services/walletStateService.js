@@ -1,51 +1,94 @@
 /**
- * 📂 walletStateService.js - Maneja el estado de la wallet conectada, firma mensajes y autentica con el backend.
+ * 📂 walletStateService.js - Maneja estado, autenticación y multi-wallet
  */
 
-import { isConnected, connectWallet, disconnectWallet, getPublicKey } from "./walletService"; // Ahora gestiona conexión automática
-import { getWalletBalance } from "./walletBalanceService";
-import { signMessage, authenticateWallet } from "./authService";
+import { isConnected, connectWallet, disconnectWallet, getPublicKey } from './walletService';
+import { getWalletBalance } from './walletBalanceService';
+import { signMessage, authenticateWallet } from './authService';
 
-/**
- * 🔍 Detecta si hay una wallet conectada y obtiene su balance.
- * @returns {Promise<{ pubkey: string | null, balance: number | null, status: string }>}.
- */
-export const detectWallet = async () => {
-  if (!isConnected()) return { pubkey: null, balance: null, status: "not_connected" };
-
-  const pubkey = getPublicKey();
-  const balance = await getWalletBalance();
-  return { pubkey, balance, status: "connected" };
+// Mensajes de error comunes
+const ERROR_MESSAGES = {
+  NOT_CONNECTED: 'No hay una wallet conectada.',
+  CONNECTION_FAILED: 'Error al conectar la wallet.',
+  SIGNATURE_FAILED: 'Error al firmar el mensaje.',
+  AUTH_FAILED: 'Error al autenticar con el backend.',
 };
 
 /**
- * 🔌 Conectar una wallet, firmar un mensaje y autenticar con el backend.
- * @returns {Promise<{ pubkey: string | null, balance: number | null, status: string }>}.
+ * 🔍 Detecta wallet conectada y balance
+ * @returns {Promise<{pubkey: string|null, balance: number|null, status: string}>}
  */
-export const handleWalletSelected = async () => {
+export const detectWallet = async () => {
+  if (!isConnected()) {
+    console.log('[WalletStateService] ❌', ERROR_MESSAGES.NOT_CONNECTED);
+    return { pubkey: null, balance: null, status: 'not_connected' };
+  }
+
   try {
-    await connectWallet({ onlyIfTrusted: true }); // Intentamos conexión automática
-    const { pubkey, balance } = await detectWallet();
-
-    // ✍️ Firmar mensaje para autenticación
-    const signedData = await signMessage("Please sign this message to authenticate.");
-    if (!signedData.signature) return { pubkey, balance, status: "signature_failed" };
-
-    // 🔐 Enviar firma al backend para autenticación
-    const authResponse = await authenticateWallet(signedData.pubkey, signedData.signature);
-    if (authResponse.status !== "authenticated") return { pubkey, balance, status: "auth_failed" };
-
-    return { pubkey, balance, status: "authenticated" };
+    const pubkey = getPublicKey();
+    const balance = await getWalletBalance();
+    console.log('[WalletStateService] ✅ Wallet detectada:', { pubkey, balance });
+    return { pubkey, balance, status: 'connected' };
   } catch (error) {
-    console.error("❌ Error al conectar y autenticar:", error.message);
-    return { pubkey: null, balance: null, status: "error" };
+    console.error('[WalletStateService] ❌ Error detectando wallet:', error.message);
+    return { pubkey: null, balance: null, status: 'error' };
   }
 };
 
 /**
- * ❌ Cerrar sesión y resetear el estado de la wallet.
+ * 🔌 Conexión completa con wallet específica + autenticación
+ * @param {string} walletType - Tipo de wallet ("phantom", "backpack", "magiceden")
+ * @returns {Promise<{pubkey: string|null, balance: number|null, status: string}>}
+ */
+export const handleWalletSelected = async (walletType) => {
+  try {
+    // 1. Desconectar wallet previa si existe
+    if (isConnected()) {
+      await disconnectWallet();
+      console.log('[WalletStateService] 🔒 Wallet previa desconectada');
+    }
+
+    // 2. Conectar con wallet específica
+    await connectWallet({ walletType });
+    console.log(`[WalletStateService] ✅ Conectado a ${walletType}`);
+
+    // 3. Obtener datos básicos
+    const { pubkey, balance } = await detectWallet();
+
+    // 4. Firmar mensaje para autenticación
+    const signedData = await signMessage('Please sign this message to authenticate.');
+    if (!signedData?.signature) {
+      console.error('[WalletStateService] ❌', ERROR_MESSAGES.SIGNATURE_FAILED);
+      await disconnectWallet();
+      return { pubkey: null, balance: null, status: 'signature_failed' };
+    }
+
+    // 5. Autenticar con backend
+    const authResponse = await authenticateWallet(signedData.pubkey, signedData.signature);
+    if (!authResponse?.authenticated) {
+      console.error('[WalletStateService] ❌', ERROR_MESSAGES.AUTH_FAILED);
+      await disconnectWallet();
+      return { pubkey: null, balance: null, status: 'auth_failed' };
+    }
+
+    console.log('[WalletStateService] ✅ Autenticación exitosa');
+    return { pubkey, balance, status: 'authenticated' };
+  } catch (error) {
+    console.error('[WalletStateService] ❌ Error en flujo completo:', error.message);
+    await disconnectWallet();
+    return { pubkey: null, balance: null, status: 'error' };
+  }
+};
+
+/**
+ * ❌ Cierre de sesión completo
  * @returns {Promise<void>}
  */
 export const handleLogoutClick = async () => {
-  await disconnectWallet();
+  try {
+    await disconnectWallet();
+    console.log('[WalletStateService] 🔒 Sesión cerrada correctamente');
+  } catch (error) {
+    console.error('[WalletStateService] ❌ Error en logout:', error.message);
+  }
 };

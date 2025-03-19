@@ -1,27 +1,44 @@
 /**
- * 📂 providers.js - Detecta wallets compatibles con Solana
- * Siguiendo el estándar de Solana sin adaptadores externos.
+ * 📂 walletBalanceService.js - Maneja la obtención del balance desde el provider
  */
 
-/**
- * 🔎 Obtiene el proveedor de Solana (si existe en el navegador).
- * @returns {Object|null} El proveedor de Solana o null si no hay wallets instaladas.
- */
-export const getSolanaProvider = () => window.solana || null;
+import { getProvider } from './walletProviders';
+
+// Mensajes de error comunes
+const ERROR_MESSAGES = {
+  NO_PROVIDER: 'No se detectó ninguna wallet compatible.',
+  NOT_CONNECTED: 'La wallet no está conectada.',
+  BALANCE_NOT_AVAILABLE: 'El balance no está disponible.',
+};
 
 /**
- * 🧐 Comprueba si hay una wallet instalada en el navegador.
- * @returns {boolean} True si hay una wallet compatible, false si no.
+ * 💰 Obtiene el balance de la wallet conectada en SOL
+ * @returns {Promise<number>} Balance en SOL (0 si falla)
  */
-export const isWalletInstalled = () => !!window.solana;
+export const getWalletBalance = async () => {
+  const provider = getProvider();
 
-/**
- * 🏷️ Devuelve qué wallet está siendo utilizada actualmente.
- * @returns {string} El nombre de la wallet ("Phantom", "Backpack", "Magic Eden Wallet", "Desconocida").
- */
-export const getWalletType = () => {
-  if (window.solana?.isPhantom) return "Phantom";
-  if (window.solana?.isBackpack) return "Backpack";
-  if (window.solana?.isMagicEden) return "Magic Eden Wallet";
-  return "Desconocida";
+  if (!provider) {
+    console.error('[WalletBalanceService] ❌', ERROR_MESSAGES.NO_PROVIDER);
+    return 0;
+  }
+
+  if (!provider.isConnected) {
+    console.error('[WalletBalanceService] ❌', ERROR_MESSAGES.NOT_CONNECTED);
+    return 0;
+  }
+
+  try {
+    // Obtener el balance en lamports desde el provider
+    const balanceLamports = await provider.getBalance();
+
+    // Convertir a SOL
+    const balanceSOL = balanceLamports / 1e9;
+    console.log('[WalletBalanceService] ✅ Balance obtenido:', balanceSOL);
+
+    return balanceSOL;
+  } catch (error) {
+    console.error('[WalletBalanceService] ❌', ERROR_MESSAGES.BALANCE_NOT_AVAILABLE, error);
+    return 0;
+  }
 };
