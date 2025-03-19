@@ -38,8 +38,8 @@ const WalletButton = memo(() => {
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
 
   /** 🔹 **Conectar wallet desde el modal** */
-  const handleWalletSelection = useCallback(async () => {
-    await handleWalletSelected();
+  const handleWalletSelection = useCallback(async (walletType) => {
+    await handleWalletSelected(walletType); // Pasamos el tipo de wallet
     updateWalletState();
     handleCloseModal();
   }, [updateWalletState, handleCloseModal]);
@@ -93,7 +93,7 @@ const WalletButton = memo(() => {
       <WalletModal 
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onWalletSelected={handleWalletSelection}
+        onWalletSelected={handleWalletSelection} // Pasamos la función actualizada
       />
     </div>
   );
