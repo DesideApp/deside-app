@@ -5,8 +5,6 @@
 import {
   connect,
   disconnectWallet,
-  getPublicKey,
-  getWalletBalance,
 } from './walletService';
 import { signMessage, authenticateWallet } from './authService';
 
@@ -46,10 +44,20 @@ export const detectWallet = async () => {
  * @returns {Promise<{pubkey: string|null, balance: number|null, status: string}>}
  */
 export const handleWalletSelected = async (walletType) => {
+  if (!walletType) {
+    console.error('[WalletStateService] ❌ Tipo de wallet no definido.');
+    return { pubkey: null, balance: null, status: 'invalid_wallet_type' };
+  }
+
   try {
     console.log(`[WalletStateService] 🔍 Intentando conectar con wallet: ${walletType}`);
     await disconnectWallet(); // Desconectar cualquier wallet previa
     const { pubkey, balance } = await connect({ walletType });
+
+    if (!pubkey) {
+      console.error('[WalletStateService] ❌ No se pudo conectar a la wallet.');
+      return { pubkey: null, balance: null, status: 'connection_failed' };
+    }
 
     const signedData = await signMessage('Please sign this message to authenticate.');
     if (!signedData?.signature) {
@@ -69,6 +77,31 @@ export const handleWalletSelected = async (walletType) => {
     console.error('[WalletStateService] ❌ Error en flujo completo:', error.message);
     return { pubkey: null, balance: null, status: 'error' };
   }
+};
+
+/**
+ * 🔹 Maneja la selección de una wallet desde el modal
+ * @param {string} walletType - Tipo de wallet seleccionada ("phantom", "backpack", "magiceden")
+ * @returns {Promise<{pubkey: string|null, balance: number|null, status: string}>}
+ */
+export const selectWallet = async (walletType) => {
+  console.log(`[WalletStateService] 🔍 Wallet seleccionada: ${walletType}`);
+
+  if (!walletType) {
+    console.error('[WalletStateService] ❌ Tipo de wallet no definido.');
+    return { pubkey: null, balance: null, status: 'invalid_wallet_type' };
+  }
+
+  // Reutilizamos `handleWalletSelected` para conectar a la wallet
+  const result = await handleWalletSelected(walletType);
+
+  if (result.status === 'connected') {
+    console.log('[WalletStateService] ✅ Wallet conectada exitosamente:', result);
+  } else {
+    console.error('[WalletStateService] ❌ Error al conectar la wallet:', result.status);
+  }
+
+  return result;
 };
 
 /**

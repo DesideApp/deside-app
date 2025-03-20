@@ -52,19 +52,27 @@ const PROVIDERS = {
 export const getProvider = (walletType) => {
   console.log(`[WalletProviders] 🔍 Intentando obtener proveedor para: ${walletType}`);
 
-  const providerConfig = PROVIDERS[walletType];
-  if (!providerConfig) {
+  // Validar que el walletType sea válido
+  if (!walletType || !Object.values(WALLET_TYPES).includes(walletType)) {
     console.warn(`[WalletProviders] ⚠️ Tipo de wallet desconocido o no válido: ${walletType}`);
     return null;
   }
 
+  const providerConfig = PROVIDERS[walletType];
+  if (!providerConfig) {
+    console.warn(`[WalletProviders] ⚠️ No se encontró configuración para el tipo de wallet: ${walletType}`);
+    return null;
+  }
+
+  // Verificar si el proveedor está disponible
   if (providerConfig.check()) {
     console.log(`[WalletProviders] ✅ ${walletType} detectado.`);
     return providerConfig.get();
   }
 
+  // Si no está disponible, redirigir a la descarga
   console.warn(`[WalletProviders] ❌ ${walletType} no detectado. Redirigiendo a la descarga...`);
-  window.open(providerConfig.downloadUrl, '_blank');
+  redirectToWalletDownload(walletType);
   return null;
 };
 

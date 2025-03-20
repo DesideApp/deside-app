@@ -24,6 +24,7 @@ export const connect = async ({ walletType, onlyIfTrusted = false } = {}) => {
   console.log(`[WalletService] 🔍 Intentando conectar con wallet: ${walletType || 'automática'}`);
   const provider = getProvider(walletType);
 
+  // Validar si el proveedor es válido
   if (!provider) {
     console.error(`[WalletService] ❌ No se detectó el proveedor para ${walletType || 'automática'}.`);
     throw new Error(ERROR_MESSAGES.NOT_INSTALLED(walletType || 'desconocida'));
