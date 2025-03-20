@@ -15,65 +15,33 @@ const WALLET_NAMES = {
   [WALLET_TYPES.PHANTOM]: 'Phantom',
   [WALLET_TYPES.BACKPACK]: 'Backpack',
   [WALLET_TYPES.MAGIC_EDEN]: 'Magic Eden Wallet',
-  [WALLET_TYPES.UNKNOWN]: 'Desconocida',
+  [WALLET_TYPES.UNKNOWN]: 'Unknown Wallet',
 };
 
-// URLs de descarga para cada wallet
+// URLs de descarga para cada wallet (para mostrar en la UI si no está instalada)
 const WALLET_DOWNLOAD_URLS = {
   [WALLET_TYPES.PHANTOM]: 'https://phantom.app/',
   [WALLET_TYPES.BACKPACK]: 'https://www.backpack.app/',
   [WALLET_TYPES.MAGIC_EDEN]: 'https://wallet.magiceden.io/',
 };
 
-// Configuración de cada proveedor
-const PROVIDERS = {
-  [WALLET_TYPES.PHANTOM]: {
-    check: () => window.phantom?.solana?.isPhantom,
-    get: () => window.phantom?.solana,
-    downloadUrl: WALLET_DOWNLOAD_URLS[WALLET_TYPES.PHANTOM],
-  },
-  [WALLET_TYPES.BACKPACK]: {
-    check: () => window.backpack?.isBackpack,
-    get: () => window.backpack,
-    downloadUrl: WALLET_DOWNLOAD_URLS[WALLET_TYPES.BACKPACK],
-  },
-  [WALLET_TYPES.MAGIC_EDEN]: {
-    check: () => window.magicEden?.solana?.isMagicEdenWallet,
-    get: () => window.magicEden?.solana,
-    downloadUrl: WALLET_DOWNLOAD_URLS[WALLET_TYPES.MAGIC_EDEN],
-  },
-};
-
 /**
  * 🔎 Obtiene el proveedor de Solana según el tipo especificado.
- * @param {string} walletType - Tipo de wallet ("phantom", "backpack", "magiceden").
- * @returns {Object|null} Proveedor o null.
+ * @param {string} [walletType] - Tipo de wallet ("phantom", "backpack", "magiceden").
+ * @returns {Object|null} Proveedor de la wallet o null si no se encuentra.
  */
 export const getProvider = (walletType) => {
-  console.log(`[WalletProviders] 🔍 Intentando obtener proveedor para: ${walletType}`);
+  if (!window.solana) return null;
 
-  // Validar que el walletType sea válido
-  if (!walletType || !Object.values(WALLET_TYPES).includes(walletType)) {
-    console.warn(`[WalletProviders] ⚠️ Tipo de wallet desconocido o no válido: ${walletType}`);
-    return null;
-  }
+  // Si no se especifica una wallet, devolver `window.solana` como fallback estándar
+  if (!walletType) return window.solana;
 
-  const providerConfig = PROVIDERS[walletType];
-  if (!providerConfig) {
-    console.warn(`[WalletProviders] ⚠️ No se encontró configuración para el tipo de wallet: ${walletType}`);
-    return null;
-  }
+  // Detección basada en las propiedades estándar de cada wallet
+  if (window.solana.isPhantom && walletType === WALLET_TYPES.PHANTOM) return window.solana;
+  if (window.solana.isBackpack && walletType === WALLET_TYPES.BACKPACK) return window.solana;
+  if (window.solana.isMagicEdenWallet && walletType === WALLET_TYPES.MAGIC_EDEN) return window.solana;
 
-  // Verificar si el proveedor está disponible
-  if (providerConfig.check()) {
-    console.log(`[WalletProviders] ✅ ${walletType} detectado.`);
-    return providerConfig.get();
-  }
-
-  // Si no está disponible, redirigir a la descarga
-  console.warn(`[WalletProviders] ❌ ${walletType} no detectado. Redirigiendo a la descarga...`);
-  redirectToWalletDownload(walletType);
-  return null;
+  return null; // No se encontró un proveedor compatible
 };
 
 /**
@@ -92,17 +60,21 @@ export const getWalletType = (provider = getProvider()) => {
 };
 
 /**
- * 🌐 Muestra un mensaje para descargar la wallet si no está instalada.
+ * 🌐 Muestra un mensaje amigable si la wallet no está instalada.
  * @param {string} walletType - Tipo de wallet ("phantom", "backpack", "magiceden").
  */
-export const redirectToWalletDownload = (walletType) => {
+export const showWalletNotInstalledMessage = (walletType) => {
   const url = WALLET_DOWNLOAD_URLS[walletType];
   if (url) {
-    alert(`Por favor, instala la extensión de ${WALLET_NAMES[walletType]} desde: ${url}`);
+    console.warn(`[WalletProviders] ⚠️ ${walletType} is not installed.`);
+    alert(
+      `It looks like ${WALLET_NAMES[walletType]} is not installed.\n\n` +
+      `If you're interested, you can download it here:\n${url}`
+    );
   } else {
-    console.warn(`[WalletProviders] ⚠️ No se encontró URL de descarga para ${walletType}`);
+    console.warn(`[WalletProviders] ⚠️ No download URL found for ${walletType}`);
   }
 };
 
 // ✅ EXPORTAMOS TODO LO NECESARIO PARA EVITAR ERRORES EN OTROS ARCHIVOS
-export { WALLET_TYPES, WALLET_NAMES };
+export { WALLET_TYPES, WALLET_NAMES, WALLET_DOWNLOAD_URLS };

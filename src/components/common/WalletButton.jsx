@@ -12,18 +12,16 @@ import "./WalletButton.css";
 const WalletButton = memo(() => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  // Obtener el estado actual de la wallet desde el servicio
-  const { pubkey: walletAddress, balance } = getWalletState();
+  const [walletState, setWalletState] = useState(getWalletState());
 
   // Detectar automáticamente la wallet al montar el componente
   useEffect(() => {
-    detectWallet();
+    detectWallet().then((state) => setWalletState(state));
   }, []);
 
   // Manejar clic en el botón "Connect Wallet"
   const handleConnectClick = () => {
-    if (!walletAddress) {
+    if (!walletState.pubkey) {
       console.log("[WalletButton] 🔍 No hay wallet conectada. Abriendo modal...");
       setIsModalOpen(true);
     } else {
@@ -39,7 +37,8 @@ const WalletButton = memo(() => {
       console.error("[WalletButton] ❌ Tipo de wallet no definido.");
       return;
     }
-    await handleWalletSelected(walletType);
+    const result = await handleWalletSelected(walletType);
+    setWalletState(result);
     setIsModalOpen(false);
   };
 
@@ -47,13 +46,14 @@ const WalletButton = memo(() => {
   const logout = async () => {
     console.log("[WalletButton] 🔍 Cerrando sesión...");
     await handleLogoutClick();
+    setWalletState({ pubkey: null, balance: null });
     setIsMenuOpen(false);
   };
 
   // Formatear el texto del botón
-  const formattedBalance = walletAddress
-    ? balance !== null && !isNaN(balance)
-      ? `${balance.toFixed(2)} SOL`
+  const formattedBalance = walletState.pubkey
+    ? walletState.balance !== null && !isNaN(walletState.balance)
+      ? `${walletState.balance.toFixed(2)} SOL`
       : "-- SOL"
     : "Connect Wallet";
 
@@ -86,8 +86,8 @@ const WalletButton = memo(() => {
         isOpen={isMenuOpen}
         handleLogout={logout}
         onClose={() => setIsMenuOpen(false)}
-        walletAddress={walletAddress}
-        balance={balance}
+        walletAddress={walletState.pubkey}
+        balance={walletState.balance}
         openWalletModal={() => setIsModalOpen(true)}
       />
 

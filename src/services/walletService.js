@@ -2,15 +2,14 @@
  * 📂 walletService.js - Maneja conexión, desconexión y balance de wallets
  */
 
-import { getProvider, getWalletType, WALLET_NAMES } from './walletProviders';
+import { getProvider, getWalletType } from './walletProviders';
 
 // Mensajes de error comunes
 const ERROR_MESSAGES = {
   NO_PROVIDER: 'No se detectó ninguna wallet compatible.',
-  NOT_INSTALLED: (walletType) => `${WALLET_NAMES[walletType]} no detectada. ¡Instálala primero!`,
+  NOT_INSTALLED: (walletType) => `${walletType ? walletType : 'Unknown Wallet'} no detectada. ¡Instálala primero!`,
   CONNECTION_FAILED: 'Error al conectar la wallet.',
   DISCONNECTION_FAILED: 'Error al desconectar la wallet.',
-  BALANCE_FAILED: 'Error al obtener el balance de la wallet.',
 };
 
 /**
@@ -18,36 +17,39 @@ const ERROR_MESSAGES = {
  * @param {Object} [options] - Opciones de conexión
  * @param {string} [options.walletType] - Tipo de wallet ("phantom", "backpack", "magiceden")
  * @param {boolean} [options.onlyIfTrusted] - Si es true, intenta una conexión automática
- * @returns {Promise<{pubkey: string|null, balance: number|null}>} Clave pública y balance
+ * @returns {Promise<{pubkey: string|null}>} Clave pública
  */
-export const connect = async ({ walletType, onlyIfTrusted = false } = {}) => {
+export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) => {
   console.log(`[WalletService] 🔍 Intentando conectar con wallet: ${walletType || 'automática'}`);
   const provider = getProvider(walletType);
 
-  // Validar si el proveedor es válido
   if (!provider) {
     console.error(`[WalletService] ❌ No se detectó el proveedor para ${walletType || 'automática'}.`);
     throw new Error(ERROR_MESSAGES.NOT_INSTALLED(walletType || 'desconocida'));
   }
 
-  if (typeof provider.connect !== 'function') {
-    throw new Error(`[WalletService] ❌ El proveedor no soporta el método "connect".`);
-  }
-
   try {
-    // Intentar conectar (manual o automática)
-    await provider.connect({ onlyIfTrusted });
-    const pubkey = provider.publicKey?.toString();
-    const balance = pubkey ? await getWalletBalance() : null;
-
-    console.log(`[WalletService] ✅ Conectado a ${getWalletType(provider)} (${pubkey}), Balance: ${balance} SOL`);
-    return { pubkey, balance };
-  } catch (error) {
     if (onlyIfTrusted) {
-      console.warn(`[WalletService] ⚠️ Conexión automática fallida: ${error.message}`);
-      return { pubkey: null, balance: null };
+      await provider.connect({ onlyIfTrusted: true });
+      if (!provider.publicKey) {
+        console.warn("⚠️ Conexión automática fallida, intentando manualmente...");
+        await provider.connect();
+      }
+    } else {
+      await provider.connect();
     }
-    console.error(`[WalletService] ❌ Error al conectar manualmente: ${error.message}`);
+
+    if (!provider.publicKey) {
+      throw new Error("La conexión fue exitosa pero no se obtuvo una publicKey.");
+    }
+
+    // Manejar eventos de desconexión automática
+    provider.on("disconnect", () => console.warn("[WalletService] 🔴 Wallet desconectada inesperadamente."));
+
+    console.log(`[WalletService] ✅ Conectado a ${getWalletType(provider)} (${provider.publicKey.toString()})`);
+    return { pubkey: provider.publicKey.toString() };
+  } catch (error) {
+    console.error(`[WalletService] ❌ Error al conectar: ${error.message}`);
     throw new Error(`${ERROR_MESSAGES.CONNECTION_FAILED} ${error.message}`);
   }
 };
@@ -65,10 +67,6 @@ export const disconnectWallet = async () => {
     return;
   }
 
-  if (typeof provider.disconnect !== 'function') {
-    throw new Error(`[WalletService] ❌ El proveedor no soporta el método "disconnect".`);
-  }
-
   try {
     await provider.disconnect();
     console.log('[WalletService] 🔒 Sesión desconectada');
@@ -84,7 +82,7 @@ export const disconnectWallet = async () => {
  */
 export const isConnected = () => {
   const provider = getProvider();
-  return !!provider?.publicKey;
+  return provider?.isConnected || false;
 };
 
 /**
@@ -94,37 +92,4 @@ export const isConnected = () => {
 export const getPublicKey = () => {
   const provider = getProvider();
   return provider?.publicKey?.toString() || null;
-};
-
-/**
- * 💰 Obtiene el balance de la wallet conectada desde el proveedor
- * @returns {Promise<number>} Balance en SOL (0 si falla)
- */
-export const getWalletBalance = async () => {
-  console.log('[WalletService] 🔍 Intentando obtener balance...');
-  const provider = getProvider();
-
-  if (!provider) {
-    console.error("[WalletService] ❌ No se detectó ningún proveedor.");
-    return 0;
-  }
-
-  if (!provider.publicKey) {
-    console.error("[WalletService] ❌ No hay una wallet conectada.");
-    return 0;
-  }
-
-  try {
-    // Verificar si el proveedor tiene un método para obtener el balance
-    if (typeof provider.getBalance === "function") {
-      const balanceLamports = await provider.getBalance(provider.publicKey);
-      return parseFloat((balanceLamports / 1e9).toFixed(4)); // Convertir a SOL
-    }
-
-    console.warn("[WalletService] ⚠️ El proveedor no soporta 'getBalance'.");
-    return 0;
-  } catch (error) {
-    console.error(`[WalletService] ❌ Error al obtener balance: ${error.message}`);
-    return 0;
-  }
 };

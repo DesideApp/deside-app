@@ -1,20 +1,8 @@
 /**
- * 📂 walletStateService.js - Maneja estado, autenticación y multi-wallet
+ * 📂 walletStateService.js - Maneja estado y conexión de wallets
  */
 
-import {
-  connect,
-  disconnectWallet,
-} from './walletService';
-import { signMessage, authenticateWallet } from './authService';
-
-// Mensajes de error comunes
-const ERROR_MESSAGES = {
-  NOT_CONNECTED: 'No hay una wallet conectada.',
-  CONNECTION_FAILED: 'Error al conectar la wallet.',
-  SIGNATURE_FAILED: 'Error al firmar el mensaje.',
-  AUTH_FAILED: 'Error al autenticar con el backend.',
-};
+import { connectWallet, disconnectWallet, isConnected, getPublicKey } from './walletService';
 
 // Estado centralizado de la wallet
 let walletState = {
@@ -46,17 +34,25 @@ const updateWalletState = (pubkey, balance) => {
 export const detectWallet = async () => {
   try {
     console.log('[WalletStateService] 🔍 Intentando detectar wallet automáticamente...');
-    const { pubkey, balance } = await connect({ onlyIfTrusted: true });
-
-    if (pubkey) {
-      updateWalletState(pubkey, balance);
-      console.log('[WalletStateService] ✅ Wallet detectada automáticamente:', { pubkey, balance });
-      return { pubkey, balance, status: 'connected' };
+    
+    const providerConnected = isConnected();
+    if (!providerConnected) {
+      console.warn('[WalletStateService] ❌ No hay wallet conectada.');
+      updateWalletState(null, null);
+      return { pubkey: null, balance: null, status: 'not_connected' };
     }
 
-    console.log('[WalletStateService] ❌ No se detectó ninguna wallet automáticamente.');
-    updateWalletState(null, null);
-    return { pubkey: null, balance: null, status: 'not_connected' };
+    const pubkey = getPublicKey();
+    if (!pubkey) {
+      console.warn('[WalletStateService] ❌ La wallet no proporcionó una clave pública.');
+      updateWalletState(null, null);
+      return { pubkey: null, balance: null, status: 'not_connected' };
+    }
+
+    updateWalletState(pubkey, null);
+    console.log('[WalletStateService] ✅ Wallet detectada automáticamente:', { pubkey });
+    return { pubkey, balance: null, status: 'connected' };
+    
   } catch (error) {
     console.error('[WalletStateService] ❌ Error detectando wallet automáticamente:', error.message);
     updateWalletState(null, null);
@@ -65,7 +61,7 @@ export const detectWallet = async () => {
 };
 
 /**
- * 🔌 Conexión completa con wallet específica + autenticación
+ * 🔌 Conectar manualmente a una wallet específica
  * @param {string} walletType - Tipo de wallet ("phantom", "backpack", "magiceden")
  * @returns {Promise<{pubkey: string|null balance: number|null, status: string}>}
  */
@@ -78,30 +74,20 @@ export const handleWalletSelected = async (walletType) => {
   try {
     console.log(`[WalletStateService] 🔍 Intentando conectar con wallet: ${walletType}`);
     await disconnectWallet(); // Desconectar cualquier wallet previa
-    const { pubkey, balance } = await connect({ walletType });
+
+    const { pubkey } = await connectWallet({ walletType });
 
     if (!pubkey) {
       console.error('[WalletStateService] ❌ No se pudo conectar a la wallet.');
       return { pubkey: null, balance: null, status: 'connection_failed' };
     }
 
-    const signedData = await signMessage('Please sign this message to authenticate.');
-    if (!signedData?.signature) {
-      console.error('[WalletStateService] ❌', ERROR_MESSAGES.SIGNATURE_FAILED);
-      return { pubkey, balance, status: 'signature_failed' };
-    }
+    updateWalletState(pubkey, null);
+    console.log('[WalletStateService] ✅ Wallet conectada exitosamente:', { pubkey });
+    return { pubkey, balance: null, status: 'connected' };
 
-    const authResponse = await authenticateWallet(signedData.pubkey, signedData.signature);
-    if (!authResponse?.authenticated) {
-      console.error('[WalletStateService] ❌', ERROR_MESSAGES.AUTH_FAILED);
-      return { pubkey, balance, status: 'auth_failed' };
-    }
-
-    updateWalletState(pubkey, balance);
-    console.log('[WalletStateService] ✅ Autenticación exitosa');
-    return { pubkey, balance, status: 'authenticated' };
   } catch (error) {
-    console.error('[WalletStateService] ❌ Error en flujo completo:', error.message);
+    console.error('[WalletStateService] ❌ Error en conexión manual:', error.message);
     updateWalletState(null, null);
     return { pubkey: null, balance: null, status: 'error' };
   }
