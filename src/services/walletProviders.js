@@ -25,6 +25,25 @@ const WALLET_DOWNLOAD_URLS = {
   [WALLET_TYPES.MAGIC_EDEN]: 'https://wallet.magiceden.io/',
 };
 
+// Configuración de cada proveedor
+const PROVIDERS = {
+  [WALLET_TYPES.PHANTOM]: {
+    check: () => window.phantom?.solana?.isPhantom,
+    get: () => window.phantom?.solana,
+    downloadUrl: WALLET_DOWNLOAD_URLS[WALLET_TYPES.PHANTOM],
+  },
+  [WALLET_TYPES.BACKPACK]: {
+    check: () => window.backpack?.isBackpack,
+    get: () => window.backpack,
+    downloadUrl: WALLET_DOWNLOAD_URLS[WALLET_TYPES.BACKPACK],
+  },
+  [WALLET_TYPES.MAGIC_EDEN]: {
+    check: () => window.magicEden?.solana?.isMagicEdenWallet,
+    get: () => window.magicEden?.solana,
+    downloadUrl: WALLET_DOWNLOAD_URLS[WALLET_TYPES.MAGIC_EDEN],
+  },
+};
+
 /**
  * 🔎 Obtiene el proveedor de Solana según el tipo especificado.
  * @param {string} walletType - Tipo de wallet ("phantom", "backpack", "magiceden").
@@ -32,47 +51,20 @@ const WALLET_DOWNLOAD_URLS = {
  */
 export const getProvider = (walletType) => {
   console.log(`[WalletProviders] 🔍 Intentando obtener proveedor para: ${walletType}`);
-  if (!walletType || !Object.values(WALLET_TYPES).includes(walletType)) {
+
+  const providerConfig = PROVIDERS[walletType];
+  if (!providerConfig) {
     console.warn(`[WalletProviders] ⚠️ Tipo de wallet desconocido o no válido: ${walletType}`);
     return null;
   }
-  if (walletType === WALLET_TYPES.PHANTOM) {
-    if ('phantom' in window) {
-      const provider = window.phantom?.solana;
-      if (provider?.isPhantom) {
-        console.log('[WalletProviders] ✅ Phantom detectado.');
-        return provider;
-      }
-    }
-    console.warn(`[WalletProviders] ❌ Phantom no detectado. Por favor, instala la extensión.`);
-    return null;
+
+  if (providerConfig.check()) {
+    console.log(`[WalletProviders] ✅ ${walletType} detectado.`);
+    return providerConfig.get();
   }
 
-  if (walletType === WALLET_TYPES.BACKPACK) {
-    if ('backpack' in window) {
-      const provider = window.backpack;
-      if (provider?.isBackpack) {
-        console.log('[WalletProviders] ✅ Backpack detectado.');
-        return provider;
-      }
-    }
-    console.warn(`[WalletProviders] ❌ Backpack no detectado. Por favor, instala la extensión.`);
-    return null;
-  }
-
-  if (walletType === WALLET_TYPES.MAGIC_EDEN) {
-    if ('magicEden' in window) {
-      const provider = window.magicEden?.solana;
-      if (provider?.isMagicEdenWallet) {
-        console.log('[WalletProviders] ✅ Magic Eden Wallet detectado.');
-        return provider;
-      }
-    }
-    console.warn(`[WalletProviders] ❌ Magic Eden Wallet no detectado. Por favor, instala la extensión.`);
-    return null;
-  }
-
-  console.warn(`[WalletProviders] ⚠️ Tipo de wallet desconocido: ${walletType}`);
+  console.warn(`[WalletProviders] ❌ ${walletType} no detectado. Redirigiendo a la descarga...`);
+  window.open(providerConfig.downloadUrl, '_blank');
   return null;
 };
 

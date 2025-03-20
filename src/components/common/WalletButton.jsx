@@ -14,9 +14,11 @@ const WalletButton = memo(() => {
    * 🔹 **Detectar conexión y actualizar balance automáticamente**
    */
   const updateWalletState = useCallback(async () => {
+    console.log("[WalletButton] 🔍 Detectando wallet automáticamente...");
     const { pubkey, balance } = await detectWallet();
     setWalletAddress(pubkey);
     setBalance(balance);
+    console.log(`[WalletButton] ✅ Estado actualizado: pubkey=${pubkey}, balance=${balance}`);
   }, []);
 
   useEffect(() => {
@@ -28,20 +30,25 @@ const WalletButton = memo(() => {
    */
   const handleConnectClick = useCallback(() => {
     if (!walletAddress) {
+      console.log("[WalletButton] 🔍 No hay wallet conectada. Abriendo modal...");
       setIsModalOpen(true);
     } else {
+      console.log("[WalletButton] 🔍 Wallet conectada. Abriendo menú...");
       setIsMenuOpen((prev) => !prev);
     }
   }, [walletAddress]);
 
   /** 🔹 **Cerrar modal** */
-  const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
+  const handleCloseModal = useCallback(() => {
+    console.log("[WalletButton] 🔍 Cerrando modal...");
+    setIsModalOpen(false);
+  }, []);
 
   /** 🔹 **Conectar wallet desde el modal** */
   const handleWalletSelection = useCallback(async (walletType) => {
     console.log(`[WalletButton] 🔍 Wallet seleccionada: ${walletType}`);
     if (!walletType) {
-      console.error('[WalletButton] ❌ Tipo de wallet no definido.');
+      console.error("[WalletButton] ❌ Tipo de wallet no definido.");
       return;
     }
     await handleWalletSelected(walletType);
@@ -51,10 +58,12 @@ const WalletButton = memo(() => {
 
   /** 🔹 **Cerrar sesión correctamente** */
   const logout = async () => {
+    console.log("[WalletButton] 🔍 Cerrando sesión...");
     await handleLogoutClick();
     setWalletAddress(null);
     setBalance(null);
     setIsMenuOpen(false);
+    console.log("[WalletButton] ✅ Sesión cerrada.");
   };
 
   /** 🔹 **Texto del botón** */
@@ -75,7 +84,11 @@ const WalletButton = memo(() => {
 
       {/* 🔹 Botón hamburguesa */}
       <div className="menu-button-wrapper">
-        <button className="menu-button" onClick={() => setIsMenuOpen((prev) => !prev)} aria-label="Toggle Wallet Menu">
+        <button
+          className="menu-button"
+          onClick={() => setIsMenuOpen((prev) => !prev)}
+          aria-label="Toggle Wallet Menu"
+        >
           <div className="menu-icon">
             <span></span>
             <span></span>
@@ -85,7 +98,7 @@ const WalletButton = memo(() => {
       </div>
 
       {/* ✅ Menú de wallet */}
-      <WalletMenu 
+      <WalletMenu
         isOpen={isMenuOpen}
         handleLogout={logout}
         onClose={() => setIsMenuOpen(false)}
@@ -95,7 +108,7 @@ const WalletButton = memo(() => {
       />
 
       {/* ✅ Modal de selección de wallet */}
-      <WalletModal 
+      <WalletModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onWalletSelected={handleWalletSelection} // Pasamos la función actualizada

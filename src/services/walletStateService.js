@@ -3,11 +3,10 @@
  */
 
 import {
-  connectWallet,
+  connect,
   disconnectWallet,
   getPublicKey,
   getWalletBalance,
-  detectWallet as detectWalletService,
 } from './walletService';
 import { signMessage, authenticateWallet } from './authService';
 
@@ -20,13 +19,13 @@ const ERROR_MESSAGES = {
 };
 
 /**
- * 🔍 Detecta wallet conectada y balance (incluye conexión automática)
+ * 🔍 Detecta automáticamente si hay una wallet conectada (conexión automática)
  * @returns {Promise<{pubkey: string|null, balance: number|null, status: string}>}
  */
 export const detectWallet = async () => {
   try {
     console.log('[WalletStateService] 🔍 Intentando detectar wallet automáticamente...');
-    const { pubkey, balance } = await detectWalletService();
+    const { pubkey, balance } = await connect({ onlyIfTrusted: true });
 
     if (pubkey) {
       console.log('[WalletStateService] ✅ Wallet detectada automáticamente:', { pubkey, balance });
@@ -47,46 +46,17 @@ export const detectWallet = async () => {
  * @returns {Promise<{pubkey: string|null, balance: number|null, status: string}>}
  */
 export const handleWalletSelected = async (walletType) => {
-  console.log(`[WalletStateService] 🔍 Intentando conectar con wallet: ${walletType}`);
-  if (!walletType || !['phantom', 'backpack', 'magiceden'].includes(walletType)) {
-    console.error('[WalletStateService] ❌ Tipo de wallet no válido:', walletType);
-    throw new Error('Tipo de wallet no válido.');
-  }
   try {
-    if (!walletType) {
-      console.error('[WalletStateService] ❌ Tipo de wallet no definido.');
-      throw new Error('Tipo de wallet no definido.');
-    }
-
     console.log(`[WalletStateService] 🔍 Intentando conectar con wallet: ${walletType}`);
+    await disconnectWallet(); // Desconectar cualquier wallet previa
+    const { pubkey, balance } = await connect({ walletType });
 
-    // 1. Verificar si la wallet seleccionada es diferente de la actual
-    const currentPubkey = getPublicKey();
-    if (currentPubkey) {
-      console.log('[WalletStateService] 🔍 Wallet actual:', currentPubkey);
-      if (walletType === currentPubkey) {
-        console.log('[WalletStateService] ⚠️ La wallet seleccionada ya está conectada.');
-        return { pubkey: currentPubkey, balance: await getWalletBalance(), status: 'connected' };
-      }
-      await disconnectWallet();
-      console.log('[WalletStateService] 🔒 Wallet previa desconectada');
-    }
-
-    // 2. Conectar con wallet específica
-    await connectWallet({ walletType });
-    console.log(`[WalletStateService] ✅ Conectado a ${walletType}`);
-
-    // 3. Obtener datos básicos
-    const { pubkey, balance } = await detectWallet();
-
-    // 4. Firmar mensaje para autenticación
     const signedData = await signMessage('Please sign this message to authenticate.');
     if (!signedData?.signature) {
       console.error('[WalletStateService] ❌', ERROR_MESSAGES.SIGNATURE_FAILED);
       return { pubkey, balance, status: 'signature_failed' };
     }
 
-    // 5. Autenticar con backend
     const authResponse = await authenticateWallet(signedData.pubkey, signedData.signature);
     if (!authResponse?.authenticated) {
       console.error('[WalletStateService] ❌', ERROR_MESSAGES.AUTH_FAILED);

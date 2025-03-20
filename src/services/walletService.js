@@ -14,18 +14,19 @@ const ERROR_MESSAGES = {
 };
 
 /**
- * 🔌 Conecta a una wallet específica seleccionada manualmente
+ * 🔌 Conecta a una wallet (manual o automática)
  * @param {Object} [options] - Opciones de conexión
  * @param {string} [options.walletType] - Tipo de wallet ("phantom", "backpack", "magiceden")
- * @returns {Promise<string>} PublicKey en formato string
+ * @param {boolean} [options.onlyIfTrusted] - Si es true, intenta una conexión automática
+ * @returns {Promise<{pubkey: string|null, balance: number|null}>} Clave pública y balance
  */
-export const connectWallet = async ({ walletType } = {}) => {
-  console.log(`[WalletService] 🔍 Intentando conectar con wallet: ${walletType}`);
-  const provider = getProvider(walletType); // Obtenemos el proveedor según el tipo
+export const connect = async ({ walletType, onlyIfTrusted = false } = {}) => {
+  console.log(`[WalletService] 🔍 Intentando conectar con wallet: ${walletType || 'automática'}`);
+  const provider = getProvider(walletType);
 
   if (!provider) {
-    console.error(`[WalletService] ❌ No se detectó el proveedor para ${walletType}.`);
-    throw new Error(ERROR_MESSAGES.NOT_INSTALLED(walletType));
+    console.error(`[WalletService] ❌ No se detectó el proveedor para ${walletType || 'automática'}.`);
+    throw new Error(ERROR_MESSAGES.NOT_INSTALLED(walletType || 'desconocida'));
   }
 
   if (typeof provider.connect !== 'function') {
@@ -33,38 +34,20 @@ export const connectWallet = async ({ walletType } = {}) => {
   }
 
   try {
-    await provider.connect(); // Conexión manual
+    // Intentar conectar (manual o automática)
+    await provider.connect({ onlyIfTrusted });
     const pubkey = provider.publicKey?.toString();
-    console.log(`[WalletService] ✅ Conectado manualmente a ${getWalletType(provider)} (${pubkey})`);
-    return pubkey;
-  } catch (error) {
-    console.error(`[WalletService] ❌ Error al conectar manualmente: ${error.message}`);
-    throw new Error(`${ERROR_MESSAGES.CONNECTION_FAILED} ${error.message}`);
-  }
-};
-
-/**
- * 🔍 Detecta si hay una wallet conectada automáticamente (sesión recordada)
- * @returns {Promise<{pubkey: string|null, balance: number|null}>} Clave pública y balance
- */
-export const detectWallet = async () => {
-  console.log('[WalletService] 🔍 Intentando detectar wallet automáticamente...');
-  const provider = getProvider();
-
-  if (!provider) {
-    console.log("[WalletService] ⚠️ No se detectó ningún proveedor.");
-    return { pubkey: null, balance: null };
-  }
-
-  try {
-    await provider.connect({ onlyIfTrusted: true }); // Conexión automática sin popup
-    const pubkey = provider.publicKey?.toString() || null;
     const balance = pubkey ? await getWalletBalance() : null;
-    console.log(`[WalletService] ✅ Wallet detectada: ${pubkey}, Balance: ${balance} SOL`);
+
+    console.log(`[WalletService] ✅ Conectado a ${getWalletType(provider)} (${pubkey}), Balance: ${balance} SOL`);
     return { pubkey, balance };
   } catch (error) {
-    console.warn("[WalletService] ⚠️ No se pudo recuperar la sesión automáticamente.");
-    return { pubkey: null, balance: null };
+    if (onlyIfTrusted) {
+      console.warn(`[WalletService] ⚠️ Conexión automática fallida: ${error.message}`);
+      return { pubkey: null, balance: null };
+    }
+    console.error(`[WalletService] ❌ Error al conectar manualmente: ${error.message}`);
+    throw new Error(`${ERROR_MESSAGES.CONNECTION_FAILED} ${error.message}`);
   }
 };
 
@@ -85,16 +68,12 @@ export const disconnectWallet = async () => {
     throw new Error(`[WalletService] ❌ El proveedor no soporta el método "disconnect".`);
   }
 
-  if (provider.isConnected) {
-    try {
-      await provider.disconnect();
-      console.log('[WalletService] 🔒 Sesión desconectada');
-    } catch (error) {
-      console.error(`[WalletService] ❌ Error al desconectar: ${error.message}`);
-      throw new Error(`${ERROR_MESSAGES.DISCONNECTION_FAILED} ${error.message}`);
-    }
-  } else {
-    console.log("[WalletService] ⚠️ No había una wallet conectada.");
+  try {
+    await provider.disconnect();
+    console.log('[WalletService] 🔒 Sesión desconectada');
+  } catch (error) {
+    console.error(`[WalletService] ❌ Error al desconectar: ${error.message}`);
+    throw new Error(`${ERROR_MESSAGES.DISCONNECTION_FAILED} ${error.message}`);
   }
 };
 
@@ -104,7 +83,7 @@ export const disconnectWallet = async () => {
  */
 export const isConnected = () => {
   const provider = getProvider();
-  return provider?.isConnected || false;
+  return !!provider?.publicKey;
 };
 
 /**
