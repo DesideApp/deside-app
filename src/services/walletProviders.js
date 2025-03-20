@@ -1,16 +1,12 @@
-/**
- * 📂 walletProviders.js - Detecta wallets compatibles con Solana (Phantom, Backpack, Magic Eden)
- */
+// walletProviders.js - Corrección DEFINITIVA según docs oficiales
 
-// Constantes para tipos de wallets
 const WALLET_TYPES = {
   PHANTOM: 'phantom',
   BACKPACK: 'backpack',
   MAGIC_EDEN: 'magiceden',
-  UNKNOWN: 'desconocida',
+  UNKNOWN: 'unknown',
 };
 
-// Constantes para nombres de wallets (UI)
 const WALLET_NAMES = {
   [WALLET_TYPES.PHANTOM]: 'Phantom',
   [WALLET_TYPES.BACKPACK]: 'Backpack',
@@ -18,7 +14,6 @@ const WALLET_NAMES = {
   [WALLET_TYPES.UNKNOWN]: 'Unknown Wallet',
 };
 
-// URLs de descarga para cada wallet (para mostrar en la UI si no está instalada)
 const WALLET_DOWNLOAD_URLS = {
   [WALLET_TYPES.PHANTOM]: 'https://phantom.app/',
   [WALLET_TYPES.BACKPACK]: 'https://www.backpack.app/',
@@ -26,55 +21,47 @@ const WALLET_DOWNLOAD_URLS = {
 };
 
 /**
- * 🔎 Obtiene el proveedor de Solana según el tipo especificado.
- * @param {string} [walletType] - Tipo de wallet ("phantom", "backpack", "magiceden").
- * @returns {Object|null} Proveedor de la wallet o null si no se encuentra.
+ * 🔎 Obtiene el proveedor específico o fallback global
  */
 export const getProvider = (walletType) => {
-  if (!window.solana) return null;
+  switch (walletType) {
+    case WALLET_TYPES.PHANTOM:
+      if (window.phantom?.solana?.isPhantom) return window.phantom.solana;
+      break;
 
-  // Si no se especifica una wallet, devolver `window.solana` como fallback estándar
-  if (!walletType) return window.solana;
+    case WALLET_TYPES.BACKPACK:
+      if (window.backpack?.isBackpack) return window.backpack;
+      if (window.solana?.isBackpack) return window.solana; // fallback seguro
+      break;
 
-  // Detección basada en las propiedades estándar de cada wallet
-  if (window.solana.isPhantom && walletType === WALLET_TYPES.PHANTOM) return window.solana;
-  if (window.solana.isBackpack && walletType === WALLET_TYPES.BACKPACK) return window.solana;
-  if (window.solana.isMagicEdenWallet && walletType === WALLET_TYPES.MAGIC_EDEN) return window.solana;
+    case WALLET_TYPES.MAGIC_EDEN:
+      if (window.magicEden?.solana?.isMagicEden) return window.magicEden.solana;
+      break;
 
-  return null; // No se encontró un proveedor compatible
+    default:
+      // Fallback para detectar cualquier wallet compatible automáticamente:
+      if (window.phantom?.solana?.isPhantom) return window.phantom.solana;
+      if (window.backpack?.isBackpack) return window.backpack;
+      if (window.solana?.isBackpack) return window.solana;
+      if (window.magicEden?.solana?.isMagicEden) return window.magicEden.solana;
+      if (window.solana?.isPhantom) return window.solana; // legacy Phantom
+      return null;
+  }
+
+  return null;
 };
 
 /**
- * 🏷️ Identifica el tipo de wallet conectada.
- * @param {Object} [provider] - Proveedor de wallet (opcional).
- * @returns {string} Nombre de la wallet.
+ * 🏷️ Identifica el tipo exacto de wallet
  */
-export const getWalletType = (provider = getProvider()) => {
+export const getWalletType = (provider) => {
   if (!provider) return WALLET_NAMES[WALLET_TYPES.UNKNOWN];
 
   if (provider.isPhantom) return WALLET_NAMES[WALLET_TYPES.PHANTOM];
   if (provider.isBackpack) return WALLET_NAMES[WALLET_TYPES.BACKPACK];
-  if (provider.isMagicEdenWallet) return WALLET_NAMES[WALLET_TYPES.MAGIC_EDEN];
+  if (provider.isMagicEden) return WALLET_NAMES[WALLET_TYPES.MAGIC_EDEN];
 
   return WALLET_NAMES[WALLET_TYPES.UNKNOWN];
 };
 
-/**
- * 🌐 Muestra un mensaje amigable si la wallet no está instalada.
- * @param {string} walletType - Tipo de wallet ("phantom", "backpack", "magiceden").
- */
-export const showWalletNotInstalledMessage = (walletType) => {
-  const url = WALLET_DOWNLOAD_URLS[walletType];
-  if (url) {
-    console.warn(`[WalletProviders] ⚠️ ${walletType} is not installed.`);
-    alert(
-      `It looks like ${WALLET_NAMES[walletType]} is not installed.\n\n` +
-      `If you're interested, you can download it here:\n${url}`
-    );
-  } else {
-    console.warn(`[WalletProviders] ⚠️ No download URL found for ${walletType}`);
-  }
-};
-
-// ✅ EXPORTAMOS TODO LO NECESARIO PARA EVITAR ERRORES EN OTROS ARCHIVOS
 export { WALLET_TYPES, WALLET_NAMES, WALLET_DOWNLOAD_URLS };

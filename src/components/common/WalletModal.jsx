@@ -1,7 +1,7 @@
 import React from "react";
 import "./WalletModal.css";
 
-// Opciones de wallets
+// Opciones de wallets disponibles
 const WALLETS = [
   { id: "phantom", name: "Phantom" },
   { id: "backpack", name: "Backpack" },
@@ -33,10 +33,7 @@ const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
           {WALLETS.map((wallet) => (
             <button
               key={wallet.id}
-              onClick={() => {
-                console.log(`[WalletModal] 🔍 Wallet seleccionada: ${wallet.id}`);
-                onWalletSelected(wallet.id);
-              }}
+              onClick={() => onWalletSelected(wallet.id)}
               className="wallet-option"
             >
               {wallet.name}
