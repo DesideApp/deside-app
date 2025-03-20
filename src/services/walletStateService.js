@@ -16,6 +16,29 @@ const ERROR_MESSAGES = {
   AUTH_FAILED: 'Error al autenticar con el backend.',
 };
 
+// Estado centralizado de la wallet
+let walletState = {
+  pubkey: null,
+  balance: null,
+};
+
+/**
+ * 🔍 Obtiene el estado actual de la wallet
+ * @returns {{pubkey: string|null, balance: number|null}}
+ */
+export const getWalletState = () => {
+  return walletState;
+};
+
+/**
+ * 🔹 Actualiza el estado de la wallet
+ * @param {string|null} pubkey - Clave pública de la wallet
+ * @param {number|null} balance - Balance de la wallet
+ */
+const updateWalletState = (pubkey, balance) => {
+  walletState = { pubkey, balance };
+};
+
 /**
  * 🔍 Detecta automáticamente si hay una wallet conectada (conexión automática)
  * @returns {Promise<{pubkey: string|null, balance: number|null, status: string}>}
@@ -26,14 +49,17 @@ export const detectWallet = async () => {
     const { pubkey, balance } = await connect({ onlyIfTrusted: true });
 
     if (pubkey) {
+      updateWalletState(pubkey, balance);
       console.log('[WalletStateService] ✅ Wallet detectada automáticamente:', { pubkey, balance });
       return { pubkey, balance, status: 'connected' };
     }
 
     console.log('[WalletStateService] ❌ No se detectó ninguna wallet automáticamente.');
+    updateWalletState(null, null);
     return { pubkey: null, balance: null, status: 'not_connected' };
   } catch (error) {
     console.error('[WalletStateService] ❌ Error detectando wallet automáticamente:', error.message);
+    updateWalletState(null, null);
     return { pubkey: null, balance: null, status: 'error' };
   }
 };
@@ -41,7 +67,7 @@ export const detectWallet = async () => {
 /**
  * 🔌 Conexión completa con wallet específica + autenticación
  * @param {string} walletType - Tipo de wallet ("phantom", "backpack", "magiceden")
- * @returns {Promise<{pubkey: string|null, balance: number|null, status: string}>}
+ * @returns {Promise<{pubkey: string|null balance: number|null, status: string}>}
  */
 export const handleWalletSelected = async (walletType) => {
   if (!walletType) {
@@ -71,10 +97,12 @@ export const handleWalletSelected = async (walletType) => {
       return { pubkey, balance, status: 'auth_failed' };
     }
 
+    updateWalletState(pubkey, balance);
     console.log('[WalletStateService] ✅ Autenticación exitosa');
     return { pubkey, balance, status: 'authenticated' };
   } catch (error) {
     console.error('[WalletStateService] ❌ Error en flujo completo:', error.message);
+    updateWalletState(null, null);
     return { pubkey: null, balance: null, status: 'error' };
   }
 };
@@ -112,6 +140,7 @@ export const handleLogoutClick = async () => {
   try {
     console.log('[WalletStateService] 🔍 Intentando cerrar sesión...');
     await disconnectWallet();
+    updateWalletState(null, null);
     console.log('[WalletStateService] 🔒 Sesión cerrada correctamente');
   } catch (error) {
     console.error('[WalletStateService] ❌ Error en logout:', error.message);
