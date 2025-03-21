@@ -5,6 +5,7 @@ import {
   handleLogoutClick,
   getWalletState,
 } from "../../services/walletStateService.js";
+import { getWalletBalance } from "../../services/walletBalanceService.js"; // NUEVO: servicio correcto
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
 import "./WalletButton.css";
@@ -13,13 +14,20 @@ const WalletButton = memo(() => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [walletState, setWalletState] = useState(getWalletState());
+  const [balance, setBalance] = useState(null); // Estado propio para balance
 
   // Detectar wallet automáticamente al montar
   useEffect(() => {
     const initializeWallet = async () => {
       const state = await detectWallet();
       setWalletState(state);
+
+      if (state.pubkey) {
+        const balance = await getWalletBalance(state.pubkey);
+        setBalance(balance);
+      }
     };
+
     initializeWallet();
   }, []);
 
@@ -36,21 +44,30 @@ const WalletButton = memo(() => {
   const handleWalletSelection = async (walletType) => {
     const result = await handleWalletSelected(walletType);
     setWalletState(result);
+
+    if (result.pubkey) {
+      const balance = await getWalletBalance(result.pubkey);
+      setBalance(balance);
+    } else {
+      setBalance(null);
+    }
+
     setIsModalOpen(false);
   };
 
   // Manejar cierre de sesión (llama al servicio)
   const logout = async () => {
     await handleLogoutClick();
-    setWalletState({ pubkey: null, balance: null });
+    setWalletState({ pubkey: null });
+    setBalance(null);
     setIsMenuOpen(false);
   };
 
-  // 🚨 Corrección definitiva: robusta y segura
+  // 🔥 NUEVO: Formateo visual usando el balance definitivo
   const formattedBalance = walletState.pubkey
-    ? typeof walletState.balance === "number" && !isNaN(walletState.balance)
-      ? `${walletState.balance.toFixed(2)} SOL`
-      : "-- SOL"
+    ? typeof balance === "number"
+      ? `${balance.toFixed(2)} SOL`
+      : `${walletState.pubkey.slice(0, 5)}...` // wallet abreviada mientras carga
     : "Connect Wallet";
 
   return (
@@ -83,7 +100,7 @@ const WalletButton = memo(() => {
         handleLogout={logout}
         onClose={() => setIsMenuOpen(false)}
         walletAddress={walletState.pubkey}
-        balance={walletState.balance}
+        balance={balance}
         openWalletModal={() => setIsModalOpen(true)}
       />
 
