@@ -1,65 +1,61 @@
 /**
- * 📂 walletStateService.js - Maneja estado y conexión de wallets
+ * 📂 walletStateService.js - Maneja estado y conexión simplificada de wallets
  */
 
 import { connectWallet, disconnectWallet, isConnected } from './walletService';
 
-// Estado centralizado de la wallet
+// Estado centralizado simple
 let walletState = {
   pubkey: null,
-  balance: null,
 };
 
 /**
- * 🔍 Obtiene el estado actual de la wallet
- * @returns {{pubkey: string|null, balance: number|null}}
+ * 🔍 Obtener estado actual
  */
 export const getWalletState = () => walletState;
 
 /**
- * 🔹 Actualiza el estado de la wallet
- * @param {string|null} pubkey - Clave pública de la wallet
- * @param {number|null} balance - Balance de la wallet
+ * 🔹 Actualizar estado global
  */
-const updateWalletState = (pubkey, balance) => {
-  walletState = { pubkey, balance };
+const updateWalletState = (pubkey) => {
+  walletState = { pubkey };
 };
 
 /**
- * 🔍 Detecta automáticamente si hay una wallet conectada (intenta conexión automática primero y popup si necesario)
- * @returns {Promise<{pubkey: string|null, balance: number|null, status: string}>}
+ * 🔍 Detecta automáticamente wallet (sin popup)
  */
 export const detectWallet = async () => {
   console.log('[WalletStateService] 🔍 Intentando detectar wallet automáticamente...');
 
-  const walletTypes = ['phantom', 'backpack', 'magiceden'];
-
-  for (const walletType of walletTypes) {
-    const { pubkey } = await handleWalletSelected(walletType);
+  try {
+    const { pubkey } = await connectWallet({ onlyIfTrusted: true });
 
     if (pubkey) {
       console.log('[WalletStateService] ✅ Wallet detectada automáticamente:', { pubkey });
-      return { pubkey, balance: null, status: 'connected' };
+      updateWalletState(pubkey);
+      return { pubkey, status: 'connected' };
+    } else {
+      console.warn('[WalletStateService] ❌ No se pudo detectar automáticamente ninguna wallet.');
+      updateWalletState(null);
+      return { pubkey: null, status: 'not_connected' };
     }
+  } catch (error) {
+    console.error('[WalletStateService] ❌ Error detectando wallet automáticamente:', error.message);
+    updateWalletState(null);
+    return { pubkey: null, status: 'error' };
   }
-
-  console.warn('[WalletStateService] ❌ No se pudo detectar automáticamente ninguna wallet.');
-  updateWalletState(null, null);
-  return { pubkey: null, balance: null, status: 'not_connected' };
 };
 
 /**
- * 🔌 Conectar manualmente a una wallet específica
- * @param {string} walletType - Tipo de wallet ("phantom", "backpack", "magiceden")
- * @returns {Promise<{pubkey: string|null, balance: number|null, status: string}>}
+ * 🔌 Conectar manualmente a una wallet específica (popup explícito)
  */
 export const handleWalletSelected = async (walletType) => {
   if (!walletType) {
     console.error('[WalletStateService] ❌ Tipo de wallet no definido.');
-    return { pubkey: null, balance: null, status: 'invalid_wallet_type' };
+    return { pubkey: null, status: 'invalid_wallet_type' };
   }
 
-  console.log(`[WalletStateService] 🔍 Intentando conectar con wallet: ${walletType}`);
+  console.log(`[WalletStateService] 🔍 Intentando conectar manualmente a wallet: ${walletType}`);
 
   try {
     if (isConnected()) {
@@ -67,44 +63,34 @@ export const handleWalletSelected = async (walletType) => {
       await disconnectWallet();
     }
 
-    const { pubkey } = await connectWallet({ walletType, onlyIfTrusted: true });
+    const { pubkey } = await connectWallet({ walletType }); // Sin onlyIfTrusted → popup explícito
 
     if (!pubkey) {
-      console.warn('[WalletStateService] ⚠️ Conexión automática fallida, abriendo popup manualmente...');
-      const manualConnection = await connectWallet({ walletType });
-      
-      if (!manualConnection.pubkey) {
-        console.error('[WalletStateService] ❌ No se pudo conectar manualmente.');
-        updateWalletState(null, null);
-        return { pubkey: null, balance: null, status: 'connection_failed' };
-      }
-
-      updateWalletState(manualConnection.pubkey, null);
-      console.log('[WalletStateService] ✅ Wallet conectada manualmente exitosamente:', { pubkey: manualConnection.pubkey });
-      return { pubkey: manualConnection.pubkey, balance: null, status: 'connected' };
+      console.error('[WalletStateService] ❌ No se pudo conectar manualmente.');
+      updateWalletState(null);
+      return { pubkey: null, status: 'connection_failed' };
     }
 
-    updateWalletState(pubkey, null);
-    console.log('[WalletStateService] ✅ Wallet conectada automáticamente exitosamente:', { pubkey });
-    return { pubkey, balance: null, status: 'connected' };
+    updateWalletState(pubkey);
+    console.log('[WalletStateService] ✅ Wallet conectada manualmente exitosamente:', { pubkey });
+    return { pubkey, status: 'connected' };
 
   } catch (error) {
     console.error('[WalletStateService] ❌ Error en conexión manual:', error.message);
-    updateWalletState(null, null);
-    return { pubkey: null, balance: null, status: 'error' };
+    updateWalletState(null);
+    return { pubkey: null, status: 'error' };
   }
 };
 
 /**
- * ❌ Cierre de sesión completo
- * @returns {Promise<void>}
+ * ❌ Cerrar sesión manualmente
  */
 export const handleLogoutClick = async () => {
   console.log('[WalletStateService] 🔍 Intentando cerrar sesión...');
 
   try {
     await disconnectWallet();
-    updateWalletState(null, null);
+    updateWalletState(null);
     console.log('[WalletStateService] 🔒 Sesión cerrada correctamente');
   } catch (error) {
     console.error('[WalletStateService] ❌ Error en logout:', error.message);

@@ -19,7 +19,7 @@ let listenersInitialized = false;
  * @param {Object} [options] Opciones de conexión
  * @param {string} [options.walletType] Tipo de wallet ("phantom", "backpack", "magiceden")
  * @param {boolean} [options.onlyIfTrusted] Si es true, conexión automática silenciosa
- * @returns {Promise<string>} PublicKey
+ * @returns {Promise<{pubkey: string|null}>} Objeto con PublicKey
  */
 export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) => {
   const provider = getProvider(walletType);
@@ -34,10 +34,14 @@ export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) 
     await provider.connect({ onlyIfTrusted });
 
     if (!provider.publicKey) {
-      throw new Error("PublicKey no disponible tras conexión.");
+      if (onlyIfTrusted) {
+        // Silencioso, sin errores ni logs
+        return { pubkey: null };
+      } else {
+        throw new Error("PublicKey no disponible tras conexión.");
+      }
     }
 
-    // Inicializar listeners globales una única vez
     if (!listenersInitialized) {
       provider.on("disconnect", () => {
         console.warn("[WalletService] 🔴 Wallet desconectada inesperadamente.");
@@ -45,21 +49,27 @@ export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) 
 
       provider.on("accountChanged", (newPublicKey) => {
         console.log(`[WalletService] 🔄 Cambio de cuenta detectado: ${newPublicKey ? newPublicKey.toString() : 'Ninguna cuenta activa'}`);
-        // Aquí podrías añadir manejo adicional del cambio de cuenta en tu aplicación
       });
 
       listenersInitialized = true;
     }
 
     console.log(`[WalletService] ✅ Conectado a ${getWalletType(provider)} (${provider.publicKey.toString()})`);
-    return provider.publicKey.toString();
+
+    return { pubkey: provider.publicKey.toString() };
 
   } catch (error) {
+    if (onlyIfTrusted) {
+      // Fallo silencioso en conexión automática, no devuelve errores
+      return { pubkey: null };
+    }
+
     if (error.code === 4001) {
       console.warn("[WalletService] ⚠️ Conexión rechazada por el usuario.");
     } else {
       console.error(`[WalletService] ❌ Error al conectar: ${error.message}`);
     }
+
     throw new Error(`${ERROR_MESSAGES.CONNECTION_FAILED} ${error.message}`);
   }
 };
