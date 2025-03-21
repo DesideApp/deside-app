@@ -11,9 +11,6 @@ const ERROR_MESSAGES = {
   DISCONNECTION_FAILED: 'Error al desconectar la wallet.',
 };
 
-// Estado para controlar que no se agreguen múltiples listeners
-let listenersInitialized = false;
-
 /**
  * 🔌 Conecta a una wallet (manual o automática silenciosa)
  * @param {Object} [options] Opciones de conexión
@@ -34,43 +31,15 @@ export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) 
     await provider.connect({ onlyIfTrusted });
 
     if (!provider.publicKey) {
-      if (onlyIfTrusted) {
-        // Silencioso, sin errores ni logs
-        return { pubkey: null };
-      } else {
-        throw new Error("PublicKey no disponible tras conexión.");
-      }
-    }
-
-    if (!listenersInitialized) {
-      provider.on("connect", (newPublicKey) => {
-        console.log(`[WalletService] 🟢 Conexión establecida con cuenta: ${newPublicKey.toString()}`);
-      });
-
-      provider.on("disconnect", () => {
-        console.warn("[WalletService] 🔴 Wallet desconectada inesperadamente.");
-      });
-
-      provider.on("accountChanged", (newPublicKey) => {
-        if (newPublicKey) {
-          console.log(`[WalletService] 🔄 Cambio de cuenta detectado: ${newPublicKey.toString()}`);
-        } else {
-          console.log(`[WalletService] 🔄 Desconexión de cuenta detectada.`);
-        }
-      });
-
-      listenersInitialized = true;
+      if (onlyIfTrusted) return { pubkey: null };
+      throw new Error("PublicKey no disponible tras conexión.");
     }
 
     console.log(`[WalletService] ✅ Conectado a ${getWalletType(provider)} (${provider.publicKey.toString()})`);
-
     return { pubkey: provider.publicKey.toString() };
 
   } catch (error) {
-    if (onlyIfTrusted) {
-      // Fallo silencioso en conexión automática, no devuelve errores
-      return { pubkey: null };
-    }
+    if (onlyIfTrusted) return { pubkey: null };
 
     if (error.code === 4001) {
       console.warn("[WalletService] ⚠️ Conexión rechazada por el usuario.");

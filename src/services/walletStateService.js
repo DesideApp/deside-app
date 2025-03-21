@@ -5,51 +5,39 @@
 import { connectWallet, disconnectWallet, isConnected } from './walletService';
 import { getProvider } from './walletProviders';
 
-// Estado global centralizado
 let walletState = {
   pubkey: null,
 };
 
-// Flag de logout explícito
 let explicitLogout = false;
-
-// Flag para listeners
 let listenersInitialized = false;
-
-// Subscriptores externos
 let subscribers = [];
 
 /**
  * 🧠 Subscripción reactiva al estado de la wallet
  * @param {function} callback - Se ejecuta cada vez que cambia el estado
+ * @returns {function} unsubscribe - Función para cancelar la suscripción
  */
 export const subscribeWalletState = (callback) => {
   subscribers.push(callback);
+
+  // ✅ Devuelve función para cancelar la suscripción
+  return () => {
+    subscribers = subscribers.filter((cb) => cb !== callback);
+  };
 };
 
-/**
- * 🔁 Notificar a todos los subscriptores del nuevo estado
- */
 const notifySubscribers = () => {
   for (const cb of subscribers) cb(walletState);
 };
 
-/**
- * 🔍 Obtener el estado actual
- */
 export const getWalletState = () => walletState;
 
-/**
- * ✅ Actualizar estado
- */
 const updateWalletState = (pubkey) => {
   walletState = { pubkey };
   notifySubscribers();
 };
 
-/**
- * 🧷 Inicializa los listeners (connect, disconnect, accountChanged)
- */
 const initializeWalletListeners = () => {
   if (listenersInitialized) return;
 
@@ -81,9 +69,6 @@ const initializeWalletListeners = () => {
   listenersInitialized = true;
 };
 
-/**
- * 🔍 Detecta automáticamente wallet (si no hubo logout explícito)
- */
 export const detectWallet = async () => {
   console.log('[WalletStateService] 🔍 Intentando detectar wallet automáticamente...');
 
@@ -113,9 +98,6 @@ export const detectWallet = async () => {
   }
 };
 
-/**
- * 🔌 Conectar manualmente a wallet específica
- */
 export const handleWalletSelected = async (walletType) => {
   if (!walletType) {
     console.error('[WalletStateService] ❌ Tipo de wallet no definido.');
@@ -148,9 +130,6 @@ export const handleWalletSelected = async (walletType) => {
   }
 };
 
-/**
- * ❌ Cerrar sesión manual
- */
 export const handleLogoutClick = async () => {
   console.log('[WalletStateService] 🔍 Cerrar sesión manualmente...');
   try {
