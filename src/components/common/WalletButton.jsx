@@ -46,9 +46,9 @@ const WalletButton = memo(() => {
     setIsMenuOpen(false);
   };
 
-  // Formato visual del botón
+  // 🚩 Formato visual del botón (ahora robusto y seguro)
   const formattedBalance = walletState.pubkey
-    ? walletState.balance !== null && !isNaN(walletState.balance)
+    ? typeof walletState.balance === "number"
       ? `${walletState.balance.toFixed(2)} SOL`
       : "-- SOL"
     : "Connect Wallet";
