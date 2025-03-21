@@ -4,8 +4,9 @@ import {
   handleWalletSelected,
   handleLogoutClick,
   getWalletState,
-  subscribeWalletState, // 🚩 nuevo import
+  subscribeWalletState,
 } from "../../services/walletStateService.js";
+import { isExplicitLogout } from "../../services/walletService.js"; // ✅ NUEVO IMPORT
 import { getWalletBalance } from "../../services/walletBalanceService.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
@@ -17,7 +18,6 @@ const WalletButton = memo(() => {
   const [walletState, setWalletState] = useState(getWalletState());
   const [balance, setBalance] = useState(null);
 
-  // 💥 Nuevo: Escuchar cambios externos en la wallet
   useEffect(() => {
     const initializeWallet = async () => {
       const state = await detectWallet();
@@ -31,7 +31,6 @@ const WalletButton = memo(() => {
 
     initializeWallet();
 
-    // 🚩 Nuevo: Suscripción a eventos externos
     const unsubscribe = subscribeWalletState(async (newWalletState) => {
       setWalletState(newWalletState);
 
@@ -43,15 +42,14 @@ const WalletButton = memo(() => {
       }
     });
 
-    // Limpiar suscripción al desmontar
     return unsubscribe;
   }, []);
 
-  // Resto del código NO CAMBIA y es perfecto 👌
+  // ✅ AJUSTE CLAVE: evita modal tras logout explícito
   const handleConnectClick = () => {
-    if (!walletState.pubkey) {
+    if (!walletState.pubkey && !isExplicitLogout()) {
       setIsModalOpen(true);
-    } else {
+    } else if (walletState.pubkey) {
       setIsMenuOpen((prev) => !prev);
     }
   };

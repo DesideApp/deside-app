@@ -11,12 +11,11 @@ const ERROR_MESSAGES = {
   DISCONNECTION_FAILED: 'Error al desconectar la wallet.',
 };
 
+// Flag de logout explícito
+let explicitLogout = false;
+
 /**
  * 🔌 Conecta a una wallet (manual o automática silenciosa)
- * @param {Object} [options] Opciones de conexión
- * @param {string} [options.walletType] Tipo de wallet ("phantom", "backpack", "magiceden")
- * @param {boolean} [options.onlyIfTrusted] Si es true, conexión automática silenciosa
- * @returns {Promise<{pubkey: string|null}>} Objeto con PublicKey
  */
 export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) => {
   const provider = getProvider(walletType);
@@ -25,6 +24,12 @@ export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) 
     const errorMsg = ERROR_MESSAGES.NOT_INSTALLED(walletType);
     console.error(`[WalletService] ❌ ${errorMsg}`);
     throw new Error(errorMsg);
+  }
+
+  // 🚫 Bloqueo de reconexión automática si el usuario hizo logout manual
+  if (explicitLogout && onlyIfTrusted) {
+    console.log("[WalletService] 🚫 No se intentará reconectar automáticamente (logout explícito).");
+    return { pubkey: null };
   }
 
   try {
@@ -53,7 +58,6 @@ export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) 
 
 /**
  * ❌ Desconecta la wallet activa
- * @returns {Promise<void>}
  */
 export const disconnectWallet = async () => {
   const provider = getProvider();
@@ -74,7 +78,6 @@ export const disconnectWallet = async () => {
 
 /**
  * ✅ Verifica si hay una wallet conectada
- * @returns {boolean}
  */
 export const isConnected = () => {
   const provider = getProvider();
@@ -83,9 +86,22 @@ export const isConnected = () => {
 
 /**
  * 🔍 Obtiene la clave pública de la wallet conectada
- * @returns {string|null}
  */
 export const getPublicKey = () => {
   const provider = getProvider();
   return provider?.publicKey?.toString() || null;
+};
+
+/**
+ * 📛 Marca que el usuario cerró sesión manualmente
+ */
+export const markExplicitLogout = () => {
+  explicitLogout = true;
+};
+
+/**
+ * 🧼 Limpia el estado de logout explícito (tras reconexión manual)
+ */
+export const clearExplicitLogout = () => {
+  explicitLogout = false;
 };

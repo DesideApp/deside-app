@@ -2,14 +2,20 @@
  * 📂 walletStateService.js - Maneja estado y conexión simplificada de wallets
  */
 
-import { connectWallet, disconnectWallet, isConnected } from './walletService';
+import {
+  connectWallet,
+  disconnectWallet,
+  isConnected,
+  markExplicitLogout,
+  clearExplicitLogout,
+  isExplicitLogout,
+} from './walletService';
 import { getProvider } from './walletProviders';
 
 let walletState = {
   pubkey: null,
 };
 
-let explicitLogout = false;
 let listenersInitialized = false;
 let subscribers = [];
 
@@ -47,13 +53,13 @@ const initializeWalletListeners = () => {
   provider.on("connect", (newPublicKey) => {
     console.log(`[WalletStateService] 🟢 Conectado externamente: ${newPublicKey.toString()}`);
     updateWalletState(newPublicKey.toString());
-    explicitLogout = false;
+    clearExplicitLogout();
   });
 
   provider.on("disconnect", () => {
     console.warn("[WalletStateService] 🔴 Desconectado externamente.");
     updateWalletState(null);
-    explicitLogout = true;
+    markExplicitLogout();
   });
 
   provider.on("accountChanged", (newPublicKey) => {
@@ -74,7 +80,7 @@ export const detectWallet = async () => {
 
   initializeWalletListeners();
 
-  if (explicitLogout) {
+  if (isExplicitLogout()) {
     console.log('[WalletStateService] ⚠️ Logout explícito → no reconectar automáticamente.');
     updateWalletState(null);
     return { pubkey: null, status: 'explicit_logout' };
@@ -120,7 +126,7 @@ export const handleWalletSelected = async (walletType) => {
     }
 
     updateWalletState(pubkey);
-    explicitLogout = false;
+    clearExplicitLogout();
     console.log('[WalletStateService] ✅ Conectado manualmente:', { pubkey });
     return { pubkey, status: 'connected' };
   } catch (error) {
@@ -135,7 +141,7 @@ export const handleLogoutClick = async () => {
   try {
     await disconnectWallet();
     updateWalletState(null);
-    explicitLogout = true;
+    markExplicitLogout();
     console.log('[WalletStateService] 🔒 Logout completo.');
   } catch (error) {
     console.error('[WalletStateService] ❌ Error en logout:', error.message);
