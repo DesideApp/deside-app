@@ -43,12 +43,20 @@ export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) 
     }
 
     if (!listenersInitialized) {
+      provider.on("connect", (newPublicKey) => {
+        console.log(`[WalletService] 🟢 Conexión establecida con cuenta: ${newPublicKey.toString()}`);
+      });
+
       provider.on("disconnect", () => {
         console.warn("[WalletService] 🔴 Wallet desconectada inesperadamente.");
       });
 
       provider.on("accountChanged", (newPublicKey) => {
-        console.log(`[WalletService] 🔄 Cambio de cuenta detectado: ${newPublicKey ? newPublicKey.toString() : 'Ninguna cuenta activa'}`);
+        if (newPublicKey) {
+          console.log(`[WalletService] 🔄 Cambio de cuenta detectado: ${newPublicKey.toString()}`);
+        } else {
+          console.log(`[WalletService] 🔄 Desconexión de cuenta detectada.`);
+        }
       });
 
       listenersInitialized = true;

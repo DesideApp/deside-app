@@ -1,6 +1,6 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 
-const RPC_URL = "https://api.mainnet-beta.solana.com";  // En producción considera QuickNode u otro RPC privado robusto.
+const RPC_URL = "https://solana-mainnet.rpc.extrnode.com";  // En producción considera QuickNode u otro RPC privado robusto.
 const connection = new Connection(RPC_URL, "confirmed");
 
 /**
