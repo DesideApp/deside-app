@@ -2,7 +2,7 @@
  * 📂 authService.js - Autenticación de wallet con el backend
  */
 
-import { signMessage } from "./walletService"; // usamos la firma desde walletService
+import { signMessageForLogin } from "./walletService"; // usamos la firma desde walletService
 
 /**
  * 🔐 Autentica la wallet con el backend.
@@ -10,7 +10,7 @@ import { signMessage } from "./walletService"; // usamos la firma desde walletSe
  */
 export const authenticateWallet = async () => {
   try {
-    const signedData = await signMessage("Please sign this message to authenticate.");
+    const signedData = await signMessageForLogin("Please sign this message to authenticate.");
     if (!signedData.signature) return { pubkey: null, status: "signature_failed" };
 
     // 🚀 Llamamos al backend para validar la firma
