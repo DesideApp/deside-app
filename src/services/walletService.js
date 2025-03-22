@@ -3,6 +3,7 @@
  */
 
 import { getProvider, getWalletType } from './walletProviders';
+import bs58 from "bs58"; // Añadir al principio si no está ya
 
 // Mensajes de error comunes
 const ERROR_MESSAGES = {
@@ -106,3 +107,28 @@ export const clearExplicitLogout = () => {
 };
 
 export const isExplicitLogout = () => explicitLogout;
+
+/**
+ * ✍️ Firma un mensaje de login con la wallet conectada.
+ * @param {string} message - Mensaje a firmar
+ * @returns {Promise<{signature: string, pubkey: string, message: string}>}
+ */
+export const signMessageForLogin = async (message) => {
+  const provider = getProvider();
+  if (!provider?.signMessage) {
+    throw new Error("El proveedor no permite firmar mensajes.");
+  }
+
+  try {
+    const encodedMessage = new TextEncoder().encode(message);
+    const signedMessage = await provider.signMessage(encodedMessage, "utf8");
+
+    return {
+      pubkey: provider.publicKey.toString(),
+      signature: bs58.encode(signedMessage),
+      message,
+    };
+  } catch (error) {
+    throw new Error(`Error al firmar el mensaje: ${error.message}`);
+  }
+};

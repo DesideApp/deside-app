@@ -11,6 +11,8 @@ import {
   isExplicitLogout
 } from './walletService';
 
+import { authenticateWallet } from './authService'; // ✅ NUEVO
+
 let walletState = {
   pubkey: null,
 };
@@ -81,6 +83,14 @@ export const handleWalletSelected = async (walletType) => {
       console.error('[WalletStateService] ❌ No se pudo conectar manualmente.');
       updateWalletState(null);
       return { pubkey: null, status: 'connection_failed' };
+    }
+
+    // 🔐 Autenticación tras conexión
+    const result = await authenticateWallet();
+    if (result.status !== "authenticated") {
+      console.warn("⚠️ Autenticación fallida tras conectar.");
+      updateWalletState(null);
+      return { pubkey: null, status: "auth_failed" };
     }
 
     updateWalletState(pubkey);
