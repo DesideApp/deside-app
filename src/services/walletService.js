@@ -28,7 +28,11 @@ export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) 
   }
 
   try {
-    await provider.connect({ onlyIfTrusted });
+    if (onlyIfTrusted) {
+      await provider.request({ method: "connect", params: { onlyIfTrusted: true } });
+    } else {
+      await provider.connect();
+    }
 
     if (!provider.publicKey) {
       if (onlyIfTrusted) return { pubkey: null };
