@@ -123,11 +123,11 @@ export const signMessageForLogin = async (message) => {
     const encodedMessage = new TextEncoder().encode(message);
     console.log("[WalletService] ✉️ Mensaje codificado para firmar:", message);
 
-    const signedMessage = await provider.signMessage(encodedMessage, "utf8");
+    const signed = await provider.signMessage(encodedMessage, "utf8");
 
     const result = {
       pubkey: provider.publicKey.toString(),
-      signature: bs58.encode(signedMessage),
+      signature: bs58.encode(signed.signature), // ✅ solo la firma
       message,
     };
 
