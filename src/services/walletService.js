@@ -109,3 +109,5 @@ export const markExplicitLogout = () => {
 export const clearExplicitLogout = () => {
   explicitLogout = false;
 };
+
+export const isExplicitLogout = () => explicitLogout;
