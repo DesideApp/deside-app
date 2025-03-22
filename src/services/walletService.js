@@ -93,3 +93,16 @@ export const getPublicKey = () => {
   const provider = getProvider();
   return provider?.publicKey?.toString() || null;
 };
+
+// 🔒 Gestión de logout explícito
+let explicitLogout = false;
+
+export const markExplicitLogout = () => {
+  explicitLogout = true;
+};
+
+export const clearExplicitLogout = () => {
+  explicitLogout = false;
+};
+
+export const isExplicitLogout = () => explicitLogout;
