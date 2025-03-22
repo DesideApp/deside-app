@@ -14,7 +14,7 @@ export const authenticateWallet = async () => {
     if (!signedData.signature) return { pubkey: null, status: "signature_failed" };
 
     // 🚀 Llamamos al backend para validar la firma
-    const response = await fetch("/api/authenticate", {
+    const response = await fetch("/api/auth/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(signedData),
