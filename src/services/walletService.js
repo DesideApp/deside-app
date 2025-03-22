@@ -11,11 +11,12 @@ const ERROR_MESSAGES = {
   DISCONNECTION_FAILED: 'Error al desconectar la wallet.',
 };
 
-// Flag de logout explícito
-let explicitLogout = false;
-
 /**
  * 🔌 Conecta a una wallet (manual o automática silenciosa)
+ * @param {Object} [options] Opciones de conexión
+ * @param {string} [options.walletType] Tipo de wallet ("phantom", "backpack", "magiceden")
+ * @param {boolean} [options.onlyIfTrusted] Si es true, conexión automática silenciosa
+ * @returns {Promise<{pubkey: string|null}>} Objeto con PublicKey
  */
 export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) => {
   const provider = getProvider(walletType);
@@ -26,42 +27,33 @@ export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) 
     throw new Error(errorMsg);
   }
 
-  // 🚫 Bloqueo de reconexión automática si el usuario hizo logout manual
-  if (explicitLogout && onlyIfTrusted) {
-    console.log("[WalletService] 🚫 No se intentará reconectar automáticamente (logout explícito).");
-    return { pubkey: null };
-  }
-
   try {
-    if (onlyIfTrusted) {
-      await provider.request({ method: "connect", params: { onlyIfTrusted: true } });
-    } else {
-      await provider.connect(); // Esto sí abre el popup
-    }
-  
+    await provider.connect({ onlyIfTrusted });
+
     if (!provider.publicKey) {
       if (onlyIfTrusted) return { pubkey: null };
       throw new Error("PublicKey no disponible tras conexión.");
     }
-  
+
     console.log(`[WalletService] ✅ Conectado a ${getWalletType(provider)} (${provider.publicKey.toString()})`);
     return { pubkey: provider.publicKey.toString() };
-  
+
   } catch (error) {
     if (onlyIfTrusted) return { pubkey: null };
-  
+
     if (error.code === 4001) {
       console.warn("[WalletService] ⚠️ Conexión rechazada por el usuario.");
     } else {
       console.error(`[WalletService] ❌ Error al conectar: ${error.message}`);
     }
-  
+
     throw new Error(`${ERROR_MESSAGES.CONNECTION_FAILED} ${error.message}`);
-  }  
+  }
 };
 
 /**
  * ❌ Desconecta la wallet activa
+ * @returns {Promise<void>}
  */
 export const disconnectWallet = async () => {
   const provider = getProvider();
@@ -82,6 +74,7 @@ export const disconnectWallet = async () => {
 
 /**
  * ✅ Verifica si hay una wallet conectada
+ * @returns {boolean}
  */
 export const isConnected = () => {
   const provider = getProvider();
@@ -90,24 +83,9 @@ export const isConnected = () => {
 
 /**
  * 🔍 Obtiene la clave pública de la wallet conectada
+ * @returns {string|null}
  */
 export const getPublicKey = () => {
   const provider = getProvider();
   return provider?.publicKey?.toString() || null;
 };
-
-/**
- * 📛 Marca que el usuario cerró sesión manualmente
- */
-export const markExplicitLogout = () => {
-  explicitLogout = true;
-};
-
-/**
- * 🧼 Limpia el estado de logout explícito (tras reconexión manual)
- */
-export const clearExplicitLogout = () => {
-  explicitLogout = false;
-};
-
-export const isExplicitLogout = () => explicitLogout;

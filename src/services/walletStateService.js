@@ -2,48 +2,34 @@
  * 📂 walletStateService.js - Maneja estado y conexión simplificada de wallets
  */
 
-import {
-  connectWallet,
-  disconnectWallet,
-  isConnected,
-  markExplicitLogout,
-  clearExplicitLogout,
-  isExplicitLogout,
-} from './walletService';
-import { getProvider } from './walletProviders';
+import { connectWallet, disconnectWallet, isConnected, getPublicKey } from './walletService';
 
+// Estado centralizado simple
 let walletState = {
   pubkey: null,
 };
 
+// Flag logout explícito
+let explicitLogout = false;
+
+// Estado para controlar listeners
 let listenersInitialized = false;
-let subscribers = [];
 
 /**
- * 🧠 Subscripción reactiva al estado de la wallet
- * @param {function} callback - Se ejecuta cada vez que cambia el estado
- * @returns {function} unsubscribe - Función para cancelar la suscripción
+ * 🔍 Obtener estado actual
  */
-export const subscribeWalletState = (callback) => {
-  subscribers.push(callback);
-
-  // ✅ Devuelve función para cancelar la suscripción
-  return () => {
-    subscribers = subscribers.filter((cb) => cb !== callback);
-  };
-};
-
-const notifySubscribers = () => {
-  for (const cb of subscribers) cb(walletState);
-};
-
 export const getWalletState = () => walletState;
 
+/**
+ * 🔹 Actualizar estado global
+ */
 const updateWalletState = (pubkey) => {
   walletState = { pubkey };
-  notifySubscribers();
 };
 
+/**
+ * 🚨 Inicializar listeners globales (connect, disconnect, accountChanged)
+ */
 const initializeWalletListeners = () => {
   if (listenersInitialized) return;
 
@@ -51,23 +37,23 @@ const initializeWalletListeners = () => {
   if (!provider) return;
 
   provider.on("connect", (newPublicKey) => {
-    console.log(`[WalletStateService] 🟢 Conectado externamente: ${newPublicKey.toString()}`);
+    console.log(`[WalletStateService] 🟢 Conexión establecida externamente: ${newPublicKey.toString()}`);
     updateWalletState(newPublicKey.toString());
-    clearExplicitLogout();
+    explicitLogout = false;
   });
 
   provider.on("disconnect", () => {
-    console.warn("[WalletStateService] 🔴 Desconectado externamente.");
+    console.warn("[WalletStateService] 🔴 Wallet desconectada externamente.");
     updateWalletState(null);
-    markExplicitLogout();
+    explicitLogout = true;
   });
 
   provider.on("accountChanged", (newPublicKey) => {
     if (newPublicKey) {
-      console.log(`[WalletStateService] 🔄 Cuenta cambiada: ${newPublicKey.toString()}`);
+      console.log(`[WalletStateService] 🔄 Cambio externo de cuenta detectado: ${newPublicKey.toString()}`);
       updateWalletState(newPublicKey.toString());
     } else {
-      console.warn("[WalletStateService] 🔄 Cuenta desconectada.");
+      console.warn("[WalletStateService] 🔄 Desconexión de cuenta detectada externamente.");
       updateWalletState(null);
     }
   });
@@ -75,13 +61,16 @@ const initializeWalletListeners = () => {
   listenersInitialized = true;
 };
 
+/**
+ * 🔍 Detecta automáticamente wallet (sin popup), respetando logout explícito
+ */
 export const detectWallet = async () => {
   console.log('[WalletStateService] 🔍 Intentando detectar wallet automáticamente...');
 
-  initializeWalletListeners();
+  initializeWalletListeners(); // Inicializar listeners aquí
 
-  if (isExplicitLogout()) {
-    console.log('[WalletStateService] ⚠️ Logout explícito → no reconectar automáticamente.');
+  if (explicitLogout) {
+    console.log('[WalletStateService] ⚠️ Logout explícito previo detectado, no reconectando automáticamente.');
     updateWalletState(null);
     return { pubkey: null, status: 'explicit_logout' };
   }
@@ -94,41 +83,47 @@ export const detectWallet = async () => {
       updateWalletState(pubkey);
       return { pubkey, status: 'connected' };
     } else {
+      console.warn('[WalletStateService] ❌ No se pudo detectar automáticamente ninguna wallet.');
       updateWalletState(null);
       return { pubkey: null, status: 'not_connected' };
     }
   } catch (error) {
-    console.error('[WalletStateService] ❌ Error detectando wallet:', error.message);
+    console.error('[WalletStateService] ❌ Error detectando wallet automáticamente:', error.message);
     updateWalletState(null);
     return { pubkey: null, status: 'error' };
   }
 };
 
+/**
+ * 🔌 Conectar manualmente a una wallet específica (popup explícito)
+ */
 export const handleWalletSelected = async (walletType) => {
   if (!walletType) {
     console.error('[WalletStateService] ❌ Tipo de wallet no definido.');
     return { pubkey: null, status: 'invalid_wallet_type' };
   }
 
-  console.log(`[WalletStateService] 🔍 Conectando manualmente con: ${walletType}`);
+  console.log(`[WalletStateService] 🔍 Intentando conectar manualmente a wallet: ${walletType}`);
 
   try {
     if (isConnected()) {
-      console.log('[WalletStateService] 🔁 Wallet previa detectada, desconectando...');
+      console.log('[WalletStateService] 🔍 Wallet previa detectada, desconectando primero...');
       await disconnectWallet();
     }
 
-    const { pubkey } = await connectWallet({ walletType });
+    const { pubkey } = await connectWallet({ walletType }); // Popup explícito
 
     if (!pubkey) {
+      console.error('[WalletStateService] ❌ No se pudo conectar manualmente.');
       updateWalletState(null);
       return { pubkey: null, status: 'connection_failed' };
     }
 
     updateWalletState(pubkey);
-    clearExplicitLogout();
-    console.log('[WalletStateService] ✅ Conectado manualmente:', { pubkey });
+    explicitLogout = false; // Resetear logout explícito tras reconexión manual
+    console.log('[WalletStateService] ✅ Wallet conectada manualmente exitosamente:', { pubkey });
     return { pubkey, status: 'connected' };
+
   } catch (error) {
     console.error('[WalletStateService] ❌ Error en conexión manual:', error.message);
     updateWalletState(null);
@@ -136,13 +131,17 @@ export const handleWalletSelected = async (walletType) => {
   }
 };
 
+/**
+ * ❌ Cerrar sesión manualmente
+ */
 export const handleLogoutClick = async () => {
-  console.log('[WalletStateService] 🔍 Cerrar sesión manualmente...');
+  console.log('[WalletStateService] 🔍 Intentando cerrar sesión...');
+
   try {
     await disconnectWallet();
     updateWalletState(null);
-    markExplicitLogout();
-    console.log('[WalletStateService] 🔒 Logout completo.');
+    explicitLogout = true; // Marcar logout explícito
+    console.log('[WalletStateService] 🔒 Sesión cerrada correctamente');
   } catch (error) {
     console.error('[WalletStateService] ❌ Error en logout:', error.message);
   }
