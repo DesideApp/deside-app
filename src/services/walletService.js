@@ -33,27 +33,31 @@ export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) 
   }
 
   try {
-    await provider.connect({ onlyIfTrusted });
-
+    if (onlyIfTrusted) {
+      await provider.request({ method: "connect", params: { onlyIfTrusted: true } });
+    } else {
+      await provider.connect(); // Esto sí abre el popup
+    }
+  
     if (!provider.publicKey) {
       if (onlyIfTrusted) return { pubkey: null };
       throw new Error("PublicKey no disponible tras conexión.");
     }
-
+  
     console.log(`[WalletService] ✅ Conectado a ${getWalletType(provider)} (${provider.publicKey.toString()})`);
     return { pubkey: provider.publicKey.toString() };
-
+  
   } catch (error) {
     if (onlyIfTrusted) return { pubkey: null };
-
+  
     if (error.code === 4001) {
       console.warn("[WalletService] ⚠️ Conexión rechazada por el usuario.");
     } else {
       console.error(`[WalletService] ❌ Error al conectar: ${error.message}`);
     }
-
+  
     throw new Error(`${ERROR_MESSAGES.CONNECTION_FAILED} ${error.message}`);
-  }
+  }  
 };
 
 /**
