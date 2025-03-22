@@ -121,14 +121,22 @@ export const signMessageForLogin = async (message) => {
 
   try {
     const encodedMessage = new TextEncoder().encode(message);
+    console.log("[WalletService] ✉️ Mensaje codificado para firmar:", message);
+
     const signedMessage = await provider.signMessage(encodedMessage, "utf8");
 
-    return {
+    const result = {
       pubkey: provider.publicKey.toString(),
       signature: bs58.encode(signedMessage),
       message,
     };
+
+    console.log("[WalletService] ✍️ Firma generada:", result.signature);
+    console.log("[WalletService] 📤 Datos listos para backend:", result);
+
+    return result;
   } catch (error) {
+    console.error("[WalletService] ❌ Error al firmar mensaje:", error.message);
     throw new Error(`Error al firmar el mensaje: ${error.message}`);
   }
 };
