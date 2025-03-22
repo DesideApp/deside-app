@@ -2,7 +2,8 @@
  * 📂 authService.js - Autenticación de wallet con el backend
  */
 
-import { signMessageForLogin } from "./walletService"; // usamos la firma desde walletService
+import { signMessageForLogin } from "./walletService";
+import { authenticateWithServer } from "./apiService"; // ✅ usamos la función centralizada
 
 /**
  * 🔐 Autentica la wallet con el backend.
@@ -13,14 +14,9 @@ export const authenticateWallet = async () => {
     const signedData = await signMessageForLogin("Please sign this message to authenticate.");
     if (!signedData.signature) return { pubkey: null, status: "signature_failed" };
 
-    // 🚀 Llamamos al backend para validar la firma
-    const response = await fetch("/api/auth/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(signedData),
-    });
+    // ✅ Usamos el sistema centralizado de llamadas API
+    const result = await authenticateWithServer(signedData.pubkey, signedData.signature, signedData.message);
 
-    const result = await response.json();
     if (!result.success) return { pubkey: null, status: "server_error" };
 
     return { pubkey: signedData.pubkey, status: "authenticated" };
