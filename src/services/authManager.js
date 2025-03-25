@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useServer } from "../contexts/ServerContext";
 import {
   detectWallet,
-  isWalletConnected,
   isWalletAuthed,
   signMessageForLogin,
 } from "../services/walletStateService";
@@ -61,7 +60,8 @@ export const useAuthManager = () => {
 
   // 🔁 Snapshot real de estado actual
   const initState = async () => {
-    internalState.walletConnected = await isWalletConnected();
+    const { pubkey } = await detectWallet();
+    internalState.walletConnected = !!pubkey;
     internalState.walletAuthed = await isWalletAuthed();
     internalState.jwtValid = !!getCSRFTokenFromCookie();
   };
