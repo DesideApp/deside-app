@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useServer } from "../contexts/ServerContext";
 import {
   detectWallet,
-  isWalletAuthed,
+  hasSignedMessage,         // ✅ Función real que verifica autenticación por firma
   signMessageForLogin,
 } from "./walletStateService";
 import {
@@ -35,13 +35,13 @@ export const useAuthManager = () => {
   }, []);
 
   useEffect(() => {
-    const onWalletChanged = async () => {
+    const updateWallet = async () => {
       const { pubkey } = await detectWallet();
       setSelectedWallet(pubkey);
     };
 
-    window.addEventListener("walletChanged", onWalletChanged);
-    return () => window.removeEventListener("walletChanged", onWalletChanged);
+    window.addEventListener("walletChanged", updateWallet);
+    return () => window.removeEventListener("walletChanged", updateWallet);
   }, []);
 
   useEffect(() => {
@@ -50,18 +50,19 @@ export const useAuthManager = () => {
 
   const renewToken = async () => {
     const response = await callRefreshToken();
-    internalState.jwtValid = !!response;
     if (response) {
+      internalState.jwtValid = true;
       await syncAuthStatus();
     } else {
       console.warn("⚠️ Refresh token inválido.");
+      internalState.jwtValid = false;
     }
   };
 
   const initState = async () => {
     const { pubkey } = await detectWallet();
     internalState.walletConnected = !!pubkey;
-    internalState.walletAuthed = await isWalletAuthed();
+    internalState.walletAuthed = await hasSignedMessage(); // ✅ Aquí usamos la función real
     internalState.jwtValid = !!getCSRFTokenFromCookie();
   };
 
@@ -107,11 +108,6 @@ export const useAuthManager = () => {
     }
   };
 
-  // Asignar para acceso global opcional
-  useEffect(() => {
-    window.ensureReady = ensureReady;
-  }, []);
-
   return {
     isAuthenticated,
     isLoading,
@@ -121,7 +117,7 @@ export const useAuthManager = () => {
   };
 };
 
-// 🧩 Helper para envolver acciones protegidas
+// 🧩 Helper para envolver onClick en botones
 export const withAuth = (action) => () => {
   if (typeof window.ensureReady === "function") {
     window.ensureReady(action);
