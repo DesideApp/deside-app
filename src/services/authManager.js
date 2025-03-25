@@ -1,16 +1,17 @@
+// /services/authManager.js
 import { useState, useEffect } from "react";
 import { useServer } from "../contexts/ServerContext";
 import {
   detectWallet,
   isWalletAuthed,
   signMessageForLogin,
-} from "../services/walletStateService";
+} from "./walletStateService";
 import {
   getCSRFTokenFromCookie,
   refreshToken as callRefreshToken,
-} from "../services/tokenService";
-import { authenticateWithServer } from "../services/apiService";
-import { connectWallet } from "../services/walletService";
+} from "./tokenService";
+import { authenticateWithServer } from "./apiService";
+import { connectWallet } from "./walletService";
 
 let internalState = {
   walletConnected: false,
@@ -34,13 +35,13 @@ export const useAuthManager = () => {
   }, []);
 
   useEffect(() => {
-    const updateWallet = async () => {
+    const onWalletChanged = async () => {
       const { pubkey } = await detectWallet();
       setSelectedWallet(pubkey);
     };
 
-    window.addEventListener("walletChanged", updateWallet);
-    return () => window.removeEventListener("walletChanged", updateWallet);
+    window.addEventListener("walletChanged", onWalletChanged);
+    return () => window.removeEventListener("walletChanged", onWalletChanged);
   }, []);
 
   useEffect(() => {
@@ -49,16 +50,14 @@ export const useAuthManager = () => {
 
   const renewToken = async () => {
     const response = await callRefreshToken();
+    internalState.jwtValid = !!response;
     if (response) {
-      internalState.jwtValid = true;
       await syncAuthStatus();
     } else {
       console.warn("⚠️ Refresh token inválido.");
-      internalState.jwtValid = false;
     }
   };
 
-  // 🔁 Snapshot real de estado actual
   const initState = async () => {
     const { pubkey } = await detectWallet();
     internalState.walletConnected = !!pubkey;
@@ -66,7 +65,6 @@ export const useAuthManager = () => {
     internalState.jwtValid = !!getCSRFTokenFromCookie();
   };
 
-  // 🎯 Llamada central para ejecutar una acción solo si todo está OK
   const ensureReady = async (action) => {
     await initState();
 
@@ -109,6 +107,11 @@ export const useAuthManager = () => {
     }
   };
 
+  // Asignar para acceso global opcional
+  useEffect(() => {
+    window.ensureReady = ensureReady;
+  }, []);
+
   return {
     isAuthenticated,
     isLoading,
@@ -118,7 +121,7 @@ export const useAuthManager = () => {
   };
 };
 
-// 🧩 Helper para envolver onClick en botones
+// 🧩 Helper para envolver acciones protegidas
 export const withAuth = (action) => () => {
   if (typeof window.ensureReady === "function") {
     window.ensureReady(action);
