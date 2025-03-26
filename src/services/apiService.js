@@ -111,23 +111,3 @@ export async function logout() {
   clearSession();
   return { success: true };
 }
-
-/**
- * 🔹 **Refrescar Token de Sesión (manual, solo si otro componente lo llama)**
- */
-export async function refreshToken() {
-  try {
-    console.debug("🔄 Intentando refrescar token manualmente...");
-    const response = await apiRequest("/api/auth/refresh", { method: "POST" });
-
-    if (response.error) {
-      console.warn("⚠️ No se pudo refrescar el token.");
-      return false;
-    }
-
-    console.debug("✅ Token refrescado con éxito.");
-    return true;
-  } catch {
-    return false;
-  }
-}

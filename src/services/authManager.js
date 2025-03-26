@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useServer } from "../contexts/ServerContext";
 import {
   detectWallet,
-  hasSignedMessage,         // ✅ Función real que verifica autenticación por firma
   signMessageForLogin,
 } from "./walletStateService";
 import {
@@ -62,7 +61,7 @@ export const useAuthManager = () => {
   const initState = async () => {
     const { pubkey } = await detectWallet();
     internalState.walletConnected = !!pubkey;
-    internalState.walletAuthed = await hasSignedMessage(); // ✅ Aquí usamos la función real
+    internalState.walletAuthed = false;
     internalState.jwtValid = !!getCSRFTokenFromCookie();
   };
 
