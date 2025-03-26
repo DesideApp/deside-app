@@ -2,15 +2,14 @@
 import { useState, useEffect } from "react";
 import { useServer } from "../contexts/ServerContext";
 import {
-  detectWallet,
-  signMessageForLogin,
+  detectWallet, // ✅ proviene de walletStateService.js
 } from "./walletStateService";
 import {
   getCSRFTokenFromCookie,
   refreshToken as callRefreshToken,
 } from "./tokenService";
 import { authenticateWithServer } from "./apiService";
-import { connectWallet } from "./walletService";
+import { connectWallet, signMessageForLogin } from "./walletService"; // ✅ CORRECTO
 
 let internalState = {
   walletConnected: false,
@@ -79,7 +78,12 @@ export const useAuthManager = () => {
       const signed = await signMessageForLogin("Please sign this message to authenticate.");
       if (!signed?.signature) return;
 
-      const result = await authenticateWithServer(signed.pubkey, signed.signature, signed.message);
+      const result = await authenticateWithServer(
+        signed.pubkey,
+        signed.signature,
+        signed.message
+      );
+
       if (result?.nextStep !== "ACCESS_GRANTED") {
         console.warn("❌ Login backend fallido.");
         return;
