@@ -1,8 +1,15 @@
 // /services/authManager.js
+
 import { useState, useEffect } from "react";
 import { useServer } from "../contexts/ServerContext";
-import { detectWallet } from "./walletStateService"; // ✅ Solo la detección real
-import { getCSRFTokenFromCookie } from "./tokenService"; // ✅ Solo para lectura JWT
+
+import { detectWallet } from "./walletStateService"; // ✅ Solo detección
+import {
+  getCSRFTokenFromCookie,
+  refreshToken as renewToken,
+} from "./tokenService"; // ✅ JWT lectura + refresh
+import { connectWallet } from "./walletService"; // ✅ Conexión modal
+import { authenticateWallet } from "./authService"; // ✅ Firma + login backend
 
 let internalState = {
   walletConnected: false,
@@ -11,40 +18,102 @@ let internalState = {
 };
 
 export const useAuthManager = () => {
-  const { isAuthenticated } = useServer();
+  const { isAuthenticated, syncAuthStatus } = useServer();
+
   const [isLoading, setIsLoading] = useState(true);
   const [requiresLogin, setRequiresLogin] = useState(false);
   const [selectedWallet, setSelectedWallet] = useState(null);
 
-  // Detecta y guarda la wallet actual (al montar)
+  // 📡 Detecta wallet al montar
   const updateWalletState = async () => {
     const { pubkey } = await detectWallet();
     setSelectedWallet(pubkey);
   };
 
   useEffect(() => {
-    updateWalletState().finally(() => setIsLoading(false));
+    updateWalletState().finally(() => {
+      setIsLoading(false);
+    });
   }, []);
 
+  // 🔄 Escucha cambios de wallet (por ejemplo, si el usuario cambia de cuenta)
   useEffect(() => {
     const updateWallet = async () => {
       const { pubkey } = await detectWallet();
       setSelectedWallet(pubkey);
     };
+
     window.addEventListener("walletChanged", updateWallet);
-    return () => window.removeEventListener("walletChanged", updateWallet);
+    return () => {
+      window.removeEventListener("walletChanged", updateWallet);
+    };
   }, []);
 
+  // 🔐 Estado de login en contexto global
   useEffect(() => {
     setRequiresLogin(!isAuthenticated);
   }, [isAuthenticated]);
 
-  // Solo mantiene estado base (aún sin acción de login)
+  // 🔍 Inicializa estado interno
   const initState = async () => {
     const { pubkey } = await detectWallet();
+
     internalState.walletConnected = !!pubkey;
     internalState.walletAuthed = false;
     internalState.jwtValid = !!getCSRFTokenFromCookie();
+  };
+
+  // 🚀 Flujo completo de autenticación
+  const ensureReady = async (action) => {
+    await initState();
+
+    if (!internalState.walletConnected) {
+      console.log("🔌 No conectado → Conectando wallet...");
+      const result = await connectWallet();
+
+      if (!result?.pubkey) return;
+
+      await initState();
+    }
+
+    if (!internalState.walletAuthed) {
+      console.log("✍️ No autenticado → Ejecutando authenticateWallet()...");
+
+      const result = await authenticateWallet();
+
+      if (result?.status !== "authenticated") {
+        console.warn("❌ Autenticación fallida.");
+        return;
+      }
+
+      internalState.walletAuthed = true;
+      internalState.jwtValid = true;
+
+      await syncAuthStatus();
+    }
+
+    if (!internalState.jwtValid) {
+      console.log("♻️ JWT caducado → Renovando...");
+
+      const refreshed = await renewToken();
+
+      internalState.jwtValid = !!refreshed;
+
+      if (refreshed) {
+        await syncAuthStatus();
+      }
+    }
+
+    if (
+      internalState.walletConnected &&
+      internalState.walletAuthed &&
+      internalState.jwtValid
+    ) {
+      console.log("✅ Autenticación completa. Ejecutando acción...");
+      action();
+    } else {
+      console.warn("⚠️ No se pudo completar el flujo de autenticación.");
+    }
   };
 
   return {
@@ -52,6 +121,15 @@ export const useAuthManager = () => {
     isLoading,
     requiresLogin,
     selectedWallet,
-    initState, // Por si lo quieres usar desde fuera en pruebas
+    ensureReady,
   };
+};
+
+// 🧩 Envoltura opcional para onClick en botones
+export const withAuth = (action) => () => {
+  if (typeof window.ensureReady === "function") {
+    window.ensureReady(action);
+  } else {
+    console.warn("⚠️ ensureReady no está disponible.");
+  }
 };
