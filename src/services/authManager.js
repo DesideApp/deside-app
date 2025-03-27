@@ -1,15 +1,8 @@
 // /services/authManager.js
 import { useState, useEffect } from "react";
 import { useServer } from "../contexts/ServerContext";
-import {
-  detectWallet, // ✅ proviene de walletStateService.js
-} from "./walletStateService";
-import {
-  getCSRFTokenFromCookie,
-  refreshToken as callRefreshToken,
-} from "./tokenService";
-import { authenticateWithServer } from "./apiService";
-import { connectWallet, signMessageForLogin } from "./walletService"; // ✅ CORRECTO
+import { detectWallet } from "./walletStateService"; // ✅ Solo la detección real
+import { getCSRFTokenFromCookie } from "./tokenService"; // ✅ Solo para lectura JWT
 
 let internalState = {
   walletConnected: false,
@@ -18,11 +11,12 @@ let internalState = {
 };
 
 export const useAuthManager = () => {
-  const { isAuthenticated, syncAuthStatus } = useServer();
+  const { isAuthenticated } = useServer();
   const [isLoading, setIsLoading] = useState(true);
   const [requiresLogin, setRequiresLogin] = useState(false);
   const [selectedWallet, setSelectedWallet] = useState(null);
 
+  // Detecta y guarda la wallet actual (al montar)
   const updateWalletState = async () => {
     const { pubkey } = await detectWallet();
     setSelectedWallet(pubkey);
@@ -37,7 +31,6 @@ export const useAuthManager = () => {
       const { pubkey } = await detectWallet();
       setSelectedWallet(pubkey);
     };
-
     window.addEventListener("walletChanged", updateWallet);
     return () => window.removeEventListener("walletChanged", updateWallet);
   }, []);
@@ -46,17 +39,7 @@ export const useAuthManager = () => {
     setRequiresLogin(!isAuthenticated);
   }, [isAuthenticated]);
 
-  const renewToken = async () => {
-    const response = await callRefreshToken();
-    if (response) {
-      internalState.jwtValid = true;
-      await syncAuthStatus();
-    } else {
-      console.warn("⚠️ Refresh token inválido.");
-      internalState.jwtValid = false;
-    }
-  };
-
+  // Solo mantiene estado base (aún sin acción de login)
   const initState = async () => {
     const { pubkey } = await detectWallet();
     internalState.walletConnected = !!pubkey;
@@ -64,67 +47,11 @@ export const useAuthManager = () => {
     internalState.jwtValid = !!getCSRFTokenFromCookie();
   };
 
-  const ensureReady = async (action) => {
-    await initState();
-
-    if (!internalState.walletConnected) {
-      console.log("🔌 Wallet no conectada. Abriendo proveedor...");
-      await connectWallet();
-      await initState();
-    }
-
-    if (!internalState.walletAuthed) {
-      console.log("✍️ Wallet conectada pero no autenticada. Solicitando firma...");
-      const signed = await signMessageForLogin("Please sign this message to authenticate.");
-      if (!signed?.signature) return;
-
-      const result = await authenticateWithServer(
-        signed.pubkey,
-        signed.signature,
-        signed.message
-      );
-
-      if (result?.nextStep !== "ACCESS_GRANTED") {
-        console.warn("❌ Login backend fallido.");
-        return;
-      }
-
-      internalState.walletAuthed = true;
-      internalState.jwtValid = true;
-      await syncAuthStatus();
-    }
-
-    if (!internalState.jwtValid) {
-      console.log("♻️ JWT caducado. Refrescando...");
-      await renewToken();
-    }
-
-    if (
-      internalState.walletConnected &&
-      internalState.walletAuthed &&
-      internalState.jwtValid
-    ) {
-      console.log("✅ Autenticación completa. Ejecutando acción...");
-      action();
-    } else {
-      console.warn("⚠️ No se pudo completar el flujo de autenticación.");
-    }
-  };
-
   return {
     isAuthenticated,
     isLoading,
     requiresLogin,
     selectedWallet,
-    ensureReady,
+    initState, // Por si lo quieres usar desde fuera en pruebas
   };
-};
-
-// 🧩 Helper para envolver onClick en botones
-export const withAuth = (action) => () => {
-  if (typeof window.ensureReady === "function") {
-    window.ensureReady(action);
-  } else {
-    console.warn("⚠️ ensureReady no está disponible.");
-  }
 };
