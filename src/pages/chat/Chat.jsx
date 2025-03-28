@@ -9,23 +9,19 @@ function Chat() {
   const { ensureReady } = useAuthManager();
   console.log("📌 ensureReady hook cargado.");
 
-  const renderLeftPanel = () => (
-    <div className="left-panel-container">
-      <LeftPanel />
-    </div>
-  );
-
-  const renderChatWindow = () => (
-    <div className="chat-window-container">
-      <ChatWindow />
-    </div>
-  );
+  const handleClick = () => {
+    ensureReady(); // sin acción, solo trigger
+  };
 
   return (
-    <div className="chat-page-container">
+    <div className="chat-page-container" onClick={handleClick}>
       <div className="chat-layout">
-        {renderLeftPanel()}
-        {renderChatWindow()}
+        <div className="left-panel-container">
+          <LeftPanel />
+        </div>
+        <div className="chat-window-container">
+          <ChatWindow />
+        </div>
         <div className="right-panel-container">
           <RightPanel />
         </div>
