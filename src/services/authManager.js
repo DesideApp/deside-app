@@ -124,12 +124,3 @@ export const useAuthManager = () => {
     ensureReady,
   };
 };
-
-// 🧩 Envoltura opcional para onClick en botones
-export const withAuth = (action) => () => {
-  if (typeof window.ensureReady === "function") {
-    window.ensureReady(action);
-  } else {
-    console.warn("⚠️ ensureReady no está disponible.");
-  }
-};
