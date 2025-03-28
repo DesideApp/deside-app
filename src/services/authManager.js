@@ -111,13 +111,17 @@ export const useAuthManager = () => {
     ) {
       console.log("✅ Autenticación completa. Ejecutando acción...");
       if (typeof action === "function") {
-        action(); // ✅ solo si es función
+        try {
+          action();
+        } catch (err) {
+          console.error("❌ Error ejecutando action():", err);
+        }
       } else {
-        console.warn("⚠️ Se intentó ejecutar una acción no válida:", action);
+        console.warn("⚠️ Acción inválida pasada a ensureReady:", action);
       }
     } else {
       console.warn("⚠️ No se pudo completar el flujo de autenticación.");
-    }
+    }    
   };
 
   return {
