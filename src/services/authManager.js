@@ -121,7 +121,7 @@ export const useAuthManager = () => {
       }
     } else {
       console.warn("⚠️ No se pudo completar el flujo de autenticación.");
-    }    
+    }        
   };
 
   return {
