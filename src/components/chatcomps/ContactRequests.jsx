@@ -1,18 +1,14 @@
 import React, { useEffect, useState, memo, useCallback } from "react";
 import { fetchContacts, approveContact, rejectContact } from "../../services/contactService.js";
-import { useAuthManager } from "../../services/authManager"; // ✅ Usamos AuthManager
 import "./ContactRequests.css";
 
 const ContactRequests = () => {
-    const { isAuthenticated, handleLoginResponse } = useAuthManager(); // ✅ Eliminamos ServerContext
     const [receivedRequests, setReceivedRequests] = useState([]);
     const [sentRequests, setSentRequests] = useState([]);
     const [errorMessage, setErrorMessage] = useState("");
 
-    // ✅ **Obtener solicitudes de contacto SOLO si el usuario está autenticado**
+    // ✅ Obtener solicitudes de contacto
     useEffect(() => {
-        if (!isAuthenticated) return; // ✅ Solo cargamos si está autenticado
-
         let isMounted = true;
 
         const fetchContactRequests = async () => {
@@ -33,16 +29,10 @@ const ContactRequests = () => {
         return () => {
             isMounted = false;
         };
-    }, [isAuthenticated]);
+    }, []);
 
-    // ✅ **Manejo de solicitudes de contacto**
+    // ✅ Manejo de solicitudes de contacto
     const handleAction = useCallback(async (pubkey, action) => {
-        if (!isAuthenticated) {
-            console.warn("⚠️ Intento de gestionar solicitudes sin estar autenticado.");
-            handleLoginResponse(); // 🔄 Activar autenticación automática
-            return;
-        }
-
         try {
             if (action === "approve") {
                 await approveContact(pubkey);
@@ -55,7 +45,7 @@ const ContactRequests = () => {
             console.error(`❌ Error al ${action === "approve" ? "aceptar" : "rechazar"} contacto:`, error);
             setErrorMessage(`❌ No se pudo ${action === "approve" ? "aceptar" : "rechazar"} la solicitud.`);
         }
-    }, [isAuthenticated, handleLoginResponse]);
+    }, []);
 
     return (
         <div className="contact-requests-container">

@@ -65,45 +65,36 @@ export const useAuthManager = () => {
 
   // 🚀 Flujo completo de autenticación
   const ensureReady = async (action) => {
+    console.log("🔎 ensureReady fue llamado con:", action);
+  
     await initState();
-
+  
     if (!internalState.walletConnected) {
       console.log("🔌 No conectado → Conectando wallet...");
       const result = await connectWallet();
-
       if (!result?.pubkey) return;
-
       await initState();
     }
-
+  
     if (!internalState.walletAuthed) {
       console.log("✍️ No autenticado → Ejecutando authenticateWallet()...");
-
       const result = await authenticateWallet();
-
       if (result?.status !== "authenticated") {
         console.warn("❌ Autenticación fallida.");
         return;
       }
-
       internalState.walletAuthed = true;
       internalState.jwtValid = true;
-
       await syncAuthStatus();
     }
-
+  
     if (!internalState.jwtValid) {
       console.log("♻️ JWT caducado → Renovando...");
-
       const refreshed = await renewToken();
-
       internalState.jwtValid = !!refreshed;
-
-      if (refreshed) {
-        await syncAuthStatus();
-      }
+      if (refreshed) await syncAuthStatus();
     }
-
+  
     if (
       internalState.walletConnected &&
       internalState.walletAuthed &&
@@ -121,8 +112,9 @@ export const useAuthManager = () => {
       }
     } else {
       console.warn("⚠️ No se pudo completar el flujo de autenticación.");
-    }        
+    }
   };
+  
 
   return {
     isAuthenticated,

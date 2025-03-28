@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect, memo } from "react";
 import { checkAuthStatus, checkWalletRegistered } from "../../services/apiService.js";
 import { sendContactRequest } from "../../services/contactService.js";
-import { FaCheckCircle, FaTimes } from "react-icons/fa"; // ✅ Se mantiene la cruz para borrar, validación mejorada
+import { FaCheckCircle, FaTimes } from "react-icons/fa";
 import "./AddContactForm.css";
 
 const AddContactForm = ({ onContactAdded }) => {
@@ -10,26 +10,20 @@ const AddContactForm = ({ onContactAdded }) => {
     const [isLoading, setIsLoading] = useState(false);
     const textareaRef = useRef(null);
 
-    /** 🔹 **Expresión regular para validar pubkey de Solana** */
     const isValidPubkey = pubkey.length === 44 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(pubkey.trim());
 
-    /** 🔹 **Ajustar altura dinámica del textarea SOLO cuando se complete una línea** */
     useEffect(() => {
         if (textareaRef.current) {
             const textarea = textareaRef.current;
-            textarea.style.height = "50px"; // 🔥 Establecer altura inicial mínima
-
-            // 🔥 Detectar si el contenido excede una línea
+            textarea.style.height = "50px";
             if (textarea.scrollHeight > textarea.clientHeight) {
                 textarea.style.height = `${textarea.scrollHeight}px`;
             }
         }
     }, [pubkey]);
 
-    /** 🔹 **Limpiar campo de entrada** */
     const clearInput = () => setPubkey("");
 
-    /** 🔹 **Manejo de solicitudes de contacto** */
     const handleAddContact = useCallback(async () => {
         if (!isValidPubkey) return;
 
@@ -64,7 +58,6 @@ const AddContactForm = ({ onContactAdded }) => {
         <div className="add-contact-container">
             <h2 className="contact-title">Add Contact</h2>
 
-            {/* 🔹 Contenedor del input con validación y espacio para iconos */}
             <div className="input-wrapper">
                 <textarea
                     ref={textareaRef}
@@ -74,11 +67,9 @@ const AddContactForm = ({ onContactAdded }) => {
                     disabled={isLoading}
                 />
                 <div className="input-icons">
-                    {/* 🔹 Icono de validación (siempre presente, pero gris cuando no es válido) */}
                     <span className={`validation-icon ${isValidPubkey ? "valid" : "inactive"}`}>
                         <FaCheckCircle />
                     </span>
-                    {/* 🔹 Icono para borrar */}
                     {pubkey && (
                         <span className="clear-icon" onClick={clearInput}>
                             <FaTimes />
@@ -87,7 +78,6 @@ const AddContactForm = ({ onContactAdded }) => {
                 </div>
             </div>
 
-            {/* 🔹 Botón de agregar */}
             <button
                 className={`send-request-button ${isValidPubkey ? "active" : "inactive"}`}
                 onClick={handleAddContact}
@@ -96,7 +86,6 @@ const AddContactForm = ({ onContactAdded }) => {
                 {isLoading ? "Sending..." : "Send request"}
             </button>
 
-            {/* ✅ Mensajes de estado */}
             {message.text && (
                 <p className={`message ${message.type}`} aria-live="assertive">{message.text}</p>
             )}

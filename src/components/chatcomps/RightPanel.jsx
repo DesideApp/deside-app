@@ -1,23 +1,13 @@
-import React, { useState, memo, useCallback } from "react";
+import React, { useState, memo } from "react";
 import { MdOutlineMail, MdMail, MdPersonOutline, MdPerson } from "react-icons/md";
 import ContactRequests from "../chatcomps/ContactRequests";
 import AddContactForm from "../chatcomps/AddContactForm";
-import { useAuthManager } from "../../services/authManager";
 import "./RightPanel.css";
 
 const RightPanel = () => {
     const [activeTab, setActiveTab] = useState("requests");
-    const { isAuthenticated, handleLoginResponse } = useAuthManager();
 
-    // ✅ **Manejo de activación de autenticación**
-    const handlePanelClick = useCallback(() => {
-        if (!isAuthenticated) {
-            console.warn("⚠️ Usuario no autenticado. Iniciando login...");
-            handleLoginResponse(() => console.log("🔵 Login completado, listo para interactuar."));
-        }
-    }, [isAuthenticated, handleLoginResponse]);
-
-    // ✅ **Cambio de pestaña sin restricciones**
+    // ✅ Cambio de pestaña sin restricciones
     const handleTabChange = (tab) => {
         setActiveTab(tab);
     };

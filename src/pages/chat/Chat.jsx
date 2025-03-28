@@ -1,28 +1,23 @@
-import React, { useState } from "react";
+import React from "react";
 import ChatWindow from "../../components/chatcomps/ChatWindow.jsx";
 import RightPanel from "../../components/chatcomps/RightPanel.jsx";
 import LeftPanel from "../../components/chatcomps/LeftPanel.jsx";
-import { useAuthManager } from "../../services/authManager"; // ✅ Importación correcta
+import { useAuthManager } from "../../services/authManager";
 import "./Chat.css";
 
 function Chat() {
-  const [selectedContact, setSelectedContact] = useState(null);
-  const { ensureReady } = useAuthManager(); // ✅ Obtenemos la función desde el hook
-  console.log("📌 ensureReady hook cargado."); // sin pasar la función
-
-  const handleSelectContact = (contact) => {
-    ensureReady(() => setSelectedContact(contact));
-  };
+  const { ensureReady } = useAuthManager();
+  console.log("📌 ensureReady hook cargado.");
 
   const renderLeftPanel = () => (
     <div className="left-panel-container">
-      <LeftPanel onSelectContact={handleSelectContact} />
+      <LeftPanel />
     </div>
   );
 
   const renderChatWindow = () => (
     <div className="chat-window-container">
-      <ChatWindow selectedContact={selectedContact} />
+      <ChatWindow />
     </div>
   );
 
