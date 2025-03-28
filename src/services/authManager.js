@@ -110,11 +110,10 @@ export const useAuthManager = () => {
       internalState.jwtValid
     ) {
       console.log("✅ Autenticación completa. Ejecutando acción...");
-
       if (typeof action === "function") {
-        action(); // ✅ Ejecuta la acción segura
+        action(); // ✅ solo si es función
       } else {
-        console.warn("⚠️ Acción no válida en ensureReady:", action);
+        console.warn("⚠️ Se intentó ejecutar una acción no válida:", action);
       }
     } else {
       console.warn("⚠️ No se pudo completar el flujo de autenticación.");
