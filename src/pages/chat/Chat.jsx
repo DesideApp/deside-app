@@ -7,8 +7,8 @@ import "./Chat.css";
 
 function Chat() {
   const [selectedContact, setSelectedContact] = useState(null);
-  console.log("📌 ensureReady desde hook:", ensureReady);
   const { ensureReady } = useAuthManager(); // ✅ Obtenemos la función desde el hook
+  console.log("📌 ensureReady desde hook:", ensureReady);
 
   const handleSelectContact = (contact) => {
     ensureReady(() => setSelectedContact(contact));
