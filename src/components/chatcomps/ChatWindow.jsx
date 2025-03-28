@@ -8,25 +8,11 @@ function ChatWindow({ selectedContact }) {
   const chatContainerRef = useRef(null);
   const socketRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [confirmedContacts, setConfirmedContacts] = useState([]);
 
-  // ✅ Obtener contactos confirmados desde el backend
-  const fetchContacts = useCallback(async () => {
-    try {
-      const contacts = await getContacts();
-      setConfirmedContacts(contacts.confirmed.map((c) => c.wallet));
-    } catch (error) {
-      console.error("❌ Error obteniendo contactos:", error);
-    }
-  }, []);
-
-  // ✅ Inicializar WebSocket solo con contacto confirmado
+  // ✅ Inicializar WebSocket solo si hay contacto seleccionado
   const initializeSocket = useCallback(() => {
     if (!selectedContact) return;
-    if (!confirmedContacts.includes(selectedContact)) {
-      console.warn("⚠️ Intento de chat con un contacto no confirmado.");
-      return;
-    }
+
     if (socketRef.current) {
       console.log("⚡ WebSocket ya está conectado, evitando reconexión.");
       return;
@@ -41,6 +27,7 @@ function ChatWindow({ selectedContact }) {
     socket.on("connect", () => {
       console.log("🟢 Conectado al servidor WebSocket");
       setIsConnected(true);
+      socket.emit("register_wallet", selectedContact); // Enviamos la pubkey como ID
     });
 
     socket.on("disconnect", () => {
@@ -49,7 +36,7 @@ function ChatWindow({ selectedContact }) {
     });
 
     socketRef.current = socket;
-  }, [selectedContact, confirmedContacts]);
+  }, [selectedContact]);
 
   // ✅ Chat y mensajes (WebRTC)
   const { messages, sendMessage } = useWebRTC(selectedContact);
@@ -60,11 +47,6 @@ function ChatWindow({ selectedContact }) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
-
-  // ✅ Cargar contactos confirmados al montar
-  useEffect(() => {
-    fetchContacts();
-  }, [fetchContacts]);
 
   // ✅ Conectar socket cuando cambia el contacto
   useEffect(() => {
