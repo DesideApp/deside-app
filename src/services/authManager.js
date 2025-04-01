@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import { useServer } from "../contexts/ServerContext";
 
-import { detectWallet } from "./walletStateService"; // ✅ Solo detección
+import { detectWallet } from "./walletStateService";
 import {
   getCSRFTokenFromCookie,
   refreshToken as renewToken,
-} from "./tokenService"; // ✅ JWT lectura + refresh
-import { connectWallet, isExplicitLogout } from "./walletService"; // ✅ CONEXIÓN + FLAG
-import { authenticateWallet } from "./authService"; // ✅ Firma + login backend
+} from "./tokenService";
+import { connectWallet, isExplicitLogout } from "./walletService";
+import { authenticateWallet } from "./authService";
 
 let internalState = {
   walletConnected: false,
@@ -36,7 +36,7 @@ export const useAuthManager = () => {
     });
   }, []);
 
-  // 🔄 Escucha cambios de wallet (por ejemplo, si el usuario cambia de cuenta)
+  // 🔄 Escucha cambios de wallet
   useEffect(() => {
     const updateWallet = async () => {
       const { pubkey } = await detectWallet();
@@ -44,12 +44,10 @@ export const useAuthManager = () => {
     };
 
     window.addEventListener("walletChanged", updateWallet);
-    return () => {
-      window.removeEventListener("walletChanged", updateWallet);
-    };
+    return () => window.removeEventListener("walletChanged", updateWallet);
   }, []);
 
-  // 🔐 Estado de login en contexto global
+  // 🔐 Estado global de login
   useEffect(() => {
     setRequiresLogin(!isAuthenticated);
   }, [isAuthenticated]);
@@ -63,14 +61,23 @@ export const useAuthManager = () => {
     internalState.jwtValid = !!getCSRFTokenFromCookie();
   };
 
-  // 🚀 Flujo completo de autenticación
+  // 🚀 Flujo principal
   const ensureReady = async (action) => {
     console.log("🔎 ensureReady fue llamado con:", action);
 
-    // 🛑 Si hubo logout explícito → forzar flujo manual
     if (isExplicitLogout()) {
       console.warn("🚫 Logout explícito detectado → mostrando modal de wallet...");
+
+      // 🔓 Abrimos modal
       window.dispatchEvent(new Event("openWalletModal"));
+
+      const result = await connectWallet(); // Esperamos selección
+      if (!result?.pubkey) return;
+
+      // ✅ Cerramos modal tras conexión
+      window.dispatchEvent(new Event("closeWalletModal"));
+
+      await syncAuthStatus();
       return;
     }
 
