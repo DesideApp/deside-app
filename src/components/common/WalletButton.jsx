@@ -31,16 +31,23 @@ const WalletButton = memo(() => {
     initializeWallet();
   }, []);
 
-  // 🌐 Escucha eventos globales para abrir el modal
+  // 🌐 Escucha eventos globales para abrir/cerrar el modal
   useEffect(() => {
-    const handleOpenWalletModal = () => {
+    const handleOpen = () => {
       console.log("🌐 Evento recibido: openWalletModal → Abriendo WalletModal...");
       setIsModalOpen(true);
     };
+    const handleClose = () => {
+      console.log("🌐 Evento recibido: closeWalletModal → Cerrando WalletModal...");
+      setIsModalOpen(false);
+    };
 
-    window.addEventListener("openWalletModal", handleOpenWalletModal);
+    window.addEventListener("openWalletModal", handleOpen);
+    window.addEventListener("closeWalletModal", handleClose);
+
     return () => {
-      window.removeEventListener("openWalletModal", handleOpenWalletModal);
+      window.removeEventListener("openWalletModal", handleOpen);
+      window.removeEventListener("closeWalletModal", handleClose);
     };
   }, []);
 
@@ -65,7 +72,7 @@ const WalletButton = memo(() => {
       setBalance(null);
     }
 
-    setIsModalOpen(false);
+    setIsModalOpen(false); // cierre manual (opcional, redundante con evento si quieres dejarlo limpio)
   };
 
   // Logout manual
