@@ -8,7 +8,7 @@ import {
   getCSRFTokenFromCookie,
   refreshToken as renewToken,
 } from "./tokenService"; // ✅ JWT lectura + refresh
-import { connectWallet } from "./walletService"; // ✅ Conexión modal
+import { connectWallet, isExplicitLogout } from "./walletService"; // ✅ CONEXIÓN + FLAG
 import { authenticateWallet } from "./authService"; // ✅ Firma + login backend
 
 let internalState = {
@@ -66,16 +66,25 @@ export const useAuthManager = () => {
   // 🚀 Flujo completo de autenticación
   const ensureReady = async (action) => {
     console.log("🔎 ensureReady fue llamado con:", action);
-  
+
+    // 🛑 Si hubo logout explícito → forzar flujo manual
+    if (isExplicitLogout()) {
+      console.warn("🚫 Logout explícito detectado → mostrando modal de wallet...");
+      const result = await connectWallet(); // Lanza modal
+      if (!result?.pubkey) return;
+      await syncAuthStatus();
+      return;
+    }
+
     await initState();
-  
+
     if (!internalState.walletConnected) {
       console.log("🔌 No conectado → Conectando wallet...");
       const result = await connectWallet();
       if (!result?.pubkey) return;
       await initState();
     }
-  
+
     if (!internalState.walletAuthed) {
       console.log("✍️ No autenticado → Ejecutando authenticateWallet()...");
       const result = await authenticateWallet();
@@ -87,14 +96,14 @@ export const useAuthManager = () => {
       internalState.jwtValid = true;
       await syncAuthStatus();
     }
-  
+
     if (!internalState.jwtValid) {
       console.log("♻️ JWT caducado → Renovando...");
       const refreshed = await renewToken();
       internalState.jwtValid = !!refreshed;
       if (refreshed) await syncAuthStatus();
     }
-  
+
     if (
       internalState.walletConnected &&
       internalState.walletAuthed &&
@@ -114,7 +123,6 @@ export const useAuthManager = () => {
       console.warn("⚠️ No se pudo completar el flujo de autenticación.");
     }
   };
-  
 
   return {
     isAuthenticated,
