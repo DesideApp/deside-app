@@ -31,9 +31,7 @@ export const useAuthManager = () => {
   };
 
   useEffect(() => {
-    updateWalletState().finally(() => {
-      setIsLoading(false);
-    });
+    updateWalletState().finally(() => setIsLoading(false));
   }, []);
 
   // 🔄 Escucha cambios de wallet
@@ -41,6 +39,12 @@ export const useAuthManager = () => {
     const updateWallet = async () => {
       const { pubkey } = await detectWallet();
       setSelectedWallet(pubkey);
+
+      // 👂 Reintenta flujo si venimos de logout explícito
+      if (isExplicitLogout()) {
+        console.log("🔁 Reintentando login post-logout...");
+        ensureReady(); // sin acción, solo login
+      }
     };
 
     window.addEventListener("walletChanged", updateWallet);
@@ -55,7 +59,6 @@ export const useAuthManager = () => {
   // 🔍 Inicializa estado interno
   const initState = async () => {
     const { pubkey } = await detectWallet();
-
     internalState.walletConnected = !!pubkey;
     internalState.walletAuthed = false;
     internalState.jwtValid = !!getCSRFTokenFromCookie();
@@ -67,9 +70,7 @@ export const useAuthManager = () => {
 
     if (isExplicitLogout()) {
       console.warn("🚫 Logout explícito detectado → mostrando modal de wallet...");
-
-      // 🔓 Solo abrimos modal → WalletButton lo gestiona
-      window.dispatchEvent(new Event("openWalletModal"));
+      window.dispatchEvent(new Event("openWalletModal")); // Solo visual
       return;
     }
 
