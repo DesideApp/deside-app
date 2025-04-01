@@ -1,14 +1,14 @@
-// 📂 services/notificationService.js
+import mitt from "mitt";
+
+const notificationEmitter = mitt();
 
 /**
- * Lanza una notificación flotante visible para el usuario.
- * @param {string} message - El texto a mostrar.
- * @param {'info'|'success'|'warning'|'error'} type - El tipo de mensaje (color y estilo).
+ * 🔔 Enviar una notificación global.
+ * @param {string} message - El mensaje a mostrar
+ * @param {string} type - Tipo de notificación: "info", "success", "error"
  */
-export const dispatchNotify = (message, type = "info") => {
-    const event = new CustomEvent("notify", {
-      detail: { message, type },
-    });
-  
-    window.dispatchEvent(event);
-  };
+export const notify = (message, type = "info") => {
+  notificationEmitter.emit("notify", message, type);
+};
+
+export { notificationEmitter }; // ⬅️ ESTA ES LA CLAVE
