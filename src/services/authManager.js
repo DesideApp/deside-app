@@ -68,16 +68,8 @@ export const useAuthManager = () => {
     if (isExplicitLogout()) {
       console.warn("🚫 Logout explícito detectado → mostrando modal de wallet...");
 
-      // 🔓 Abrimos modal
+      // 🔓 Solo abrimos modal → WalletButton lo gestiona
       window.dispatchEvent(new Event("openWalletModal"));
-
-      const result = await connectWallet(); // Esperamos selección
-      if (!result?.pubkey) return;
-
-      // ✅ Cerramos modal tras conexión
-      window.dispatchEvent(new Event("closeWalletModal"));
-
-      await syncAuthStatus();
       return;
     }
 
