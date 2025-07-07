@@ -13,12 +13,12 @@
 .chat-layout {
     width: 100%;
     max-width: 96vw;
-    height: 79vh;
+    height: 83vh;
     display: flex;
     justify-content: space-between; /* 🔹 Distribuye los componentes */
     align-items: stretch; /* 🔹 Alinea todos los componentes con la misma altura */
-    margin-top: auto; /* 🔹 Ajuste para centrar todo hacia abajo */
-    margin-bottom: 55px; /* 🔹 Mantiene el balance sin empujar hacia arriba */
+    margin-top: 100px; /* 🔹 Ajuste para centrar todo hacia abajo */
+    margin-bottom: 60px; /* 🔹 Mantiene el balance sin empujar hacia arriba */
 }
 
 /* 📌 LeftPanel - Manejo de la ubicación y estructura */

@@ -1,20 +1,32 @@
 /* ✅ Header estructural (espacio reservado pero sin estilos adicionales) */
 .left-panel-header {
-    height: 70px; /* 🔥 Espacio definido sin modificar el diseño */
+    height: 90px; /* 🔥 Espacio definido sin modificar el diseño */
     flex-shrink: 0; /* 🔥 EVITA QUE SE COMPORTE COMO SCROLL */
 }
 
+.left-panel-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-color);
+    text-align: center;
+    padding-top: 30px;
+}
+  
 /* ✅ Contenedor del contenido con efecto hundido */
 .left-panel-content {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    width: 90%;               /* 🔥 Agranda el recuadro blanco */
+    height: 90%;              /* 🔥 Opcional si quieres más alto */
     padding: 8px 10px; /* 🔥 Ajuste uniforme */
-    border-radius: 15px;
+    border-radius: 20px;
     background: var(--background-overlay); /* 🔹 Fondo translúcido */
+    box-sizing: border-box;
     box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.08); /* 🔥 Sombra sutil */
     transition: background 0.3s ease-in-out;
-    margin: 10px; /* 🔥 Espaciado uniforme */
+    margin: 0px; /* 🔥 Espaciado uniforme */
+    margin-left: 0px;
     overflow: hidden; /* 🔥 ELIMINA EL SCROLL */
 }
 
@@ -24,10 +36,12 @@
     z-index: 10; /* 🔥 Asegura que esté por encima de otros elementos */
     display: flex;
     justify-content: center;
-    gap: 6px;
+    height: 100px; /* 🔥 Espacio definido sin modificar el diseño */
+    gap: 8px;
     padding: 0;
     border-radius: 8px;
     padding-bottom: 10px;
+    padding-top: 10px;
     transition: background 0.3s ease-in-out;
     overflow: hidden; /* 🔥 PREVIENE SCROLL EN LAS PESTAÑAS */
 }

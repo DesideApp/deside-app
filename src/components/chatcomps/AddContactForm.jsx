@@ -1,13 +1,16 @@
 import React, { useState, useCallback, useRef, useEffect, memo } from "react";
 import { checkAuthStatus, checkWalletRegistered } from "../../services/apiService.js";
-import { sendContactRequest } from "../../services/contactService.js";
+import { sendContactRequest, fetchContacts } from "../../services/contactService.js";
 import { FaCheckCircle, FaTimes } from "react-icons/fa";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import "./AddContactForm.css";
 
 const AddContactForm = ({ onContactAdded }) => {
     const [pubkey, setPubkey] = useState("");
     const [message, setMessage] = useState({ type: "", text: "" });
     const [isLoading, setIsLoading] = useState(false);
+    const [sentRequests, setSentRequests] = useState([]);
+    const [isExpanded, setIsExpanded] = useState(false);
     const textareaRef = useRef(null);
 
     const isValidPubkey = pubkey.length === 44 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(pubkey.trim());
@@ -21,6 +24,26 @@ const AddContactForm = ({ onContactAdded }) => {
             }
         }
     }, [pubkey]);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchSentRequests = async () => {
+            try {
+                const contacts = await fetchContacts();
+                if (isMounted) {
+                    setSentRequests(contacts.outgoing || []);
+                }
+            } catch (error) {
+                console.error("❌ Error al obtener solicitudes enviadas:", error);
+            }
+        };
+
+        fetchSentRequests();
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const clearInput = () => setPubkey("");
 
@@ -89,6 +112,30 @@ const AddContactForm = ({ onContactAdded }) => {
             {message.text && (
                 <p className={`message ${message.type}`} aria-live="assertive">{message.text}</p>
             )}
+
+            {/* Contenedor combinado para toggle y lista */}
+            <div className={`sent-requests-wrapper ${isExpanded ? "expanded" : "collapsed"}`}>
+                <div className="toggle-sent-section" onClick={() => setIsExpanded(!isExpanded)}>
+                    <span className="toggle-label">Sent Requests</span>
+                    {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                </div>
+
+                {isExpanded && (
+                    <div className="sent-requests-box">
+                        {sentRequests.length > 0 ? (
+                            <ul className="requests-list">
+                                {sentRequests.map(({ wallet }) => (
+                                    <li key={wallet}>
+                                        {wallet.slice(0, 6)}...{wallet.slice(-4)} (Pending)
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="no-requests">No sent requests.</p>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

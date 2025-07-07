@@ -1,146 +1,229 @@
 /* 📌 Contenedor principal del formulario */
 .add-contact-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 500px;
-    padding: 10px;
-    border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+  padding: 10px;
+  border-radius: 15px;
 }
 
 /* 📌 Título */
 .contact-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: var(--text-color);
-    margin-bottom: 14px;
-    text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--text-color);
+  margin-bottom: 14px;
+  text-align: center;
 }
 
-/* 📌 Contenedor del input (se expande con el textarea) */
+/* 📌 Input */
 .input-wrapper {
-    position: relative;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    transition: height 0.2s ease-in-out;
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: height 0.2s ease-in-out;
+  height: fit-content;
 }
 
-/* 📌 Input para clave pública (se expande automáticamente sin scroll interno) */
 .add-contact-container textarea {
-    min-height: 50px; /* 🔥 Mantiene altura inicial estable */
-    max-height: 150px; /* 🔥 Controla la expansión */
-    width: 100%;
-    height: auto; /* 🔥 Crecimiento dinámico */
-    padding: 14px;
-    font-size: 14px;
-    font-family: 'Montserrat', sans-serif;
-    color: var(--text-color);
-    background: var(--window-background);
-    border: 2px solid rgba(128, 128, 128, 0.25);
-    padding-right: 60px;
-    border-radius: 15px;
-    outline: none;
-    transition: height 0.2s ease-in-out, border 0.2s ease-in-out;
-    overflow: hidden; /* 🔥 Evita scroll interno */
-    resize: none;
-    text-align: center;
-    line-height: 1.4;
+  min-height: 50px;
+  max-height: 150px;
+  width: 100%;
+  padding: 14px;
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+  color: var(--text-color);
+  background: var(--window-background);
+  border: 2px solid rgba(128, 128, 128, 0.25);
+  padding-right: 60px;
+  border-radius: 15px;
+  outline: none;
+  transition: height 0.2s ease-in-out, border 0.2s ease-in-out;
+  overflow: hidden;
+  resize: none;
+  text-align: center;
+  line-height: 1.4;
 }
 
-/* 📌 Mantener expansión controlada */
 .add-contact-container textarea:focus,
 .add-contact-container textarea:not(:placeholder-shown) {
-    height: auto;
-    line-height: normal; /* 🔥 Evita que el texto baje inesperadamente */
+  height: auto;
+  line-height: normal;
 }
 
-/* 📌 Centrar dinámicamente el placeholder */
 .add-contact-container textarea::placeholder {
-    text-align: center;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%); /* 🔥 Siempre centrado en cualquier altura */
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
-/* 📌 Asegurar que input-wrapper crezca con el textarea */
-.input-wrapper {
-    height: fit-content;
-}
-
-/* 📌 Contenedor de iconos */
+/* 📌 Iconos del input */
 .input-icons {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    gap: 6px;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-/* 📌 Iconos dentro del input */
 .validation-icon {
-    font-size: 1rem;
-    transition: color 0.2s ease-in-out, opacity 0.3s ease-in-out;
-    opacity: 0.85;
+  font-size: 1rem;
+  transition: color 0.2s ease-in-out, opacity 0.3s ease-in-out;
+  opacity: 0.85;
 }
 
-/* 📌 Estado válido (tick verde) */
 .validation-icon.valid {
-    color: #00C853;
+  color: #00C853;
 }
 
-/* 📌 Estado inactivo (cuando la pubkey no es válida) */
 .validation-icon.inactive {
-    color: rgba(128, 128, 128, 0.85);
+  color: rgba(128, 128, 128, 0.85);
 }
 
-/* 📌 Icono de borrar */
 .clear-icon {
-    font-size: 1rem;
-    color: rgba(150, 150, 150, 0.7);
-    cursor: pointer;
-    transition: color 0.2s ease-in-out;
+  font-size: 1rem;
+  color: rgba(150, 150, 150, 0.7);
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
 }
 
 .clear-icon:hover {
-    color: rgba(150, 150, 150, 1);
+  color: rgba(150, 150, 150, 1);
 }
 
 /* 📌 Botón de envío */
 .send-request-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #fc554f;
-    color: white;
-    height: 38px;
-    min-width: 150px;
-    font-size: 14px;
-    font-family: 'Montserrat', sans-serif;
-    padding: 0 16px;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    text-align: center;
-    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
-    margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fc554f;
+  color: white;
+  height: 38px;
+  min-width: 150px;
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+  padding: 0 16px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-align: center;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 18px;
 }
 
-/* 📌 Hover y efecto al hacer click (cuando el botón está activo) */
 .send-request-button.active:hover {
-    background-color: #e04a45;
-    transform: scale(1.02);
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+  background-color: #e04a45;
+  transform: scale(1.02);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* 📌 Desactivado visualmente */
 .send-request-button.inactive {
-    opacity: 1;
-    cursor: default;
-    transform: none;
-    pointer-events: none;
+  opacity: 1;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* 📌 Mensaje de error/éxito */
+.message {
+  margin-top: 12px;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.message.success {
+  color: #2e7d32;
+}
+
+.message.error {
+  color: #c62828;
+}
+
+/* 📌 Contenedor de toggle + lista */
+.sent-requests-wrapper {
+  display: flex;
+  flex-direction: column-reverse;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+/* Si está colapsado: toggle abajo */
+.sent-requests-wrapper.collapsed {
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+}
+
+/* Si está expandido: lista sube, toggle arriba */
+.sent-requests-wrapper.expanded {
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* 📌 Toggle desplegable */
+.toggle-sent-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--text-color);
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: opacity 0.3s ease;
+  padding: 8px 0;
+}
+
+.toggle-sent-section:hover {
+  opacity: 0.75;
+}
+
+/* 📌 Lista de solicitudes */
+.sent-requests-box {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background-color: #f7f7f7;
+  border-radius: 10px;
+  box-shadow: inset 0px 1px 4px rgba(0, 0, 0, 0.05);
+  max-height: 200px;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+.sent-requests-box ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sent-requests-box li {
+  font-size: 0.92rem;
+  background-color: #f0f0f0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  text-align: center;
+  color: #444;
+  transition: background-color 0.2s ease;
+}
+
+.sent-requests-box li:hover {
+  background-color: #e5e5e5;
+}
+
+.sent-requests-box .no-requests {
+  font-size: 0.92rem;
+  color: #777;
+  text-align: center;
+  padding: 6px 0;
 }
