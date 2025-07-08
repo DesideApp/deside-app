@@ -23,10 +23,13 @@ let internalState = {
  */
 const checkAuthStatus = async () => {
   try {
-    const res = await fetch("/api/auth/status", {
-      method: "GET",
-      credentials: "include",
-    });
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/auth/status`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
     if (!res.ok) {
       console.warn("⚠️ /status respondió error:", res.status);
       return false;
