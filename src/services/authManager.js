@@ -17,6 +17,36 @@ let internalState = {
   jwtValid: false,
 };
 
+/**
+ * 🔎 Llama al backend para comprobar si ya estamos autenticados.
+ * Devuelve true si estamos autenticados, false si no.
+ */
+const checkAuthStatus = async () => {
+  try {
+    const res = await fetch("/api/auth/status", {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!res.ok) {
+      console.warn("⚠️ /status respondió error:", res.status);
+      return false;
+    }
+    const data = await res.json();
+    if (data.isAuthenticated) {
+      console.log("✅ Backend confirma sesión activa:", data.wallet);
+      internalState.walletAuthed = true;
+      internalState.jwtValid = true;
+      return true;
+    } else {
+      console.warn("🚫 Backend dice que NO estás autenticado.");
+      return false;
+    }
+  } catch (err) {
+    console.error("❌ Error comprobando /status:", err);
+    return false;
+  }
+};
+
 export const useAuthManager = () => {
   const { isAuthenticated, syncAuthStatus } = useServer();
 
@@ -84,15 +114,20 @@ export const useAuthManager = () => {
     }
 
     if (!internalState.walletAuthed) {
-      console.log("✍️ No autenticado → Ejecutando authenticateWallet()...");
-      const result = await authenticateWallet();
-      if (result?.status !== "authenticated") {
-        console.warn("❌ Autenticación fallida.");
-        return;
+      console.log("🔎 Consultando backend para ver si ya estamos autenticados...");
+      const isAuthed = await checkAuthStatus();
+
+      if (!isAuthed) {
+        console.log("✍️ No autenticado → Ejecutando authenticateWallet()...");
+        const result = await authenticateWallet();
+        if (result?.status !== "authenticated") {
+          console.warn("❌ Autenticación fallida.");
+          return;
+        }
+        internalState.walletAuthed = true;
+        internalState.jwtValid = true;
+        await syncAuthStatus();
       }
-      internalState.walletAuthed = true;
-      internalState.jwtValid = true;
-      await syncAuthStatus();
     }
 
     if (!internalState.jwtValid) {
@@ -114,7 +149,7 @@ export const useAuthManager = () => {
         } catch (err) {
           console.error("❌ Error ejecutando action():", err);
         }
-      } else {
+      } else if (action !== undefined) {
         console.warn("⚠️ Acción inválida pasada a ensureReady:", action);
       }
     } else {
