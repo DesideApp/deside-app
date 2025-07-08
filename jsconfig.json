@@ -5,7 +5,7 @@
       "@components/*": ["src/components/*"],
       "@pages/*": ["src/pages/*"],
       "@main": ["src/main"], 
-      "@Main": ["src/Main"]
+      "@Layout": ["src/Layout"]
     }
   },
   "include": ["src/**/*"]

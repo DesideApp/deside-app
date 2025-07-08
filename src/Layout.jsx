@@ -5,7 +5,7 @@ import Home from "./pages/Home.jsx";
 import Chat from "./pages/chat/Chat.jsx";
 import BottomBar from "./components/layout/BottomBar.jsx";
 
-function Main() {
+function Layout() {
     return (
         <>
             <Header />
@@ -20,4 +20,4 @@ function Main() {
     );
 }
 
-export default Main;
+export default Layout;

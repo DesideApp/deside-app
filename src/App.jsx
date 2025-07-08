@@ -1,14 +1,14 @@
 import React from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { ServerProvider } from "./contexts/ServerContext.jsx";
-import Main from "./Main.jsx";
+import Layout from "./Layout.jsx";
 import NotificationContainer from "./components/common/NotificationContainer.jsx"; // ✅ Importación añadida
 
 function App() {
     return (
         <ServerProvider>
             <Router>
-                <Main />
+                <Layout />
                 <NotificationContainer />
             </Router>
         </ServerProvider>
