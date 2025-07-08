@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "vercel-build": "npm install --force && npm run build"
+    "vercel-build": "rm -rf package-lock.json node_modules && npm install && npm run build"
   },
   "keywords": [],
   "author": "",
