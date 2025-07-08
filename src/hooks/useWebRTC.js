@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { apiRequest as fetchWithAuth } from "../services/apiService.js"; // ✅ API centralizada
+import { apiRequest as fetchWithAuth } from "../services/apiService.js";
 
 const useWebRTC = (selectedContact, walletAddress) => {
   const [messages, setMessages] = useState([]);
-  const [connectionStatus, setConnectionStatus] = useState("idle"); // ✅ Estado de conexión
+  const [connectionStatus, setConnectionStatus] = useState("idle");
   const peerRef = useRef(null);
   const dataChannelRef = useRef(null);
   const isReconnecting = useRef(false);
 
-  // ✅ **Verificar si el contacto está confirmado antes de iniciar WebRTC**
   const validateContactStatus = useCallback(async () => {
     try {
       const response = await fetchWithAuth(`/api/contacts/status/${selectedContact}`);
@@ -23,7 +22,6 @@ const useWebRTC = (selectedContact, walletAddress) => {
     }
   }, [selectedContact]);
 
-  // ✅ **Inicializar WebRTC solo si el contacto está confirmado**
   const initializeWebRTC = useCallback(async () => {
     if (peerRef.current) {
       console.log("🔵 WebRTC ya inicializado. Evitando duplicación.");
@@ -44,7 +42,23 @@ const useWebRTC = (selectedContact, walletAddress) => {
     peer.ondatachannel = (event) => {
       dataChannelRef.current = event.channel;
       dataChannelRef.current.onmessage = (e) => {
-        setMessages((prev) => [...prev, { sender: "peer", text: e.data }]);
+        try {
+          const parsed = JSON.parse(e.data);
+          setMessages((prev) => [
+            ...prev,
+            {
+              sender: "peer",
+              ...parsed,
+            },
+          ]);
+        } catch (error) {
+          console.error("❌ Error al parsear mensaje WebRTC:", error);
+          // fallback: tratarlo como texto plano
+          setMessages((prev) => [
+            ...prev,
+            { sender: "peer", text: e.data },
+          ]);
+        }
       };
       setConnectionStatus("connected");
     };
@@ -60,7 +74,6 @@ const useWebRTC = (selectedContact, walletAddress) => {
     peerRef.current = peer;
   }, [validateContactStatus, selectedContact]);
 
-  // 🔄 **Intentar reconexión automática solo si el contacto sigue confirmado**
   const attemptReconnection = useCallback(async () => {
     console.log("🔄 Intentando reconexión...");
     if (await validateContactStatus()) {
@@ -71,23 +84,36 @@ const useWebRTC = (selectedContact, walletAddress) => {
     }
   }, [validateContactStatus, initializeWebRTC]);
 
-  // 💬 **Enviar mensaje solo si el contacto sigue confirmado y el canal está activo**
-  const sendMessage = useCallback(async (text) => {
-    if (!(await validateContactStatus())) {
-      console.error("❌ No se puede enviar el mensaje. El contacto ya no está confirmado.");
-      return;
-    }
+  // ✅ AHORA acepta un objeto completo
+  const sendMessage = useCallback(
+    async (messageObject) => {
+      if (!(await validateContactStatus())) {
+        console.error("❌ No se puede enviar el mensaje. El contacto ya no está confirmado.");
+        return;
+      }
 
-    if (!dataChannelRef.current || dataChannelRef.current.readyState !== "open") {
-      console.error("❌ No se puede enviar mensaje, canal de datos no inicializado o cerrado.");
-      return;
-    }
+      if (!dataChannelRef.current || dataChannelRef.current.readyState !== "open") {
+        console.error("❌ No se puede enviar mensaje, canal de datos no inicializado o cerrado.");
+        return;
+      }
 
-    dataChannelRef.current.send(text);
-    setMessages((prev) => [...prev, { sender: "me", text }]);
-  }, [validateContactStatus]);
+      try {
+        dataChannelRef.current.send(JSON.stringify(messageObject));
 
-  // ✅ **Gestión del ciclo de vida del WebRTC**
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "me",
+            ...messageObject,
+          },
+        ]);
+      } catch (error) {
+        console.error("❌ Error al enviar mensaje WebRTC:", error);
+      }
+    },
+    [validateContactStatus]
+  );
+
   useEffect(() => {
     if (selectedContact) {
       initializeWebRTC();

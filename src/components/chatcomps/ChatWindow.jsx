@@ -1,13 +1,21 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import WrittingPanel from "./WrittingPanel";
+import ChatMessages from "./ChatMessages";
 import useWebRTC from "../../hooks/useWebRTC";
 import { io } from "socket.io-client";
 import "./ChatWindow.css";
 
 function ChatWindow({ selectedContact }) {
-  const chatContainerRef = useRef(null);
   const socketRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  const {
+    messages,
+    sendMessage,
+    sendSignal,
+    handleRemoteSignal
+  } = useWebRTC(selectedContact);
 
   // ✅ Inicializar WebSocket solo si hay contacto seleccionado
   const initializeSocket = useCallback(() => {
@@ -19,6 +27,8 @@ function ChatWindow({ selectedContact }) {
     }
 
     console.log("🔵 Conectando a WebSocket...");
+    setIsConnecting(true);
+
     const socket = io(import.meta.env.VITE_WEBSOCKET_URL, {
       transports: ["websocket"],
       withCredentials: true,
@@ -27,26 +37,37 @@ function ChatWindow({ selectedContact }) {
     socket.on("connect", () => {
       console.log("🟢 Conectado al servidor WebSocket");
       setIsConnected(true);
-      socket.emit("register_wallet", selectedContact); // Enviamos la pubkey como ID
+      setIsConnecting(false);
+
+      // ✅ Registramos la wallet para identificar este usuario
+      socket.emit("register_wallet", selectedContact);
     });
 
     socket.on("disconnect", () => {
       console.warn("🔴 Desconectado del servidor WebSocket");
       setIsConnected(false);
+      setIsConnecting(false);
+    });
+
+    // ✅ Recibir señales WebRTC desde el socket
+    socket.on("webrtc_signal", ({ from, signal }) => {
+      console.log("📡 Señal WebRTC recibida de:", from, signal);
+      handleRemoteSignal(signal);
     });
 
     socketRef.current = socket;
-  }, [selectedContact]);
+  }, [selectedContact, handleRemoteSignal]);
 
-  // ✅ Chat y mensajes (WebRTC)
-  const { messages, sendMessage } = useWebRTC(selectedContact);
-
-  // ✅ Scroll automático al nuevo mensaje
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+  // ✅ Enviar señal WebRTC vía WebSocket
+  const emitSignal = (signal) => {
+    if (socketRef.current && selectedContact) {
+      console.log("📤 Enviando señal WebRTC a:", selectedContact, signal);
+      socketRef.current.emit("webrtc_signal", {
+        to: selectedContact,
+        signal,
+      });
     }
-  }, [messages]);
+  };
 
   // ✅ Conectar socket cuando cambia el contacto
   useEffect(() => {
@@ -63,6 +84,12 @@ function ChatWindow({ selectedContact }) {
     };
   }, [initializeSocket, selectedContact]);
 
+  // ✅ Integrar signaling con WebRTC
+  useEffect(() => {
+    if (!selectedContact) return;
+    sendSignal.current = emitSignal;
+  }, [selectedContact]);
+
   return (
     <>
       <header className="chat-header">
@@ -74,31 +101,37 @@ function ChatWindow({ selectedContact }) {
             </span>
           </h3>
         ) : (
-          <h3 className="chat-header-placeholder">💬 Select a contact</h3>
+          <h3 className="chat-header-placeholder">
+            💬 Select a contact
+          </h3>
         )}
-        <p className={`connection-status ${isConnected ? "connected" : "disconnected"}`}>
-          {isConnected ? "🟢 Connected" : "🔴 Disconnected"}
+        <p
+          className={`connection-status ${
+            isConnected
+              ? "connected"
+              : isConnecting
+              ? "connecting"
+              : "disconnected"
+          }`}
+        >
+          {isConnected
+            ? "🟢 Connected"
+            : isConnecting
+            ? "🟡 Connecting..."
+            : "🔴 Disconnected"}
         </p>
       </header>
 
-      <main className="chat-messages" ref={chatContainerRef}>
-        {selectedContact ? (
-          messages.length > 0 ? (
-            messages.map((msg, index) => (
-              <div key={index} className={`chat-message ${msg.sender === "me" ? "sent" : "received"}`}>
-                {msg.text}
-              </div>
-            ))
-          ) : (
-            <p className="no-messages">🔹 No messages yet.</p>
-          )
-        ) : (
-          <p className="chat-placeholder">🔍 Select a contact to start chatting.</p>
-        )}
-      </main>
+      <ChatMessages
+        messages={messages}
+        selectedContact={selectedContact}
+      />
 
       <div className="writting-panel-container">
-        <WrittingPanel onSendMessage={sendMessage} disabled={!isConnected} />
+        <WrittingPanel
+          onSendMessage={sendMessage}
+          disabled={!isConnected}
+        />
       </div>
     </>
   );

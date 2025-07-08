@@ -1,11 +1,13 @@
 import React, { useState, memo } from "react";
 import { Users, MessageCircle, UserPlus, Bell } from "lucide-react";
 import useContactManager from "../../hooks/useContactManager";
-import ContactRequests from "../chatcomps/ContactRequests";
+import NotificationPanel from "../chatcomps/NotificationPanel";
 import AddContactForm from "../chatcomps/AddContactForm";
+import ContactList from "../chatcomps/ContactList";
+import ConversationList from "../chatcomps/ConversationList";
 import "./LeftPanel.css";
 
-const LeftPanel = () => {
+const LeftPanel = ({ onSelectContact }) => {
   const { confirmedContacts } = useContactManager();
   const [activeTab, setActiveTab] = useState("chats");
 
@@ -17,6 +19,24 @@ const LeftPanel = () => {
     requests: "Notifications",
   };
 
+  // ✅ Simulamos conversaciones (esto en el futuro vendrá de la API / backups)
+  const conversations = [
+    {
+      pubkey: "ABCDEFG1234567890",
+      nickname: "Satoshi",
+      lastMessage: "Hey, how are you?",
+      timestamp: new Date().toISOString(),
+      avatar: null,
+    },
+    {
+      pubkey: "HIJKLMN9876543210",
+      nickname: null,
+      lastMessage: "Let's meet at 5pm.",
+      timestamp: new Date().toISOString(),
+      avatar: null,
+    },
+  ];
+
   return (
     <>
       {/* ✅ Título dinámico según pestaña activa */}
@@ -25,20 +45,22 @@ const LeftPanel = () => {
       </header>
 
       <div className="left-panel-content">
+        {activeTab === "chats" && (
+          <ConversationList
+            conversations={conversations}
+            onConversationSelected={onSelectContact}
+          />
+        )}
+
         {activeTab === "contacts" && (
-          <ul className="contact-list">
-            {confirmedContacts.map(({ wallet }) => (
-              <li key={wallet} className="contact-item">
-                {wallet.slice(0, 6)}...{wallet.slice(-4)}
-              </li>
-            ))}
-          </ul>
+          <ContactList
+            confirmedContacts={confirmedContacts}
+            onContactSelected={onSelectContact}
+          />
         )}
 
         {activeTab === "addContact" && <AddContactForm />}
-        {activeTab === "requests" && <ContactRequests />}
-
-        {/* ⚠️ NOTA: 'chats' aún no tiene componente asociado */}
+        {activeTab === "requests" && <NotificationPanel />}
       </div>
 
       <nav className="left-panel-nav">
