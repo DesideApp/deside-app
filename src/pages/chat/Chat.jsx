@@ -10,13 +10,13 @@ function Chat() {
   console.log("📌 ensureReady hook cargado.");
 
   const renderLeftPanel = () => (
-    <div className="left-panel-container" onClick={ensureReady}>
+    <div className="left-panel-container" onClick={() => ensureReady()}>
       <LeftPanel />
     </div>
   );
 
   const renderChatWindow = () => (
-    <div className="chat-window-container" onClick={ensureReady}>
+    <div className="chat-window-container" onClick={() => ensureReady()}>
       <ChatWindow />
     </div>
   );
