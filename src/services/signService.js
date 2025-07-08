@@ -1,4 +1,4 @@
-import { getProvider } from "./walletService";
+import { getProvider } from "./walletProviders.js";
 import bs58 from "bs58";
 
 /**
