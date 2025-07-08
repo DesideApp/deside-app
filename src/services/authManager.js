@@ -100,26 +100,42 @@ export const useAuthManager = () => {
   // 🚀 Flujo principal
   const ensureReady = async (action) => {
     console.log("🔎 ensureReady fue llamado con:", action);
-
+  
     if (isExplicitLogout()) {
       console.warn("🚫 Logout explícito detectado → mostrando modal de wallet...");
       window.dispatchEvent(new Event("openWalletModal")); // Solo visual
       return;
     }
-
+  
     await initState();
-
+  
     if (!internalState.walletConnected) {
       console.log("🔌 No conectado → Conectando wallet...");
       const result = await connectWallet();
       if (!result?.pubkey) return;
       await initState();
     }
-
+  
+    // ✅ NUEVO → check de lastAuthCheck
+    const lastCheck = localStorage.getItem('lastAuthCheck');
+    if (lastCheck && Date.now() - lastCheck < 30 * 60 * 1000) {
+      console.log("✅ Omitiendo consulta a /status → sesión reciente.");
+      internalState.walletAuthed = true;
+      internalState.jwtValid = true;
+      if (typeof action === "function") {
+        try {
+          action();
+        } catch (err) {
+          console.error("❌ Error ejecutando action():", err);
+        }
+      }
+      return;
+    }
+  
     if (!internalState.walletAuthed) {
       console.log("🔎 Consultando backend para ver si ya estamos autenticados...");
       const isAuthed = await checkAuthStatus();
-
+  
       if (!isAuthed) {
         console.log("✍️ No autenticado → Ejecutando authenticateWallet()...");
         const result = await authenticateWallet();
@@ -129,17 +145,23 @@ export const useAuthManager = () => {
         }
         internalState.walletAuthed = true;
         internalState.jwtValid = true;
+        localStorage.setItem('lastAuthCheck', Date.now());
         await syncAuthStatus();
+      } else {
+        localStorage.setItem('lastAuthCheck', Date.now());
       }
     }
-
+  
     if (!internalState.jwtValid) {
       console.log("♻️ JWT caducado → Renovando...");
       const refreshed = await renewToken();
       internalState.jwtValid = !!refreshed;
-      if (refreshed) await syncAuthStatus();
+      if (refreshed) {
+        localStorage.setItem('lastAuthCheck', Date.now());
+        await syncAuthStatus();
+      }
     }
-
+  
     if (
       internalState.walletConnected &&
       internalState.walletAuthed &&
@@ -159,6 +181,7 @@ export const useAuthManager = () => {
       console.warn("⚠️ No se pudo completar el flujo de autenticación.");
     }
   };
+  
 
   return {
     isAuthenticated,
