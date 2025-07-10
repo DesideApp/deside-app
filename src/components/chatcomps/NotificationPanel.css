@@ -1,22 +1,38 @@
-.notification-panel-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 500px;
-    padding: 10px;
-    border-radius: 15px;
+.icon-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background-color: #FF304F;
+  color: #fff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  line-height: 1;
+  box-shadow: 0 0 5px rgba(255, 48, 79, 0.5);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+      transform: scale(1);
+      box-shadow: 0 0 5px rgba(255, 48, 79, 0.5);
   }
-  
-  .notification-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: var(--text-color);
-    margin-bottom: 16px;
-    text-align: center;
+  50% {
+      transform: scale(1.2);
+      box-shadow: 0 0 10px rgba(255, 48, 79, 0.8);
   }
-  
-  .notifications-section {
-    width: 100%;
+  100% {
+      transform: scale(1);
+      box-shadow: 0 0 5px rgba(255, 48, 79, 0.5);
   }
-  
+}

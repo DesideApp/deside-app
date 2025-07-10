@@ -3,19 +3,48 @@ import WrittingPanel from "./WrittingPanel";
 import ChatMessages from "./ChatMessages";
 import useWebRTC from "../../hooks/useWebRTC";
 import { io } from "socket.io-client";
+import useBackupManager from "../../hooks/useBackupManager";
 import "./ChatWindow.css";
 
 function ChatWindow({ selectedContact }) {
   const socketRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [historyMessages, setHistoryMessages] = useState([]);
 
   const {
-    messages,
+    messages: liveMessages,
     sendMessage,
     sendSignal,
     handleRemoteSignal
   } = useWebRTC(selectedContact);
+
+  const { loadChat } = useBackupManager();
+
+  // ✅ Load chat history when a contact is selected
+  useEffect(() => {
+    const fetchHistory = async () => {
+      if (!selectedContact) {
+        setHistoryMessages([]);
+        return;
+      }
+
+      try {
+        console.log("🔹 Loading chat history from BackupManager:", selectedContact);
+        const history = await loadChat(selectedContact);
+        console.log("✅ History loaded:", history);
+        setHistoryMessages(history || []);
+      } catch (error) {
+        console.error("❌ Error loading chat history:", error);
+        setHistoryMessages([]);
+      }
+    };
+
+    fetchHistory();
+  }, [selectedContact, loadChat]);
+
+  // ✅ Merge history + live messages
+  const allMessages = [...historyMessages, ...liveMessages];
 
   // ✅ Inicializar WebSocket solo si hay contacto seleccionado
   const initializeSocket = useCallback(() => {
@@ -123,7 +152,7 @@ function ChatWindow({ selectedContact }) {
       </header>
 
       <ChatMessages
-        messages={messages}
+        messages={allMessages}
         selectedContact={selectedContact}
       />
 

@@ -1,119 +1,32 @@
-import React, { useState, useCallback, useRef, useEffect, memo } from "react";
-import { checkAuthStatus } from "../../services/apiService.js";
-import { sendContactRequest, fetchContacts } from "../../services/contactService.js";
-import { searchUserByPubkey } from "../../services/userService.js";
-import { notify } from "../../services/notificationService.js";
+import React, { memo } from "react";
 import { FaCheckCircle, FaTimes } from "react-icons/fa";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import useAddContactManager from "../../hooks/useAddContactManager";
 import "./AddContactForm.css";
 
+const formatPubkey = (wallet) => {
+  if (!wallet) return "";
+  return `${wallet.slice(0, 6)}...${wallet.slice(-4)}`;
+};
+
 const AddContactForm = ({ onContactAdded }) => {
-  const [pubkey, setPubkey] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [sentRequests, setSentRequests] = useState([]);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const textareaRef = useRef(null);
+  const {
+    pubkey,
+    setPubkey,
+    isValidPubkey,
+    isLoading,
+    textareaRef,
+    handleAddContact,
+    sentRequests,
+    isExpanded,
+    setIsExpanded,
+    clearInput,
+  } = useAddContactManager(onContactAdded);
 
-  const isValidPubkey = /^([1-9A-HJ-NP-Za-km-z]{32,44})$/.test(pubkey.trim());
-
-  useEffect(() => {
-    if (textareaRef.current) {
-      const textarea = textareaRef.current;
-      textarea.style.height = "50px";
-      if (textarea.scrollHeight > textarea.clientHeight) {
-        textarea.style.height = `${textarea.scrollHeight}px`;
-      }
-    }
-  }, [pubkey]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchSentRequests = async () => {
-      try {
-        const contacts = await fetchContacts();
-        if (isMounted) {
-          setSentRequests(contacts.outgoing || []);
-        }
-      } catch (error) {
-        console.error("❌ Error al obtener solicitudes enviadas:", error);
-      }
-    };
-
-    fetchSentRequests();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const clearInput = () => setPubkey("");
-
-  const handleAddContact = useCallback(async () => {
-    const trimmedPubkey = pubkey.trim();
-
-    if (!/^([1-9A-HJ-NP-Za-km-z]{32,44})$/.test(trimmedPubkey)) {
-      notify("❌ Clave pública inválida.", "error");
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const { isAuthenticated } = await checkAuthStatus();
-      if (!isAuthenticated) {
-        notify("⚠️ You must be logged in to add contacts.", "error");
-        return;
-      }
-
-      const result = await searchUserByPubkey(trimmedPubkey);
-
-      if (result.error) {
-        notify(result.message, "error");
-        return;
-      }
-
-      if (!result.registered) {
-        notify("⚠️ This wallet is not registered on Deside.", "error");
-        return;
-      }
-
-      if (result.relationship === "confirmed") {
-        notify("⚠️ This user is already your contact.", "info");
-        return;
-      }
-
-      if (result.relationship === "pending") {
-        notify("⚠️ You already have a pending request with this user.", "info");
-        return;
-      }
-
-      if (result.blocked) {
-        notify("⚠️ This user is blocked.", "error");
-        return;
-      }
-
-      // ✅ Mostrar nickname si existe
-      if (result.nickname) {
-        notify(`✅ User found: ${result.nickname}`, "success");
-      } else {
-        notify("✅ User found.", "success");
-      }
-
-      await sendContactRequest(trimmedPubkey);
-      notify("✅ Request sent successfully.", "success");
-      setPubkey("");
-      onContactAdded();
-
-      // ✅ Refrescar lista de solicitudes enviadas tras enviar
-      const contacts = await fetchContacts();
-      setSentRequests(contacts.outgoing || []);
-    } catch (error) {
-      console.error("❌ Error sending request:", error);
-      notify("❌ Error sending request.", "error");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [pubkey, onContactAdded]);
+  const handleClear = () => {
+    clearInput();
+    textareaRef.current?.focus();
+  };
 
   return (
     <div className="add-contact-container">
@@ -126,13 +39,21 @@ const AddContactForm = ({ onContactAdded }) => {
           onChange={(e) => setPubkey(e.target.value.slice(0, 88))}
           placeholder="Friend's Wallet"
           disabled={isLoading}
+          aria-label="Friend's wallet pubkey"
         />
         <div className="input-icons">
-          <span className={`validation-icon ${isValidPubkey ? "valid" : "inactive"}`}>
+          <span
+            className={`validation-icon ${isValidPubkey ? "valid" : "inactive"}`}
+            aria-label={isValidPubkey ? "Valid pubkey" : "Invalid pubkey"}
+          >
             <FaCheckCircle />
           </span>
           {pubkey && (
-            <span className="clear-icon" onClick={clearInput}>
+            <span
+              className="clear-icon"
+              onClick={handleClear}
+              aria-label="Clear input"
+            >
               <FaTimes />
             </span>
           )}
@@ -143,13 +64,21 @@ const AddContactForm = ({ onContactAdded }) => {
         className={`send-request-button ${isValidPubkey ? "active" : "inactive"}`}
         onClick={handleAddContact}
         disabled={isLoading || !isValidPubkey}
+        aria-label="Send contact request"
       >
         {isLoading ? "Sending..." : "Send request"}
       </button>
 
-      {/* Sent Requests List */}
-      <div className={`sent-requests-wrapper ${isExpanded ? "expanded" : "collapsed"}`}>
-        <div className="toggle-sent-section" onClick={() => setIsExpanded(!isExpanded)}>
+      <div
+        className={`sent-requests-wrapper ${
+          isExpanded ? "expanded" : "collapsed"
+        }`}
+      >
+        <div
+          className="toggle-sent-section"
+          onClick={() => setIsExpanded(!isExpanded)}
+          aria-label={isExpanded ? "Collapse sent requests" : "Expand sent requests"}
+        >
           <span className="toggle-label">Sent Requests</span>
           {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
         </div>
@@ -160,7 +89,7 @@ const AddContactForm = ({ onContactAdded }) => {
               <ul className="requests-list">
                 {sentRequests.map(({ wallet }) => (
                   <li key={wallet}>
-                    {wallet.slice(0, 6)}...{wallet.slice(-4)} (Pending)
+                    {formatPubkey(wallet)} (Pending)
                   </li>
                 ))}
               </ul>

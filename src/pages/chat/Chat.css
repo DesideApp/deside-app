@@ -1,49 +1,49 @@
 /* 📌 Estructura general */
 .chat-page-container {
-    width: 100vw;
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 0; /* 🔹 Sin padding extra */
+    padding: 0;
     box-sizing: border-box;
+    transition: margin-left 0.3s ease;
 }
 
 /* 📌 Organización de las ventanas */
 .chat-layout {
     width: 100%;
-    max-width: 96vw;
+    max-width: calc(100vw - 200px);
     height: 83vh;
     display: flex;
-    justify-content: space-between; /* 🔹 Distribuye los componentes */
-    align-items: stretch; /* 🔹 Alinea todos los componentes con la misma altura */
-    margin-top: 100px; /* 🔹 Ajuste para centrar todo hacia abajo */
-    margin-bottom: 60px; /* 🔹 Mantiene el balance sin empujar hacia arriba */
+    justify-content: space-between;
+    align-items: stretch;
+    margin-top: 100px;
+    margin-bottom: 60px;
 }
 
 /* 📌 LeftPanel - Manejo de la ubicación y estructura */
 .left-panel-container {
     flex: 1;
     height: 100%;
-    margin-left: 12px; /* 🔹 Espacio entre componentes */
+    margin-left: 12px;
     align-items: center;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     background-color: var(--window-background); 
     padding: 0;
-    box-shadow: var(--window-shadow); /* 🔹 Aplica la sombra exterior */
-    border-radius: 20px; /* 🔹 Bordes redondeados */
-    overflow-y: auto; /* 🔹 Scroll si es necesario */
+    box-shadow: var(--window-shadow);
+    border-radius: 20px;
+    overflow-y: auto;
 }
 
 /* 📌 Contenedor general del chat */
 .chat-window-container {
-    flex: 2; /* 🔹 Ocupa el espacio central del layout */
+    flex: 2;
     height: 100%;
     display: flex;
     flex-direction: column;
-    overflow: visible; /* 🔹 Permitimos que el contenido sobresalga */
+    overflow: visible;
     background-color: transparent;
     position: relative;
 }
@@ -52,18 +52,17 @@
 .right-panel-container {
     flex: 1;
     height: 100%;
-    margin-right: 12px; /* 🔹 Mantiene el margen */
+    margin-right: 12px;
     align-items: center;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     background-color: var(--window-background);
     padding: 0;
-    box-shadow: var(--window-shadow); /* 🔹 Aplica la sombra exterior */
-    border-radius: 20px; /* 🔹 Bordes redondeados */
-    overflow-y: auto; /* 🔹 Scroll si es necesario */
+    box-shadow: var(--window-shadow);
+    border-radius: 20px;
+    overflow-y: auto;
 }
-
 
 /* 📌 Eliminamos cualquier margen o padding innecesario */
 * {
@@ -81,11 +80,15 @@
         width: 90%;
     }
 
-    .contact-list-container,
+    .left-panel-container,
     .chat-window-container,
     .right-panel-container {
         width: 100%;
         height: auto;
         margin: 0;
+    }
+
+    .right-panel-container {
+        display: none;
     }
 }

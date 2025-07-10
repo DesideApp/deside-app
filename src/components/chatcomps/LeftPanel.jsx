@@ -1,6 +1,7 @@
 import React, { useState, memo } from "react";
 import { Users, MessageCircle, UserPlus, Bell } from "lucide-react";
 import useContactManager from "../../hooks/useContactManager";
+import useConversationManager from "../../hooks/useConversationManager";
 import NotificationPanel from "../chatcomps/NotificationPanel";
 import AddContactForm from "../chatcomps/AddContactForm";
 import ContactList from "../chatcomps/ContactList";
@@ -8,10 +9,43 @@ import ConversationList from "../chatcomps/ConversationList";
 import "./LeftPanel.css";
 
 const LeftPanel = ({ onSelectContact }) => {
-  const { confirmedContacts } = useContactManager();
-  const [activeTab, setActiveTab] = useState("chats");
+  const {
+    confirmedContacts,
+    receivedRequests,
+    handleAddContact,
+    handleAcceptRequest,
+    handleRejectRequest,
+    loading: contactsLoading,
+  } = useContactManager();
 
-  // 🔹 Diccionario de títulos por pestaña
+  const {
+    conversations,
+    loading: conversationsLoading,
+    refresh,
+  } = useConversationManager();
+
+  const [activeTab, setActiveTab] = useState("chats");
+  const [selectedContactWallet, setSelectedContactWallet] = useState(null);
+  const [selectedConversationPubkey, setSelectedConversationPubkey] = useState(null);
+
+  const isLoading = conversationsLoading || contactsLoading;
+
+  const handleConversationSelect = (pubkey) => {
+    setSelectedConversationPubkey(pubkey);
+    setSelectedContactWallet(null);
+    if (onSelectContact) {
+      onSelectContact(pubkey);
+    }
+  };
+
+  const handleContactSelect = (wallet) => {
+    setSelectedContactWallet(wallet);
+    setSelectedConversationPubkey(null);
+    if (onSelectContact) {
+      onSelectContact(wallet);
+    }
+  };
+
   const tabTitles = {
     chats: "Chats",
     contacts: "Contacts",
@@ -19,48 +53,55 @@ const LeftPanel = ({ onSelectContact }) => {
     requests: "Notifications",
   };
 
-  // ✅ Simulamos conversaciones (esto en el futuro vendrá de la API / backups)
-  const conversations = [
-    {
-      pubkey: "ABCDEFG1234567890",
-      nickname: "Satoshi",
-      lastMessage: "Hey, how are you?",
-      timestamp: new Date().toISOString(),
-      avatar: null,
-    },
-    {
-      pubkey: "HIJKLMN9876543210",
-      nickname: null,
-      lastMessage: "Let's meet at 5pm.",
-      timestamp: new Date().toISOString(),
-      avatar: null,
-    },
-  ];
-
   return (
-    <>
-      {/* ✅ Título dinámico según pestaña activa */}
+    <div className="left-panel-wrapper">
       <header className="left-panel-header">
         <h2 className="left-panel-title">{tabTitles[activeTab]}</h2>
       </header>
 
       <div className="left-panel-content">
-        {activeTab === "chats" && (
-          <ConversationList
-            conversations={conversations}
-            onConversationSelected={onSelectContact}
-          />
+        {isLoading && <p className="left-panel-loading">Loading...</p>}
+
+        {!isLoading && activeTab === "chats" && (
+          <>
+            {conversations.length > 0 ? (
+              <ConversationList
+                conversations={conversations}
+                onConversationSelected={handleConversationSelect}
+                onRefresh={refresh}
+                selectedPubkey={selectedConversationPubkey}
+              />
+            ) : (
+              <p className="no-data-text">No conversations found. Start chatting!</p>
+            )}
+          </>
         )}
 
-        {activeTab === "contacts" && (
-          <ContactList
-            confirmedContacts={confirmedContacts}
-            onContactSelected={onSelectContact}
-          />
+        {!isLoading && activeTab === "contacts" && (
+          <>
+            {confirmedContacts.length > 0 ? (
+              <ContactList
+                confirmedContacts={confirmedContacts}
+                onContactSelected={handleContactSelect}
+                selectedWallet={selectedContactWallet}
+              />
+            ) : (
+              <p className="no-data-text">No contacts yet. Add new friends!</p>
+            )}
+          </>
         )}
 
-        {activeTab === "addContact" && <AddContactForm />}
-        {activeTab === "requests" && <NotificationPanel />}
+        {!isLoading && activeTab === "addContact" && (
+          <AddContactForm onAddContact={handleAddContact} />
+        )}
+
+        {!isLoading && activeTab === "requests" && (
+          <NotificationPanel
+            receivedRequests={receivedRequests}
+            onAcceptRequest={handleAcceptRequest}
+            onRejectRequest={handleRejectRequest}
+          />
+        )}
       </div>
 
       <nav className="left-panel-nav">
@@ -81,7 +122,7 @@ const LeftPanel = ({ onSelectContact }) => {
         <button
           className={activeTab === "addContact" ? "active" : ""}
           onClick={() => setActiveTab("addContact")}
-          aria-label="Add contact"
+          aria-label="Add Contact"
         >
           <UserPlus size={20} />
         </button>
@@ -93,7 +134,7 @@ const LeftPanel = ({ onSelectContact }) => {
           <Bell size={20} />
         </button>
       </nav>
-    </>
+    </div>
   );
 };
 

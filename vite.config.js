@@ -10,6 +10,7 @@ const backendUrl =
 const isProduction = process.env.NODE_ENV === "production";
 
 export default defineConfig({
+  root: "./",
   plugins: [react()],
   define: {
     "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),

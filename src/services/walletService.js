@@ -1,11 +1,6 @@
-/**
- * 📂 walletService.js - Maneja conexión, desconexión y clave pública
- */
-
 import { getProvider, getWalletType } from './walletProviders';
-import bs58 from "bs58"; // Añadir al principio si no está ya
+import bs58 from "bs58";
 
-// Mensajes de error comunes
 const ERROR_MESSAGES = {
   NOT_INSTALLED: (walletType) => `${walletType || 'Unknown Wallet'} no detectada. ¡Instálala primero!`,
   CONNECTION_FAILED: 'Error al conectar la wallet.',
@@ -14,10 +9,10 @@ const ERROR_MESSAGES = {
 
 /**
  * 🔌 Conecta a una wallet (manual o automática silenciosa)
- * @param {Object} [options] Opciones de conexión
- * @param {string} [options.walletType] Tipo de wallet ("phantom", "backpack", "magiceden")
- * @param {boolean} [options.onlyIfTrusted] Si es true, conexión automática silenciosa
- * @returns {Promise<{pubkey: string|null}>} Objeto con PublicKey
+ * @param {Object} [options]
+ * @param {string} [options.walletType]
+ * @param {boolean} [options.onlyIfTrusted]
+ * @returns {Promise<{pubkey: string|null}>}
  */
 export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) => {
   const provider = getProvider(walletType);
@@ -36,7 +31,10 @@ export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) 
     }
 
     if (!provider.publicKey) {
-      if (onlyIfTrusted) return { pubkey: null };
+      if (onlyIfTrusted) {
+        console.log("[WalletService] ⚠️ Conexión silenciosa no autorizada.");
+        return { pubkey: null };
+      }
       throw new Error("PublicKey no disponible tras conexión.");
     }
 
@@ -57,7 +55,7 @@ export const connectWallet = async ({ walletType, onlyIfTrusted = false } = {}) 
 };
 
 /**
- * ❌ Desconecta la wallet activa
+ * 🔒 Desconecta la wallet activa.
  * @returns {Promise<void>}
  */
 export const disconnectWallet = async () => {
@@ -69,8 +67,12 @@ export const disconnectWallet = async () => {
   }
 
   try {
-    await provider.disconnect();
-    console.log('[WalletService] 🔒 Sesión desconectada');
+    if (typeof provider.disconnect === "function") {
+      await provider.disconnect();
+      console.log('[WalletService] 🔒 Wallet desconectada.');
+    } else {
+      console.warn("[WalletService] ⚠️ El proveedor no implementa disconnect().");
+    }
   } catch (error) {
     console.error(`[WalletService] ❌ Error al desconectar: ${error.message}`);
     throw new Error(`${ERROR_MESSAGES.DISCONNECTION_FAILED} ${error.message}`);
@@ -78,7 +80,7 @@ export const disconnectWallet = async () => {
 };
 
 /**
- * ✅ Verifica si hay una wallet conectada
+ * ✅ Verifica si hay una wallet conectada.
  * @returns {boolean}
  */
 export const isConnected = () => {
@@ -87,7 +89,7 @@ export const isConnected = () => {
 };
 
 /**
- * 🔍 Obtiene la clave pública de la wallet conectada
+ * 🔍 Obtiene la clave pública de la wallet conectada.
  * @returns {string|null}
  */
 export const getPublicKey = () => {
@@ -95,22 +97,32 @@ export const getPublicKey = () => {
   return provider?.publicKey?.toString() || null;
 };
 
-// 🔒 Gestión de logout explícito
+// 🔒 Control de logout explícito
 let explicitLogout = false;
 
+/**
+ * Marca logout explícito (p.ej. usuario pulsó salir).
+ */
 export const markExplicitLogout = () => {
   explicitLogout = true;
 };
 
+/**
+ * Limpia estado de logout explícito.
+ */
 export const clearExplicitLogout = () => {
   explicitLogout = false;
 };
 
+/**
+ * Devuelve si el logout fue explícito.
+ * @returns {boolean}
+ */
 export const isExplicitLogout = () => explicitLogout;
 
 /**
- * ✍️ Firma un mensaje de login con la wallet conectada.
- * @param {string} message - Mensaje a firmar
+ * ✍️ Firma un mensaje con la wallet conectada.
+ * @param {string} message
  * @returns {Promise<{signature: string, pubkey: string, message: string}>}
  */
 export const signMessageForLogin = async (message) => {
@@ -127,7 +139,7 @@ export const signMessageForLogin = async (message) => {
 
     const result = {
       pubkey: provider.publicKey.toString(),
-      signature: bs58.encode(signed.signature), // ✅ solo la firma
+      signature: bs58.encode(signed.signature),
       message,
     };
 

@@ -1,6 +1,11 @@
 import React, { useEffect, useRef } from "react";
 import "./ChatWindow.css";
 
+const formatPubkey = (pubkey) => {
+  if (!pubkey) return "";
+  return `${pubkey.slice(0, 6)}...${pubkey.slice(-4)}`;
+};
+
 const ChatMessages = ({ messages, selectedContact }) => {
   const chatContainerRef = useRef(null);
 
@@ -25,10 +30,28 @@ const ChatMessages = ({ messages, selectedContact }) => {
                 msg.sender === "me" ? "sent" : "received"
               }`}
             >
-              {msg.text}
-              {/* 🚀 Futuro: flags visuales */}
-              {msg.isSigned && <span className="message-flag">✔️</span>}
-              {msg.isBackedUp && <span className="message-flag">💾</span>}
+              {msg.sender !== "me" && msg.sender && (
+                <div className="message-sender">
+                  {formatPubkey(msg.sender)}
+                </div>
+              )}
+
+              <div className="message-text">
+                {msg.text}
+              </div>
+
+              <div className="message-flags">
+                {msg.isSigned && (
+                  <span className="message-flag" title="Signed Message">
+                    ✔️
+                  </span>
+                )}
+                {msg.isBackedUp && (
+                  <span className="message-flag" title="Backed Up">
+                    💾
+                  </span>
+                )}
+              </div>
             </div>
           ))
         ) : (

@@ -1,20 +1,23 @@
+/* ✅ WalletMenu overlay con fondo integrado y blur */
 .wallet-menu {
     position: fixed;
     top: 0;
-    right: -100%;
+    right: 0;
     width: 320px;
     height: 100%;
-    background: white;
-    border-left: 0.5px solid #ccc;
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-    transition: right 0.4s ease-in-out, opacity 0.3s ease-in-out;
+    background: var(--background-overlay);
+    border-left: 0.5px solid rgba(0, 0, 0, 0.1);
+    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+    transform: translateX(100%);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
     z-index: 1000;
     padding: 20px;
-    opacity: 0;
+    backdrop-filter: blur(10px);
 }
 
 .wallet-menu.open {
-    right: 0;
+    transform: translateX(0);
     opacity: 1;
 }
 
@@ -24,19 +27,64 @@
     text-align: center;
 }
 
-/* 📌 Contenedor de la dirección */
+/* ✅ Solana logo + network name */
+.wallet-network {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: #9945FF;
+}
+
+.wallet-network svg {
+    min-width: 24px;
+    min-height: 24px;
+}
+
+/* ✅ Balance box */
+.wallet-balance-box {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bubble-background);
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    gap: 4px;
+    margin-bottom: 12px;
+}
+
+.balance-value {
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+
+.balance-unit {
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+}
+
+/* ✅ Wallet address (shortened) */
 .wallet-address-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #f2f2f2;
+    background: var(--bubble-background);
     padding: 10px;
     border-radius: 15px;
-    word-wrap: break-word;
+    word-break: break-all;
     margin-bottom: 15px;
 }
 
-/* 📌 Botón de copiar */
+.wallet-address {
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    margin: 0;
+}
+
+/* ✅ Copy button */
 .copy-button {
     background: none;
     border: none;
@@ -48,8 +96,9 @@
     opacity: 0.7;
 }
 
-/* 📌 Botones de conexión y logout */
-.connect-button, .logout-button {
+/* ✅ Connection and logout buttons */
+.connect-button,
+.logout-button {
     width: 100%;
     padding: 10px 20px;
     background-color: #fc554f;
@@ -64,7 +113,8 @@
     margin-bottom: 10px;
 }
 
-.connect-button:hover, .logout-button:hover {
+.connect-button:hover,
+.logout-button:hover {
     background-color: #fc564f;
     opacity: 0.8;
 }
@@ -77,9 +127,17 @@
     background-color: #e04343;
 }
 
-/* 📌 Mensaje de copia exitosa */
+/* ✅ Copy success message */
 .copy-success {
     font-size: 0.85rem;
     color: #28a745;
     margin-top: 5px;
+}
+
+/* ✅ Responsive WalletMenu */
+@media (max-width: 768px) {
+    .wallet-menu {
+        width: 100%;
+        border-radius: 0;
+    }
 }

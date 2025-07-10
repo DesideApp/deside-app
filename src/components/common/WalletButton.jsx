@@ -8,6 +8,7 @@ import {
 import { getWalletBalance } from "../../services/walletBalanceService.js";
 import WalletMenu from "./WalletMenu";
 import WalletModal from "./WalletModal";
+import { useLayout } from "../../contexts/LayoutContext";
 import "./WalletButton.css";
 
 const WalletButton = memo(() => {
@@ -16,7 +17,9 @@ const WalletButton = memo(() => {
   const [walletState, setWalletState] = useState(getWalletState());
   const [balance, setBalance] = useState(null);
 
-  // Detectar wallet automáticamente al montar
+  const { setLeftbarExpanded } = useLayout();
+
+  // ✅ Detect wallet automatically on mount
   useEffect(() => {
     const initializeWallet = async () => {
       const state = await detectWallet();
@@ -31,36 +34,45 @@ const WalletButton = memo(() => {
     initializeWallet();
   }, []);
 
-  // 🌐 Escucha eventos globales para abrir/cerrar el modal
+  // ✅ Listen for LeftbarOpened → close WalletMenu
   useEffect(() => {
-    const handleOpen = () => {
-      console.log("🌐 Evento recibido: openWalletModal → Abriendo WalletModal...");
-      setIsModalOpen(true);
-    };
-    const handleClose = () => {
-      console.log("🌐 Evento recibido: closeWalletModal → Cerrando WalletModal...");
-      setIsModalOpen(false);
+    const handleLeftbarOpened = () => {
+      setIsMenuOpen(false);
     };
 
-    window.addEventListener("openWalletModal", handleOpen);
-    window.addEventListener("closeWalletModal", handleClose);
-
+    window.addEventListener("leftbarOpened", handleLeftbarOpened);
     return () => {
-      window.removeEventListener("openWalletModal", handleOpen);
-      window.removeEventListener("closeWalletModal", handleClose);
+      window.removeEventListener("leftbarOpened", handleLeftbarOpened);
     };
   }, []);
 
-  // Evento de clic en "Connect Wallet"
+  // ✅ Listen for WalletMenuOpened → collapse LeftBar
+  useEffect(() => {
+    const handleWalletMenuOpened = () => {
+      setLeftbarExpanded(false);
+    };
+
+    window.addEventListener("walletMenuOpened", handleWalletMenuOpened);
+    return () => {
+      window.removeEventListener("walletMenuOpened", handleWalletMenuOpened);
+    };
+  }, [setLeftbarExpanded]);
+
+  // ✅ Handle Connect / Toggle WalletMenu
   const handleConnectClick = () => {
     if (!walletState.pubkey) {
       setIsModalOpen(true);
     } else {
+      window.dispatchEvent(new Event("walletMenuOpened"));
       setIsMenuOpen((prev) => !prev);
     }
   };
 
-  // Seleccionar wallet desde modal
+  const handleMenuToggle = () => {
+    window.dispatchEvent(new Event("walletMenuOpened"));
+    setIsMenuOpen((prev) => !prev);
+  };
+
   const handleWalletSelection = async (walletType) => {
     const result = await handleWalletSelected(walletType);
     setWalletState(result);
@@ -72,10 +84,9 @@ const WalletButton = memo(() => {
       setBalance(null);
     }
 
-    setIsModalOpen(false); // cierre manual (opcional, redundante con evento si quieres dejarlo limpio)
+    setIsModalOpen(false);
   };
 
-  // Logout manual
   const logout = async () => {
     await handleLogoutClick();
     setWalletState({ pubkey: null });
@@ -100,7 +111,7 @@ const WalletButton = memo(() => {
       <div className="menu-button-wrapper">
         <button
           className="menu-button"
-          onClick={() => setIsMenuOpen((prev) => !prev)}
+          onClick={handleMenuToggle}
           aria-label="Toggle Wallet Menu"
         >
           <div className="menu-icon">

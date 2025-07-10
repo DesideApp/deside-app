@@ -1,0 +1,88 @@
+.leftbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 100vh;
+    background-color: var(--window-background);
+    box-shadow: var(--window-shadow);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px 0;
+    z-index: 20;
+    transition: width 0.3s ease;
+  }
+  
+  .leftbar.expanded {
+    width: 200px;
+  }
+  
+  .leftbar-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color);
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .leftbar-icons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .leftbar.expanded .leftbar-icons {
+    align-items: flex-start;
+  }
+  
+  .leftbar-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color);
+    font-size: 24px;
+    padding: 6px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  
+  .leftbar.expanded .leftbar-button {
+    justify-content: flex-start;
+    padding-left: 16px;
+  }
+  
+  .leftbar-button:hover {
+    background-color: var(--bubble-background);
+  }
+  
+  .leftbar-button.active {
+    color: var(--highlight-color);
+  }
+  
+  .leftbar-label {
+    font-size: 0.85rem;
+    color: var(--text-color);
+  }
+  
+  .leftbar-divider {
+    width: 40px;
+    height: 1px;
+    background-color: var(--secondary-text);
+    opacity: 0.3;
+    margin: 20px auto;
+  }
+  
+  .leftbar-wallet {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 10px;
+  }
+  

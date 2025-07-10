@@ -59,6 +59,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
+  color: var(--secondary-text);
 }
 
 /* 📌 Iconos del input */
@@ -83,7 +84,7 @@
 }
 
 .validation-icon.inactive {
-  color: rgba(128, 128, 128, 0.85);
+  color: var(--secondary-text);
 }
 
 .clear-icon {
@@ -125,8 +126,11 @@
 }
 
 .send-request-button.inactive {
-  opacity: 1;
-  cursor: default;
+  background-color: rgba(128, 128, 128, 0.3);
+  color: var(--secondary-text);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
   pointer-events: none;
 }
 
@@ -190,7 +194,7 @@
   width: 100%;
   margin-bottom: 12px;
   padding: 10px 12px;
-  background-color: #f7f7f7;
+  background-color: var(--bubble-background);
   border-radius: 10px;
   box-shadow: inset 0px 1px 4px rgba(0, 0, 0, 0.05);
   max-height: 200px;
@@ -209,21 +213,22 @@
 
 .sent-requests-box li {
   font-size: 0.92rem;
-  background-color: #f0f0f0;
+  background-color: var(--window-background);
   padding: 8px 10px;
   border-radius: 8px;
   text-align: center;
-  color: #444;
+  color: var(--text-color);
   transition: background-color 0.2s ease;
 }
 
 .sent-requests-box li:hover {
-  background-color: #e5e5e5;
+  background-color: var(--bubble-background);
+  filter: brightness(1.1);
 }
 
 .sent-requests-box .no-requests {
   font-size: 0.92rem;
-  color: #777;
+  color: var(--secondary-text);
   text-align: center;
   padding: 6px 0;
 }

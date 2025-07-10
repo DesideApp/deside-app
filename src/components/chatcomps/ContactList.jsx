@@ -2,14 +2,23 @@ import React, { useState, memo } from "react";
 import { FaSearch } from "react-icons/fa";
 import "./ContactList.css";
 
-const ContactList = ({ confirmedContacts = [], onContactSelected }) => {
+const formatPubkey = (wallet) => {
+  if (!wallet) return "";
+  return `${wallet.slice(0, 6)}...${wallet.slice(-4)}`;
+};
+
+const ContactList = ({
+  confirmedContacts = [],
+  onContactSelected,
+  selectedWallet = null,
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredContacts = confirmedContacts.filter((c) => {
     const term = searchTerm.toLowerCase();
     return (
       (c.nickname && c.nickname.toLowerCase().includes(term)) ||
-      c.wallet.toLowerCase().includes(term)
+      c.wallet?.toLowerCase().includes(term)
     );
   });
 
@@ -30,8 +39,12 @@ const ContactList = ({ confirmedContacts = [], onContactSelected }) => {
           {filteredContacts.map((c) => (
             <li
               key={c.wallet}
-              className="contact-item"
-              onClick={() => onContactSelected && onContactSelected(c.wallet)}
+              className={`contact-item ${
+                selectedWallet === c.wallet ? "active" : ""
+              }`}
+              onClick={() =>
+                onContactSelected && onContactSelected(c.wallet)
+              }
             >
               {c.avatar && (
                 <img
@@ -42,8 +55,8 @@ const ContactList = ({ confirmedContacts = [], onContactSelected }) => {
               )}
               <span className="contact-name">
                 {c.nickname
-                  ? `${c.nickname} (${c.wallet.slice(0, 6)}...${c.wallet.slice(-4)})`
-                  : `${c.wallet.slice(0, 6)}...${c.wallet.slice(-4)}`}
+                  ? `${c.nickname} (${formatPubkey(c.wallet)})`
+                  : formatPubkey(c.wallet)}
               </span>
             </li>
           ))}

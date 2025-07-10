@@ -1,6 +1,6 @@
 import { getCSRFTokenFromCookie, clearSession } from "./tokenService.js";
 
-const API_BASE_URL = "https://backend-deside.onrender.com";
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:5000";
 const cache = new Map();
 const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutos
 
@@ -9,19 +9,22 @@ const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutos
  */
 export async function apiRequest(endpoint, options = {}, useCache = false) {
   if (!endpoint) throw new Error("❌ API Request sin endpoint definido.");
-  const requestUrl = `${API_BASE_URL.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
 
-  // ✅ Verificar caché solo si se permite
+  const requestUrl = `${API_BASE_URL}/${endpoint.replace(/^\//, "")}`;
   const cacheKey = `${requestUrl}:${JSON.stringify(options)}`;
+
+  // ✅ Devolver de caché si está permitido y válido
   if (useCache && cache.has(cacheKey)) {
     const cachedData = cache.get(cacheKey);
     if (Date.now() - cachedData.timestamp <= CACHE_EXPIRATION) {
+      console.log(`✅ Respuesta cacheada para ${requestUrl}`);
       return cachedData.data;
     }
   }
 
   try {
     const csrfToken = getCSRFTokenFromCookie();
+
     const headers = {
       "Content-Type": "application/json",
       ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
@@ -34,6 +37,11 @@ export async function apiRequest(endpoint, options = {}, useCache = false) {
       headers,
     });
 
+    // Si es respuesta vacía (204 No Content)
+    if (response.status === 204) {
+      return {};
+    }
+
     if (!response.ok) {
       if (response.status === 401) {
         console.warn("⚠️ Sesión expirada. Se requiere login manual.");
@@ -42,13 +50,20 @@ export async function apiRequest(endpoint, options = {}, useCache = false) {
       }
 
       const errorData = await response.json().catch(() => ({ message: "Error desconocido" }));
-      return { error: true, statusCode: response.status, message: errorData.message || response.statusText };
+      console.error(`❌ API error [${response.status}]:`, errorData.message);
+      return {
+        error: true,
+        statusCode: response.status,
+        message: errorData.message || response.statusText,
+      };
     }
 
     const responseData = await response.json();
     if (useCache) cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
+
     return responseData;
   } catch (error) {
+    console.error("❌ API Request error:", error.message);
     return { error: true, message: error.message || "Error en la API" };
   }
 }
