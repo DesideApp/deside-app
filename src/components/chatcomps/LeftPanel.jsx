@@ -30,8 +30,11 @@ const LeftPanel = ({ onSelectContact }) => {
     loadPreviews,
     isPremium,
     backupData,
-    backupData: { pubkey } = {},
   } = useBackupManager();
+
+  const pubkey = backupData?.pubkey;
+  const encryptionKey = backupData?.encryptionKey;
+  const localPreviews = backupData?.metadata?.recentConversations || [];
 
   const [activeTab, setActiveTab] = useState("chats");
   const [selectedContactWallet, setSelectedContactWallet] = useState(null);
@@ -42,17 +45,13 @@ const LeftPanel = ({ onSelectContact }) => {
   const handleConversationSelect = (pubkey) => {
     setSelectedConversationPubkey(pubkey);
     setSelectedContactWallet(null);
-    if (onSelectContact) {
-      onSelectContact(pubkey);
-    }
+    onSelectContact?.(pubkey);
   };
 
   const handleContactSelect = (wallet) => {
     setSelectedContactWallet(wallet);
     setSelectedConversationPubkey(null);
-    if (onSelectContact) {
-      onSelectContact(wallet);
-    }
+    onSelectContact?.(wallet);
   };
 
   const tabTitles = {
@@ -76,7 +75,7 @@ const LeftPanel = ({ onSelectContact }) => {
             {conversations.length > 0 ? (
               <ConversationList
                 conversations={conversations}
-                previews={backupData?.metadata?.recentConversations || []}
+                previews={localPreviews}
                 onConversationSelected={handleConversationSelect}
                 onRefresh={refresh}
                 selectedPubkey={selectedConversationPubkey}
@@ -88,7 +87,7 @@ const LeftPanel = ({ onSelectContact }) => {
                 </p>
                 <ConverList
                   pubkey={pubkey}
-                  encryptionKey={backupData?.encryptionKey}
+                  encryptionKey={encryptionKey}
                   onSelect={handleConversationSelect}
                 />
               </>
@@ -98,10 +97,10 @@ const LeftPanel = ({ onSelectContact }) => {
 
         {!isLoading && activeTab === "contacts" && (
           <>
-            {confirmedContacts.length > 0 || (backupData?.metadata?.recentConversations?.length > 0) ? (
+            {confirmedContacts.length > 0 || localPreviews.length > 0 ? (
               <ContactList
                 confirmedContacts={confirmedContacts}
-                previews={backupData?.metadata?.recentConversations || []}
+                previews={localPreviews}
                 onContactSelected={handleContactSelect}
                 selectedWallet={selectedContactWallet}
               />
