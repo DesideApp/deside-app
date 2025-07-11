@@ -4,6 +4,7 @@ import ChatMessages from "./ChatMessages";
 import useWebRTC from "../../hooks/useWebRTC";
 import { io } from "socket.io-client";
 import useBackupManager from "../../hooks/useBackupManager";
+import { notify } from "../../services/notificationService.js";
 import "./ChatWindow.css";
 
 function ChatWindow({ selectedContact }) {
@@ -11,6 +12,7 @@ function ChatWindow({ selectedContact }) {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [historyMessages, setHistoryMessages] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   const {
     messages: liveMessages,
@@ -21,6 +23,25 @@ function ChatWindow({ selectedContact }) {
 
   const { loadChat } = useBackupManager();
 
+  /**
+   * ✅ Merge messages intelligently
+   */
+  const mergeMessages = (history, live) => {
+    const seen = new Set();
+    const combined = [...history, ...live].filter((msg) => {
+      const key = msg.id || JSON.stringify(msg);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    return combined.sort((a, b) => {
+      const tA = new Date(a.timestamp || 0).getTime();
+      const tB = new Date(b.timestamp || 0).getTime();
+      return tA - tB;
+    });
+  };
+
   // ✅ Load chat history when a contact is selected
   useEffect(() => {
     const fetchHistory = async () => {
@@ -29,6 +50,8 @@ function ChatWindow({ selectedContact }) {
         return;
       }
 
+      setLoadingHistory(true);
+
       try {
         console.log("🔹 Loading chat history from BackupManager:", selectedContact);
         const history = await loadChat(selectedContact);
@@ -36,15 +59,17 @@ function ChatWindow({ selectedContact }) {
         setHistoryMessages(history || []);
       } catch (error) {
         console.error("❌ Error loading chat history:", error);
+        notify("Error loading chat history.", "error");
         setHistoryMessages([]);
+      } finally {
+        setLoadingHistory(false);
       }
     };
 
     fetchHistory();
   }, [selectedContact, loadChat]);
 
-  // ✅ Merge history + live messages
-  const allMessages = [...historyMessages, ...liveMessages];
+  const allMessages = mergeMessages(historyMessages, liveMessages);
 
   // ✅ Inicializar WebSocket solo si hay contacto seleccionado
   const initializeSocket = useCallback(() => {
@@ -68,17 +93,19 @@ function ChatWindow({ selectedContact }) {
       setIsConnected(true);
       setIsConnecting(false);
 
-      // ✅ Registramos la wallet para identificar este usuario
-      socket.emit("register_wallet", selectedContact);
+      // ✅ Registramos la wallet solo si está conectado
+      if (socket.connected) {
+        socket.emit("register_wallet", selectedContact);
+      }
     });
 
     socket.on("disconnect", () => {
       console.warn("🔴 Desconectado del servidor WebSocket");
       setIsConnected(false);
       setIsConnecting(false);
+      notify("Disconnected from chat server.", "error");
     });
 
-    // ✅ Recibir señales WebRTC desde el socket
     socket.on("webrtc_signal", ({ from, signal }) => {
       console.log("📡 Señal WebRTC recibida de:", from, signal);
       handleRemoteSignal(signal);
@@ -87,18 +114,19 @@ function ChatWindow({ selectedContact }) {
     socketRef.current = socket;
   }, [selectedContact, handleRemoteSignal]);
 
-  // ✅ Enviar señal WebRTC vía WebSocket
   const emitSignal = (signal) => {
-    if (socketRef.current && selectedContact) {
+    if (socketRef.current && selectedContact && socketRef.current.connected) {
       console.log("📤 Enviando señal WebRTC a:", selectedContact, signal);
       socketRef.current.emit("webrtc_signal", {
         to: selectedContact,
         signal,
       });
+    } else {
+      console.warn("❌ Socket not connected. Cannot send signal.");
+      notify("Connection lost. Cannot send signal.", "error");
     }
   };
 
-  // ✅ Conectar socket cuando cambia el contacto
   useEffect(() => {
     if (selectedContact) {
       initializeSocket();
@@ -113,7 +141,6 @@ function ChatWindow({ selectedContact }) {
     };
   }, [initializeSocket, selectedContact]);
 
-  // ✅ Integrar signaling con WebRTC
   useEffect(() => {
     if (!selectedContact) return;
     sendSignal.current = emitSignal;
@@ -150,6 +177,12 @@ function ChatWindow({ selectedContact }) {
             : "🔴 Disconnected"}
         </p>
       </header>
+
+      {loadingHistory && (
+        <div className="loading-history text-gray-500 text-sm">
+          Loading chat history...
+        </div>
+      )}
 
       <ChatMessages
         messages={allMessages}

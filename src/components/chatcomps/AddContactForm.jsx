@@ -2,6 +2,7 @@ import React, { memo } from "react";
 import { FaCheckCircle, FaTimes } from "react-icons/fa";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import useAddContactManager from "../../hooks/useAddContactManager";
+import { notify } from "../../services/notificationService.js";
 import "./AddContactForm.css";
 
 const formatPubkey = (wallet) => {
@@ -28,6 +29,23 @@ const AddContactForm = ({ onContactAdded }) => {
     textareaRef.current?.focus();
   };
 
+  const handleInputChange = (e) => {
+    const clean = e.target.value
+      .replace(/\s+/g, "")        // quitar espacios y saltos de línea
+      .slice(0, 88);
+    setPubkey(clean);
+  };
+
+  const handleSendRequest = async () => {
+    try {
+      await handleAddContact();
+      notify("Contact request sent successfully!", "success");
+    } catch (e) {
+      console.error(e);
+      notify("Failed to send contact request.", "error");
+    }
+  };
+
   return (
     <div className="add-contact-container">
       <h2 className="contact-title">Add Contact</h2>
@@ -36,7 +54,7 @@ const AddContactForm = ({ onContactAdded }) => {
         <textarea
           ref={textareaRef}
           value={pubkey}
-          onChange={(e) => setPubkey(e.target.value.slice(0, 88))}
+          onChange={handleInputChange}
           placeholder="Friend's Wallet"
           disabled={isLoading}
           aria-label="Friend's wallet pubkey"
@@ -62,7 +80,7 @@ const AddContactForm = ({ onContactAdded }) => {
 
       <button
         className={`send-request-button ${isValidPubkey ? "active" : "inactive"}`}
-        onClick={handleAddContact}
+        onClick={handleSendRequest}
         disabled={isLoading || !isValidPubkey}
         aria-label="Send contact request"
       >
@@ -89,12 +107,12 @@ const AddContactForm = ({ onContactAdded }) => {
               <ul className="requests-list">
                 {sentRequests.map(({ wallet }) => (
                   <li key={wallet}>
-                    {formatPubkey(wallet)} (Pending)
+                    {formatPubkey(wallet)} <span className="pending-label">(Pending)</span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="no-requests">No sent requests.</p>
+              <p className="no-requests text-gray-500">No sent requests.</p>
             )}
           </div>
         )}

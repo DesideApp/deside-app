@@ -2,10 +2,12 @@ import React, { useState, memo } from "react";
 import { Users, MessageCircle, UserPlus, Bell } from "lucide-react";
 import useContactManager from "../../hooks/useContactManager";
 import useConversationManager from "../../hooks/useConversationManager";
+import useBackupManager from "../../hooks/useBackupManager";
 import NotificationPanel from "../chatcomps/NotificationPanel";
 import AddContactForm from "../chatcomps/AddContactForm";
 import ContactList from "../chatcomps/ContactList";
 import ConversationList from "../chatcomps/ConversationList";
+import ConverList from "../chatcomps/ConverList";
 import "./LeftPanel.css";
 
 const LeftPanel = ({ onSelectContact }) => {
@@ -23,6 +25,13 @@ const LeftPanel = ({ onSelectContact }) => {
     loading: conversationsLoading,
     refresh,
   } = useConversationManager();
+
+  const {
+    loadPreviews,
+    isPremium,
+    backupData,
+    backupData: { pubkey } = {},
+  } = useBackupManager();
 
   const [activeTab, setActiveTab] = useState("chats");
   const [selectedContactWallet, setSelectedContactWallet] = useState(null);
@@ -67,21 +76,32 @@ const LeftPanel = ({ onSelectContact }) => {
             {conversations.length > 0 ? (
               <ConversationList
                 conversations={conversations}
+                previews={backupData?.metadata?.recentConversations || []}
                 onConversationSelected={handleConversationSelect}
                 onRefresh={refresh}
                 selectedPubkey={selectedConversationPubkey}
               />
             ) : (
-              <p className="no-data-text">No conversations found. Start chatting!</p>
+              <>
+                <p className="no-data-text">
+                  No conversations from backend. Loading local previews...
+                </p>
+                <ConverList
+                  pubkey={pubkey}
+                  encryptionKey={backupData?.encryptionKey}
+                  onSelect={handleConversationSelect}
+                />
+              </>
             )}
           </>
         )}
 
         {!isLoading && activeTab === "contacts" && (
           <>
-            {confirmedContacts.length > 0 ? (
+            {confirmedContacts.length > 0 || (backupData?.metadata?.recentConversations?.length > 0) ? (
               <ContactList
                 confirmedContacts={confirmedContacts}
+                previews={backupData?.metadata?.recentConversations || []}
                 onContactSelected={handleContactSelect}
                 selectedWallet={selectedContactWallet}
               />
@@ -131,7 +151,12 @@ const LeftPanel = ({ onSelectContact }) => {
           onClick={() => setActiveTab("requests")}
           aria-label="Notifications"
         >
-          <Bell size={20} />
+          <div className="icon-wrapper">
+            <Bell size={20} />
+            {receivedRequests.length > 0 && (
+              <span className="badge">{receivedRequests.length}</span>
+            )}
+          </div>
         </button>
       </nav>
     </div>

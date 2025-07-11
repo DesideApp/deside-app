@@ -9,16 +9,42 @@ const formatPubkey = (wallet) => {
 
 const ContactList = ({
   confirmedContacts = [],
+  previews = [],
   onContactSelected,
   selectedWallet = null,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredContacts = confirmedContacts.filter((c) => {
+  // Construir listado unificado
+  const contactsMap = {};
+
+  for (const c of confirmedContacts) {
+    contactsMap[c.wallet] = {
+      ...c,
+      isContact: true,
+    };
+  }
+
+  for (const p of previews) {
+    if (!contactsMap[p.chatId]) {
+      contactsMap[p.chatId] = {
+        wallet: p.chatId,
+        nickname: null,
+        lastMessageText: p.lastMessageText,
+        lastMessageTimestamp: p.lastMessageTimestamp,
+        isContact: false,
+      };
+    }
+  }
+
+  const allContacts = Object.values(contactsMap);
+
+  const filteredContacts = allContacts.filter((c) => {
     const term = searchTerm.toLowerCase();
     return (
       (c.nickname && c.nickname.toLowerCase().includes(term)) ||
-      c.wallet?.toLowerCase().includes(term)
+      c.wallet?.toLowerCase().includes(term) ||
+      c.lastMessageText?.toLowerCase().includes(term)
     );
   });
 
@@ -54,10 +80,25 @@ const ContactList = ({
                 />
               )}
               <span className="contact-name">
-                {c.nickname
-                  ? `${c.nickname} (${formatPubkey(c.wallet)})`
-                  : formatPubkey(c.wallet)}
+                {c.isContact
+                  ? `${c.nickname || formatPubkey(c.wallet)}`
+                  : `Desconocido (${formatPubkey(c.wallet)})`}
               </span>
+              {c.lastMessageText && (
+                <span className="contact-preview text-gray-500 text-xs block truncate">
+                  {c.lastMessageText}
+                </span>
+              )}
+              {c.isContact && c.premium && (
+                <span className="premium-badge ml-2 bg-yellow-400 text-black px-1 rounded text-xs">
+                  PREMIUM
+                </span>
+              )}
+              {!c.isContact && (
+                <span className="unknown-badge ml-2 bg-red-400 text-white px-1 rounded text-xs">
+                  UNKNOWN
+                </span>
+              )}
             </li>
           ))}
         </ul>
