@@ -7,7 +7,7 @@ import NotificationPanel from "../chatcomps/NotificationPanel";
 import AddContactForm from "../chatcomps/AddContactForm";
 import ContactList from "../chatcomps/ContactList";
 import ConversationList from "../chatcomps/ConversationList";
-import ConverList from "../chatcomps/ConverList";
+import ConverList from "../conversation/ConverList";
 import "./LeftPanel.css";
 
 const LeftPanel = ({ onSelectContact }) => {
