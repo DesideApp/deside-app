@@ -5,11 +5,11 @@ export default function NotificationContainer() {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    const handler = (message, type = "info", duration = 3000, progress = false) => {
+    const handler = ({ message, type = "info", duration = 3000, progress = false }) => {
       const id = Date.now();
 
       setNotifications((prev) => {
-        // Agrupa mensajes idénticos
+        // Agrupar mensajes idénticos
         const existing = prev.find(
           (n) => n.message === message && n.type === type
         );
@@ -31,7 +31,6 @@ export default function NotificationContainer() {
     };
 
     notificationEmitter.on("notify", handler);
-
     return () => {
       notificationEmitter.off("notify", handler);
     };
@@ -73,12 +72,16 @@ export default function NotificationContainer() {
             <div className="w-full h-1 mt-2 bg-white bg-opacity-30 rounded overflow-hidden">
               <div
                 className="h-full bg-white"
-                style={{ width: "100%", animation: `shrink ${notif.duration}ms linear forwards` }}
+                style={{
+                  width: "100%",
+                  animation: `shrink ${notif.duration}ms linear forwards`,
+                }}
               ></div>
             </div>
           )}
         </div>
       ))}
+
       <style jsx>{`
         @keyframes shrink {
           from {

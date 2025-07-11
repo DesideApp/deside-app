@@ -1,100 +1,126 @@
-/* 📌 Header correctamente centrado dentro de chat-window */
+/* 📌 Header centrado dentro de chat-window */
 .chat-header {
-    position: absolute;
-    top: 0;
-    left: 50%; /* 🔥 Lo centramos dentro de chat-window */
-    transform: translateX(-50%); /* 🔥 Asegura que esté realmente centrado */
-    width: 90%; /* 🔹 Hace que sea flexible sin depender de cálculos manuales */
-    max-width: 600px;
-    background-color: var(--window-background);
-    padding: 15px;
-    border-radius: 20px;
-    box-shadow: var(--window-shadow);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
-    color: #333;
-    z-index: 5;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 600px;
+  background-color: var(--window-background);
+  padding: 15px;
+  border-radius: 20px;
+  box-shadow: var(--window-shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  color: #333;
+  z-index: 5;
 }
 
-/* 📌 Placeholder cuando no hay contacto */
 .chat-header-placeholder {
-    color: #bbb;
-    font-weight: 500;
+  color: #bbb;
+  font-weight: 500;
 }
 
 /* 📌 Contenedor de mensajes */
 .chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px;
-    background: none;
-    margin-top: 70px; /* 🔹 Ajuste para que los mensajes no queden ocultos por el header */
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  margin-top: 70px;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
-/* 📌 Contenedor principal del input */
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+/* 📌 Panel de escritura */
 .writting-panel-container {
-    position: absolute;
-    bottom: 0;
-    left: 50%; /* 🔥 Ahora centrado dentro de chat-window */
-    transform: translateX(-50%);
-    width: 90%; /* 🔹 Ajuste dinámico en lugar de restar píxeles fijos */
-    max-width: 600px;
-    display: flex;
-    justify-content: center;
-    z-index: 5;
-    background-color: var(--window-background);
-    padding: 8px 12px;
-    border-radius: 20px;
-    box-shadow: var(--window-shadow);
-    display: flex;
-    align-items: flex-end;
-    gap: 10px;
-    transition: all 0.2s ease-in-out;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 600px;
+  display: flex;
+  justify-content: center;
+  z-index: 5;
+  background-color: var(--window-background);
+  padding: 8px 12px;
+  border-radius: 20px;
+  box-shadow: var(--window-shadow);
+  align-items: flex-end;
+  gap: 10px;
+  transition: all 0.2s ease-in-out;
 }
 
 .chat-message {
-    margin-bottom: 10px;
-    max-width: 80%;
-    padding: 10px 14px;
-    border-radius: 12px;
-    word-break: break-word;
-    font-size: 0.95rem;
-    color: var(--text-color);
-    background-color: var(--window-background);
-    box-shadow: var(--window-shadow);
-    position: relative;
-  }
-  
-  .chat-message.sent {
-    align-self: flex-end;
-    background-color: #fc554f;
-    color: #fff;
-  }
-  
-  .chat-message.received {
-    align-self: flex-start;
-    background-color: var(--bubble-background);
-    color: var(--text-color);
-  }
-  
-  .message-sender {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--secondary-text);
-    margin-bottom: 4px;
-  }
-  
-  .message-flags {
-    display: flex;
-    gap: 6px;
-    margin-top: 4px;
-  }
-  
-  .message-flag {
-    font-size: 0.85rem;
-    color: var(--secondary-text);
-  }
-  
+  margin-bottom: 10px;
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  word-break: break-word;
+  font-size: 0.95rem;
+  color: var(--text-color);
+  background-color: var(--window-background);
+  box-shadow: var(--window-shadow);
+  position: relative;
+}
+
+.chat-message.sent {
+  align-self: flex-end;
+  background-color: #fc554f;
+  color: #fff;
+  border-radius: 20px 20px 4px 20px;
+}
+
+.chat-message.received {
+  align-self: flex-start;
+  background-color: var(--bubble-background);
+  color: var(--text-color);
+  border-radius: 20px 20px 20px 4px;
+}
+
+.message-sender {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--secondary-text);
+  margin-bottom: 4px;
+}
+
+.message-flags {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.message-flag {
+  font-size: 0.85rem;
+  color: var(--secondary-text);
+}
+
+.message-flag[title="Signed Message"] {
+  color: #22c55e;
+}
+
+.message-flag[title="Backed Up"] {
+  color: #3b82f6;
+}
+
+.message-timestamp {
+  font-size: 0.7rem;
+  color: #999;
+  margin-top: 4px;
+  text-align: right;
+}
