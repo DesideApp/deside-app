@@ -27,8 +27,6 @@ const LeftPanel = ({ onSelectContact }) => {
   } = useConversationManager();
 
   const {
-    loadPreviews,
-    isPremium,
     backupData,
   } = useBackupManager();
 
@@ -75,7 +73,6 @@ const LeftPanel = ({ onSelectContact }) => {
             {conversations.length > 0 ? (
               <ConversationList
                 conversations={conversations}
-                previews={localPreviews}
                 onConversationSelected={handleConversationSelect}
                 onRefresh={refresh}
                 selectedPubkey={selectedConversationPubkey}
