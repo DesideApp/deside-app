@@ -1,7 +1,27 @@
-/* ✅ Header estructural (espacio reservado pero sin estilos adicionales) */
+/* ✅ LeftPanel wrapper (fijo sobre layout) */
+.left-panel-wrapper {
+  position: fixed;
+  top: 0;
+  left: 60px;
+  height: 100vh;
+  width: calc(100vw - 60px);
+  background: var(--window-background);
+  box-shadow: var(--window-shadow);
+  z-index: 150;
+  transition: left 0.3s ease, width 0.3s ease;
+  overflow: hidden;
+}
+
+/* ✅ Si leftbar está expandido */
+.leftbar.expanded ~ .left-panel-wrapper {
+  left: 200px;
+  width: calc(100vw - 200px);
+}
+
+/* ✅ Header estructural (espacio reservado) */
 .left-panel-header {
-  height: 90px; /* 🔥 Igual que RightPanel */
-  flex-shrink: 0; /* 🔥 EVITA QUE SE COMPORTE COMO SCROLL */
+  height: 90px;
+  flex-shrink: 0;
 }
 
 .left-panel-title {
@@ -18,32 +38,15 @@
   flex-direction: column;
   flex-grow: 1;
   width: 90%;
-  height: 90%;
+  height: calc(100% - 90px - 100px); /* header + nav height */
+  margin: 0 auto;
   padding: 8px 10px;
   border-radius: 20px;
   background: var(--background-overlay);
   box-sizing: border-box;
   box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.08);
   transition: background 0.3s ease-in-out;
-  margin: 0px;
-  margin-left: 0px;
-  overflow: hidden;
-}
-
-.left-panel-wrapper {
-  position: fixed;
-  top: 0;
-  left: 60px;
-  height: 100vh;
-  width: 300px;
-  background: var(--window-background);
-  box-shadow: var(--window-shadow);
-  z-index: 150;
-  transition: left 0.3s ease;
-}
-
-.leftbar.expanded ~ .left-panel-wrapper {
-  left: 200px;
+  overflow-y: auto;
 }
 
 /* ✅ Menú de pestañas pegadas al contenido */
@@ -54,15 +57,13 @@
   justify-content: center;
   height: 100px;
   gap: 8px;
-  padding: 0;
   border-radius: 8px;
-  padding-bottom: 10px;
-  padding-top: 10px;
+  padding: 10px 0;
   transition: background 0.3s ease-in-out;
   overflow: hidden;
 }
 
-/* ✅ Botones de pestañas – SOLO ICONOS, sin fondo visible */
+/* ✅ Botones de pestañas */
 .left-panel-nav button {
   z-index: 15;
   width: 35px;
@@ -78,12 +79,11 @@
   justify-content: center;
 }
 
-/* ✅ Efecto hover en pestañas */
 .left-panel-nav button:hover {
   background: rgba(240, 240, 240, 0.3);
 }
 
-/* ✅ Iconos dentro de los botones */
+/* ✅ Iconos dentro de las pestañas */
 .left-panel-nav button svg {
   z-index: 20;
   transition: transform 0.3s ease-in-out;
@@ -96,14 +96,14 @@
   color: #fd6a66 !important;
 }
 
-/* ✅ Pestaña activa – Icono con ligera animación */
+/* ✅ Icono activo */
 .left-panel-nav button.active svg {
   transform: scale(1.05);
   color: #fc554f !important;
   fill: #fc554f;
 }
 
-/* ✅ Mejorar la legibilidad de los textos */
+/* ✅ Mejorar legibilidad textos */
 .left-panel-content p {
   font-size: 0.95rem;
   color: inherit;
@@ -111,7 +111,7 @@
   margin-top: 12px;
 }
 
-/* ✅ Estilo de la lista de contactos */
+/* ✅ Lista de contactos */
 .contact-list {
   list-style: none;
   padding: 0;
@@ -133,7 +133,7 @@
   background-color: #f2f2f2;
 }
 
-/* ✅ Mensaje cuando no hay contactos */
+/* ✅ Mensaje sin contactos */
 .no-contacts-message,
 .add-contact-placeholder {
   text-align: center;
@@ -144,8 +144,19 @@
 
 /* ✅ Responsive */
 @media (max-width: 768px) {
+  .left-panel-wrapper {
+    left: 0;
+    width: 100vw;
+  }
+
+  .leftbar.expanded ~ .left-panel-wrapper {
+    left: 0;
+    width: 100vw;
+  }
+
   .left-panel-content {
     padding: 10px;
+    height: auto;
   }
 
   .contact-item {
