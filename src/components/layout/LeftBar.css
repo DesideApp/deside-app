@@ -10,14 +10,14 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 10px 0;
-  z-index: 20;
+  z-index: 200;
   transition: width 0.3s ease;
-  overflow: hidden; /* ✅ Para evitar que el texto sobresalga en colapsado */
 }
 
 .leftbar.expanded {
   width: 200px;
 }
+
 
 .leftbar-toggle {
   background: none;

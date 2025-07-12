@@ -30,6 +30,22 @@
   overflow: hidden;
 }
 
+.left-panel-wrapper {
+  position: fixed;
+  top: 0;
+  left: 60px;
+  height: 100vh;
+  width: 300px;
+  background: var(--window-background);
+  box-shadow: var(--window-shadow);
+  z-index: 150;
+  transition: left 0.3s ease;
+}
+
+.leftbar.expanded ~ .left-panel-wrapper {
+  left: 200px;
+}
+
 /* ✅ Menú de pestañas pegadas al contenido */
 .left-panel-nav {
   position: relative;
