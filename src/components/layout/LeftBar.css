@@ -10,7 +10,7 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 10px 0;
-  z-index: 200;
+  z-index: 20;
   transition: width 0.3s ease;
 }
 
@@ -18,14 +18,13 @@
   width: 200px;
 }
 
-
 .leftbar-toggle {
   background: none;
   border: none;
   cursor: pointer;
   color: var(--text-color);
   font-size: 24px;
-  margin-bottom: 10px;
+  margin: 10px auto;
 }
 
 .leftbar-icons {
@@ -37,6 +36,7 @@
 
 .leftbar.expanded .leftbar-icons {
   align-items: flex-start;
+  padding-left: 16px;
 }
 
 .leftbar-button {
@@ -53,12 +53,18 @@
   padding: 6px;
   border-radius: 8px;
   transition: background-color 0.2s ease, color 0.2s ease;
-  width: 100%; /* ✅ Para ocupar todo el ancho, tanto colapsado como expandido */
 }
 
 .leftbar.expanded .leftbar-button {
   justify-content: flex-start;
   padding-left: 16px;
+}
+
+.leftbar:not(.expanded) .leftbar-button {
+  width: 48px;
+  height: 48px;
+  justify-content: center;
+  padding: 0;
 }
 
 .leftbar-button:hover {
@@ -72,13 +78,10 @@
 .leftbar-label {
   font-size: 0.85rem;
   color: var(--text-color);
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.3s ease;
 }
 
-.leftbar.expanded .leftbar-label {
-  opacity: 1;
+.leftbar:not(.expanded) .leftbar-label {
+  display: none;
 }
 
 .leftbar-divider {
@@ -93,9 +96,4 @@
   display: flex;
   justify-content: center;
   padding-bottom: 10px;
-}
-
-/* ✅ Garantiza que collapsed siempre tenga ancho mínimo visible */
-.leftbar:not(.expanded) .leftbar-label {
-  display: none;
 }
