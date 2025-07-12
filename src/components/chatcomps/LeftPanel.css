@@ -1,138 +1,138 @@
 /* ✅ Header estructural (espacio reservado pero sin estilos adicionales) */
 .left-panel-header {
-    height: 90px; /* 🔥 Espacio definido sin modificar el diseño */
-    flex-shrink: 0; /* 🔥 EVITA QUE SE COMPORTE COMO SCROLL */
+  height: 90px; /* 🔥 Igual que RightPanel */
+  flex-shrink: 0; /* 🔥 EVITA QUE SE COMPORTE COMO SCROLL */
 }
 
 .left-panel-title {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--text-color);
-    text-align: center;
-    padding-top: 30px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-color);
+  text-align: center;
+  padding-top: 30px;
 }
-  
+
 /* ✅ Contenedor del contenido con efecto hundido */
 .left-panel-content {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    width: 90%;               /* 🔥 Agranda el recuadro blanco */
-    height: 90%;              /* 🔥 Opcional si quieres más alto */
-    padding: 8px 10px; /* 🔥 Ajuste uniforme */
-    border-radius: 20px;
-    background: var(--background-overlay); /* 🔹 Fondo translúcido */
-    box-sizing: border-box;
-    box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.08); /* 🔥 Sombra sutil */
-    transition: background 0.3s ease-in-out;
-    margin: 0px; /* 🔥 Espaciado uniforme */
-    margin-left: 0px;
-    overflow: hidden; /* 🔥 ELIMINA EL SCROLL */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  width: 90%;
+  height: 90%;
+  padding: 8px 10px;
+  border-radius: 20px;
+  background: var(--background-overlay);
+  box-sizing: border-box;
+  box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.08);
+  transition: background 0.3s ease-in-out;
+  margin: 0px;
+  margin-left: 0px;
+  overflow: hidden;
 }
 
 /* ✅ Menú de pestañas pegadas al contenido */
 .left-panel-nav {
-    position: relative;
-    z-index: 10; /* 🔥 Asegura que esté por encima de otros elementos */
-    display: flex;
-    justify-content: center;
-    height: 100px; /* 🔥 Espacio definido sin modificar el diseño */
-    gap: 8px;
-    padding: 0;
-    border-radius: 8px;
-    padding-bottom: 10px;
-    padding-top: 10px;
-    transition: background 0.3s ease-in-out;
-    overflow: hidden; /* 🔥 PREVIENE SCROLL EN LAS PESTAÑAS */
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  height: 100px;
+  gap: 8px;
+  padding: 0;
+  border-radius: 8px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  transition: background 0.3s ease-in-out;
+  overflow: hidden;
 }
 
 /* ✅ Botones de pestañas – SOLO ICONOS, sin fondo visible */
 .left-panel-nav button {
-    z-index: 15; /* 🔥 Asegura que los botones no estén tapados */
-    width: 35px;
-    height: 35px;
-    border: none;
-    background: none; /* 🔥 Sin fondo visible */
-    font-size: 0.9rem;
-    color: inherit;
-    cursor: pointer;
-    transition: transform 0.3s ease-in-out, color 0.3s ease-in-out;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  z-index: 15;
+  width: 35px;
+  height: 35px;
+  border: none;
+  background: none;
+  font-size: 0.9rem;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out, color 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ✅ Efecto hover en pestañas */
 .left-panel-nav button:hover {
-    background: rgba(240, 240, 240, 0.3);
+  background: rgba(240, 240, 240, 0.3);
 }
 
 /* ✅ Iconos dentro de los botones */
 .left-panel-nav button svg {
-    z-index: 20; /* 🔥 Asegura que los iconos siempre sean visibles */
-    transition: transform 0.3s ease-in-out;
-    width: 24px !important;
-    height: 24px !important;
-    min-width: 24px !important;
-    min-height: 24px !important;
-    display: block !important;
-    opacity: 1 !important;
-    color: #fd6a66 !important;
+  z-index: 20;
+  transition: transform 0.3s ease-in-out;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  display: block !important;
+  opacity: 1 !important;
+  color: #fd6a66 !important;
 }
 
 /* ✅ Pestaña activa – Icono con ligera animación */
 .left-panel-nav button.active svg {
-    transform: scale(1.05);
-    color: #fc554f !important; /* 🔥 Color real sin atenuación */
-    fill: #fc554f; /* 🔥 Se rellena completamente */
+  transform: scale(1.05);
+  color: #fc554f !important;
+  fill: #fc554f;
 }
 
 /* ✅ Mejorar la legibilidad de los textos */
 .left-panel-content p {
-    font-size: 0.95rem;
-    color: inherit;
-    text-align: center;
-    margin-top: 12px;
+  font-size: 0.95rem;
+  color: inherit;
+  text-align: center;
+  margin-top: 12px;
 }
 
 /* ✅ Estilo de la lista de contactos */
 .contact-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .contact-item {
-    padding: 10px;
-    background-color: #ffffff;
-    border: 1px solid #dcdcdc;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-bottom: 8px;
-    text-align: center;
-    transition: background-color 0.3s ease;
+  padding: 10px;
+  background-color: #ffffff;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  text-align: center;
+  transition: background-color 0.3s ease;
 }
 
 .contact-item:hover {
-    background-color: #f2f2f2;
+  background-color: #f2f2f2;
 }
 
 /* ✅ Mensaje cuando no hay contactos */
 .no-contacts-message,
 .add-contact-placeholder {
-    text-align: center;
-    color: #777;
-    font-size: 1rem;
-    padding: 10px;
+  text-align: center;
+  color: #777;
+  font-size: 1rem;
+  padding: 10px;
 }
 
 /* ✅ Responsive */
 @media (max-width: 768px) {
-    .left-panel-content {
-        padding: 10px;
-    }
+  .left-panel-content {
+    padding: 10px;
+  }
 
-    .contact-item {
-        font-size: 0.9rem;
-    }
+  .contact-item {
+    font-size: 0.9rem;
+  }
 }
