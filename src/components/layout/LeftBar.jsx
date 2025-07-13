@@ -1,118 +1,110 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   MessageCircle,
   Star,
   HelpCircle,
-  Settings,
-  Sun,
-  ChevronLeft,
-  ChevronRight,
+  Settings
 } from "lucide-react";
-import WalletButton from "../common/WalletButton.jsx";
-import { toggleTheme } from "../../config/theme.js";
 import { useLayout } from "../../contexts/LayoutContext";
 import "./LeftBar.css";
 
 const LeftBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isDesktop, setRightPanelOpen } = useLayout();
 
-  const {
-    leftbarExpanded,
-    setLeftbarExpanded,
-    setRightPanelOpen,
-  } = useLayout();
-
-  // 🔥 Si se abre WalletMenu, colapsa la LeftBar
-  useEffect(() => {
-    const handleWalletMenuOpened = () => {
-      setLeftbarExpanded(false);
-    };
-
-    window.addEventListener("walletMenuOpened", handleWalletMenuOpened);
-    return () => {
-      window.removeEventListener("walletMenuOpened", handleWalletMenuOpened);
-    };
-  }, [setLeftbarExpanded]);
+  const [expanded, setExpanded] = useState(false);
+  const leftbarRef = useRef(null);
 
   const toggleLeftbar = () => {
-    setLeftbarExpanded((prev) => {
-      const next = !prev;
-
-      if (next) {
-        // 🔥 Si vamos a abrir LeftBar → cerramos Right Panel
-        setRightPanelOpen(false);
-        window.dispatchEvent(new Event("leftbarOpened"));
-      }
-      return next;
-    });
+    setExpanded((prev) => !prev);
+    setRightPanelOpen(false);
   };
 
+  const closeLeftbar = () => {
+    setExpanded(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (expanded && leftbarRef.current && !leftbarRef.current.contains(e.target)) {
+        closeLeftbar();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [expanded]);
+
   const pages = [
-    { path: "/", icon: <MessageCircle />, label: "Chat" },
-    { path: "/premium", icon: <Star />, label: "Premium" },
-    { path: "/help", icon: <HelpCircle />, label: "Help" },
+    { path: "/", icon: <MessageCircle size={24} />, label: "Chat" },
+    { path: "/premium", icon: <Star size={24} />, label: "Premium" },
+    { path: "/help", icon: <HelpCircle size={24} />, label: "Help" },
   ];
 
-  const other = [
+  const options = [
     {
-      icon: <Settings />,
+      icon: <Settings size={24} />,
       label: "Settings",
-      action: () =>
-        window.dispatchEvent(new Event("openSettingsPanel")),
+      action: () => {
+        setRightPanelOpen(false);
+        window.dispatchEvent(new Event("openSettingsPanel"));
+      },
     },
-    { icon: <Sun />, label: "Theme", action: toggleTheme },
   ];
 
   const isActive = (path) => location.pathname === path;
 
   return (
-    <aside className={`leftbar ${leftbarExpanded ? "expanded" : ""}`}>
-      <button
-        className="leftbar-toggle"
-        onClick={toggleLeftbar}
-        title={leftbarExpanded ? "Collapse" : "Expand"}
-      >
-        {leftbarExpanded ? <ChevronLeft /> : <ChevronRight />}
-      </button>
+    <aside
+      ref={leftbarRef}
+      className={`leftbar ${expanded ? "expanded" : ""} ${isDesktop ? "is-desktop" : ""}`}
+      onClick={toggleLeftbar}
+    >
+      <div className="leftbar-inner">
+        {/* D LOGO */}
+        <div className="leftbar-logo">
+          <span className="logo-text">D</span>
+          {expanded && <span className="logo-label">Deside</span>}
+        </div>
 
-      <div className="leftbar-icons">
-        {pages.map((link) => (
-          <button
-            key={link.path}
-            className={`leftbar-button ${
-              isActive(link.path) ? "active" : ""
-            }`}
-            onClick={() => navigate(link.path)}
-            title={link.label}
-          >
-            {link.icon}
-            {leftbarExpanded && (
-              <span className="leftbar-label">{link.label}</span>
-            )}
-          </button>
-        ))}
-      </div>
+        {/* TOP SECTION */}
+        <div className="leftbar-section top-section">
+          {pages.map((link) => (
+            <button
+              key={link.path}
+              className={`leftbar-button ${isActive(link.path) ? "active" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(link.path);
+              }}
+              title={link.label}
+            >
+              {link.icon}
+              {expanded && <span className="leftbar-label">{link.label}</span>}
+            </button>
+          ))}
+        </div>
 
-      <div className="leftbar-divider"></div>
-
-      <div className="leftbar-icons">
-        {other.map((item) => (
-          <button
-            key={item.label}
-            className="leftbar-button"
-            onClick={item.action}
-            title={item.label}
-          >
-            {item.icon}
-            {leftbarExpanded && (
-              <span className="leftbar-label">{item.label}</span>
-            )}
-          </button>
-        ))}
-        <div className="leftbar-wallet">
-          <WalletButton />
+        {/* BOTTOM SECTION */}
+        <div className="leftbar-section bottom-section">
+          {options.map((item) => (
+            <button
+              key={item.label}
+              className="leftbar-button"
+              onClick={(e) => {
+                e.stopPropagation();
+                item.action();
+              }}
+              title={item.label}
+            >
+              {item.icon}
+              {expanded && <span className="leftbar-label">{item.label}</span>}
+            </button>
+          ))}
         </div>
       </div>
     </aside>

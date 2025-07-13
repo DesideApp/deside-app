@@ -8,7 +8,7 @@ import "./Chat.css";
 
 function Chat() {
   const { ensureReady } = useAuthManager();
-  const { leftbarExpanded } = useLayout();
+  const { isDesktop, isTablet, isMobile } = useLayout();
 
   console.log("📌 ensureReady hook cargado.");
 
@@ -32,16 +32,17 @@ function Chat() {
 
   return (
     <div
-      className="chat-page-container"
-      style={{
-        marginLeft: leftbarExpanded ? "200px" : "60px",
-        transition: "margin-left 0.3s ease",
-      }}
+      className={`
+        chat-page-container
+        ${isDesktop ? "is-desktop" : ""}
+        ${isTablet ? "is-tablet" : ""}
+        ${isMobile ? "is-mobile" : ""}
+      `}
     >
       <div className="chat-layout">
         {renderLeftPanel()}
         {renderChatWindow()}
-        {!leftbarExpanded && renderRightPanel()}
+        {isDesktop && renderRightPanel()}
       </div>
     </div>
   );

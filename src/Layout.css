@@ -1,0 +1,151 @@
+/* ---------------------------------------------
+   ✅ GLOBAL → DESKTOP DEFAULT
+---------------------------------------------- */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background-color);
+  font-family: 'Roboto', sans-serif;
+}
+
+.layout-wrapper {
+  display: grid;
+  grid-template-columns: var(--leftbar-width) 1fr;
+  grid-template-rows:
+    var(--header-height)
+    1fr
+    var(--bottom-bar-height);
+  height: 100vh;
+  width: 100vw;
+  transition: grid-template-columns var(--transition-speed) var(--transition-easing);
+}
+
+.leftbar {
+  grid-column: 1 / 2;
+  grid-row: 1 / span 3;
+  background: var(--surface-color);
+  transition: width var(--transition-speed) var(--transition-easing);
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.header {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+  height: var(--header-height);
+  background: var(--surface-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--layout-padding);
+  box-shadow: var(--window-shadow);
+  z-index: 900;
+  margin: 0;
+  transition:
+    padding var(--transition-speed) var(--transition-easing);
+}
+
+.layout-content {
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+  padding: var(--layout-padding);
+  background: var(--background-color);
+  z-index: 1;
+}
+
+.bottom-bar {
+  grid-column: 2 / 3;
+  grid-row: 3 / 4;
+  height: var(--bottom-bar-height);
+  background: var(--surface-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--window-shadow);
+  z-index: 1000;
+}
+
+/* ---------------------------------------------
+   ✅ TABLET
+   max-width: 1024px
+---------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .layout-wrapper {
+    /* Layout for tablet devices */
+    grid-template-columns: 0 1fr;
+  }
+
+  /* Leftbar overlay styles could go here */
+
+  .leftbar {
+    /* e.g. overlay positioning */
+    /* position: fixed;
+       left: -300px;
+       width: 300px;
+       transition: left var(--transition-speed) var(--transition-easing); */
+  }
+
+  .leftbar.open {
+    /* left: 0; */
+  }
+
+  .header {
+    /* Optional tablet-specific styles */
+  }
+
+  .layout-content {
+    /* Optional tablet-specific styles */
+  }
+
+  .bottom-bar {
+    /* Optional tablet-specific styles */
+  }
+}
+
+/* ---------------------------------------------
+   ✅ MOBILE
+   max-width: 768px
+---------------------------------------------- */
+
+@media (max-width: 768px) {
+  .layout-wrapper {
+    /* Layout for mobile devices */
+    grid-template-columns: 1fr;
+    grid-template-rows:
+      var(--header-height)
+      1fr
+      var(--bottom-bar-height);
+  }
+
+  .leftbar {
+    /* e.g. overlay drawer for mobile */
+    /* position: fixed;
+       left: -300px;
+       width: 300px;
+       transition: left var(--transition-speed) var(--transition-easing); */
+  }
+
+  .leftbar.open {
+    /* left: 0; */
+  }
+
+  .header {
+    /* Optional mobile-specific styles */
+  }
+
+  .layout-content {
+    /* Optional mobile-specific styles */
+  }
+
+  .bottom-bar {
+    /* Optional mobile-specific styles */
+  }
+}

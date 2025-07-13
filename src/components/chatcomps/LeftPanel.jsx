@@ -26,9 +26,7 @@ const LeftPanel = ({ onSelectContact }) => {
     refresh,
   } = useConversationManager();
 
-  const {
-    backupData,
-  } = useBackupManager();
+  const { backupData } = useBackupManager();
 
   const pubkey = backupData?.pubkey;
   const encryptionKey = backupData?.encryptionKey;
@@ -60,7 +58,7 @@ const LeftPanel = ({ onSelectContact }) => {
   };
 
   return (
-    <div className="left-panel-wrapper">
+    <>
       <header className="left-panel-header">
         <h2 className="left-panel-title">{tabTitles[activeTab]}</h2>
       </header>
@@ -155,7 +153,7 @@ const LeftPanel = ({ onSelectContact }) => {
           </div>
         </button>
       </nav>
-    </div>
+    </>
   );
 };
 
