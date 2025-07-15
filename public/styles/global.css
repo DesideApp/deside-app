@@ -1,3 +1,37 @@
+:root {
+  /* Title (Grandes títulos, header, panel titles) */
+  --font-title-family: 'Montserrat', sans-serif;
+  --font-title-size: 20px;
+  --font-title-weight: 600;
+
+  /* Subtitle (subtítulos, panel subtitles) */
+  --font-subtitle-family: 'Montserrat', sans-serif;
+  --font-subtitle-size: 16px;
+  --font-subtitle-weight: 500;
+
+  /* UI Text (bubbles, labels, bottom bar, small UI elements) */
+  --font-ui-family: 'Montserrat', sans-serif;
+  --font-ui-size: 14px;
+  --font-ui-weight: 500;
+
+  /* Body (texto normal, chat, párrafos) */
+  --font-body-family: 'Roboto', sans-serif;
+  --font-body-size: 14px;
+  --font-body-weight: 400;
+
+  /* Navigation (leftbar, wallet menu) */
+  --font-navigation-family: 'IBM Plex Sans', sans-serif;
+  --font-navigation-size: 13px;
+  --font-navigation-weight: 500;
+  --font-navigation-transform: uppercase;
+
+  /* Caption (tooltips, microtext, etiquetas muy pequeñas) */
+  --font-caption-family: 'Inter', sans-serif;
+  --font-caption-size: 11px;
+  --font-caption-weight: 400;
+  --font-caption-transform: uppercase;
+}
+
 /* Estilos globales */
 body {
     font-family: 'Roboto', sans-serif;

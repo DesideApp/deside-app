@@ -1,4 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import {
+  getPreferredTheme,
+  applyTheme,
+} from "../config/theme.js";
 
 const LayoutContext = createContext({
   leftbarExpanded: false,
@@ -8,10 +12,13 @@ const LayoutContext = createContext({
   toggleRightPanel: () => {},
   setRightPanelOpen: () => {},
   leftbarWidth: 0,
+  headerTitleOffset: "0px",
   device: "desktop",
   isDesktop: true,
   isTablet: false,
   isMobile: false,
+  theme: "light",
+  toggleTheme: () => {},
 });
 
 export const LayoutProvider = ({ children }) => {
@@ -24,17 +31,27 @@ export const LayoutProvider = ({ children }) => {
   // Device type
   const [device, setDevice] = useState("desktop");
 
-  // Breakpoints
-  const DESKTOP_BREAKPOINT = 1024;
-  const TABLET_BREAKPOINT = 768;
+  // Theme state
+  const [theme, setTheme] = useState(getPreferredTheme());
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    applyTheme(newTheme);
+  };
+
+  useEffect(() => {
+    // ✅ Apply theme on initial mount
+    applyTheme(theme);
+  }, [theme]);
 
   // Update device on resize
   useEffect(() => {
     const checkDevice = () => {
       const width = window.innerWidth;
-      if (width > DESKTOP_BREAKPOINT) {
+      if (width > 1024) {
         setDevice("desktop");
-      } else if (width > TABLET_BREAKPOINT) {
+      } else if (width > 768) {
         setDevice("tablet");
       } else {
         setDevice("mobile");
@@ -51,9 +68,23 @@ export const LayoutProvider = ({ children }) => {
   const collapsedWidthDesktop = 50;
   const expandedWidthDesktop = 350;
 
-  const leftbarWidth = device === "desktop"
-    ? (leftbarExpanded ? expandedWidthDesktop : collapsedWidthDesktop)
-    : 0;
+  const leftbarWidth =
+    device === "desktop"
+      ? leftbarExpanded
+        ? expandedWidthDesktop
+        : collapsedWidthDesktop
+      : 0;
+
+  // Header Title Offset
+  const collapsedOffset = "0px";
+  const expandedOffset = "300px";
+
+  const headerTitleOffset =
+    device === "desktop"
+      ? leftbarExpanded
+        ? expandedOffset
+        : collapsedOffset
+      : "0px";
 
   const toggleLeftbar = () => {
     setLeftbarExpanded((prev) => !prev);
@@ -73,10 +104,13 @@ export const LayoutProvider = ({ children }) => {
         setRightPanelOpen,
         toggleRightPanel,
         leftbarWidth,
+        headerTitleOffset,
         device,
         isDesktop: device === "desktop",
         isTablet: device === "tablet",
         isMobile: device === "mobile",
+        theme,
+        toggleTheme,
       }}
     >
       {children}

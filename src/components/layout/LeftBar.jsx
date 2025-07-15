@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   MessageCircle,
@@ -9,40 +9,35 @@ import {
 import { useLayout } from "../../contexts/LayoutContext";
 import "./LeftBar.css";
 
+const LeftBarLogo = () => {
+  const { theme } = useLayout();
+
+  const logoSrc =
+    theme === "dark"
+      ? "/assets/logo-dark.svg"
+      : "/assets/logo-light.svg";
+
+  return (
+    <img
+      src={logoSrc}
+      alt="Logo"
+      className="leftbar-logo-icon"
+    />
+  );
+};
+
 const LeftBar = () => {
+  // ✅ METEMOS theme AQUÍ PARA FORZAR RERENDER
+  const { theme, leftbarExpanded, toggleLeftbar, setRightPanelOpen } = useLayout();
   const location = useLocation();
   const navigate = useNavigate();
-  const { isDesktop, setRightPanelOpen } = useLayout();
 
-  const [expanded, setExpanded] = useState(false);
   const leftbarRef = useRef(null);
 
-  const toggleLeftbar = () => {
-    setExpanded((prev) => !prev);
-    setRightPanelOpen(false);
-  };
-
-  const closeLeftbar = () => {
-    setExpanded(false);
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (expanded && leftbarRef.current && !leftbarRef.current.contains(e.target)) {
-        closeLeftbar();
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [expanded]);
-
   const pages = [
-    { path: "/", icon: <MessageCircle size={24} />, label: "Chat" },
-    { path: "/premium", icon: <Star size={24} />, label: "Premium" },
-    { path: "/help", icon: <HelpCircle size={24} />, label: "Help" },
+    { path: "/", icon: <MessageCircle size={24} />, label: "CHAT" },
+    { path: "/premium", icon: <Star size={24} />, label: "PREMIUM" },
+    { path: "/documents", icon: <HelpCircle size={24} />, label: "DOCUMENTS" },
   ];
 
   const options = [
@@ -61,14 +56,21 @@ const LeftBar = () => {
   return (
     <aside
       ref={leftbarRef}
-      className={`leftbar ${expanded ? "expanded" : ""} ${isDesktop ? "is-desktop" : ""}`}
-      onClick={toggleLeftbar}
+      className={`leftbar ${leftbarExpanded ? "expanded" : ""}`}
     >
-      <div className="leftbar-inner">
-        {/* D LOGO */}
-        <div className="leftbar-logo">
-          <span className="logo-text">D</span>
-          {expanded && <span className="logo-label">Deside</span>}
+      <div
+        className="leftbar-inner"
+        onClick={toggleLeftbar}
+      >
+        {/* SVG LOGO */}
+        <div
+          className="leftbar-logo"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleLeftbar();
+          }}
+        >
+          <LeftBarLogo />
         </div>
 
         {/* TOP SECTION */}
@@ -84,7 +86,7 @@ const LeftBar = () => {
               title={link.label}
             >
               {link.icon}
-              {expanded && <span className="leftbar-label">{link.label}</span>}
+              {leftbarExpanded && <span className="leftbar-label">{link.label}</span>}
             </button>
           ))}
         </div>
@@ -102,7 +104,7 @@ const LeftBar = () => {
               title={item.label}
             >
               {item.icon}
-              {expanded && <span className="leftbar-label">{item.label}</span>}
+              {leftbarExpanded && <span className="leftbar-label">{item.label}</span>}
             </button>
           ))}
         </div>

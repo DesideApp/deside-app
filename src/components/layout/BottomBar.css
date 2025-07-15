@@ -3,134 +3,146 @@
 ---------------------------------------------- */
 
 :root {
-    --bottom-bar-padding-x: 20px;
-    --bottom-bar-gap: 12px;
-    --bubble-radius: 20px;
-    --bubble-padding-y: 4px;
-    --bubble-padding-x: 10px;
-    --bubble-shadow: var(--window-shadow);
+  --bottom-bar-padding-x: 20px;
+  --bottom-bar-gap: 12px;
+  --bubble-radius: 4px;
+  --bubble-padding-y: 4px;
+  --bubble-padding-x: 10px;
 }
 
 /* ---------------------------------------------
-   ✅ BOTTOM BAR STYLES (DESKTOP)
-   ≥ 1025px
+   ✅ BOTTOM BAR STYLES
 ---------------------------------------------- */
 
-.bottom-bar.is-desktop {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 40px; /* ALTURA SOLO DESKTOP */
-    background-color: transparent;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 0 var(--bottom-bar-padding-x);
-    z-index: 1000;
-    transition:
-      transform 0.4s ease-in-out,
-      opacity 0.4s ease-in-out;
+.bottom-bar {
+  grid-area: bottombar;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  background-color: transparent;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 10px;
+  z-index: 1000;
+  transition:
+    transform 0.4s ease-in-out,
+    opacity 0.4s ease-in-out;
 }
 
-/* Contenedor interno */
-.bottom-bar.is-desktop .bottom-bar-content {
-    display: flex;
-    align-items: center;
-    gap: var(--bottom-bar-gap);
-    margin-right: var(--bottom-bar-padding-x);
+/* Contenedor izquierdo (Theme toggle) */
+.bottom-bar-left-content {
+  display: flex;
+  align-items: center;
+  gap: var(--bottom-bar-gap);
+  max-width: 50px;
+  flex-grow: 1;
+}
+
+/* Contenedor derecho (Network, Solana, Swap) */
+.bottom-bar-right-content {
+  display: flex;
+  align-items: center;
+  gap: var(--bottom-bar-gap);
+  flex-grow: 1;
+  justify-content: flex-end;
 }
 
 /* ---------------------------------------------
    ✅ BUBBLES
 ---------------------------------------------- */
 
-.bottom-bar.is-desktop .bubble {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--bubble-padding-y) var(--bubble-padding-x);
-    background-color: var(--window-background);
-    border-radius: var(--bubble-radius);
-    box-shadow: var(--bubble-shadow);
-    width: fit-content;
+.bottom-bar .bubble {
+  display: flex;
+  font-family: 'Montserrat', sans-serif;
+  align-items: center;
+  justify-content: center;
+  padding: var(--bubble-padding-y) var(--bubble-padding-x);
+  background-color: var(--window-background);
+  border-radius: var(--bubble-radius);
+  width: fit-content;
+  border-top: 1px solid var(--border-color);
 }
 
 /* Tipo A - Más alto (NetworkStatus, SolanaPrice, Jupiter) */
-.bottom-bar.is-desktop .bubble.type-a {
-    height: 30px;
+.bottom-bar .bubble.type-a {
+  height: 30px;
 }
 
 /* Tipo B - Más bajo (Interruptor de tema) */
-.bottom-bar.is-desktop .bubble.type-b {
-    height: 26px;
-    margin-right: -4px;
+.bottom-bar .bubble.type-b {
+  height: 26px;
+  margin-right: -4px;
 }
 
 /* Switch dentro del Bubble */
-.bottom-bar.is-desktop .switch {
-    position: relative;
-    width: 30px;
-    height: 16px;
+.bottom-bar .switch {
+  position: relative;
+  width: 30px;
+  height: 16px;
 }
 
-.bottom-bar.is-desktop .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+.bottom-bar .switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
-.bottom-bar.is-desktop .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--highlight-color);
-    transition: 0.3s;
-    border-radius: 18px;
+.bottom-bar .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--highlight-color);
+  transition: 0.3s;
+  border-radius: 18px;
 }
 
-.bottom-bar.is-desktop .slider:before {
-    content: "";
-    position: absolute;
-    height: 12px;
-    width: 12px;
-    left: 2px;
-    bottom: 2px;
-    background-color: var(--window-background);
-    transition: 0.3s;
-    border-radius: 50%;
+.bottom-bar .slider:before {
+  content: "";
+  position: absolute;
+  height: 12px;
+  width: 12px;
+  left: 2px;
+  bottom: 2px;
+  background-color: var(--window-background);
+  transition: 0.3s;
+  border-radius: 50%;
 }
 
-.bottom-bar.is-desktop input:checked + .slider:before {
-    transform: translateX(14px);
+.bottom-bar input:checked + .slider:before {
+  transform: translateX(14px);
 }
 
 /* Swap Bubble Hover */
-.bottom-bar.is-desktop .bubble.type-a.swap-bubble {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: var(--bubble-padding-y) var(--bubble-padding-x);
-    cursor: pointer;
-    transition: transform 0.2s ease-in-out;
+.bottom-bar .bubble.type-a.swap-bubble {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--bubble-padding-y) var(--bubble-padding-x);
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
 }
 
-.bottom-bar.is-desktop .bubble.type-a.swap-bubble:hover {
-    transform: scale(1.05);
+.bottom-bar .bubble.type-a.swap-bubble:hover {
+  transform: scale(1.05);
 }
 
 /* Swap Icono */
-.bottom-bar.is-desktop .swap-icon {
-    width: 18px;
-    height: 18px;
+.bottom-bar .swap-icon {
+  width: 18px;
+  height: 18px;
 }
 
-.bottom-bar.is-desktop .swap-bubble span {
-    font-size: 14px;
-    font-weight: 500;
+.bottom-bar .swap-bubble span {
+  font-family: var(--font-navigation-family);
+  font-size: var(--font-navigation-size);
+  font-weight: var(--font-navigation-weight);
+  text-transform: var(--font-navigation-transform);
 }
 
 /* ---------------------------------------------
@@ -139,7 +151,7 @@
 ---------------------------------------------- */
 
 .bottom-bar.is-tablet {
-    /* pendiente de implementar */
+  /* pendiente de implementar */
 }
 
 /* ---------------------------------------------
@@ -148,5 +160,5 @@
 ---------------------------------------------- */
 
 .bottom-bar.is-mobile {
-    /* pendiente de implementar */
+  /* pendiente de implementar */
 }

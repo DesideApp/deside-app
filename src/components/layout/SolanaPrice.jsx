@@ -53,7 +53,7 @@ const SolanaPrice = React.memo(() => {
     return (
         <div className="solana-price-container">
             <span className={`solana-price ${currentClass}`}>
-                {price !== null ? `$${price.toFixed(2)}` : "Loading..."}
+                {price !== null ? `$${price.toFixed(2)}` : "Connecting..."}
             </span>
         </div>
     );

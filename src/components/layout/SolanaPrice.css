@@ -3,9 +3,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-family: var(--font-navigation-family);
+    font-size: var(--font-navigation-size);
+    font-weight: var(--font-navigation-weight);
+    text-transform: var(--font-navigation-transform);
     padding: 3px 8px;
     border-radius: 6px;
     height: 22px;

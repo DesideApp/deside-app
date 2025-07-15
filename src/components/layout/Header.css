@@ -1,44 +1,65 @@
-.header.is-desktop {
-    grid-column: 2 / 3;
-    grid-row: 1 / 2;
-    height: var(--header-height);
-    background-color: var(--surface-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-left: var(--layout-padding);
-    padding-right: var(--layout-padding);
-    box-shadow: var(--window-shadow);
-    z-index: 900;
-    margin: 0;
-    transition: padding var(--transition-speed) var(--transition-easing);
+/* ---------------------------------------------
+   ✅ HEADER → DESKTOP DEFAULT
+---------------------------------------------- */
+
+.header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  height: var(--header-height);
+  background-color: var(--window-background);
+  width: calc(100vw - var(--leftbar-width));
+  overflow: hidden;
+  z-index: 900;
+  transition: width var(--transition-speed) var(--transition-easing);
+  border-bottom: 1px solid var(--border-color);
 }
 
-.header.is-desktop .header-title-container {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
+/* ---------------------------------------------
+   ✅ HEADER INNER
+---------------------------------------------- */
+
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
-.header.is-desktop .header-title {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-family: 'Montserrat', sans-serif;
-    font-size: var(--header-title-font-size);
-    color: var(--header-title-color);
-    margin: 0;
+/* ---------------------------------------------
+   ✅ LEFT ZONE → TITLE CONTAINER
+---------------------------------------------- */
+
+.header-title-container {
+  flex: 0 0 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
 }
 
-.header.is-desktop .header-buttons-container {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: var(--header-buttons-gap);
-    min-width: var(--header-buttons-min-width);
-    height: 100%;
-    margin-right: 0;
+.header-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-title-family);
+  font-size: var(--font-title-size);
+  font-weight: var(--font-title-weight);
+  color: var(--header-title-color);
+  margin: 0;
+}
+
+/* ---------------------------------------------
+   ✅ RIGHT ZONE → BUTTONS CONTAINER
+---------------------------------------------- */
+
+.header-buttons-container {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
 }

@@ -7,15 +7,21 @@ const THEMES = {
     "--leftbar-expanded-width": "350px",
     "--header-height": "60px",
     "--bottom-bar-height": "40px",
-    "--layout-padding": "24px",
 
     // ✅ Colors
     "--background-color": "#f8f6f4",      // tu blanco roto
-    "--surface-color": "#e7e3de",         // gris clarito (intermedio)
-    "--window-background": "#d9d5d0",     // gris más oscuro para ventanas
+    "--surface-color": "#f1eeeb",         // gris clarito (intermedio)
+    "--window-background": "#e9e7e5",     // gris más oscuro para ventanas
     "--text-color": "#2b2323",
     "--highlight-color": "#554646",
     "--secondary-text": "#716965",
+    "--border-color": "#d1cfceff",
+
+    // ✅ Text colors
+    "--text-primary": "#2b2323",
+    "--text-secondary": "#716965",
+    "--text-on-surface": "#3c3333",
+    "--text-on-window": "#2b2323",
 
     // ✅ Shadows
     "--window-shadow": "0px 4px 12px rgba(0, 0, 0, 0.1)",
@@ -27,13 +33,16 @@ const THEMES = {
 
     // ✅ Overlays
     "--background-overlay": "rgba(248, 246, 244, 0.2)",
+
+    // ✅ Header title offset for animation
+    "--header-title-offset-collapsed": "0px",
+    "--header-title-offset-expanded": "300px",
   },
   dark: {
     "--leftbar-collapsed-width": "50px",
     "--leftbar-expanded-width": "350px",
     "--header-height": "60px",
     "--bottom-bar-height": "40px",
-    "--layout-padding": "24px",
 
     "--background-color": "#262424",      // plano de lectura
     "--surface-color": "#1f1d1a",         // intermedio más oscuro
@@ -41,6 +50,12 @@ const THEMES = {
     "--text-color": "#f0eae6",
     "--highlight-color": "#d1c5bf",
     "--secondary-text": "#b9b2ad",
+    "--border-color": "#302e2eff",
+
+    "--text-primary": "#f0eae6",
+    "--text-secondary": "#b9b2ad",
+    "--text-on-surface": "#f6f0eb",
+    "--text-on-window": "#f0eae6",
 
     "--window-shadow": "0px 4px 12px rgba(0, 0, 0, 0.6)",
     "--content-shadow": "inset 0px 2px 5px rgba(0, 0, 0, 0.5)",
@@ -49,6 +64,10 @@ const THEMES = {
     "--transition-easing": "ease",
 
     "--background-overlay": "rgba(38, 36, 36, 0.2)",
+
+    // ✅ Header title offset for animation
+    "--header-title-offset-collapsed": "0px",
+    "--header-title-offset-expanded": "300px",
   },
 };
 

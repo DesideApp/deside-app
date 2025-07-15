@@ -42,15 +42,15 @@ body {
 .chat-layout {
   display: grid;
   grid-template-columns:
-    400px /* LeftPanel */
-    1fr   /* ChatWindow */
-    400px /* RightPanel */;
+    400px
+    1fr
+    400px;
   grid-template-areas:
     "left center right";
   gap: 12px;
-  height: calc(100vh - 160px);
-  margin-top: 100px;
-  margin-bottom: 60px;
+  height: 100%;
+  padding-top: 40px;
+  padding-bottom: 40px;
   width: 100%;
 }
 
@@ -69,7 +69,6 @@ body {
   box-shadow: var(--window-shadow);
   border-radius: 4px;
   overflow: hidden;
-  overflow-y: auto;
 }
 
 /* -------------------------------
@@ -102,7 +101,6 @@ body {
   box-shadow: var(--window-shadow);
   border-radius: 4px;
   overflow: hidden;
-  overflow-y: auto;
   opacity: 1;
   transform: translateX(0);
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -141,7 +139,6 @@ body {
     height: auto;
     margin: 12px 0;
     border-radius: 12px;
-    overflow-y: visible;
   }
 
   .chat-window-container {

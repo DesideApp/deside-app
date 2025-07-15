@@ -51,8 +51,8 @@ const LeftPanel = ({ onSelectContact }) => {
   };
 
   const tabTitles = {
-    chats: "Chats",
-    contacts: "Contacts",
+    chats: "CHAT",
+    contacts: "CONTACTS",
     addContact: "Add Contact",
     requests: "Notifications",
   };

@@ -2,6 +2,9 @@
 .right-panel-header {
     height: 90px; /* 🔥 Igual que LeftPanel */
     flex-shrink: 0; /* 🔥 EVITA QUE SE COMPORTE COMO SCROLL */
+    font-family: var(--font-title-family);
+    font-size: var(--font-title-size);
+    font-weight: var(--font-title-weight);
 }
 
 .right-panel-title {

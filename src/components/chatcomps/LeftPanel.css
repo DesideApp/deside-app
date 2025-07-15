@@ -5,8 +5,9 @@
 }
 
 .left-panel-title {
-    font-size: 1.3rem;
-    font-weight: 600;
+    font-family: var(--font-title-family);
+    font-size: var(--font-title-size);
+    font-weight: var(--font-title-weight);
     color: var(--text-color);
     text-align: center;
     padding-top: 30px;

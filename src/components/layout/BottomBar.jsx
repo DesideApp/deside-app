@@ -1,16 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import "./BottomBar.css";
 import NetworkStatus from "./NetworkStatus.jsx";
 import SolanaPrice from "./SolanaPrice.jsx";
-import { toggleTheme, getPreferredTheme } from "../../config/theme.js";
 import { useLayout } from "../../contexts/LayoutContext";
 
 const BottomBar = React.memo(() => {
-  const { isDesktop, isTablet, isMobile } = useLayout();
+  const { theme, toggleTheme, isTablet, isMobile } = useLayout();
 
-  const [isDarkMode, setIsDarkMode] = useState(getPreferredTheme() === "dark");
   const swapButtonRef = useRef(null);
-  const [isJupiterLoaded, setIsJupiterLoaded] = useState(false);
+  const [isJupiterLoaded, setIsJupiterLoaded] = React.useState(false);
 
   useEffect(() => {
     // 🚀 Lazy Load con IntersectionObserver
@@ -58,32 +56,30 @@ const BottomBar = React.memo(() => {
 
   return (
     <footer
-      className={`bottom-bar 
-        ${isDesktop ? "is-desktop" : ""}
+      className={`bottom-bar
         ${isTablet ? "is-tablet" : ""}
         ${isMobile ? "is-mobile" : ""}
       `}
     >
-      <div className="bottom-bar-content">
-        {/* 🔹 Estado y precio de SOL */}
-        <div className="bubble type-a">
-          <NetworkStatus />
-          <SolanaPrice />
-        </div>
-
+      <div className="bottom-bar-left-content">
         {/* 🔹 Interruptor Claro/Oscuro */}
         <div className="bubble type-b">
           <label className="switch">
             <input
               type="checkbox"
-              checked={isDarkMode}
-              onChange={() => {
-                toggleTheme();
-                setIsDarkMode((prev) => !prev);
-              }}
+              checked={theme === "dark"}
+              onChange={toggleTheme}
             />
             <span className="slider"></span>
           </label>
+        </div>
+      </div>
+
+      <div className="bottom-bar-right-content">
+        {/* 🔹 Estado y precio de SOL */}
+        <div className="bubble type-a">
+          <NetworkStatus />
+          <SolanaPrice />
         </div>
 
         {/* 🔹 Swap de Jupiter con Lazy Load (NO se abre solo) */}
@@ -97,7 +93,7 @@ const BottomBar = React.memo(() => {
             alt="Jupiter"
             className="swap-icon"
           />
-          <span>Jupiter Swap</span>
+          <span>Jupiter</span>
         </div>
       </div>
     </footer>
