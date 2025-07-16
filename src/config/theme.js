@@ -12,9 +12,7 @@ const THEMES = {
     "--background-color": "#f8f6f4",      // tu blanco roto
     "--surface-color": "#f1eeeb",         // gris clarito (intermedio)
     "--window-background": "#e9e7e5",     // gris más oscuro para ventanas
-    "--text-color": "#2b2323",
     "--highlight-color": "#554646",
-    "--secondary-text": "#716965",
     "--border-color": "#d1cfceff",
 
     // ✅ Text colors
@@ -30,6 +28,9 @@ const THEMES = {
     // ✅ Transitions
     "--transition-speed": "0.3s",
     "--transition-easing": "ease",
+
+    // ✅ Wallet button colors
+    "--walletbutton-shadow": "#fa6560",
 
     // ✅ Overlays
     "--background-overlay": "rgba(248, 246, 244, 0.2)",
@@ -47,9 +48,7 @@ const THEMES = {
     "--background-color": "#262424",      // plano de lectura
     "--surface-color": "#1f1d1a",         // intermedio más oscuro
     "--window-background": "#1a1815",     // gris oscuro para ventanas
-    "--text-color": "#f0eae6",
     "--highlight-color": "#d1c5bf",
-    "--secondary-text": "#b9b2ad",
     "--border-color": "#302e2eff",
 
     "--text-primary": "#f0eae6",
@@ -62,6 +61,8 @@ const THEMES = {
 
     "--transition-speed": "0.3s",
     "--transition-easing": "ease",
+
+    "--walletbutton-shadow": "#e04a45",
 
     "--background-overlay": "rgba(38, 36, 36, 0.2)",
 

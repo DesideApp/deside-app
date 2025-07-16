@@ -10,7 +10,6 @@
   background-color: var(--window-background);
   width: calc(100vw - var(--leftbar-width));
   overflow: hidden;
-  z-index: 900;
   transition: width var(--transition-speed) var(--transition-easing);
   border-bottom: 1px solid var(--border-color);
 }
@@ -35,7 +34,7 @@
 
 .header-title-container {
   flex: 0 0 auto;
-  min-width: 0;
+  min-width: 100px;
   display: flex;
   align-items: center;
   padding-left: 10px;
@@ -48,7 +47,7 @@
   font-family: var(--font-title-family);
   font-size: var(--font-title-size);
   font-weight: var(--font-title-weight);
-  color: var(--header-title-color);
+  color: var(--text-on-window);
   margin: 0;
 }
 
@@ -61,5 +60,5 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding-right: 10px;
+  padding-right: 20px;
 }

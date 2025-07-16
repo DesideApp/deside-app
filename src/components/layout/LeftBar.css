@@ -7,7 +7,6 @@
   justify-content: space-between;
   transition: width 0.3s ease;
   overflow: hidden;
-  z-index: 1000;
   height: 100%;
   border-right: 1px solid var(--border-color);
 }
@@ -57,7 +56,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text-color, #333);
+  color: var(--highlight-color);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -79,5 +78,5 @@
   font-size: var(--font-title-size);
   font-weight: var(--font-title-weight);
   text-transform: var(--font-title-transform);
-  color: var(--text-color, #333);
+  color: var(--text-on-window);
 }

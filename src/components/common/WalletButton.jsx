@@ -98,7 +98,7 @@ const WalletButton = memo(() => {
     ? typeof balance === "number"
       ? `${balance.toFixed(2)} SOL`
       : `${walletState.pubkey.slice(0, 5)}...`
-    : "LOG IN";
+    : "Log in";
 
   return (
     <div className="wallet-container">

@@ -8,7 +8,7 @@ const Header = React.memo(() => {
       <div className="header-inner">
         {/* Left zone of the header (title area) */}
         <div className="header-title-container">
-          <h1 className="header-title">Deside</h1>
+          <div className="header-title">Deside</div>
         </div>
 
         {/* Right zone of the header (wallet area) */}

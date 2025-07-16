@@ -59,6 +59,14 @@ const NetworkStatus = React.memo(({ className = "" }) => {
 
     return (
         <div className={`network-status-container ${className}`}>
+            <div className={`network-status-logo-container ${className}`}>
+                <img
+                src="/companys/solanacolor.svg"
+                alt="Solana Logo"
+                style={{ width: "18px", height: "18px" }}
+                className="chain-logo"
+                />
+            </div>   
             <div className="status-container">
                 <div className={`status-light ${statusColor}`}></div>
             </div>

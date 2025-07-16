@@ -4,7 +4,6 @@
 
 :root {
   --bottom-bar-padding-x: 20px;
-  --bottom-bar-gap: 12px;
   --bubble-radius: 4px;
   --bubble-padding-y: 4px;
   --bubble-padding-x: 10px;
@@ -25,8 +24,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-right: 10px;
-  z-index: 1000;
+  padding-right: 20px;
   transition:
     transform 0.4s ease-in-out,
     opacity 0.4s ease-in-out;
@@ -36,7 +34,6 @@
 .bottom-bar-left-content {
   display: flex;
   align-items: center;
-  gap: var(--bottom-bar-gap);
   max-width: 50px;
   flex-grow: 1;
 }
@@ -45,7 +42,7 @@
 .bottom-bar-right-content {
   display: flex;
   align-items: center;
-  gap: var(--bottom-bar-gap);
+  gap: 10px;
   flex-grow: 1;
   justify-content: flex-end;
 }
@@ -143,6 +140,7 @@
   font-size: var(--font-navigation-size);
   font-weight: var(--font-navigation-weight);
   text-transform: var(--font-navigation-transform);
+  color: var(--text-on-window);
 }
 
 /* ---------------------------------------------

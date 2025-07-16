@@ -5,14 +5,22 @@
     gap: 8px; /* 🔥 Compactado aún más */
     color: #fff;
     padding: 4px 8px;
-    border-radius: 6px;
+    border-radius: 4px;
     height: 30px; /* 🔥 Igual a settings-bubble */
+}
+
+.network-status-logo-container {
+    align-items: center;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
 }
 
 /* 📌 Indicador del estado de la red */
 .status-container {
     display: flex;
     align-items: center;
+    padding-left: 10px;
 }
 
 /* 📌 Luces de estado (más pequeñas y refinadas) */

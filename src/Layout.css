@@ -35,11 +35,12 @@ body {
   grid-area: leftbar;
   transition: width var(--transition-speed) var(--transition-easing);
   overflow: hidden;
-  z-index: 1000;
+  z-index: 500;
 }
 
 .header {
   grid-area: header;
+  z-index: 500;
 }
 
 .layout-content {
@@ -53,7 +54,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 499;
 }
 
 /* ---------------------------------------------

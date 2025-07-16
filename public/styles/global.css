@@ -1,17 +1,17 @@
 :root {
   /* Title (Grandes títulos, header, panel titles) */
   --font-title-family: 'Montserrat', sans-serif;
-  --font-title-size: 20px;
+  --font-title-size: 18px;
   --font-title-weight: 600;
 
   /* Subtitle (subtítulos, panel subtitles) */
   --font-subtitle-family: 'Montserrat', sans-serif;
-  --font-subtitle-size: 16px;
+  --font-subtitle-size: 14px;
   --font-subtitle-weight: 500;
 
   /* UI Text (bubbles, labels, bottom bar, small UI elements) */
   --font-ui-family: 'Montserrat', sans-serif;
-  --font-ui-size: 14px;
+  --font-ui-size: 16px;
   --font-ui-weight: 500;
 
   /* Body (texto normal, chat, párrafos) */
@@ -21,8 +21,8 @@
 
   /* Navigation (leftbar, wallet menu) */
   --font-navigation-family: 'IBM Plex Sans', sans-serif;
-  --font-navigation-size: 13px;
-  --font-navigation-weight: 500;
+  --font-navigation-size: 12px;
+  --font-navigation-weight: 400;
   --font-navigation-transform: uppercase;
 
   /* Caption (tooltips, microtext, etiquetas muy pequeñas) */
