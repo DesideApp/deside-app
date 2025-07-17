@@ -17,7 +17,7 @@ const THEMES = {
 
     // ✅ Text colors
     "--text-primary": "#2b2323",
-    "--text-secondary": "#716965",
+    "--text-secondary": "#867e7aff",
     "--text-on-surface": "#3c3333",
     "--text-on-window": "#2b2323",
 
@@ -52,7 +52,7 @@ const THEMES = {
     "--border-color": "#302e2eff",
 
     "--text-primary": "#f0eae6",
-    "--text-secondary": "#b9b2ad",
+    "--text-secondary": "#99938fff",
     "--text-on-surface": "#f6f0eb",
     "--text-on-window": "#f0eae6",
 

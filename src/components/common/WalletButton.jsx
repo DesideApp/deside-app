@@ -19,7 +19,7 @@ const WalletButton = memo(() => {
 
   const { setLeftbarExpanded } = useLayout();
 
-  // ✅ Detect wallet automatically on mount
+  // ✅ Detect wallet on mount
   useEffect(() => {
     const initializeWallet = async () => {
       const state = await detectWallet();
@@ -34,7 +34,7 @@ const WalletButton = memo(() => {
     initializeWallet();
   }, []);
 
-  // ✅ Listen for LeftbarOpened → close WalletMenu
+  // ✅ Close WalletMenu when Leftbar opens
   useEffect(() => {
     const handleLeftbarOpened = () => {
       setIsMenuOpen(false);
@@ -46,7 +46,7 @@ const WalletButton = memo(() => {
     };
   }, []);
 
-  // ✅ Listen for WalletMenuOpened → collapse LeftBar
+  // ✅ Collapse Leftbar when WalletMenu opens
   useEffect(() => {
     const handleWalletMenuOpened = () => {
       setLeftbarExpanded(false);
@@ -58,19 +58,22 @@ const WalletButton = memo(() => {
     };
   }, [setLeftbarExpanded]);
 
-  // ✅ Handle Connect / Toggle WalletMenu
+  // ✅ Toggle wallet menu with proper open event
+  const toggleWalletMenu = () => {
+    setIsMenuOpen((prev) => {
+      if (!prev) {
+        window.dispatchEvent(new Event("walletMenuOpened"));
+      }
+      return !prev;
+    });
+  };
+
   const handleConnectClick = () => {
     if (!walletState.pubkey) {
       setIsModalOpen(true);
     } else {
-      window.dispatchEvent(new Event("walletMenuOpened"));
-      setIsMenuOpen((prev) => !prev);
+      toggleWalletMenu();
     }
-  };
-
-  const handleMenuToggle = () => {
-    window.dispatchEvent(new Event("walletMenuOpened"));
-    setIsMenuOpen((prev) => !prev);
   };
 
   const handleWalletSelection = async (walletType) => {
@@ -111,7 +114,7 @@ const WalletButton = memo(() => {
       <div className="menu-button-wrapper">
         <button
           className="menu-button"
-          onClick={handleMenuToggle}
+          onClick={toggleWalletMenu}
           aria-label="Toggle Wallet Menu"
         >
           <div className="menu-icon">
