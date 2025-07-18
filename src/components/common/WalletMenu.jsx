@@ -79,7 +79,9 @@ const WalletMenu = memo(
                 </div>
               </>
             ) : (
-              <p className="no-wallet">Please connect a Solana wallet to continue</p>
+              <p className="no-wallet">
+                Please connect a Solana wallet to continue
+              </p>
             )}
           </div>
 
@@ -106,12 +108,46 @@ const WalletMenu = memo(
                   </button>
                 </div>
                 {copySuccess && <p className="copy-success">Copied!</p>}
+                <button
+                  className="logout-button"
+                  onClick={handleLogout}
+                  aria-label="Disconnect Wallet"
+                >
+                  Disconnect
+                </button>
               </>
             )}
           </div>
 
           {/* FOOTER */}
-          <div className="wallet-menu-footer"></div>
+          <div className="wallet-menu-footer">
+            {walletAddress && (
+              <div className="footer-logos">
+                {/* Solana */}
+                <img
+                  src="/companys/marcasolanalight.svg"
+                  alt="Solana"
+                  className="solana-logo light-only"
+                />
+                <img
+                  src="/companys/marcasolanadark.svg"
+                  alt="Solana"
+                  className="solana-logo dark-only"
+                />
+                {/* Deside */}
+                <img
+                  src="/assets/desidelogolight.svg"
+                  alt="Deside"
+                  className="deside-logo light-only"
+                />
+                <img
+                  src="/assets/desidelogodark.svg"
+                  alt="Deside"
+                  className="deside-logo dark-only"
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );

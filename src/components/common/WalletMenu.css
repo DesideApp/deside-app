@@ -166,10 +166,39 @@
   margin-top: 5px;
 }
 
-/* ✅ Responsive WalletMenu */
-@media (max-width: 768px) {
-  .wallet-menu {
-    width: 100%;
-    border-radius: 0;
+/* ✅ Footer branding */
+.footer-logos {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+  padding-bottom: 10px;
+}
+
+.footer-logos img {
+  height: 20px;
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+
+.footer-logos img:hover {
+  opacity: 1;
+}
+
+/* ✅ Modo claro/oscuro para logos */
+.light-only {
+  display: block;
+}
+.dark-only {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .light-only {
+    display: none;
+  }
+  .dark-only {
+    display: block;
   }
 }
