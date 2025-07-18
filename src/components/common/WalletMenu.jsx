@@ -101,18 +101,16 @@ const WalletMenu = memo(
                   </div>
                 </div>
 
-                <div className="wallet-info-box">
+                <div className="wallet-info-box pubkey-box">
                   <div className="wallet-info-title-row">
                     <span className="wallet-info-title">Public Key</span>
-                      <div className="wallet-info-box pubkey-box">
-                        <button
-                          className="eye-toggle-button"
-                          onClick={toggleExpanded}
-                          aria-label="Show full address"
-                        >
-                          <Eye size={16} />
-                        </button>
-                      </div>
+                    <button
+                      className="eye-toggle-button"
+                      onClick={toggleExpanded}
+                      aria-label="Show full address"
+                    >
+                      <Eye size={16} />
+                    </button>
                   </div>
                   <div className="wallet-info-value">
                     <span className="wallet-address">

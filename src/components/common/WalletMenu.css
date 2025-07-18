@@ -1,3 +1,4 @@
+/* ========== STRUCTURA GENERAL ========== */
 .wallet-menu {
   position: fixed;
   top: var(--header-height);
@@ -27,7 +28,7 @@
   text-align: center;
 }
 
-/* ✅ HEADER */
+/* ========== HEADER ========== */
 .wallet-menu-header {
   display: flex;
   max-width: 270px;
@@ -52,7 +53,7 @@
   height: 18px;
 }
 
-/* ✅ BODY */
+/* ========== BODY ========== */
 .wallet-menu-body {
   padding-top: 40px;
   flex: 1;
@@ -62,6 +63,7 @@
   gap: 20px;
 }
 
+/* ========== BOXES ========== */
 .wallet-info-box {
   width: 100%;
   max-width: 270px;
@@ -77,9 +79,10 @@
 }
 
 .wallet-info-box.pubkey-box {
-  min-height: 64px; /* o ajusta a la altura del recuadro balance */
+  min-height: 64px;
 }
 
+/* ========== TITLES & ROWS ========== */
 .wallet-info-title {
   font-family: var(--font-navigation-family);
   font-size: var(--font-navigation-size);
@@ -96,12 +99,7 @@
   align-items: center;
 }
 
-.solana-logo-inline {
-  height: 14px;
-  vertical-align: middle;
-  filter: brightness(1); /* opcional, si necesitas adaptarlo por theme */
-}
-
+/* ========== CONTENT INSIDE BOXES ========== */
 .wallet-info-value {
   width: 100%;
   display: flex;
@@ -115,26 +113,6 @@
   gap: 10px;
 }
 
-.wallet-info-actions button {
-  background: none;
-  border: none;
-  padding: 6px;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease;
-}
-
-.wallet-info-actions svg {
-  display: block;
-}
-
-.wallet-info-actions button:hover {
-  background-color: var(--hover-color); /* pon tu color dinámico */
-}
-
 .wallet-address {
   font-family: monospace;
   font-size: 0.88rem;
@@ -142,58 +120,24 @@
   margin: 0;
 }
 
-.copy-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-  padding: 2px;
+/* ========== ICONS ========== */
+.solana-logo-inline {
+  height: 14px;
+  vertical-align: middle;
+  filter: brightness(1);
 }
 
-.copy-button:hover {
-  opacity: 0.7;
-}
-
-/* ✅ Mensaje de no wallet */
-.no-wallet {
-  font-family: var(--font-ui-family);
-  font-size: var(--font-ui-size);
-  font-weight: var(--font-ui-weight);
-  color: var(--text-secondary);
-  padding: 8px 10px;
-  text-align: center;
-  line-height: 1.4;
-}
-
-/* ✅ Botones */
-
-.eye-toggle-button {
-  background: none;
-  border: none;
-  padding: 4px;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease;
-}
-
-.eye-toggle-button:hover {
-  background-color: var(--hover-color);
-}
-
-/* ✅ ÍCONO DE CHECK EN BOTÓN DE COPIAR */
+/* ========== BUTTONS INSIDE BOXES ========== */
+.wallet-info-actions svg,
 .wallet-info-actions button svg {
   width: 18px;
   height: 18px;
   display: block;
 }
 
-/* ✅ BOTÓN DE ACCIÓN (COPY / CHECK / EYE) */
-.wallet-info-actions button {
+.wallet-info-actions button,
+.eye-toggle-button {
   background: none;
-  color: var(--window-background);
   border: none;
   padding: 6px;
   border-radius: 6px;
@@ -204,10 +148,16 @@
   transition: background-color 0.2s ease;
 }
 
-.wallet-info-actions button:hover {
-  background-color: var(--hover-color); /* pon tu color dinámico */
+.eye-toggle-button {
+  padding: 4px;
 }
 
+.wallet-info-actions button:hover,
+.eye-toggle-button:hover {
+  background-color: var(--hover-color);
+}
+
+/* ========== AUTH BUTTONS ========== */
 .connect-button,
 .logout-button {
   padding: 10px 20px;
@@ -238,7 +188,18 @@
   background-color: #e04343;
 }
 
-/* ✅ FOOTER */
+/* ========== NO WALLET MESSAGE ========== */
+.no-wallet {
+  font-family: var(--font-ui-family);
+  font-size: var(--font-ui-size);
+  font-weight: var(--font-ui-weight);
+  color: var(--text-secondary);
+  padding: 8px 10px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ========== FOOTER ========== */
 .wallet-menu-footer {
   display: flex;
   justify-content: center;
@@ -257,7 +218,7 @@
   opacity: 1;
 }
 
-/* ✅ Responsive */
+/* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
   .wallet-menu {
     width: 100%;
