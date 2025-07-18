@@ -48,8 +48,7 @@
 }
 
 .wallet-network img {
-  width: 24px;
-  height: 24px;
+  height: 40px;
 }
 
 /* ✅ BODY */
@@ -172,7 +171,7 @@
 }
 
 .footer-logo img {
-  height: 20px;
+  height: 40px;
   opacity: 0.85;
   transition: opacity 0.2s ease;
 }
