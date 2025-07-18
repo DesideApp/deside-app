@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from "react";
-import { Copy, Eye, Check } from "lucide-react";
+import { Copy } from "lucide-react";
 import { useLayout } from "../../contexts/LayoutContext";
 import "./WalletMenu.css";
 
@@ -12,7 +12,6 @@ const WalletMenu = memo(
   ({ isOpen, onClose, handleLogout, walletAddress, balance, openWalletModal }) => {
     const menuRef = useRef(null);
     const [copySuccess, setCopySuccess] = useState(false);
-    const [isExpanded, setIsExpanded] = useState(false);
     const { theme } = useLayout();
 
     const solanaLogo =
@@ -25,6 +24,7 @@ const WalletMenu = memo(
         ? "/assets/desidelogodark.svg"
         : "/assets/desidelogolight.svg";
 
+    // Cierre por click fuera
     useEffect(() => {
       const handleClickOutside = (event) => {
         const isClickInside = menuRef.current?.contains(event.target);
@@ -37,6 +37,7 @@ const WalletMenu = memo(
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [isOpen, onClose]);
 
+    // Cierre por ESC
     useEffect(() => {
       const handleEsc = (event) => {
         if (event.key === "Escape") {
@@ -47,18 +48,17 @@ const WalletMenu = memo(
       return () => document.removeEventListener("keydown", handleEsc);
     }, [onClose]);
 
+    // Copiar dirección
     const handleCopy = useCallback(async () => {
       if (!walletAddress || copySuccess) return;
       try {
         await navigator.clipboard.writeText(walletAddress);
         setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 2000);
+        setTimeout(() => setCopySuccess(false), 3000);
       } catch (error) {
         console.error("[WalletMenu] ❌ Error copiando la dirección:", error);
       }
     }, [walletAddress, copySuccess]);
-
-    const toggleExpanded = () => setIsExpanded((prev) => !prev);
 
     return (
       <div
@@ -72,9 +72,9 @@ const WalletMenu = memo(
           {/* HEADER */}
           <div className="wallet-menu-header">
             {walletAddress ? (
-              <div className="wallet-network">
-                <span>Chain</span>
-                <img src={solanaLogo} alt="Solana" />
+              <div className="wallet-network-box">
+                <span className="network-label">Chain</span>
+                <img src={solanaLogo} alt="Solana" className="network-logo" />
               </div>
             ) : (
               <p className="no-wallet">Please connect a Solana wallet to continue</p>
@@ -83,51 +83,33 @@ const WalletMenu = memo(
 
           {/* BODY */}
           <div className="wallet-menu-body">
-            {walletAddress ? (
+            {!walletAddress ? (
+              <button className="connect-button" onClick={openWalletModal}>
+                Log in
+              </button>
+            ) : (
               <>
-                <div className="wallet-info-box">
-                  <span className="wallet-info-title">Balance</span>
-                  <div className="wallet-info-value balance">
-                    <span>{balance !== null ? balance.toFixed(2) : "0.00"}</span>
-                    <div className="solana-logo-wrapper">
-                      <img
-                        src={
-                          theme === "dark"
-                            ? "/companys/solanadark.svg"
-                            : "/companys/solanalight.svg"
-                        }
-                        alt="SOL"
-                        className="solana-logo-inline"
-                      />
-                    </div>
-                  </div>
+                <div className="info-box">
+                  <span className="info-title">Balance</span>
+                  <span className="info-content">
+                    {balance !== null ? balance.toFixed(2) : "0.00"}&nbsp;
+                    <span className="info-unit">SOL</span>
+                  </span>
                 </div>
 
-                <div className="wallet-info-box pubkey-box">
-                  <div className="wallet-info-title-row">
-                    <span className="wallet-info-title">Public Key</span>
+                <div className="info-box wallet-box">
+                  <span className="info-title">Wallet</span>
+                  <div className="wallet-address-actions">
+                    <p className="wallet-address">{shortenAddress(walletAddress)}</p>
                     <button
-                      className="eye-toggle-button"
-                      onClick={toggleExpanded}
-                      aria-label="Show full address"
+                      className="copy-button"
+                      onClick={handleCopy}
+                      aria-label="Copy Wallet Address"
                     >
-                      <Eye size={18} />
+                      <Copy size={18} />
                     </button>
                   </div>
-                  <div className="wallet-info-value">
-                    <span className="wallet-address">
-                      {isExpanded ? walletAddress : shortenAddress(walletAddress)}
-                    </span>
-                    <div className="wallet-info-actions">
-                      <button className="copy-button" onClick={handleCopy} aria-label="Copy Wallet Address">
-                        {copySuccess ? (
-                          <Check size={18} color="#28a745" />
-                        ) : (
-                          <Copy size={18} />
-                        )}
-                      </button>
-                    </div>
-                  </div>
+                  {copySuccess && <p className="copy-success">Copied!</p>}
                 </div>
 
                 <button
@@ -138,14 +120,6 @@ const WalletMenu = memo(
                   Disconnect
                 </button>
               </>
-            ) : (
-              <button
-                className="connect-button"
-                onClick={openWalletModal}
-                aria-label="Connect Wallet"
-              >
-                Log in
-              </button>
             )}
           </div>
 
