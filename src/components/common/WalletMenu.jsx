@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from "react";
-import { Copy } from "lucide-react";
+import { Copy, Eye } from "lucide-react";
 import { useLayout } from "../../contexts/LayoutContext";
 import "./WalletMenu.css";
 
@@ -88,7 +88,14 @@ const WalletMenu = memo(
                 <div className="wallet-info-box">
                   <span className="wallet-info-title">Balance</span>
                   <div className="wallet-info-value">
-                    <span>{balance !== null ? balance.toFixed(2) : "0.00"} SOL</span>
+                    <span>{balance !== null ? balance.toFixed(2) : "0.00"}</span>
+                    <img
+                      src={theme === "dark"
+                        ? "/companys/solanadark.svg"
+                        : "/companys/solanalight.svg"}
+                      alt="SOL"
+                      className="solana-logo-inline"
+                    />
                   </div>
                 </div>
 
@@ -99,7 +106,9 @@ const WalletMenu = memo(
                       {isExpanded ? walletAddress : shortenAddress(walletAddress)}
                     </span>
                     <div className="wallet-info-actions">
-                      <button onClick={toggleExpanded} aria-label="Expand Wallet Address">…</button>
+                      <button onClick={toggleExpanded} aria-label="Show full address">
+                        <Eye size={16} />
+                      </button>
                       <button onClick={handleCopy} aria-label="Copy Wallet Address">
                         <Copy size={18} />
                       </button>

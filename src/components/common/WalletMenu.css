@@ -30,6 +30,7 @@
 /* ✅ HEADER */
 .wallet-menu-header {
   display: flex;
+  max-width: 270px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -53,7 +54,7 @@
 
 /* ✅ BODY */
 .wallet-menu-body {
-  padding-top: 32px;
+  padding-top: 40px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -65,7 +66,7 @@
   width: 100%;
   max-width: 270px;
   background: var(--bubble-background);
-  border-radius: 16px;
+  border-radius: 4px;
   padding: 12px 16px;
   display: flex;
   flex-direction: column;
@@ -73,6 +74,7 @@
   gap: 8px;
   border: 2px solid var(--border-color);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  margin-bottom: 10px;
 }
 
 .wallet-info-title {
@@ -82,6 +84,13 @@
   text-transform: var(--font-navigation-transform);
   color: var(--text-on-window);
   letter-spacing: 0.03em;
+}
+
+.solana-logo-inline {
+  height: 14px;
+  margin-left: 6px;
+  vertical-align: middle;
+  filter: brightness(1); /* opcional, si necesitas adaptarlo por theme */
 }
 
 .wallet-info-value {
@@ -106,6 +115,10 @@
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s ease;
+}
+
+.wallet-info-actions svg {
+  display: block;
 }
 
 .wallet-info-actions button:hover {
