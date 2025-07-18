@@ -57,13 +57,14 @@
 
 /* 📌 Icono de hamburguesa (AHORA TAMBIÉN CUADRADO) */
 .menu-icon {
-    width: 20px; 
-    height: 20px; 
+    width: 20px;
+    height: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: center;       /* Centra completamente las tres líneas */
     align-items: center;
-    gap: 4px; /* Espacio uniforme */
+    gap: 4px;                      /* Espacio controlado entre líneas */
+    padding-top: 1px;              /* 🔥 Ajuste visual final */
 }
 
 /* 📌 Las tres líneas interiores (AHORA PROPORCIONALES) */

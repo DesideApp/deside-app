@@ -33,15 +33,16 @@ const WalletModal = ({ isOpen, onClose, onWalletSelected }) => {
         {/* Body */}
         <div className="wallet-modal-body">
           {/* Blockchain Info */}
-          <div className="wallet-modal-chain-info">
-            <span className="chain-text">Chain</span>
-            <img
-              src="/companys/solanacolor.svg"
-              alt="Solana Logo"
-              className="chain-logo"
-            />
+          <div className="wallet-info-box chain-box">
+            <div className="wallet-info-value">
+              <span className="wallet-info-title">Chain</span>
+              <img
+                src="/companys/solanacolor.svg"
+                alt="Solana Logo"
+                className="solana-logo-inline"
+              />
+            </div>
           </div>
-
           {/* Wallet options */}
           <div className="wallet-options">
             {WALLETS.map((wallet) => (

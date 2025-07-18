@@ -1,110 +1,74 @@
-/* 📌 Contenedor principal */
-.network-status-container {
-    display: flex;
-    align-items: center;
-    gap: 8px; /* 🔥 Compactado aún más */
-    color: #fff;
-    padding: 4px 8px;
-    border-radius: 4px;
-    height: 30px; /* 🔥 Igual a settings-bubble */
+/* 📌 Barra de estado de red Solana (estilo limpio y horizontal) */
+
+.network-status-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 4px;
 }
 
-.network-status-logo-container {
-    align-items: center;
-    flex-shrink: 0;
-    width: 18px;
-    height: 18px;
+/* 📌 Icono de Solana */
+.solana-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
-/* 📌 Indicador del estado de la red */
-.status-container {
-    display: flex;
-    align-items: center;
-    padding-left: 10px;
-}
-
-/* 📌 Luces de estado (más pequeñas y refinadas) */
+/* 📌 Luz de estado (verde, amarilla, roja) */
 .status-light {
-    width: 8px; /* 🔥 Un poco más pequeño */
-    height: 8px;
-    border-radius: 50%;
-    transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 6px;
+  transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 .status-light.green {
-    background-color: #4caf50;
-    box-shadow: 0 0 3px #4caf50;
+  background-color: #4caf50;
+  box-shadow: 0 0 3px #4caf50;
 }
 
 .status-light.yellow {
-    background-color: #ff9800;
-    box-shadow: 0 0 3px #ff9800;
+  background-color: #ff9800;
+  box-shadow: 0 0 3px #ff9800;
 }
 
 .status-light.red {
-    background-color: #f44336;
-    box-shadow: 0 0 3px #f44336;
+  background-color: #f44336;
+  box-shadow: 0 0 3px #f44336;
 }
 
-/* 📌 Contenedor de TPS */
-.tps-container {
-    display: flex;
-    align-items: center;
-    gap: 3px; /* 🔥 Espaciado mínimo */
+/* 📌 Contenedor de la barra TPS */
+.tps-progress-wrapper {
+  width: 60px;
+  height: 6px;
+  background-color: #333;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
 }
 
-/* 📌 Barras de actividad TPS (ahora siempre visibles, pero apagadas si inactivas) */
-.tps-bars {
-    display: flex;
-    gap: 1.5px; /* 🔥 Aún más compacto */
-    height: 14px; /* 🔥 Pequeño ajuste */
-    align-items: flex-end;
+/* 📌 Barra de progreso dinámica (color por inline-style) */
+.tps-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease-in-out;
 }
 
-/* 📌 Barras individuales de TPS */
-.tps-bar {
-    width: 3px; /* 🔥 Más fino */
-    border-radius: 2px;
-    transition: height 0.4s ease-in-out, background-color 0.3s ease-in-out, opacity 0.3s ease-in-out;
-}
-
-/* 📌 Animación más sutil de TPS */
-@keyframes pulseTPS {
-    0%, 100% {
-        height: 5px; /* 🔥 Cambio muy sutil */
-    }
-    50% {
-        height: 12px;
-    }
-}
-
-/* 📌 Aplicar animación a cada barra con un retraso progresivo */
-.tps-bar.active:nth-child(1) {
-    animation: pulseTPS 1.5s infinite ease-in-out 0s;
-}
-.tps-bar.active:nth-child(2) {
-    animation: pulseTPS 1.5s infinite ease-in-out 0.2s;
-}
-.tps-bar.active:nth-child(3) {
-    animation: pulseTPS 1.5s infinite ease-in-out 0.4s;
-}
-.tps-bar.active:nth-child(4) {
-    animation: pulseTPS 1.5s infinite ease-in-out 0.6s;
-}
-
-/* 📌 Colores dinámicos para las barras TPS */
-.tps-bar.active {
-    background-color: #4caf50;
-}
-
-.tps-bar.inactive {
-    background-color: #f44336;
-    opacity: 0.3; /* 🔥 Ahora aún más tenue */
+/* 📌 Texto de valor TPS (opcional si lo usas) */
+.tps-number {
+  font-family: var(--font-data-family);
+  font-size: var(--font-data-size);
+  font-weight: var(--font-data-weight);
+  color: var(--text-secondary);
+  margin-left: 6px;
 }
 
 /* 📌 Mensaje de error */
 .error {
-    color: #f44336;
-    font-size: 0.7rem; /* 🔥 Un poco más pequeño */
-    margin-left: 5px;
+  color: #f44336;
+  font-size: 0.7rem;
+  margin-left: 5px;
 }

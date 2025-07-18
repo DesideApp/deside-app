@@ -38,7 +38,7 @@
   flex-grow: 1;
 }
 
-/* Contenedor derecho (Network, Solana, Swap) */
+/* Contenedor derecho (Jupiter, Donate, Network) */
 .bottom-bar-right-content {
   display: flex;
   align-items: center;
@@ -53,7 +53,6 @@
 
 .bottom-bar .bubble {
   display: flex;
-  font-family: 'Montserrat', sans-serif;
   align-items: center;
   justify-content: center;
   padding: var(--bubble-padding-y) var(--bubble-padding-x);
@@ -61,9 +60,14 @@
   border-radius: var(--bubble-radius);
   width: fit-content;
   border-top: 1px solid var(--border-color);
+  font-family: var(--font-navigation-family);
+  font-size: var(--font-navigation-size);
+  font-weight: var(--font-navigation-weight);
+  text-transform: var(--font-navigation-transform);
+  color: var(--text-on-window);
 }
 
-/* Tipo A - Más alto (NetworkStatus, SolanaPrice, Jupiter) */
+/* Tipo A - Más alto (NetworkStatus, SolanaPrice, Jupiter, Donate) */
 .bottom-bar .bubble.type-a {
   height: 30px;
 }
@@ -73,6 +77,10 @@
   height: 26px;
   margin-right: -4px;
 }
+
+/* ---------------------------------------------
+   🔁 BUBBLES ESPECIALES
+---------------------------------------------- */
 
 /* Switch dentro del Bubble */
 .bottom-bar .switch {
@@ -115,12 +123,21 @@
   transform: translateX(14px);
 }
 
-/* Swap Bubble Hover */
+/* 💸 Donate Bubble */
+.bottom-bar .bubble.type-a.donate-bubble {
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.bottom-bar .bubble.type-a.donate-bubble:hover {
+  transform: scale(1.05);
+}
+
+/* 🪐 Swap Bubble (Jupiter) */
 .bottom-bar .bubble.type-a.swap-bubble {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: var(--bubble-padding-y) var(--bubble-padding-x);
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
 }
@@ -129,18 +146,9 @@
   transform: scale(1.05);
 }
 
-/* Swap Icono */
 .bottom-bar .swap-icon {
   width: 18px;
   height: 18px;
-}
-
-.bottom-bar .swap-bubble span {
-  font-family: var(--font-navigation-family);
-  font-size: var(--font-navigation-size);
-  font-weight: var(--font-navigation-weight);
-  text-transform: var(--font-navigation-transform);
-  color: var(--text-on-window);
 }
 
 /* ---------------------------------------------
