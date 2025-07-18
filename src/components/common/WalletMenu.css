@@ -30,12 +30,12 @@
 
 /* ========== HEADER ========== */
 .wallet-menu-header {
-  display: flex;
+  width: 100%; /* 🔥 Ocupará todo el ancho del menú */
   max-width: 270px;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .wallet-network {
@@ -137,6 +137,7 @@
 
 .wallet-info-actions button,
 .eye-toggle-button {
+  color: var(--window-background);
   background: none;
   width: 30px;
   height: 30px;
@@ -160,6 +161,7 @@
 }
 
 .copy-button {
+  color: var(--window-background);
   background: none;
   width: 30px;
   height: 30px;
