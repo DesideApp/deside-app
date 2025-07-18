@@ -1,5 +1,5 @@
 /* 🔹 Overlay igual al de WalletModal */
-.wallet-modal-overlay {
+.donation-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -12,8 +12,8 @@
   z-index: 1001;
 }
 
-/* 🔹 Modal base igual a wallet-modal */
-.wallet-modal {
+/* 🔹 Modal base */
+.donation-modal {
   background-color: var(--window-background);
   padding-bottom: 20px;
   border-radius: 4px;
@@ -25,8 +25,8 @@
   flex-direction: column;
 }
 
-/* 🔹 Header igualado */
-.wallet-modal-header {
+/* 🔹 Header */
+.donation-modal-header {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -39,8 +39,8 @@
   color: var(--text-on-window);
 }
 
-/* 🔹 Body adaptado */
-.wallet-modal-body {
+/* 🔹 Body */
+.donation-modal-body {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -50,8 +50,8 @@
   padding: 0 0;
 }
 
-/* 🔹 Footer igualado */
-.wallet-modal-footer {
+/* 🔹 Footer */
+.donation-modal-footer {
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -59,7 +59,7 @@
   padding-bottom: 10px;
 }
 
-.close-modal {
+.donation-close-modal {
   font-family: var(--font-navigation-family);
   font-size: 16px;
   font-weight: var(--font-navigation-weight);
@@ -68,8 +68,8 @@
   cursor: pointer;
 }
 
-/* 🔹 Caja igual que en WalletModal */
-.wallet-info-box {
+/* 🔹 Caja de dirección */
+.donation-info-box {
   width: 360px;
   background: var(--bubble-background);
   border-radius: 8px;
@@ -82,7 +82,7 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
-.wallet-info-title {
+.donation-info-title {
   font-family: var(--font-navigation-family);
   font-size: var(--font-navigation-size);
   font-weight: var(--font-navigation-weight);
@@ -91,7 +91,7 @@
   letter-spacing: 0.03em;
 }
 
-.wallet-info-value {
+.donation-info-value {
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -104,14 +104,14 @@
   gap: 15px;
 }
 
-.wallet-address {
+.donation-wallet-address {
   font-family: monospace;
   font-size: 0.88rem;
   color: var(--text-color);
 }
 
-/* 🔹 Botón copiar idéntico */
-.copy-button {
+/* 🔹 Botón copiar */
+.donation-copy-button {
   color: var(--text-on-window);
   background: none;
   width: 30px;
@@ -126,12 +126,12 @@
   transition: background-color 0.2s ease;
 }
 
-.copy-button:hover {
+.donation-copy-button:hover {
   background-color: var(--hover-color);
 }
 
 /* 🔹 Feedback copiado */
-.copy-success {
+.donation-copy-success {
   font-size: 0.85rem;
   color: #28a745;
   margin-top: 5px;
