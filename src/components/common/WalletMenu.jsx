@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from "react";
 import { Copy } from "lucide-react";
 import SolanaLogo from "./SolanaLogo.jsx";
+import { useLayout } from "../../contexts/LayoutContext";
 import "./WalletMenu.css";
 
 const shortenAddress = (address) => {
@@ -12,6 +13,17 @@ const WalletMenu = memo(
   ({ isOpen, onClose, handleLogout, walletAddress, balance, openWalletModal }) => {
     const menuRef = useRef(null);
     const [copySuccess, setCopySuccess] = useState(false);
+    const { theme } = useLayout();
+
+    const solanaLogo =
+      theme === "dark"
+        ? "/companys/marcasolanadark.svg"
+        : "/companys/marcasolanalight.svg";
+
+    const desideLogo =
+      theme === "dark"
+        ? "/assets/desidelogodark.svg"
+        : "/assets/desidelogolight.svg";
 
     // ⛔️ Click fuera del menú para cerrar
     useEffect(() => {
@@ -68,7 +80,7 @@ const WalletMenu = memo(
             {walletAddress ? (
               <>
                 <div className="wallet-network">
-                  <SolanaLogo width={24} height={24} />
+                  <img src={solanaLogo} alt="Solana" />
                   <span>Solana</span>
                 </div>
                 <div className="wallet-balance-box">
@@ -123,28 +135,8 @@ const WalletMenu = memo(
           <div className="wallet-menu-footer">
             {walletAddress && (
               <div className="footer-logos">
-                {/* Solana */}
-                <img
-                  src="/companys/marcasolanalight.svg"
-                  alt="Solana"
-                  className="solana-logo light-only"
-                />
-                <img
-                  src="/companys/marcasolanadark.svg"
-                  alt="Solana"
-                  className="solana-logo dark-only"
-                />
-                {/* Deside */}
-                <img
-                  src="/assets/desidelogolight.svg"
-                  alt="Deside"
-                  className="deside-logo light-only"
-                />
-                <img
-                  src="/assets/desidelogodark.svg"
-                  alt="Deside"
-                  className="deside-logo dark-only"
-                />
+                <img src={solanaLogo} alt="Solana" className="solana-logo" />
+                <img src={desideLogo} alt="Deside" className="deside-logo" />
               </div>
             )}
           </div>

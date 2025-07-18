@@ -11,6 +11,8 @@
   transition: transform 0.3s ease, opacity 0.3s ease;
   z-index: 700;
   padding: 40px 15px;
+  display: flex;
+  flex-direction: column;
 }
 
 .wallet-menu.open {
@@ -18,13 +20,14 @@
   opacity: 1;
 }
 
-/* 📌 Contenido del menú */
 .wallet-menu-content {
-  padding: 0px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   text-align: center;
 }
 
-/* ✅ Nuevos contenedores */
+/* ✅ HEADER */
 .wallet-menu-header {
   display: flex;
   flex-direction: column;
@@ -32,58 +35,39 @@
   margin-bottom: 20px;
 }
 
-.wallet-menu-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.wallet-menu-footer {
-  display: flex;
-  justify-content: center;
-}
-
-/* ✅ Mensaje de no wallet conectado */
-.no-wallet {
-  font-family: var(--font-ui-family);
-  font-size: var(--font-ui-size);
-  font-weight: var(--font-ui-weight);
-  color: var(--text-secondary);
-  text-align: center;
-  line-height: 1.4;
-  padding: 8px 10px;
-}
-
-/* ✅ Solana logo + network name */
 .wallet-network {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   font-weight: 600;
   color: #9945FF;
 }
 
-.wallet-network svg {
-  min-width: 24px;
-  min-height: 24px;
+.wallet-network img {
+  width: 24px;
+  height: 24px;
 }
 
-/* ✅ Balance box */
+/* ✅ BODY */
+.wallet-menu-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
 .wallet-balance-box {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   background: var(--bubble-background);
   padding: 8px 12px;
   border-radius: 12px;
   font-weight: 600;
-  gap: 4px;
-  margin-bottom: 12px;
+  gap: 6px;
+  min-width: 140px;
 }
 
 .balance-value {
@@ -96,16 +80,16 @@
   color: var(--secondary-text);
 }
 
-/* ✅ Wallet address (shortened) */
 .wallet-address-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: var(--bubble-background);
-  padding: 10px;
-  border-radius: 15px;
-  word-break: break-all;
-  margin-bottom: 15px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  word-break: break-word;
+  width: 100%;
+  max-width: 240px;
 }
 
 .wallet-address {
@@ -115,19 +99,30 @@
   margin: 0;
 }
 
-/* ✅ Copy button */
 .copy-button {
   background: none;
   border: none;
   cursor: pointer;
   transition: opacity 0.2s ease;
+  padding: 2px;
 }
 
 .copy-button:hover {
   opacity: 0.7;
 }
 
-/* ✅ Connection and logout buttons */
+/* ✅ Mensaje de no wallet */
+.no-wallet {
+  font-family: var(--font-ui-family);
+  font-size: var(--font-ui-size);
+  font-weight: var(--font-ui-weight);
+  color: var(--text-secondary);
+  padding: 8px 10px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ✅ Buttons */
 .connect-button,
 .logout-button {
   padding: 10px 20px;
@@ -135,7 +130,6 @@
   min-width: 160px;
   max-width: 180px;
   height: 36px;
-  justify-content: center;
   font-family: var(--font-ui-family);
   font-size: var(--font-ui-size);
   font-weight: var(--font-ui-weight);
@@ -159,21 +153,19 @@
   background-color: #e04343;
 }
 
-/* ✅ Copy success message */
 .copy-success {
   font-size: 0.85rem;
   color: #28a745;
   margin-top: 5px;
 }
 
-/* ✅ Footer branding */
-.footer-logos {
+/* ✅ FOOTER */
+.wallet-menu-footer {
   display: flex;
-  gap: 14px;
-  align-items: center;
   justify-content: center;
-  margin-top: auto;
-  padding-bottom: 10px;
+  align-items: flex-end;
+  padding-top: 10px;
+  padding-bottom: 15px;
 }
 
 .footer-logos img {
@@ -186,19 +178,10 @@
   opacity: 1;
 }
 
-/* ✅ Modo claro/oscuro para logos */
-.light-only {
-  display: block;
-}
-.dark-only {
-  display: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  .light-only {
-    display: none;
-  }
-  .dark-only {
-    display: block;
+/* ✅ Responsive */
+@media (max-width: 768px) {
+  .wallet-menu {
+    width: 100%;
+    border-radius: 0;
   }
 }
