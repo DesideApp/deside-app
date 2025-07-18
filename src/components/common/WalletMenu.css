@@ -53,17 +53,17 @@
 
 /* ✅ BODY */
 .wallet-menu-body {
-  padding-top: 30px;
+  padding-top: 32px;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 
 .wallet-info-box {
   width: 100%;
-  max-width: 240px;
+  max-width: 270px;
   background: var(--bubble-background);
   border-radius: 16px;
   padding: 12px 16px;
@@ -206,7 +206,7 @@
 }
 
 .footer-logo img {
-  height: 45px;
+  height: 42px;
   opacity: 0.85;
   transition: opacity 0.2s ease;
 }
