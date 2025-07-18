@@ -40,15 +40,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #9945FF;
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-family: var(--font-title-family);
+  font-size: var(--font-title-size);
+  font-weight: var(--font-title-weight);
+  color: var(--text-on-window);
   margin-bottom: 12px;
   padding: 0 4px;
 }
 
 .wallet-network img {
-  height: 40px;
+  height: 15px;
 }
 
 /* ✅ BODY */
