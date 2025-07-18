@@ -76,6 +76,10 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
+.wallet-info-box.pubkey-box {
+  min-height: 64px; /* o ajusta a la altura del recuadro balance */
+}
+
 .wallet-info-title {
   font-family: var(--font-navigation-family);
   font-size: var(--font-navigation-size);
@@ -85,9 +89,15 @@
   letter-spacing: 0.03em;
 }
 
+.wallet-info-title-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .solana-logo-inline {
   height: 14px;
-  margin-left: 6px;
   vertical-align: middle;
   filter: brightness(1); /* opcional, si necesitas adaptarlo por theme */
 }
@@ -95,13 +105,14 @@
 .wallet-info-value {
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: start;
   align-items: center;
   font-family: var(--font-data-family);
   font-size: var(--font-data-size);
   font-weight: var(--font-data-weight);
   color: var(--text-secondary);
   word-break: break-word;
+  gap: 10px;
 }
 
 .wallet-info-actions button {
@@ -156,6 +167,22 @@
 
 /* ✅ Botones */
 
+.eye-toggle-button {
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.eye-toggle-button:hover {
+  background-color: var(--hover-color);
+}
+
 /* ✅ ÍCONO DE CHECK EN BOTÓN DE COPIAR */
 .wallet-info-actions button svg {
   width: 18px;
@@ -166,6 +193,7 @@
 /* ✅ BOTÓN DE ACCIÓN (COPY / CHECK / EYE) */
 .wallet-info-actions button {
   background: none;
+  color: var(--window-background);
   border: none;
   padding: 6px;
   border-radius: 6px;

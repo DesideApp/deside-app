@@ -102,23 +102,29 @@ const WalletMenu = memo(
                 </div>
 
                 <div className="wallet-info-box">
-                  <span className="wallet-info-title">Public Key</span>
+                  <div className="wallet-info-title-row">
+                    <span className="wallet-info-title">Public Key</span>
+                      <div className="wallet-info-box pubkey-box">
+                        <button
+                          className="eye-toggle-button"
+                          onClick={toggleExpanded}
+                          aria-label="Show full address"
+                        >
+                          <Eye size={16} />
+                        </button>
+                      </div>
+                  </div>
                   <div className="wallet-info-value">
                     <span className="wallet-address">
                       {isExpanded ? walletAddress : shortenAddress(walletAddress)}
                     </span>
-                    <div className="wallet-info-actions">
-                      <button onClick={toggleExpanded} aria-label="Show full address">
-                        <Eye size={16} />
-                      </button>
-                      <button onClick={handleCopy} aria-label="Copy Wallet Address">
-                        {copySuccess ? (
-                          <Check size={18} color="#28a745" />
-                        ) : (
-                          <Copy size={18} />
-                        )}
-                      </button>
-                    </div>
+                    <button onClick={handleCopy} aria-label="Copy Wallet Address">
+                      {copySuccess ? (
+                        <Check size={18} color="#28a745" />
+                      ) : (
+                        <Copy size={18} />
+                      )}
+                    </button>
                   </div>
                 </div>
 
