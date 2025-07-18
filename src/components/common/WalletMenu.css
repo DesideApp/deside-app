@@ -60,14 +60,14 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
 }
 
 .wallet-info-box {
   width: 100%;
   max-width: 270px;
   background: var(--bubble-background);
-  border-radius: 4px;
+  border-radius: 8px;
   padding: 12px 16px;
   display: flex;
   flex-direction: column;
