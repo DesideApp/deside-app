@@ -143,12 +143,6 @@
   opacity: 0.7;
 }
 
-.copy-success {
-  font-size: 0.85rem;
-  color: #28a745;
-  margin-top: 5px;
-}
-
 /* ✅ Mensaje de no wallet */
 .no-wallet {
   font-family: var(--font-ui-family);
@@ -162,6 +156,14 @@
 
 /* ✅ Botones */
 
+/* ✅ ÍCONO DE CHECK EN BOTÓN DE COPIAR */
+.wallet-info-actions button svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* ✅ BOTÓN DE ACCIÓN (COPY / CHECK / EYE) */
 .wallet-info-actions button {
   background: none;
   border: none;

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from "react";
-import { Copy, Eye } from "lucide-react";
+import { Copy, Eye, Check } from "lucide-react";
 import { useLayout } from "../../contexts/LayoutContext";
 import "./WalletMenu.css";
 
@@ -90,9 +90,11 @@ const WalletMenu = memo(
                   <div className="wallet-info-value">
                     <span>{balance !== null ? balance.toFixed(2) : "0.00"}</span>
                     <img
-                      src={theme === "dark"
-                        ? "/companys/solanadark.svg"
-                        : "/companys/solanalight.svg"}
+                      src={
+                        theme === "dark"
+                          ? "/companys/solanadark.svg"
+                          : "/companys/solanalight.svg"
+                      }
                       alt="SOL"
                       className="solana-logo-inline"
                     />
@@ -110,13 +112,15 @@ const WalletMenu = memo(
                         <Eye size={16} />
                       </button>
                       <button onClick={handleCopy} aria-label="Copy Wallet Address">
-                        <Copy size={18} />
+                        {copySuccess ? (
+                          <Check size={18} color="#28a745" />
+                        ) : (
+                          <Copy size={18} />
+                        )}
                       </button>
                     </div>
                   </div>
                 </div>
-
-                {copySuccess && <p className="copy-success">Copied!</p>}
 
                 <button
                   className="logout-button"
