@@ -31,7 +31,7 @@ const DonationModal = memo(({ isOpen, onClose }) => {
       >
         {/* Header */}
         <div className="donation-modal-header">
-          <div id="donation-title">Support Deside ❤️</div>
+          <div id="donation-title">Support Deside </div>
         </div>
 
         {/* Body */}
