@@ -36,12 +36,15 @@
 }
 
 .wallet-network {
+  width: 100%;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-  font-weight: 600;
   color: #9945FF;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+  padding: 0 4px;
 }
 
 .wallet-network img {
@@ -111,6 +114,12 @@
   opacity: 0.7;
 }
 
+.copy-success {
+  font-size: 0.85rem;
+  color: #28a745;
+  margin-top: 5px;
+}
+
 /* ✅ Mensaje de no wallet */
 .no-wallet {
   font-family: var(--font-ui-family);
@@ -122,7 +131,7 @@
   line-height: 1.4;
 }
 
-/* ✅ Buttons */
+/* ✅ Botones */
 .connect-button,
 .logout-button {
   padding: 10px 20px;
@@ -153,12 +162,6 @@
   background-color: #e04343;
 }
 
-.copy-success {
-  font-size: 0.85rem;
-  color: #28a745;
-  margin-top: 5px;
-}
-
 /* ✅ FOOTER */
 .wallet-menu-footer {
   display: flex;
@@ -168,13 +171,13 @@
   padding-bottom: 15px;
 }
 
-.footer-logos img {
+.footer-logo img {
   height: 20px;
   opacity: 0.85;
   transition: opacity 0.2s ease;
 }
 
-.footer-logos img:hover {
+.footer-logo img:hover {
   opacity: 1;
 }
 

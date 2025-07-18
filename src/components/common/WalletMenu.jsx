@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from "react";
 import { Copy } from "lucide-react";
-import SolanaLogo from "./SolanaLogo.jsx";
 import { useLayout } from "../../contexts/LayoutContext";
 import "./WalletMenu.css";
 
@@ -25,38 +24,33 @@ const WalletMenu = memo(
         ? "/assets/desidelogodark.svg"
         : "/assets/desidelogolight.svg";
 
-    // ⛔️ Click fuera del menú para cerrar
+    // Cierre por click fuera
     useEffect(() => {
       const handleClickOutside = (event) => {
-        const isClickInside =
-          menuRef.current && menuRef.current.contains(event.target);
+        const isClickInside = menuRef.current?.contains(event.target);
         const isClickOnToggleButton = event.target.closest(".menu-button-wrapper");
-
         if (isOpen && !isClickInside && !isClickOnToggleButton) {
           onClose();
         }
       };
-
       document.addEventListener("mousedown", handleClickOutside);
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [isOpen, onClose]);
 
-    // ⛔️ ESC para cerrar
+    // Cierre por ESC
     useEffect(() => {
       const handleEsc = (event) => {
         if (event.key === "Escape") {
           onClose();
         }
       };
-
       document.addEventListener("keydown", handleEsc);
       return () => document.removeEventListener("keydown", handleEsc);
     }, [onClose]);
 
-    // ✅ Copiar dirección
+    // Copiar dirección
     const handleCopy = useCallback(async () => {
       if (!walletAddress || copySuccess) return;
-
       try {
         await navigator.clipboard.writeText(walletAddress);
         setCopySuccess(true);
@@ -78,37 +72,26 @@ const WalletMenu = memo(
           {/* HEADER */}
           <div className="wallet-menu-header">
             {walletAddress ? (
+              <div className="wallet-network">
+                <span>Chain</span>
+                <img src={solanaLogo} alt="Solana" />
+              </div>
+            ) : (
+              <p className="no-wallet">Please connect a Solana wallet to continue</p>
+            )}
+          </div>
+
+          {/* BODY */}
+          <div className="wallet-menu-body">
+            {walletAddress ? (
               <>
-                <div className="wallet-network">
-                  <img src={solanaLogo} alt="Solana" />
-                  <span>Solana</span>
-                </div>
                 <div className="wallet-balance-box">
                   <span className="balance-value">
                     {balance !== null ? balance.toFixed(2) : "0.00"}
                   </span>
                   <span className="balance-unit">SOL</span>
                 </div>
-              </>
-            ) : (
-              <p className="no-wallet">
-                Please connect a Solana wallet to continue
-              </p>
-            )}
-          </div>
 
-          {/* BODY */}
-          <div className="wallet-menu-body">
-            {!walletAddress ? (
-              <button
-                className="connect-button"
-                onClick={openWalletModal}
-                aria-label="Connect Wallet"
-              >
-                Log in
-              </button>
-            ) : (
-              <>
                 <div className="wallet-address-container">
                   <p className="wallet-address">{shortenAddress(walletAddress)}</p>
                   <button
@@ -119,7 +102,9 @@ const WalletMenu = memo(
                     <Copy size={18} />
                   </button>
                 </div>
+
                 {copySuccess && <p className="copy-success">Copied!</p>}
+
                 <button
                   className="logout-button"
                   onClick={handleLogout}
@@ -128,17 +113,22 @@ const WalletMenu = memo(
                   Disconnect
                 </button>
               </>
+            ) : (
+              <button
+                className="connect-button"
+                onClick={openWalletModal}
+                aria-label="Connect Wallet"
+              >
+                Log in
+              </button>
             )}
           </div>
 
           {/* FOOTER */}
           <div className="wallet-menu-footer">
-            {walletAddress && (
-              <div className="footer-logos">
-                <img src={solanaLogo} alt="Solana" className="solana-logo" />
-                <img src={desideLogo} alt="Deside" className="deside-logo" />
-              </div>
-            )}
+            <div className="footer-logo">
+              <img src={desideLogo} alt="Deside" />
+            </div>
           </div>
         </div>
       </div>
