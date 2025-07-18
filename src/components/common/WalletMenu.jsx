@@ -125,23 +125,23 @@ const WalletMenu = memo(
               <div className="footer-logos">
                 {/* Solana */}
                 <img
-                  src="/companys/marcasolanalight.svg"
+                  src="/company/marcasolanadark.svg"
                   alt="Solana"
                   className="solana-logo light-only"
                 />
                 <img
-                  src="/companys/marcasolanadark.svg"
+                  src="/company/marcasolanalight.svg"
                   alt="Solana"
                   className="solana-logo dark-only"
                 />
                 {/* Deside */}
                 <img
-                  src="/assets/desidelogolight.svg"
+                  src="/assets/desidelogodark.svg"
                   alt="Deside"
                   className="deside-logo light-only"
                 />
                 <img
-                  src="/assets/desidelogodark.svg"
+                  src="/assets/desidelogolight.svg"
                   alt="Deside"
                   className="deside-logo dark-only"
                 />
