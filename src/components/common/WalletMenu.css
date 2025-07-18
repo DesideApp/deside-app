@@ -186,7 +186,7 @@
   height: 30px;
   border: none;
   cursor: pointer;
-  padding: 6px;
+  padding: 6px; /* Igual que el eye-toggle */
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -196,6 +196,12 @@
 
 .copy-button:hover {
   background-color: var(--hover-color);
+}
+
+.copy-button svg {
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
 /* ========== AUTH BUTTONS ========== */
