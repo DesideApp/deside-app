@@ -52,7 +52,7 @@ const WalletMenu = memo(
       try {
         await navigator.clipboard.writeText(walletAddress);
         setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 3000);
+        setTimeout(() => setCopySuccess(false), 2000);
       } catch (error) {
         console.error("[WalletMenu] ❌ Error copiando la dirección:", error);
       }
