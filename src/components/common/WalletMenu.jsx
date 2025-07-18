@@ -111,7 +111,7 @@ const WalletMenu = memo(
                       onClick={toggleExpanded}
                       aria-label="Show full address"
                     >
-                      <Eye size={16} />
+                      <Eye size={18} />
                     </button>
                   </div>
                   <div className="wallet-info-value">
