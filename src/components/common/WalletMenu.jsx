@@ -12,6 +12,7 @@ const WalletMenu = memo(
   ({ isOpen, onClose, handleLogout, walletAddress, balance, openWalletModal }) => {
     const menuRef = useRef(null);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
     const { theme } = useLayout();
 
     const solanaLogo =
@@ -24,7 +25,6 @@ const WalletMenu = memo(
         ? "/assets/desidelogodark.svg"
         : "/assets/desidelogolight.svg";
 
-    // Cierre por click fuera
     useEffect(() => {
       const handleClickOutside = (event) => {
         const isClickInside = menuRef.current?.contains(event.target);
@@ -37,7 +37,6 @@ const WalletMenu = memo(
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [isOpen, onClose]);
 
-    // Cierre por ESC
     useEffect(() => {
       const handleEsc = (event) => {
         if (event.key === "Escape") {
@@ -48,7 +47,6 @@ const WalletMenu = memo(
       return () => document.removeEventListener("keydown", handleEsc);
     }, [onClose]);
 
-    // Copiar dirección
     const handleCopy = useCallback(async () => {
       if (!walletAddress || copySuccess) return;
       try {
@@ -59,6 +57,8 @@ const WalletMenu = memo(
         console.error("[WalletMenu] ❌ Error copiando la dirección:", error);
       }
     }, [walletAddress, copySuccess]);
+
+    const toggleExpanded = () => setIsExpanded((prev) => !prev);
 
     return (
       <div
@@ -85,22 +85,26 @@ const WalletMenu = memo(
           <div className="wallet-menu-body">
             {walletAddress ? (
               <>
-                <div className="wallet-balance-box">
-                  <span className="balance-value">
-                    {balance !== null ? balance.toFixed(2) : "0.00"}
-                  </span>
-                  <span className="balance-unit">SOL</span>
+                <div className="wallet-info-box">
+                  <span className="wallet-info-title">Balance</span>
+                  <div className="wallet-info-value">
+                    <span>{balance !== null ? balance.toFixed(2) : "0.00"} SOL</span>
+                  </div>
                 </div>
 
-                <div className="wallet-address-container">
-                  <p className="wallet-address">{shortenAddress(walletAddress)}</p>
-                  <button
-                    className="copy-button"
-                    onClick={handleCopy}
-                    aria-label="Copy Wallet Address"
-                  >
-                    <Copy size={18} />
-                  </button>
+                <div className="wallet-info-box">
+                  <span className="wallet-info-title">Public Key</span>
+                  <div className="wallet-info-value">
+                    <span className="wallet-address">
+                      {isExpanded ? walletAddress : shortenAddress(walletAddress)}
+                    </span>
+                    <div className="wallet-info-actions">
+                      <button onClick={toggleExpanded} aria-label="Expand Wallet Address">…</button>
+                      <button onClick={handleCopy} aria-label="Copy Wallet Address">
+                        <Copy size={18} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 {copySuccess && <p className="copy-success">Copied!</p>}
