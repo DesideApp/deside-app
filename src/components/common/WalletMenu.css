@@ -36,6 +36,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 15px;
 }
 
 .wallet-network {
@@ -137,7 +138,7 @@
 
 .wallet-info-actions button,
 .eye-toggle-button {
-  color: var(--window-background);
+  color: var(--text-on-window);
   background: none;
   width: 30px;
   height: 30px;
@@ -161,7 +162,7 @@
 }
 
 .copy-button {
-  color: var(--window-background);
+  color: var(--text-on-window);
   background: none;
   width: 30px;
   height: 30px;
