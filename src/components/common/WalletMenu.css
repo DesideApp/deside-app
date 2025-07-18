@@ -61,38 +61,35 @@
   gap: 14px;
 }
 
-.wallet-balance-box {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.wallet-info-box {
+  width: 100%;
+  max-width: 240px;
   background: var(--bubble-background);
-  padding: 8px 12px;
   border-radius: 12px;
-  font-weight: 600;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
   gap: 6px;
-  min-width: 140px;
 }
 
-.balance-value {
-  font-size: 1.1rem;
-  color: var(--text-color);
-}
-
-.balance-unit {
-  font-size: 0.9rem;
+.wallet-info-title {
+  font-size: 0.75rem;
+  font-weight: 500;
   color: var(--secondary-text);
 }
 
-.wallet-address-container {
+.wallet-info-value {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  background: var(--bubble-background);
-  padding: 10px 12px;
-  border-radius: 12px;
-  word-break: break-word;
-  width: 100%;
-  max-width: 240px;
+  align-items: center;
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.wallet-info-actions {
+  display: flex;
+  gap: 6px;
 }
 
 .wallet-address {
