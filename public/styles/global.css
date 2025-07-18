@@ -25,6 +25,12 @@
   --font-navigation-weight: 400;
   --font-navigation-transform: uppercase;
 
+  /* Data (Cifras, direcciones, valores crudos, técnicos) */
+  --font-data-family: 'IBM Plex Mono', monospace;
+  --font-data-size: 13px;
+  --font-data-weight: 400;
+  --font-data-transform: none;
+
   /* Caption (tooltips, microtext, etiquetas muy pequeñas) */
   --font-caption-family: 'Inter', sans-serif;
   --font-caption-size: 11px;

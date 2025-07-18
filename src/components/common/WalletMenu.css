@@ -33,7 +33,6 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
 }
 
 .wallet-network {
@@ -45,12 +44,11 @@
   font-size: var(--font-subtitle-size);
   font-weight: var(--font-subtitle-weight);
   color: var(--text-on-window);
-  margin-bottom: 12px;
   padding: 0 4px;
 }
 
 .wallet-network img {
-  height: 20px;
+  height: 18px;
 }
 
 /* ✅ BODY */
@@ -91,9 +89,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: monospace;
-  font-size: 0.9rem;
-  color: var(--text-color);
+  font-family: var(--font-data-family);
+  font-size: var(--font-data-size);
+  font-weight: var(--font-data-weight);
+  color: var(--text-secondary);
   word-break: break-word;
 }
 
