@@ -87,17 +87,19 @@ const WalletMenu = memo(
               <>
                 <div className="wallet-info-box">
                   <span className="wallet-info-title">Balance</span>
-                  <div className="wallet-info-value">
+                  <div className="wallet-info-value balance">
                     <span>{balance !== null ? balance.toFixed(2) : "0.00"}</span>
-                    <img
-                      src={
-                        theme === "dark"
-                          ? "/companys/solanadark.svg"
-                          : "/companys/solanalight.svg"
-                      }
-                      alt="SOL"
-                      className="solana-logo-inline"
-                    />
+                    <div className="solana-logo-wrapper">
+                      <img
+                        src={
+                          theme === "dark"
+                            ? "/companys/solanadark.svg"
+                            : "/companys/solanalight.svg"
+                        }
+                        alt="SOL"
+                        className="solana-logo-inline"
+                      />
+                    </div>
                   </div>
                 </div>
 
