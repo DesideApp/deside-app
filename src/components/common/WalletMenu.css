@@ -35,7 +35,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 10px;
+  margin: 0 auto;
 }
 
 .wallet-network {
@@ -50,7 +50,7 @@
 }
 
 .wallet-network img {
-  height: 18px;
+  height: 16px;
 }
 
 /* ========== BODY ========== */
@@ -103,14 +103,14 @@
 .wallet-info-value {
   width: 100%;
   display: flex;
-  justify-content: start;
+  justify-content: space-between;
   align-items: center;
   font-family: var(--font-data-family);
   font-size: var(--font-data-size);
   font-weight: var(--font-data-weight);
   color: var(--text-secondary);
   word-break: break-word;
-  gap: 10px;
+  gap: 15px;
 }
 
 .wallet-address {
@@ -122,7 +122,7 @@
 
 /* ========== ICONS ========== */
 .solana-logo-inline {
-  height: 14px;
+  height: 13px;
   vertical-align: middle;
   filter: brightness(1);
 }
@@ -138,6 +138,8 @@
 .wallet-info-actions button,
 .eye-toggle-button {
   background: none;
+  width: 30px;
+  height: 30px;
   border: none;
   padding: 6px;
   border-radius: 6px;
@@ -159,6 +161,8 @@
 
 .copy-button {
   background: none;
+  width: 30px;
+  height: 30px;
   border: none;
   cursor: pointer;
   padding: 6px;

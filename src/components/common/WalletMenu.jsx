@@ -116,13 +116,15 @@ const WalletMenu = memo(
                     <span className="wallet-address">
                       {isExpanded ? walletAddress : shortenAddress(walletAddress)}
                     </span>
-                    <button className="copy-button" onClick={handleCopy} aria-label="Copy Wallet Address">
-                      {copySuccess ? (
-                        <Check size={18} color="#28a745" />
-                      ) : (
-                        <Copy size={18} />
-                      )}
-                    </button>
+                    <div className="wallet-info-actions">
+                      <button className="copy-button" onClick={handleCopy} aria-label="Copy Wallet Address">
+                        {copySuccess ? (
+                          <Check size={18} color="#28a745" />
+                        ) : (
+                          <Copy size={18} />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
