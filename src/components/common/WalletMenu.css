@@ -1,3 +1,4 @@
+/* ========== STRUCTURA GENERAL ========== */
 .wallet-menu {
   position: fixed;
   top: var(--header-height);
@@ -27,12 +28,15 @@
   text-align: center;
 }
 
-/* ✅ HEADER */
+/* ========== HEADER ========== */
 .wallet-menu-header {
+  width: 100%; /* 🔥 Ocupará todo el ancho del menú */
+  max-width: 270px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 20px;
+  padding: 15px;
 }
 
 .wallet-network {
@@ -40,95 +44,164 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: var(--font-title-family);
-  font-size: var(--font-title-size);
-  font-weight: var(--font-title-weight);
+  font-family: var(--font-subtitle-family);
+  font-size: var(--font-subtitle-size);
+  font-weight: var(--font-subtitle-weight);
   color: var(--text-on-window);
-  margin-bottom: 12px;
-  padding: 0 4px;
 }
 
 .wallet-network img {
-  height: 15px;
+  height: 16px;
 }
 
-/* ✅ BODY */
+/* ========== BODY ========== */
 .wallet-menu-body {
+  padding-top: 40px;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 20px;
 }
 
+/* ========== BOXES ========== */
 .wallet-info-box {
   width: 100%;
-  max-width: 240px;
+  max-width: 270px;
   background: var(--bubble-background);
-  border-radius: 12px;
-  padding: 10px 12px;
+  border-radius: 8px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: flex-start;
+  gap: 8px;
+  border: 2px solid var(--border-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
+.wallet-info-box.pubkey-box {
+  min-height: 64px;
+}
+
+/* ========== TITLES & ROWS ========== */
 .wallet-info-title {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--secondary-text);
+  font-family: var(--font-navigation-family);
+  font-size: var(--font-navigation-size);
+  font-weight: var(--font-navigation-weight);
+  text-transform: var(--font-navigation-transform);
+  color: var(--text-on-window);
+  letter-spacing: 0.03em;
 }
 
-.wallet-info-value {
+.wallet-info-title-row {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: monospace;
-  font-size: 0.9rem;
-  color: var(--text-color);
 }
 
-.wallet-info-actions {
+/* ========== CONTENT INSIDE BOXES ========== */
+.wallet-info-value {
+  width: 100%;
   display: flex;
-  gap: 6px;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-data-family);
+  font-size: var(--font-data-size);
+  font-weight: var(--font-data-weight);
+  color: var(--text-secondary);
+  word-break: break-word;
+  gap: 15px;
 }
+
+.wallet-info-value.balance {
+  justify-content: flex-end;
+}
+
 
 .wallet-address {
   font-family: monospace;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--text-color);
   margin: 0;
+  justify-content: flex-start;
+}
+
+/* ========== ICONS ========== */
+.solana-logo-inline {
+  height: 13px;
+  vertical-align: middle;
+  filter: brightness(1);
+}
+
+.solana-logo-wrapper {
+  width: 30px;
+  height: 30px;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ========== BUTTONS INSIDE BOXES ========== */
+.wallet-info-actions svg,
+.wallet-info-actions button svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.wallet-info-actions button,
+.eye-toggle-button {
+  color: var(--text-on-window);
+  background: none;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.eye-toggle-button {
+  padding: 4px;
+}
+
+.wallet-info-actions button:hover,
+.eye-toggle-button:hover {
+  background-color: var(--hover-color);
 }
 
 .copy-button {
+  color: var(--text-on-window);
   background: none;
+  width: 30px;
+  height: 30px;
   border: none;
   cursor: pointer;
-  transition: opacity 0.2s ease;
-  padding: 2px;
+  padding: 6px; /* Igual que el eye-toggle */
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
 }
 
 .copy-button:hover {
-  opacity: 0.7;
+  background-color: var(--hover-color);
 }
 
-.copy-success {
-  font-size: 0.85rem;
-  color: #28a745;
-  margin-top: 5px;
+.copy-button svg {
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
-/* ✅ Mensaje de no wallet */
-.no-wallet {
-  font-family: var(--font-ui-family);
-  font-size: var(--font-ui-size);
-  font-weight: var(--font-ui-weight);
-  color: var(--text-secondary);
-  padding: 8px 10px;
-  text-align: center;
-  line-height: 1.4;
-}
-
-/* ✅ Botones */
+/* ========== AUTH BUTTONS ========== */
 .connect-button,
 .logout-button {
   padding: 10px 20px;
@@ -159,17 +232,27 @@
   background-color: #e04343;
 }
 
-/* ✅ FOOTER */
+/* ========== NO WALLET MESSAGE ========== */
+.no-wallet {
+  font-family: var(--font-ui-family);
+  font-size: var(--font-ui-size);
+  font-weight: var(--font-ui-weight);
+  color: var(--text-secondary);
+  padding: 8px 10px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ========== FOOTER ========== */
 .wallet-menu-footer {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  padding-top: 10px;
-  padding-bottom: 15px;
+  padding-top: 30px;
 }
 
 .footer-logo img {
-  height: 40px;
+  height: 42px;
   opacity: 0.85;
   transition: opacity 0.2s ease;
 }
@@ -178,7 +261,7 @@
   opacity: 1;
 }
 
-/* ✅ Responsive */
+/* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
   .wallet-menu {
     width: 100%;
