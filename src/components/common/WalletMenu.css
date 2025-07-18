@@ -115,7 +115,7 @@
 }
 
 .wallet-info-value.balance {
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 
 
