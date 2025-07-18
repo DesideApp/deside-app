@@ -104,7 +104,7 @@
 .wallet-info-value {
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   font-family: var(--font-data-family);
   font-size: var(--font-data-size);
@@ -112,6 +112,7 @@
   color: var(--text-secondary);
   word-break: break-word;
   gap: 15px;
+  text-align: right;
 }
 
 .wallet-address {
@@ -143,7 +144,9 @@
   width: 30px;
   height: 30px;
   border: none;
-  padding: 6px;
+  padding-left: 12px;
+  padding-top: 6px;
+  padding-bottom: 6px;
   border-radius: 6px;
   cursor: pointer;
   display: flex;
@@ -227,7 +230,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  padding-top: 10px;
+  padding-top: 30px;
   padding-bottom: 15px;
 }
 
