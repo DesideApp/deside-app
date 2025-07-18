@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from "react";
-import { Copy, Eye, Check } from "lucide-react";
+import { Copy } from "lucide-react";
 import { useLayout } from "../../contexts/LayoutContext";
 import "./WalletMenu.css";
 
@@ -52,7 +52,7 @@ const WalletMenu = memo(
       try {
         await navigator.clipboard.writeText(walletAddress);
         setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 2000);
+        setTimeout(() => setCopySuccess(false), 3000);
       } catch (error) {
         console.error("[WalletMenu] ❌ Error copiando la dirección:", error);
       }
@@ -87,48 +87,27 @@ const WalletMenu = memo(
               <>
                 <div className="wallet-info-box">
                   <span className="wallet-info-title">Balance</span>
-                  <div className="wallet-info-value balance">
-                    <span>{balance !== null ? balance.toFixed(2) : "0.00"}</span>
-                    <div className="solana-logo-wrapper">
-                      <img
-                        src={
-                          theme === "dark"
-                            ? "/companys/solanadark.svg"
-                            : "/companys/solanalight.svg"
-                        }
-                        alt="SOL"
-                        className="solana-logo-inline"
-                      />
-                    </div>
+                  <div className="wallet-info-value">
+                    <span>{balance !== null ? balance.toFixed(2) : "0.00"} SOL</span>
                   </div>
                 </div>
 
-                <div className="wallet-info-box pubkey-box">
-                  <div className="wallet-info-title-row">
-                    <span className="wallet-info-title">Public Key</span>
-                    <button
-                      className="eye-toggle-button"
-                      onClick={toggleExpanded}
-                      aria-label="Show full address"
-                    >
-                      <Eye size={18} />
-                    </button>
-                  </div>
+                <div className="wallet-info-box">
+                  <span className="wallet-info-title">Public Key</span>
                   <div className="wallet-info-value">
                     <span className="wallet-address">
                       {isExpanded ? walletAddress : shortenAddress(walletAddress)}
                     </span>
                     <div className="wallet-info-actions">
-                      <button className="copy-button" onClick={handleCopy} aria-label="Copy Wallet Address">
-                        {copySuccess ? (
-                          <Check size={18} color="#28a745" />
-                        ) : (
-                          <Copy size={18} />
-                        )}
+                      <button onClick={toggleExpanded} aria-label="Expand Wallet Address">…</button>
+                      <button onClick={handleCopy} aria-label="Copy Wallet Address">
+                        <Copy size={18} />
                       </button>
                     </div>
                   </div>
                 </div>
+
+                {copySuccess && <p className="copy-success">Copied!</p>}
 
                 <button
                   className="logout-button"
