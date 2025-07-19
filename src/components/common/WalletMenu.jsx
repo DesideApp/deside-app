@@ -85,9 +85,9 @@ const WalletMenu = memo(
           <div className="wallet-menu-body">
             {walletAddress ? (
               <>
-                <div className="wallet-infor-boxbox">
+                <div className="wallet-infor-box">
                   <span className="wallet-infor-title">Balance</span>
-                  <div className="wallet-infor-valuee balance">
+                  <div className="wallet-infor-value balance">
                     <span>{balance !== null ? balance.toFixed(2) : "0.00"}</span>
                     <div className="solana-logo-wrapper">
                       <img
@@ -119,7 +119,11 @@ const WalletMenu = memo(
                       {isExpanded ? walletAddress : shortenAddress(walletAddress)}
                     </span>
                     <div className="wallet-infor-actions">
-                      <button className="copy-button" onClick={handleCopy} aria-label="Copy Wallet Address">
+                      <button
+                        className="copy-button"
+                        onClick={handleCopy}
+                        aria-label="Copy Wallet Address"
+                      >
                         {copySuccess ? (
                           <Check size={18} color="#28a745" />
                         ) : (
