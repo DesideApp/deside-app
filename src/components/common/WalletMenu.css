@@ -62,12 +62,15 @@
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  max-width: 290px; /* margen de seguridad real */
+  margin: 0 auto;
 }
 
 /* =========== BOXES =========== */
 .wallet-info-box {
+  width: 100%;
+  max-width: 270px;
   box-sizing: border-box;
-  width: 270px;
   background: var(--bubble-background);
   border-radius: 8px;
   padding: 12px 16px;
