@@ -69,7 +69,7 @@
 }
 
 /* 🔹 Caja de dirección */
-.donation-info-box {
+.donation-modal .donation-info-box {
   width: 360px;
   background: var(--bubble-background);
   border-radius: 8px;
