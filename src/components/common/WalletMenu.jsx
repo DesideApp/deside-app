@@ -85,7 +85,7 @@ const WalletMenu = memo(
           <div className="wallet-menu-body">
             {walletAddress ? (
               <>
-                <div className="wallet-info-box">
+                <div className="wallet-info-boxbox">
                   <span className="wallet-info-title">Balance</span>
                   <div className="wallet-info-value balance">
                     <span>{balance !== null ? balance.toFixed(2) : "0.00"}</span>
