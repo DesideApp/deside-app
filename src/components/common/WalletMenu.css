@@ -67,7 +67,7 @@
 /* =========== BOXES =========== */
 .wallet-info-box {
   box-sizing: border-box;
-  max-width: 270px;
+  width: 270px;
   background: var(--bubble-background);
   border-radius: 8px;
   padding: 12px 16px;
