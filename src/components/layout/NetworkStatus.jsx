@@ -12,7 +12,10 @@ const NetworkStatus = React.memo(({ className = "" }) => {
   const fetchData = useCallback(async () => {
     if (!isMountedRef.current) return;
     try {
-      const [statusData, tpsData] = await Promise.all([getSolanaStatus(), getSolanaTPS()]);
+      const [statusData, tpsData] = await Promise.all([
+        getSolanaStatus(),
+        getSolanaTPS(),
+      ]);
       if (isMountedRef.current) {
         setStatus(statusData || "offline");
         setTps(typeof tpsData === "number" ? tpsData : 0);
@@ -51,6 +54,17 @@ const NetworkStatus = React.memo(({ className = "" }) => {
 
   const progressWidth = Math.min((tps / 4000) * 100, 100);
 
+  const formattedTps = useMemo(() => {
+    if (tps >= 1000) return `${(tps / 1000).toFixed(1)}k`;
+    return `${tps.toFixed(0)}`;
+  }, [tps]);
+
+  const progressColor = useMemo(() => {
+    if (tps >= 3000) return "#4caf50";   // verde
+    if (tps >= 1500) return "#ff9800";   // amarillo
+    return "#f44336";                    // rojo
+  }, [tps]);
+
   return (
     <div className={`network-status-bar-container ${className}`}>
       <img
@@ -59,14 +73,20 @@ const NetworkStatus = React.memo(({ className = "" }) => {
         className="solana-icon"
       />
 
-      <div className="tps-progress-wrapper">
+      <div
+        className="tps-progress-wrapper"
+        style={{ visibility: tps > 0 ? "visible" : "hidden" }}
+      >
         <div
           className="tps-progress-fill"
-          style={{ width: `${progressWidth}%` }}
+          style={{
+            width: `${progressWidth}%`,
+            backgroundColor: progressColor,
+          }}
         ></div>
       </div>
 
-      <span className="tps-number">{tps.toLocaleString()} TPS</span>
+      <span className="tps-number">{formattedTps} TPS</span>
 
       <div className={`status-light ${statusColor}`} />
 

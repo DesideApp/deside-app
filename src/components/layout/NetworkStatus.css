@@ -1,5 +1,4 @@
 /* 📌 Barra de estado de red Solana (estilo limpio y horizontal) */
-
 .network-status-bar-container {
   display: flex;
   align-items: center;
@@ -48,22 +47,25 @@
   border-radius: 3px;
   overflow: hidden;
   position: relative;
+  flex-shrink: 0;
 }
 
-/* 📌 Barra de progreso dinámica (color por inline-style) */
+/* 📌 Barra de progreso dinámica (color via inline-style) */
 .tps-progress-fill {
   height: 100%;
   border-radius: 3px;
-  transition: width 0.3s ease-in-out;
+  transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
+  background-color: transparent; /* default para evitar override no deseado */
 }
 
-/* 📌 Texto de valor TPS (opcional si lo usas) */
+/* 📌 Texto de valor TPS */
 .tps-number {
   font-family: var(--font-data-family);
   font-size: var(--font-data-size);
   font-weight: var(--font-data-weight);
   color: var(--text-secondary);
   margin-left: 6px;
+  flex-shrink: 0;
 }
 
 /* 📌 Mensaje de error */
