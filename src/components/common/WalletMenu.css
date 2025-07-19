@@ -67,7 +67,7 @@
 }
 
 /* =========== BOXES =========== */
-.wallet-info-boxbox {
+.wallet-infor-box {
   width: 100%;
   max-width: 270px;
   box-sizing: border-box;
@@ -81,12 +81,12 @@
   border: 2px solid var(--border-color);
 }
 
-.wallet-info-box.pubkey-box {
+.wallet-infor-box.pubkey-box {
   min-height: 64px;
 }
 
 /* ========== TITLES & ROWS ========== */
-.wallet-info-title {
+.wallet-infor-title {
   font-family: var(--font-navigation-family);
   font-size: var(--font-navigation-size);
   font-weight: var(--font-navigation-weight);
@@ -95,7 +95,7 @@
   letter-spacing: 0.03em;
 }
 
-.wallet-info-title-row {
+.wallet-infor-title-row {
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -103,7 +103,7 @@
 }
 
 /* ========== CONTENT INSIDE BOXES ========== */
-.wallet-info-value {
+.wallet-infor-value {
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -116,7 +116,7 @@
   gap: 15px;
 }
 
-.wallet-info-value.balance {
+.wallet-infor-value.balance {
   justify-content: flex-end;
 }
 
@@ -147,14 +147,14 @@
 }
 
 /* ========== BUTTONS INSIDE BOXES ========== */
-.wallet-info-actions svg,
-.wallet-info-actions button svg {
+.wallet-infor-actions svg,
+.wallet-infor-actions button svg {
   width: 18px;
   height: 18px;
   display: block;
 }
 
-.wallet-info-actions button,
+.wallet-infor-actions button,
 .eye-toggle-button {
   color: var(--text-on-window);
   background: none;
@@ -173,7 +173,7 @@
   padding: 4px;
 }
 
-.wallet-info-actions button:hover,
+.wallet-infor-actions button:hover,
 .eye-toggle-button:hover {
   background-color: var(--hover-color);
 }

@@ -85,9 +85,9 @@ const WalletMenu = memo(
           <div className="wallet-menu-body">
             {walletAddress ? (
               <>
-                <div className="wallet-info-boxbox">
-                  <span className="wallet-info-title">Balance</span>
-                  <div className="wallet-info-value balance">
+                <div className="wallet-infor-boxbox">
+                  <span className="wallet-infor-title">Balance</span>
+                  <div className="wallet-infor-valuee balance">
                     <span>{balance !== null ? balance.toFixed(2) : "0.00"}</span>
                     <div className="solana-logo-wrapper">
                       <img
@@ -103,9 +103,9 @@ const WalletMenu = memo(
                   </div>
                 </div>
 
-                <div className="wallet-info-box pubkey-box">
-                  <div className="wallet-info-title-row">
-                    <span className="wallet-info-title">Public Key</span>
+                <div className="wallet-infor-box pubkey-box">
+                  <div className="wallet-infor-title-row">
+                    <span className="wallet-infor-title">Public Key</span>
                     <button
                       className="eye-toggle-button"
                       onClick={toggleExpanded}
@@ -114,11 +114,11 @@ const WalletMenu = memo(
                       <Eye size={18} />
                     </button>
                   </div>
-                  <div className="wallet-info-value">
+                  <div className="wallet-infor-value">
                     <span className="wallet-address">
                       {isExpanded ? walletAddress : shortenAddress(walletAddress)}
                     </span>
-                    <div className="wallet-info-actions">
+                    <div className="wallet-infor-actions">
                       <button className="copy-button" onClick={handleCopy} aria-label="Copy Wallet Address">
                         {copySuccess ? (
                           <Check size={18} color="#28a745" />
