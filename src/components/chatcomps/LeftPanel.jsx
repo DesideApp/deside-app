@@ -58,12 +58,49 @@ const LeftPanel = ({ onSelectContact }) => {
   };
 
   return (
-    <>
+    <div className="left-panel">
+      {/* HEADER */}
       <header className="left-panel-header">
         <h2 className="left-panel-title">{tabTitles[activeTab]}</h2>
+        <nav className="left-panel-nav">
+          <button
+            className={activeTab === "chats" ? "active" : ""}
+            onClick={() => setActiveTab("chats")}
+            aria-label="Chats"
+          >
+            <MessageCircle size={20} />
+          </button>
+          <button
+            className={activeTab === "contacts" ? "active" : ""}
+            onClick={() => setActiveTab("contacts")}
+            aria-label="Contacts"
+          >
+            <Users size={20} />
+          </button>
+          <button
+            className={activeTab === "addContact" ? "active" : ""}
+            onClick={() => setActiveTab("addContact")}
+            aria-label="Add Contact"
+          >
+            <UserPlus size={20} />
+          </button>
+          <button
+            className={activeTab === "requests" ? "active" : ""}
+            onClick={() => setActiveTab("requests")}
+            aria-label="Notifications"
+          >
+            <div className="icon-wrapper">
+              <Bell size={20} />
+              {receivedRequests.length > 0 && (
+                <span className="badge">{receivedRequests.length}</span>
+              )}
+            </div>
+          </button>
+        </nav>
       </header>
 
-      <div className="left-panel-content">
+      {/* BODY */}
+      <div className="left-panel-body">
         {isLoading && <p className="left-panel-loading">Loading...</p>}
 
         {!isLoading && activeTab === "chats" && (
@@ -117,43 +154,7 @@ const LeftPanel = ({ onSelectContact }) => {
           />
         )}
       </div>
-
-      <nav className="left-panel-nav">
-        <button
-          className={activeTab === "chats" ? "active" : ""}
-          onClick={() => setActiveTab("chats")}
-          aria-label="Chats"
-        >
-          <MessageCircle size={20} />
-        </button>
-        <button
-          className={activeTab === "contacts" ? "active" : ""}
-          onClick={() => setActiveTab("contacts")}
-          aria-label="Contacts"
-        >
-          <Users size={20} />
-        </button>
-        <button
-          className={activeTab === "addContact" ? "active" : ""}
-          onClick={() => setActiveTab("addContact")}
-          aria-label="Add Contact"
-        >
-          <UserPlus size={20} />
-        </button>
-        <button
-          className={activeTab === "requests" ? "active" : ""}
-          onClick={() => setActiveTab("requests")}
-          aria-label="Notifications"
-        >
-          <div className="icon-wrapper">
-            <Bell size={20} />
-            {receivedRequests.length > 0 && (
-              <span className="badge">{receivedRequests.length}</span>
-            )}
-          </div>
-        </button>
-      </nav>
-    </>
+    </div>
   );
 };
 

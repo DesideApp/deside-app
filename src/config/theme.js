@@ -10,7 +10,7 @@ const THEMES = {
 
     // ✅ Colors
     "--background-color": "#f8f6f4",      // tu blanco roto
-    "--surface-color": "#f1eeeb",         // gris clarito (intermedio)
+    "--surface-color": "#f3f0edff",         // gris clarito (intermedio)
     "--window-background": "#e9e7e5",     // gris más oscuro para ventanas
     "--highlight-color": "#554646",
     "--border-color": "#d1cfceff",
@@ -46,7 +46,7 @@ const THEMES = {
     "--bottom-bar-height": "40px",
 
     "--background-color": "#262424",      // plano de lectura
-    "--surface-color": "#1f1d1a",         // intermedio más oscuro
+    "--surface-color": "#201e1cff",         // intermedio más oscuro
     "--window-background": "#1a1815",     // gris oscuro para ventanas
     "--highlight-color": "#d1c5bf",
     "--border-color": "#302e2eff",
