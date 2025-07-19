@@ -66,7 +66,7 @@
 
 /* =========== BOXES =========== */
 .wallet-info-box {
-  min-width: 260;
+  box-sizing: border-box;
   max-width: 270px;
   background: var(--bubble-background);
   border-radius: 8px;
@@ -76,7 +76,6 @@
   align-items: flex-start;
   gap: 8px;
   border: 2px solid var(--border-color);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .wallet-info-box.pubkey-box {
