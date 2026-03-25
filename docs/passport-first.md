@@ -1,6 +1,6 @@
 # Passport First
 
-`Passport first, enrich after` is the direction for Deside's identity model.
+`Passport first, enrich after` is the identity architecture Deside is already moving through in production.
 
 ## What It Means
 
@@ -12,55 +12,56 @@ In practical terms:
 
 1. resolve passport base first when available
 2. enrich with protocol-specific metadata and reputation
-3. expose one normalized identity through `agentMeta`
+3. expose one visible participant identity through the public contract
 
-## Why MIP-014 Matters
+## Why MPL Agent Registry (Metaplex) Matters
 
-MIP-014 is useful because it aims to be a minimal, canonical passport for agent identity on Solana.
-
-That makes it a strong candidate for the base question:
+MPL Agent Registry (Metaplex) matters because it is a strong candidate for the base identity question:
 
 - is this wallet controlling a recognized on-chain agent identity?
 
-But MIP-014 is intentionally minimal.
+It is useful as an anchor precisely because it aims to stay minimal.
 
-It does not remove the need for richer systems such as:
+That does not remove the need for richer systems such as:
 
-- 8004 for ATOM reputation and richer registry-native metadata
-- SATI for SAS attestations
-- SAID for additional identity and ecosystem signals
+- Quantu 8004-Solana for ATOM reputation and richer registry-native metadata
+- Cascade SATI for trust signals
+- SAID Protocol for additional protocol-native identity and reputation signals
 
 ## Today
 
 Today, the ecosystem is still pre-convergence.
 
-So Deside must continue to support:
+So Deside must continue to support one passport anchor plus multiple protocol identity and enrichment sources:
 
-- agents that only exist in 8004
-- agents that only exist in SATI
-- agents that only exist in SAID
-- agents with no MIP-014 passport yet
+- agents that only exist in Quantu 8004-Solana
+- agents that only exist in Cascade SATI
+- agents that only exist in SAID Protocol
+- agents with no MPL Agent Registry (Metaplex) anchor yet
 
-## Tomorrow
+This is why passport-first cannot mean passport-only.
 
-If a shared passport layer becomes more common, Deside should not duplicate agents in the product.
+## What Deside Does With It
 
-The same participant can be:
+When a passport exists:
 
-- passport base: MIP-014
-- enrichment source: 8004
-- enrichment source: SATI
-- enrichment source: SAID
+- it acts as the base identity anchor
+- Deside can preserve protocol-native enrichment on top
 
-Still one agent.
+When a passport does not exist:
+
+- Deside can still resolve the participant through supported protocol paths
+
+That keeps the product compatible with the current ecosystem while reducing future fragmentation.
 
 ## Important Clarification
 
 Passport-first does not mean:
 
-- replace all protocols with MIP-014
-- discard registry-native reputation
+- replace all protocols with MPL Agent Registry (Metaplex)
+- discard protocol-native reputation
 - require migration before Deside can support an agent
+- pretend convergence is already complete
 
 It means:
 

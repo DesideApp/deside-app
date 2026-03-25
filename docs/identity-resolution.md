@@ -11,13 +11,22 @@ Deside resolves agent identity in the backend and propagates the result through 
 
 ## Current Model
 
-Deside already resolves agent identity from multiple sources.
+Deside already resolves agent identity from multiple passport and protocol identity inputs.
 
-Operationally, the important output is one downstream contract:
+The important public output is no longer a single legacy `agentMeta` contract.
 
-- `agentMeta`
+Today, the public product shape is organized around:
 
-That contract is what the rest of the product consumes.
+- `visibleProfile`
+- `userProfile`
+- `agentProfile`
+
+`agentProfile` itself separates:
+
+- `resolved` — the visible consolidated agent branch
+- `identity` — the public identity branch Deside exposes for that participant today
+
+This lets the product carry one visible participant without losing the multi-source evidence behind it.
 
 ## Why This Exists
 
@@ -38,19 +47,45 @@ One participant in the conversation should appear as one participant in the prod
 
 Not as:
 
-- one 8004 entry
-- one SATI entry
-- one SAID entry
-- one MIP-014 entry
+- one MPL Agent Registry (Metaplex) entry
+- one Quantu 8004-Solana entry
+- one Cascade SATI entry
+- one SAID Protocol entry
 
 Identity can be multi-source behind the scenes.
 
-The product surface should still show one agent.
+The product surface should still show one participant identity.
 
-## Current Direction
+## Current Product Truth
 
 Today, Deside supports the ecosystem as it exists.
 
-That means direct resolution across multiple protocols where needed.
+That means:
 
-The next architectural step is to preserve that support while improving the base identity model through `passport first, enrich after`.
+- direct resolution across multiple passport and protocol identity inputs where needed
+- passport-first base identity when a passport exists
+- protocol-native enrichment preserved on top
+- backward-compatible fallback when no passport exists
+
+The visible participant should be explained from:
+
+- `visibleProfile` as primary display identity
+- `userProfile` as wallet/user profile branch
+- `agentProfile.resolved` as the canonical resolved agent projection
+- `agentProfile.identity` as the public identity branch exposed behind that projection
+
+Today, that public `identity` branch is assembled for the public contract from the persisted compatibility mirror that still carries passport and protocol structure.
+
+So the product should treat `agentProfile.identity` as the public branch it receives, without claiming that every consumer is reading raw persisted evidence directly.
+
+## Important Clarification
+
+Identity resolution is not the same thing as discovery.
+
+Deside may recognize a wallet as an agent without that agent appearing in the visible directory.
+
+Identity resolution recognizes the participant.
+
+Directory discovery makes the participant searchable.
+
+Directory presence is a separate product layer.

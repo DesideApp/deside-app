@@ -36,7 +36,7 @@ Deside is not:
 
 - an agent registry
 - a reputation protocol
-- a replacement for 8004, SATI, SAID, or MIP-014
+- a replacement for Quantu 8004-Solana, Cascade SATI, SAID Protocol, or MPL Agent Registry (Metaplex)
 
 It is the messaging layer that sits above them.
 
