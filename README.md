@@ -1,38 +1,51 @@
 # Deside App
 
-Wallet-native messaging between Solana users and AI agents.
+Unified agent identity, directory, and messaging for Solana users and AI agents.
 
 `deside-app` is the public product-level documentation surface for Deside.
 
 If you want the MCP endpoint, auth flow, and tool reference, see [`deside-mcp`](https://github.com/DesideApp/deside-mcp).
 
-If you want to understand how Deside works as a messaging product, start here.
+If you want to understand how Deside reads agent identity across Solana registries and projects it into product surfaces, start here.
+
+## Hackathon Submission
+
+For the current hackathon submission, the main product focus is the identity and discovery layer behind the Solana Agent Directory.
+
+In practical terms, that means this repo is centered on:
+
+- unifying agent identity across five Solana registry inputs
+- projecting one visible agent profile and directory entry from fragmented source records
+- preserving a separate boundary between discovered agents and authenticated messaging participants
+
+Messaging remains part of the product, but it is presented here as a downstream surface built on top of identity unification rather than as the core submission claim.
 
 ## What Deside Is
 
-Deside is a messaging product for:
+Deside is a wallet-native product layer for:
 
 - users with Solana wallets
-- AI agents connecting through MCP
-- agent identities coming from external passport and protocol identity inputs
+- agents that can authenticate into Deside
+- agent identities discovered across passport and protocol registries
 
 The key idea is simple:
 
-- passport and protocol identity inputs tell Deside how an agent can be recognized
-- Deside lets that participant talk to users through one messaging surface
+- multiple registry records can belong to one visible agent identity
+- Deside resolves that identity once in the backend
+- Deside projects that result into a directory, a profile surface, and a shared messaging surface
 
-Deside does not replace passport and protocol identity inputs or reputation systems.
+Deside does not replace registries, identity systems, or trust systems.
 
-Deside consumes them and turns them into one usable communication product.
+It makes them usable together in one product.
 
 ## What This Repo Covers
 
-- Deside as a messaging product
-- agent-to-user messaging
-- backend identity resolution
-- `passport first, enrich after`
-- how MPL Agent Registry (Metaplex), Quantu 8004-Solana, Cascade SATI, and SAID Protocol fit into the product model
-- wallet-level reputation, including FairScale, as part of product semantics
+- Deside as a product layer above Solana agent registries
+- discovery across supported identity sources
+- canonical identity resolution and auth boundaries
+- passport and protocol registries as different identity roles
+- agent directory and profile projection
+- agent-to-user messaging as a product surface
 
 ## What This Repo Does Not Cover
 
@@ -46,27 +59,46 @@ Those belong in `deside-mcp`.
 ## Product Model
 
 ```mermaid
+%%{init: {'flowchart': {'nodeSpacing': 40, 'rankSpacing': 30}} }%%
 flowchart LR
-    A[Agent] --> M[MCP]
-    M --> D[Deside]
-    U[User wallet] --> D
-    I[Passport anchor] -. base identity .-> D
-    E[Protocol identity and enrichment sources] -. enrichment .-> D
-    X[Deside directory] -. discovery .-> D
-    D --> C[One conversation surface]
+    subgraph L[ ]
+        direction TB
+        U[User wallet]
+        A[Agent wallet]
+    end
+
+    subgraph M1[ ]
+        direction TB
+        M[Agent MCP]
+        I[Agent identity unification]
+        D[Agent discovery]
+    end
+
+    A --> M
+
+    U --> X[Deside]
+    M --> I
+    I --> X
+    I -.-> S[Solana Agent Directory]
+    X --> C[Shared messaging surface]
+    D -.-> I
+
+    style L fill:none,stroke:none
+    style M1 fill:none,stroke:none
 ```
 
-The transport is one thing.
+Participants, identity sources, and product surfaces are different layers.
 
-Identity is another.
+Deside joins them without flattening them into one question.
 
-Discovery is another.
+Agent authentication through MCP and agent discovery both feed the same identity-unification layer.
 
-Deside joins them without making the messaging experience source-specific.
+That layer is where identity is related and unified before it is projected into product surfaces.
 
-Identity resolution recognizes the participant.
+The important boundary is still operational:
 
-Directory discovery makes the participant searchable.
+- agent discovery can feed identity unification and directory projection
+- only the agent MCP path can make an agent active in the messaging surface
 
 ## Current Product Truth
 
@@ -74,11 +106,20 @@ Today, Deside supports the agent ecosystem as it actually exists.
 
 That means:
 
-- messaging does not require agent recognition
-- backend identity is resolved once and propagated downstream
-- one participant should appear as one participant in the product
-- identity can have one base anchor plus protocol enrichment
-- discovery is a Deside directory layer, not a mirror of every source
+- discovery and authentication are separate provisioning flows
+- one visible agent should not appear as several disconnected registry records
+- when a passport exists, it acts as the preferred canonical anchor
+- protocol registries still contribute metadata, trust, reputation, and service declarations
+- directory and messaging are sibling surfaces built on the same resolved identity model
+- only authenticated agents participate as active messaging peers
+
+The current supported registry set includes:
+
+- MPL Agent Registry (Metaplex)
+- 8004-Solana
+- SATI
+- SAID
+- SAP
 
 In the current public contract, the important branches are:
 
@@ -86,13 +127,9 @@ In the current public contract, the important branches are:
 - `userProfile`
 - `agentProfile`
 
-`walletReputation` is part of the public product model, but it is not present on every surface.
+`walletReputation` is a separate public layer where the exposed surface includes wallet-level reputation.
 
-Today, it is exposed where the public contract explicitly includes wallet-level reputation, rather than as a guaranteed branch on every user lookup.
-
-That wallet-level reputation is separate from passport and protocol identity inputs. It can apply to both user wallets and agent wallets. Today, the public wallet-level reputation branch can include FairScale data where the surface exposes it.
-
-The product should be explained through those branches as the current public shape.
+It is not the same thing as passport or protocol-registry identity.
 
 ## Ecosystem Links
 
@@ -100,18 +137,20 @@ The product should be explained through those branches as the current public sha
 - [Quantu 8004-Solana](https://github.com/QuantuLabs/8004-solana)
 - [Cascade SATI](https://github.com/cascade-protocol/sati)
 - [SAID Protocol](https://github.com/kaiclawd/said)
+- [Synapse SAP](https://github.com/OOBE-PROTOCOL/synapse-sap)
 
 ## Reading Order
 
-1. [What Is Deside Messaging](docs/what-is-deside-messaging.md)
-2. [Agent To User Messaging](docs/agent-to-user-messaging.md)
-3. [Passport First](docs/passport-first.md)
-4. [Identity Resolution](docs/identity-resolution.md)
-5. [Protocol Support](docs/protocol-support.md)
+1. [What Is Deside](docs/01-what-is-deside.md)
+2. [Discovery For Agents](docs/02-discovery-for-agents.md)
+3. [Identity Resolution And Auth Boundaries](docs/03-identity-resolution-and-auth-boundaries.md)
+4. [Passport And Protocol Registries](docs/04-passport-and-protocol-registries.md)
+5. [Agent Directory And Profile Surfaces](docs/05-agent-directory-and-profile-surfaces.md)
+6. [Agent To User Messaging](docs/06-agent-to-user-messaging.md)
 
 ## Relationship To `deside-mcp`
 
 - [`deside-mcp`](https://github.com/DesideApp/deside-mcp) = how agents connect and consume Deside through MCP
-- `deside-app` = how messaging, identity, reputation, and discovery fit together as product semantics
+- `deside-app` = how identity, discovery, directory, and messaging fit together as product semantics
 
 They describe the same system from different entry points.
