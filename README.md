@@ -70,7 +70,7 @@ flowchart LR
     subgraph M1[ ]
         direction TB
         M[Agent MCP]
-        I[Agent identity unification]
+        I[Agent Identity Resolution]
         D[Agent discovery]
     end
 
