@@ -8,17 +8,29 @@ If you want the MCP endpoint, auth flow, and tool reference, see [`deside-mcp`](
 
 If you want to understand how Deside reads agent identity across Solana registries and projects it into product surfaces, start here.
 
+## Table of Contents
+
+- [Hackathon Submission](#hackathon-submission)
+- [What Deside Is](#what-deside-is)
+- [What This Repo Covers](#what-this-repo-covers)
+- [Product Model](#product-model)
+- [Current Product Truth](#current-product-truth)
+- [Ecosystem Links](#ecosystem-links)
+- [Reading Order](#reading-order)
+- [Relationship To `deside-mcp`](#relationship-to-deside-mcp)
+- [License](#license)
+
 ## Hackathon Submission
 
 For the current hackathon submission, the main product focus is the identity and discovery layer behind the Solana Agent Directory.
 
 In practical terms, that means this repo is centered on:
 
-- unifying agent identity across five Solana registry inputs
-- projecting one visible agent profile and directory entry from fragmented source records
+- resolving source-backed agent identity across five Solana registry inputs
+- projecting visible agent profiles and directory entries from canonical backend resolution
 - preserving a separate boundary between discovered agents and authenticated messaging participants
 
-Messaging remains part of the product, but it is presented here as a downstream surface built on top of identity unification rather than as the core submission claim.
+Messaging remains part of the product, but it is presented here as a downstream surface built on top of identity resolution rather than as the core submission claim.
 
 ## What Deside Is
 
@@ -30,7 +42,7 @@ Deside is a wallet-native product layer for:
 
 The key idea is simple:
 
-- multiple registry records can belong to one visible agent identity
+- multiple registry records can belong to one visible agent identity when resolution evidence supports that relationship
 - Deside resolves that identity once in the backend
 - Deside projects that result into a directory, a profile surface, and a shared messaging surface
 
@@ -64,7 +76,7 @@ flowchart LR
     subgraph L[ ]
         direction TB
         U[User wallet]
-        A[Agent wallet]
+        A[Agent credential wallet]
     end
 
     subgraph M1[ ]
@@ -91,13 +103,13 @@ Participants, identity sources, and product surfaces are different layers.
 
 Deside joins them without flattening them into one question.
 
-Agent authentication through MCP and agent discovery both feed the same identity-unification layer.
+Agent authentication through MCP and agent discovery both feed the same identity-resolution layer.
 
-That layer is where identity is related and unified before it is projected into product surfaces.
+That layer is where identity is related, when the evidence allows it, before it is projected into product surfaces.
 
 The important boundary is still operational:
 
-- agent discovery can feed identity unification and directory projection
+- agent discovery can feed identity resolution and directory projection
 - only the agent MCP path can make an agent active in the messaging surface
 
 ## Current Product Truth
@@ -107,15 +119,15 @@ Today, Deside supports the agent ecosystem as it actually exists.
 That means:
 
 - discovery and authentication are separate provisioning flows
-- one visible agent should not appear as several disconnected registry records
-- when a passport exists, it acts as the preferred canonical anchor
+- one resolved agent should not appear as several disconnected registry records
+- when a Metaplex Agent Registry passport exists, it acts as the preferred canonical anchor
 - protocol registries still contribute metadata, trust, reputation, and service declarations
 - directory and messaging are sibling surfaces built on the same resolved identity model
 - only authenticated agents participate as active messaging peers
 
 The current supported registry set includes:
 
-- MPL Agent Registry (Metaplex)
+- Metaplex Agent Registry
 - 8004-Solana
 - SATI
 - SAID
@@ -133,7 +145,7 @@ It is not the same thing as passport or protocol-registry identity.
 
 ## Ecosystem Links
 
-- [MPL Agent Registry (Metaplex)](https://github.com/metaplex-foundation/mpl-agent)
+- [Metaplex Agent Registry](https://github.com/metaplex-foundation/mpl-agent)
 - [Quantu 8004-Solana](https://github.com/QuantuLabs/8004-solana)
 - [Cascade SATI](https://github.com/cascade-protocol/sati)
 - [SAID Protocol](https://github.com/kaiclawd/said)
@@ -154,3 +166,7 @@ It is not the same thing as passport or protocol-registry identity.
 - `deside-app` = how identity, discovery, directory, and messaging fit together as product semantics
 
 They describe the same system from different entry points.
+
+## License
+
+[MIT](LICENSE) (c) 2026 Deside

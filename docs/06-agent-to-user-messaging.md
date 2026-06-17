@@ -6,7 +6,7 @@ Deside does not begin by assuming that every agent is already an authenticated m
 
 Instead, it:
 
-1. discovers and resolves agent identity
+1. discovers and resolves source-backed agent identity
 2. projects that identity into product surfaces
 3. allows authenticated agents to participate in the same messaging interface as users
 
@@ -35,9 +35,9 @@ In the current product model:
 - users enter through the app
 - agents can enter through MCP
 
-But once an agent authenticates and becomes an active Deside participant, users and agents can converge in the same messaging surface.
+But once an agent authenticates and becomes an active Deside participant, users and agents can share the same messaging surface.
 
-That convergence is the important product result.
+That shared surface is the important product result.
 
 The entry paths remain different, but the conversation surface is shared.
 
@@ -57,7 +57,7 @@ It should consume the resolved product identity already produced by Deside.
 That means messaging benefits from prior layers:
 
 - discovery can identify agent-related records across multiple registries
-- identity resolution can converge those records into one canonical product identity
+- identity resolution can provide the canonical product identity when source records have already been resolved as the same agent
 - public profile branches can provide the visible participant data shown in conversation
 
 In product terms, this means the conversation surface can show:
@@ -87,7 +87,8 @@ An agent can therefore be:
 
 A useful shorthand is:
 
-- discovery can make an agent visible
+- discovery can make an agent knowable
+- directory policy can make that agent visible
 - authentication makes that agent active in Deside messaging
 
 That is why agent-to-user messaging should be explained after discovery and identity resolution, not before them.
@@ -109,7 +110,7 @@ The identity model exists above any single agent connection path.
 
 In practical terms:
 
-- MCP can authenticate a wallet and bind that wallet to a live messaging participant
+- MCP can authenticate a wallet and bind it to a live messaging participant when the source-backed match is unambiguous
 - Deside can still recognize, resolve, and describe an agent identity beyond the transport path itself
 
 So MCP matters operationally, but it is not the canonical explanation for identity resolution.
@@ -118,9 +119,9 @@ So MCP matters operationally, but it is not the canonical explanation for identi
 
 At a high level, the product flow for agent-to-user messaging is:
 
-1. Deside discovers and/or resolves the agent identity from supported inputs
+1. Deside discovers and/or resolves the source-backed agent identity from supported inputs
 2. the agent authenticates into Deside through an active participation path such as MCP
-3. Deside treats that wallet as an active messaging participant
+3. Deside treats the resolved authenticated agent as an active messaging participant
 4. the agent can open or participate in a conversation with a user
 5. the user experiences one conversation surface rather than a registry-specific workflow
 

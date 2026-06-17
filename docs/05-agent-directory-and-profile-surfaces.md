@@ -22,24 +22,29 @@ They interact with:
 - a visible profile for one agent
 - consistent names, avatars, registries, services, and trust signals
 
-The job of these surfaces is to turn canonical identity resolution into something usable without forcing the user to think in terms of fragmented registry records.
+The job of these surfaces is to turn canonical identity resolution into something usable.
+
+They do not decide identity for themselves.
 
 ## One Visible Agent, Not Five Registry Records
 
-The core product rule still applies here:
+The core product rule still applies here after identity resolution:
 
-one agent should appear as one visible identity in product.
+one resolved agent should appear as one visible identity in product.
 
 That does not mean the source structure disappears.
 
 It means the source structure is projected in a product-oriented way rather than as a raw list of disconnected registry entries.
+
+If identity resolution keeps source entries separate, the directory and profile
+surfaces should keep them separate too.
 
 In practice, the directory and profile surfaces should show:
 
 - one visible agent entry
 - one primary visible name and avatar
 - one multi-registry presence model
-- one set of unified onchain and service-facing details
+- one set of source-aware onchain and service-facing details
 
 ## The Directory Surface
 
@@ -71,21 +76,17 @@ In user terms, the directory entry should feel like:
 
 not like a stack of raw records from different registries.
 
-### Owner-Wallet Continuity As A Product Signal
+### Directory Consumes Resolution
 
-The directory should be understood as prioritizing convergence around a shared `ownerWallet`.
+The directory should be understood as a projection of canonical identity
+resolution.
 
-That does not mean owner wallet is the only technical signal in the entire system.
+It can show source-aware context, registry presence, and a primary source hint.
 
-It means that, in product terms, continuity of the same owner wallet across multiple registries is one of the strongest visible signals that multiple records belong to the same agent identity.
+It should not merge entries because they share a wallet, name, avatar, service
+declaration, or metadata field.
 
-This is why the projected directory item preserves the key pieces of visible and source-aware context needed to show one agent identity without discarding the multi-registry structure behind it.
-
-This should be read as a product projection rule:
-
-- if multiple registry records converge strongly around the same owner-wallet continuity, Deside should strongly prefer showing one visible agent identity rather than several partially duplicated ones
-
-That is one of the reasons the directory can stay coherent even when the source structure remains multi-registry behind the scenes.
+Those decisions belong to identity resolution.
 
 ## Directory Projection
 
@@ -102,7 +103,42 @@ In practical terms, directory projection combines:
 
 into one public listing record.
 
-That is why the directory can show one visible agent even when that agent is backed by multiple source records.
+That is why the directory can show one visible agent when that agent is backed by multiple source records already resolved into the same canonical identity.
+
+The current backend directory item can expose compact source-aware context such as:
+
+- `catalogId`
+- `slug` and canonical path
+- primary source and primary source entry
+- owner wallet and, when canonical, `agentWallet`
+- attached source entries
+- registry presence
+- visible name, description, avatar, and cached avatar URLs
+- service signals
+- owner score when the public policy allows it
+
+The important guarantee is not that every field appears for every agent.
+
+The guarantee is that these fields come from the directory projection rather
+than from a frontend reconstruction of raw registry data.
+
+## Public And Authenticated Directory Reads
+
+The backend exposes two directory read surfaces:
+
+- public directory reads for externally visible catalog and profile pages
+- authenticated directory reads for logged-in product and MCP consumers
+
+Both read from the same projected directory model.
+
+The public path is designed for cacheable product/profile access.
+
+The authenticated path is used when the consumer already has a Deside session or
+MCP OAuth context.
+
+This distinction should not be read as two directory models.
+
+It is one projected directory with different access paths.
 
 ## What The User Should See In The Directory
 
@@ -150,7 +186,7 @@ The profile surface is where Deside can show:
 - visible identity
 - registry presence
 - external registry links
-- unified onchain details
+- source-aware onchain details
 - service declarations
 - trust and reputation signals
 
@@ -172,6 +208,49 @@ The profile surface should answer these product questions:
 
 That is why the surface is structured around product sections rather than around raw source dumps.
 
+## Backend-Owned Profile Sections
+
+Some profile sections are backend-owned projections.
+
+They are not identity sources.
+
+They should not be derived separately by the frontend or by MCP documentation.
+
+### Agent Token
+
+Agent token status is resolved by the backend from source-aware evidence.
+
+Today, verified agent-token status comes from a native Metaplex binding from the
+agent identity to the token mint.
+
+Other sources can contribute declared token evidence only when it appears in
+allowed agent-token metadata paths.
+
+Deside should not infer an agent token from:
+
+- payment assets
+- escrow assets
+- x402 assets
+- wallet holdings
+- generic mints
+
+Agent token projection does not participate in identity resolution.
+
+### Wallet Holdings
+
+Wallet holdings are backend snapshots against chain data.
+
+They can cover:
+
+- the canonical owner wallet
+- the Metaplex `agentWallet` when one exists
+
+They are not live frontend chain reads.
+
+They do not participate in identity resolution.
+
+They do not prove an agent token.
+
 ## What The User Should See In The Profile Surface
 
 In practical terms, the user should be able to inspect the agent through a few clear surface areas:
@@ -182,13 +261,13 @@ In practical terms, the user should be able to inspect the agent through a few c
 - service declarations such as web, MCP, or A2A
 - trust, payments, and reputation signals when available
 
-This structure matters because it lets the user inspect a single visible agent from several angles without having to understand the underlying source fragmentation directly.
+This structure matters because it lets the user inspect a resolved visible agent from several angles without having to understand the underlying source structure directly.
 
-## Unified Onchain Details
+## Source-Aware Onchain Details
 
-One of the most important jobs of the profile surface is to unify onchain details that may come from different source types.
+One of the most important jobs of the profile surface is to organize onchain details that may come from different source types.
 
-Behind the scenes, different registries may contribute different onchain structures for what product still understands as the same agent.
+Behind the scenes, different registries may contribute different onchain structures for the resolved agent.
 
 Depending on the source, that can include:
 
@@ -200,11 +279,11 @@ Depending on the source, that can include:
 
 The profile surface should not flatten all of that into an undifferentiated dump.
 
-It should organize those details into one product-readable view of the agent's onchain identity.
+It should organize those details into one product-readable view of the agent's source-backed identity.
 
 Where useful, the surface can still preserve source-aware grouping behind that view.
 
-That means the profile surface can show unified onchain identity while still making it legible that different fields may come from different source contexts.
+That means the profile surface can show source-aware onchain identity while still making it legible that different fields may come from different source contexts.
 
 ## Service Declarations
 
@@ -219,7 +298,7 @@ These can include declarations such as:
 
 The important product point is not just that those services exist.
 
-It is that Deside can merge and normalize service-facing declarations from multiple sources into one public profile surface.
+It is that Deside can surface service-facing declarations from resolved source entries in one public profile surface.
 
 For a user, this should answer a practical question:
 
@@ -235,11 +314,24 @@ Depending on the sources available, Deside may expose:
 - protocol-native reputation signals
 - wallet-level reputation where the public contract includes it
 
-These should be shown as part of one visible agent profile rather than as separate identities fighting for control of the UI.
+These should be shown as part of one resolved agent profile rather than as separate identities fighting for control of the UI.
 
 For the user, this should answer another practical question:
 
 - why should I trust this visible agent, and what signals are available across the sources Deside knows about?
+
+Deside should not present each registry's internal score as the shared product
+score.
+
+The shared product score is FairScale wallet reputation.
+
+In the directory, the owner score is exposed only when the resolved agent has
+presence in two or more registries.
+
+For the canonical owner wallet, Deside uses FairScale Human/Wallet FairScore.
+
+For a canonical Metaplex `agentWallet`, Deside can store FairScale Agent Score
+as the `agentWallet` reputation branch.
 
 ## Directory Visibility Is Not Identity Resolution
 
@@ -267,7 +359,7 @@ Users would still be left with:
 
 - fragmented registry-specific mental models
 - duplicated or inconsistent visible identities
-- no coherent way to inspect one agent across multiple identity inputs
+- no coherent way to inspect one resolved agent across multiple identity inputs
 
 The directory and profile surfaces are what turn multi-source backend truth into usable product reality.
 

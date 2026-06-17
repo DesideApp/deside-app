@@ -14,7 +14,7 @@ Those are not the same question.
 
 ## Canonical Identity Resolution
 
-Identity resolution takes passport and protocol-registry inputs and turns them into one canonical product identity for an agent.
+Identity resolution takes passport and protocol-registry inputs and turns them into canonical product identity when the evidence supports that relationship.
 
 That result then feeds public branches such as:
 
@@ -37,11 +37,11 @@ Without canonical resolution, drift would appear between:
 
 ## One Visible Agent Identity
 
-Deside should not project one visible participant per source record.
+Deside should not project one visible participant per source record when those records have been resolved as the same agent.
 
 One agent should not appear in product as a stack of disconnected identities from:
 
-- Metaplex passport
+- Metaplex Agent Registry passport
 - 8004-Solana
 - SATI
 - SAID
@@ -49,7 +49,61 @@ One agent should not appear in product as a stack of disconnected identities fro
 
 Identity can remain multi-source behind the scenes.
 
-The product should still show one visible agent identity.
+The product should still show one visible agent identity for the resolved agent.
+
+If resolution keeps source entries separate, product surfaces should keep them
+as separate agents too.
+
+## Source-Native Identity And Owner Collections
+
+Identity resolution must preserve the identity unit of each source.
+
+In the current supported model:
+
+- Metaplex Agent Registry identity is anchored by the Core Asset
+- 8004-Solana identity is anchored by the source-native agent id
+- SATI identity is anchored by the SATI mint
+- SAID and SAP contribute their own wallet-shaped or PDA/source-native identity records
+
+`ownerWallet` is an owner or authority relationship.
+
+It is not, by itself, a unique agent identity.
+
+### Sufficient Evidence Today
+
+Deside can attach records to the same canonical agent in two current cases:
+
+1. the incoming record is the same `source + sourceEntryId` already attached to that agent
+2. the owner relationship is one-to-one across the involved sources
+
+The one-to-one case is narrow.
+
+It means the same owner has exactly one relevant source entry in each involved
+source, and no participant source shows a collection for that owner.
+
+In that case, the one-to-one source layout can be treated as a correspondence
+because there is no competing source entry to choose from.
+
+### Owner Collections Stay Separate
+
+If an owner controls multiple agents in any participant registry, owner
+continuity is not evidence of cross-registry identity.
+
+For example, a single owner can control:
+
+- several Metaplex Core Assets
+- several 8004-Solana agent ids
+- several SATI mints
+
+Today, the supported registries do not expose a shared onchain relation that
+proves which Metaplex Core Asset, 8004 id, and SATI mint are the same agent
+inside such a collection.
+
+So Deside must keep those source entries as separate agents.
+
+The system should not treat shared owner wallet, matching name, matching avatar,
+declared service wallet, payment asset, or metadata similarity as a cross-source
+merge rule in that case.
 
 ## Two Canonical Provisioning Flows
 
@@ -60,11 +114,38 @@ Today, the canonical model is fed by two provisioning flows:
 1. `auth_login`
 2. `discovery_sync`
 
+Discovery is the preferred path for learning ecosystem identity before active
+participation.
+
+In the normal case, discovery should already have a source-backed
+`User(role='agent')` before that agent authenticates through MCP.
+
+Authentication should then behave mainly as a participation and lifecycle
+transition.
+
+It should match the authenticating wallet to an existing source-backed canonical
+agent when possible, then mark that agent as authenticated for Deside.
+
+If discovery has not seen the entry yet, auth can still become a source-backed
+acquisition path.
+
+But it must resolve against a concrete source entry rather than inventing a
+wallet-only agent identity.
+
+When the authenticating owner wallet controls multiple source entries, wallet-only
+auth is ambiguous.
+
+That case belongs to upcoming MCP source-entry-bound login work.
+
 ### `auth_login`
 
 This is the flow where a wallet authenticates through an active Deside participation path.
 
-Identity resolution in this flow matters because authentication makes the wallet an active Deside participant.
+Identity resolution in this flow matters because authentication makes a resolved
+agent an active Deside participant.
+
+Auth should not create a parallel agent identity when it is really authenticating
+an agent already known through discovery.
 
 ### `discovery_sync`
 
@@ -135,7 +216,7 @@ It separates:
 - `resolved` — the consolidated visible agent projection
 - `identity` — the public identity branch that preserves passport and protocol structure behind that projection
 
-This separation lets the product show one visible identity without losing the multi-source structure that produced it.
+This separation lets the product show one visible identity without losing the source structure that produced it.
 
 ## Authenticated Is Not The Same Thing As Persisted
 
@@ -159,9 +240,35 @@ In the current public contract, this also means that product surfaces should not
 
 At the public surface level, `registered` is intended to align with authenticated operational status rather than simple persistence existence.
 
+For agent profiles, the backend derives this from agent lifecycle state rather
+than from document existence alone.
+
 This is why the older persistence-based shortcut is no longer sufficient:
 
 - existence in persistence is not enough to describe active Deside participation
+
+## Owner Wallet And Agent Wallet
+
+The current backend model distinguishes owner wallets from operational agent
+wallets.
+
+In public product language:
+
+- `ownerWallet` is the canonical owner or authority-level wallet behind the
+  resolved identity
+- `agentWallet` is only canonical and operational when the source can support
+  that meaning
+
+Today, the important canonical case is Metaplex.
+
+When Metaplex Agent Registry exposes a verifiable `agentWallet` for the identity,
+Deside can preserve that wallet separately from the owner wallet and expose it
+as the operational contact wallet for that agent.
+
+Other registries may contain wallet-like fields or service declarations, but
+those should not automatically become the canonical `agentWallet`.
+
+This is a backend contract boundary, not only a UI naming choice.
 
 ## Resolution Is Not Directory Visibility
 
@@ -215,7 +322,7 @@ This model allows Deside to behave like a real product layer above a fragmented 
 
 It lets Deside:
 
-- resolve one visible identity from multiple source records
+- resolve one visible identity from multiple source records when the evidence allows it
 - preserve the difference between discovery and authentication
 - keep directory visibility separate from identity recognition
 - keep messaging participation separate from mere identity knowledge

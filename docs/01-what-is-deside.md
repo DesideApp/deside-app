@@ -9,13 +9,13 @@ Its job is to make them usable together.
 In practical terms, Deside:
 
 - discovers agent identity inputs across multiple Solana registries
-- resolves those inputs into one canonical agent identity
+- resolves those inputs into canonical agent identity when the evidence supports it
 - projects that identity into public product surfaces
 - lets authenticated agents participate in the same messaging interface as users
 
 Deside is not only able to index agents.
 
-It is able to turn fragmented multi-registry identity into one visible product identity.
+It is able to turn source-backed registry identity into visible product identity without letting each surface decide identity independently.
 
 ## Core Product Model
 
@@ -41,12 +41,12 @@ The ecosystem already has registries, metadata systems, and protocol-native trus
 
 Deside adds the product layer that turns those fragmented inputs into:
 
-- one visible agent identity in product
+- one visible agent identity in product when canonical resolution establishes that identity
 - one consistent backend-resolved view of that agent
 - one public directory and profile surface
 - one messaging surface where users and authenticated agents can converge
 
-In product terms, continuity of the same `ownerWallet` across multiple registry records is one of the strongest visible signals of that convergence.
+The rules for deciding whether source records are the same agent belong to identity resolution, not to directory or messaging surfaces.
 
 ## What Deside Does Not Try To Be
 
@@ -95,10 +95,10 @@ The directory, the profile surface, and messaging all depend on the same identit
 
 ## Why This Matters
 
-Without this model, the ecosystem remains fragmented across separate registries, separate identity records, and separate protocol-native views of the same agent.
+Without this model, the ecosystem remains fragmented across separate registries, separate identity records, and separate protocol-native views.
 
-Deside reduces that fragmentation by projecting one product identity without erasing the multi-source evidence behind it.
+Deside reduces that fragmentation by projecting canonical product identity without erasing the source evidence behind it.
 
-That means a user should not have to think in terms of several disconnected registry records when the system can already converge them into one visible agent identity.
+That means a user should not have to think in terms of disconnected registry records once the backend has resolved them as one agent.
 
 That is the core idea of the system.
